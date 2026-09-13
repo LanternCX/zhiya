@@ -74,6 +74,32 @@ export type CourseConversationState = {
   currentPageId: string;
 };
 
+export type StoredCourseConversation = {
+  id: string;
+  sectionId: string;
+  title: string;
+  state: CourseConversationState;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CourseSection = {
+  id: string;
+  title: string;
+  objective: string;
+  position: number;
+  status: "planned" | "active" | "complete" | "archived";
+  conversations: StoredCourseConversation[];
+};
+
+export type CourseMaterial = {
+  id: string;
+  name: string;
+  mediaType: "text/markdown" | "text/plain";
+  sizeBytes: number;
+  createdAt: string;
+};
+
 export type CourseCover = {
   motif:
     | "code"
@@ -95,6 +121,7 @@ export type StoredCourse = {
   cover: CourseCover;
   status: "active";
   state: CourseConversationState;
+  sections?: CourseSection[];
   createdAt: string;
   updatedAt: string;
 };

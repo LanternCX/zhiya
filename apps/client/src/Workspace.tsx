@@ -3,16 +3,25 @@ import type { useAccount } from "./features/account/useAccount";
 import AccountProfile from "./features/account/Profile";
 import Security from "./features/account/Security";
 import CourseRoom from "./features/course/CourseRoom";
+import CourseOverview from "./features/course/CourseOverview";
+import SectionOverview from "./features/course/SectionOverview";
 import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
 import Icon, { type IconName } from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
 import {
+  createCourseConversation,
+  deleteCourseConversation,
   deleteCourse,
   listCourses,
   updateCourse,
 } from "./features/course/courses";
-import type { ModelInfo, StoredCourse } from "./domain/learning";
+import type {
+  CourseSection,
+  ModelInfo,
+  StoredCourse,
+  StoredCourseConversation,
+} from "./domain/learning";
 import "./workspace.css";
 
 const destinations: {
@@ -48,6 +57,10 @@ export default function Workspace({
   const [destination, setDestination] = useState(destinations[0]);
   const [courses, setCourses] = useState<StoredCourse[]>([]);
   const [activeCourse, setActiveCourse] = useState<StoredCourse | null>(null);
+  const [courseLevel, setCourseLevel] = useState<
+    "course" | "section" | "conversation"
+  >("course");
+  const [activeSectionId, setActiveSectionId] = useState("");
   const [coursesReady, setCoursesReady] = useState(false);
   const [courseRoomToken, setCourseRoomToken] = useState(0);
   const [courseError, setCourseError] = useState("");
@@ -64,6 +77,8 @@ export default function Workspace({
         if (!current) return;
         setCourses(next);
         setActiveCourse(null);
+        setCourseLevel("course");
+        setActiveSectionId("");
         setCourseError("");
       })
       .catch(() => current && setCourseError("暂时无法读取课程"))
@@ -114,6 +129,8 @@ export default function Workspace({
       setDestination(next);
       if (next.id === "learning") {
         setActiveCourse(null);
+        setCourseLevel("course");
+        setActiveSectionId("");
         setCourseRoomToken((value) => value + 1);
       }
     }
@@ -149,6 +166,77 @@ export default function Workspace({
     !memoryOpen &&
     destination.id === "learning" &&
     Boolean(activeCourse);
+  const activeSection = activeCourse?.sections?.find((section) =>
+    courseLevel === "conversation"
+      ? section.conversations.some(
+          (conversation) => conversation.id === activeCourse.conversationId,
+        )
+      : section.id === activeSectionId,
+  );
+  const openConversation = (
+    conversation: StoredCourseConversation,
+    source = activeCourse,
+  ) => {
+    if (!source) return;
+    const updated = {
+      ...source,
+      conversationId: conversation.id,
+      state: conversation.state,
+    };
+    setActiveCourse(updated);
+    setCourses((all) =>
+      all.map((item) => (item.id === updated.id ? updated : item)),
+    );
+    setActiveSectionId(conversation.sectionId);
+    setCourseLevel("conversation");
+    setCourseRoomToken((value) => value + 1);
+  };
+  const createSectionConversation = async () => {
+    if (!activeCourse || !activeSection) return;
+    try {
+      const conversation = await createCourseConversation(
+        activeCourse.id,
+        activeSection.id,
+        "新对话",
+      );
+      const updated = {
+        ...activeCourse,
+        sections: activeCourse.sections?.map((section) =>
+          section.id === activeSection.id
+            ? {
+                ...section,
+                conversations: [...section.conversations, conversation],
+              }
+            : section,
+        ),
+      };
+      setCourseError("");
+      openConversation(conversation, updated);
+    } catch {
+      setCourseError("暂时无法新建对话");
+    }
+  };
+  const removeSectionConversation = async (
+    conversation: StoredCourseConversation,
+  ) => {
+    if (!activeCourse || !activeSection) return false;
+    try {
+      const updated = await deleteCourseConversation(
+        activeCourse.id,
+        activeSection.id,
+        conversation.id,
+      );
+      setCourses((all) =>
+        all.map((item) => (item.id === updated.id ? updated : item)),
+      );
+      setActiveCourse(updated);
+      setCourseError("");
+      return true;
+    } catch {
+      setCourseError("暂时无法删除对话");
+      return false;
+    }
+  };
   return (
     <div
       className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
@@ -265,14 +353,22 @@ export default function Workspace({
               className="icon-button"
               aria-label={
                 courseOpen
-                  ? "返回课程列表"
+                  ? courseLevel === "conversation"
+                    ? "返回小节"
+                    : courseLevel === "section"
+                      ? "返回课程"
+                      : "返回课程列表"
                   : memoryOpen && !editingMemory
                     ? "停止对话"
                     : "返回学习"
               }
               title={
                 courseOpen
-                  ? "返回课程列表"
+                  ? courseLevel === "conversation"
+                    ? "返回小节"
+                    : courseLevel === "section"
+                      ? "返回课程"
+                      : "返回课程列表"
                   : memoryOpen && !editingMemory
                     ? "停止对话"
                     : "返回学习"
@@ -280,7 +376,14 @@ export default function Workspace({
               disabled={endingMemory}
               onClick={() => {
                 if (courseOpen) {
-                  setActiveCourse(null);
+                  if (courseLevel === "conversation") {
+                    setCourseLevel("section");
+                  } else if (courseLevel === "section") {
+                    setCourseLevel("course");
+                  } else {
+                    setActiveCourse(null);
+                    setActiveSectionId("");
+                  }
                   setCourseRoomToken((value) => value + 1);
                 } else if (memoryOpen && !editingMemory) {
                   setEndingMemory(true);
@@ -298,14 +401,18 @@ export default function Workspace({
           )}
           <span>
             {courseOpen
-              ? activeCourse?.title
+              ? courseLevel === "section"
+                ? `${activeCourse?.title} · ${activeSection?.title ?? "小节"}`
+                : courseLevel === "conversation"
+                  ? `${activeSection?.title ?? activeCourse?.title} · 对话`
+                  : activeCourse?.title
               : memoryOpen
-              ? "学习档案"
-              : view === "home"
-                ? onboarding && destination.id === "learning"
-                  ? "初次见面"
-                  : destination.title
-                : titles[view]}
+                ? "学习档案"
+                : view === "home"
+                  ? onboarding && destination.id === "learning"
+                    ? "初次见面"
+                    : destination.title
+                  : titles[view]}
           </span>
         </header>
         <main className="workspace-content" aria-busy={busy}>
@@ -326,10 +433,7 @@ export default function Workspace({
           {feedback}
           <Profile
             user={user}
-            visible={
-              onboarding ||
-              (view === "home" && memoryOpen)
-            }
+            visible={onboarding || (view === "home" && memoryOpen)}
             memoryOpen={!onboarding && memoryOpen}
             editing={editingMemory}
             setEditing={setEditingMemory}
@@ -344,36 +448,65 @@ export default function Workspace({
               data-hidden={view !== "home" || destination.id !== "learning"}
               aria-label="学习空间"
             >
-              <CourseRoom
-                info={learningContext.model}
-                memory={learningContext.memory}
-                courses={courses}
-                activeCourse={activeCourse}
-                coursesReady={coursesReady}
-                roomToken={courseRoomToken}
-                libraryError={courseError}
-                onOpenCourse={(course) => {
-                  setActiveCourse(course);
-                  setCourseRoomToken((value) => value + 1);
-                }}
-                onRenameCourse={renameCourse}
-                onDeleteCourse={removeCourse}
-                onCourseCreated={(course) => {
-                  setCourses((all) => [
-                    course,
-                    ...all.filter((item) => item.id !== course.id),
-                  ]);
-                  setActiveCourse(course);
-                }}
-                onCourseUpdated={(course) => {
-                  setCourses((all) =>
-                    all.map((item) => (item.id === course.id ? course : item)),
-                  );
-                  setActiveCourse((current) =>
-                    current?.id === course.id ? course : current,
-                  );
-                }}
-              />
+              {activeCourse && courseLevel === "course" && (
+                <CourseOverview
+                  course={activeCourse}
+                  onOpenSection={(section: CourseSection) => {
+                    setActiveSectionId(section.id);
+                    setCourseLevel("section");
+                  }}
+                  onContinue={(conversation) => openConversation(conversation)}
+                />
+              )}
+              {activeCourse && courseLevel === "section" && activeSection && (
+                <SectionOverview
+                  course={activeCourse}
+                  section={activeSection}
+                  error={courseError}
+                  onOpenConversation={(conversation) =>
+                    openConversation(conversation)
+                  }
+                  onCreateConversation={createSectionConversation}
+                  onDeleteConversation={removeSectionConversation}
+                />
+              )}
+              {(!activeCourse || courseLevel === "conversation") && (
+                <CourseRoom
+                  info={learningContext.model}
+                  memory={learningContext.memory}
+                  courses={courses}
+                  activeCourse={activeCourse}
+                  coursesReady={coursesReady}
+                  roomToken={courseRoomToken}
+                  libraryError={courseError}
+                  onOpenCourse={(course) => {
+                    setActiveCourse(course);
+                    setCourseLevel("course");
+                    setActiveSectionId("");
+                  }}
+                  onRenameCourse={renameCourse}
+                  onDeleteCourse={removeCourse}
+                  onCourseCreated={(course) => {
+                    setCourses((all) => [
+                      course,
+                      ...all.filter((item) => item.id !== course.id),
+                    ]);
+                    setActiveCourse(course);
+                    setActiveSectionId(course.sections?.[0]?.id ?? "");
+                    setCourseLevel("conversation");
+                  }}
+                  onCourseUpdated={(course) => {
+                    setCourses((all) =>
+                      all.map((item) =>
+                        item.id === course.id ? course : item,
+                      ),
+                    );
+                    setActiveCourse((current) =>
+                      current?.id === course.id ? course : current,
+                    );
+                  }}
+                />
+              )}
             </section>
           )}
           {!onboarding &&

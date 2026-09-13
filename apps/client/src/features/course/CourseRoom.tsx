@@ -10,6 +10,7 @@ import type {
   ModelRetryStatus,
   CourseConversationState,
   StoredCourse,
+  StoredCourseConversation,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
 import {
@@ -27,7 +28,11 @@ import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
 import {
   createCourse,
+  createCourseConversation as createStoredCourseConversation,
   emptyCourseState,
+  getCourseMaterial,
+  listCourseMaterials,
+  replaceCourseOutline,
   saveCourseConversation,
   updateCourse,
 } from "./courses";
@@ -119,16 +124,39 @@ export default function CourseRoom({
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
 }) {
-  const [messages, setMessages] = useState<RenderedCourseMessage[]>([]);
-  const [pages, setPages] = useState<LessonPage[]>([]);
-  const [presented, setPresented] = useState<Set<string>>(() => new Set());
-  const [page, setPage] = useState(0);
+  const initialState = activeCourse?.state ?? emptyCourseState();
+  const [messages, setMessages] = useState<RenderedCourseMessage[]>(
+    initialState.messages,
+  );
+  const [pages, setPages] = useState<LessonPage[]>(initialState.pages);
+  const [presented, setPresented] = useState<Set<string>>(
+    () => new Set(initialState.presentedPageIds),
+  );
+  const [page, setPage] = useState(() =>
+    Math.max(
+      0,
+      initialState.pages.findIndex(
+        ({ id }) => id === initialState.currentPageId,
+      ),
+    ),
+  );
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
+  const [conversationToken, setConversationToken] = useState(0);
+  const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
+  const pagesRef = useRef<LessonPage[]>(initialState.pages);
+  const presentedRef = useRef<Set<string>>(
+    new Set(initialState.presentedPageIds),
+  );
+  const pendingConversation = useRef<{
+    conversation: StoredCourseConversation;
+    messageStart: number;
+    existingPageIds: Set<string>;
+  } | null>(null);
   const session = useRef<CourseSession | null>(null);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const pendingSave = useRef<{
@@ -158,12 +186,19 @@ export default function CourseRoom({
 
   useEffect(() => {
     if (!info?.available || !coursesReady) return;
-    const initial = activeCourse?.state ?? emptyCourseState();
-    sessionCourse.current = activeCourse;
-    setCourse(activeCourse);
+    const selectedCourse =
+      sessionCourse.current?.id === activeCourse?.id
+        ? sessionCourse.current
+        : activeCourse;
+    const initial = selectedCourse?.state ?? emptyCourseState();
+    sessionCourse.current = selectedCourse;
+    setCourse(selectedCourse);
     setMessages(initial.messages);
+    messagesRef.current = initial.messages;
     setPages(initial.pages);
+    pagesRef.current = initial.pages;
     setPresented(new Set(initial.presentedPageIds));
+    presentedRef.current = new Set(initial.presentedPageIds);
     const initialPage = initial.pages.findIndex(
       (page) => page.id === initial.currentPageId,
     );
@@ -177,12 +212,22 @@ export default function CourseRoom({
       memory,
       (message, replaceLast) =>
         setMessages((all) => {
-          if (!replaceLast) return [...all, message];
-          return [...all.slice(0, -1), message];
+          const next = !replaceLast
+            ? [...all, message]
+            : [...all.slice(0, -1), message];
+          messagesRef.current = next;
+          return next;
         }),
-      (next) => setPages(next),
+      (next) => {
+        pagesRef.current = next;
+        setPages(next);
+      },
       (pageId) => {
-        setPresented((existing) => new Set(existing).add(pageId));
+        setPresented((existing) => {
+          const next = new Set(existing).add(pageId);
+          presentedRef.current = next;
+          return next;
+        });
         setPages((existing) => {
           const index = existing.findIndex((page) => page.id === pageId);
           if (index >= 0) setPage(index);
@@ -194,7 +239,7 @@ export default function CourseRoom({
       setError,
       initial,
       {
-        course: activeCourse,
+        course: selectedCourse,
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
           sessionCourse.current = created;
@@ -214,6 +259,77 @@ export default function CourseRoom({
           onCourseUpdated(next);
           return next;
         },
+        setOutline: async (sections) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          const updated = await replaceCourseOutline(
+            sessionCourse.current.id,
+            sections,
+          );
+          const currentConversation = updated.sections
+            ?.flatMap((section) => section.conversations)
+            .find(
+              (conversation) =>
+                conversation.id === sessionCourse.current?.conversationId,
+            );
+          const next = currentConversation
+            ? {
+                ...updated,
+                conversationId: currentConversation.id,
+                state: sessionCourse.current.state,
+              }
+            : updated;
+          sessionCourse.current = next;
+          setCourse(next);
+          onCourseUpdated(next);
+          return next;
+        },
+        createConversation: async (sectionId, title) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          const conversation = await createStoredCourseConversation(
+            sessionCourse.current.id,
+            sectionId,
+            title,
+          );
+          let lastUser = 0;
+          for (
+            let index = messagesRef.current.length - 1;
+            index >= 0;
+            index--
+          ) {
+            if (messagesRef.current[index].role === "user") {
+              lastUser = index;
+              break;
+            }
+          }
+          pendingConversation.current = {
+            conversation,
+            messageStart: lastUser,
+            existingPageIds: new Set(pagesRef.current.map(({ id }) => id)),
+          };
+          const updated = {
+            ...sessionCourse.current,
+            sections: sessionCourse.current.sections?.map((section) =>
+              section.id === sectionId
+                ? {
+                    ...section,
+                    conversations: [...section.conversations, conversation],
+                  }
+                : section,
+            ),
+          };
+          sessionCourse.current = updated;
+          setCourse(updated);
+          onCourseUpdated(updated);
+          return conversation;
+        },
+        listMaterials: async () => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          return listCourseMaterials(sessionCourse.current.id);
+        },
+        readMaterial: async (materialId) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          return getCourseMaterial(sessionCourse.current.id, materialId);
+        },
       },
       listCodeLanguages,
     );
@@ -222,7 +338,14 @@ export default function CourseRoom({
       current.stop();
       if (session.current === current) session.current = null;
     };
-  }, [info?.available, info?.id, memory, roomToken, coursesReady]);
+  }, [
+    info?.available,
+    info?.id,
+    memory,
+    roomToken,
+    conversationToken,
+    coursesReady,
+  ]);
 
   useEffect(() => {
     if (!course) return;
@@ -232,7 +355,18 @@ export default function CourseRoom({
       presentedPageIds: [...presented],
       currentPageId: pages[page]?.id ?? "",
     };
-    const updated = { ...course, state };
+    const updated = {
+      ...course,
+      state,
+      sections: course.sections?.map((section) => ({
+        ...section,
+        conversations: section.conversations.map((conversation) =>
+          conversation.id === course.conversationId
+            ? { ...conversation, state }
+            : conversation,
+        ),
+      })),
+    };
     sessionCourse.current = updated;
     latestSnapshot.current = { course, state };
     onCourseUpdated(updated);
@@ -282,6 +416,45 @@ export default function CourseRoom({
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
     await session.current.prompt(value);
+    const pending = pendingConversation.current;
+    if (pending && sessionCourse.current) {
+      pendingConversation.current = null;
+      const nextPages = pagesRef.current.filter(
+        ({ id }) => !pending.existingPageIds.has(id),
+      );
+      const nextState: CourseConversationState = {
+        messages: messagesRef.current.slice(pending.messageStart),
+        pages: nextPages,
+        presentedPageIds: nextPages
+          .filter(({ id }) => presentedRef.current.has(id))
+          .map(({ id }) => id),
+        currentPageId: nextPages.at(-1)?.id ?? "",
+      };
+      const updated = {
+        ...sessionCourse.current,
+        conversationId: pending.conversation.id,
+        state: nextState,
+        sections: sessionCourse.current.sections?.map((section) => ({
+          ...section,
+          conversations: section.conversations.map((conversation) =>
+            conversation.id === pending.conversation.id
+              ? { ...conversation, state: nextState }
+              : conversation,
+          ),
+        })),
+      };
+      messagesRef.current = nextState.messages;
+      pagesRef.current = nextPages;
+      presentedRef.current = new Set(nextState.presentedPageIds);
+      sessionCourse.current = updated;
+      setMessages(nextState.messages);
+      setPages(nextPages);
+      setPresented(new Set(nextState.presentedPageIds));
+      setPage(Math.max(0, nextPages.length - 1));
+      setCourse(updated);
+      onCourseUpdated(updated);
+      setConversationToken((token) => token + 1);
+    }
     setBusy(false);
   };
   const submit = async () => {
@@ -342,14 +515,18 @@ export default function CourseRoom({
               <div className="subject-art learning">
                 <Icon name="learning" />
               </div>
-              <h1>今天想学什么？</h1>
-              <CourseLibrary
-                courses={courses}
-                error={libraryError}
-                onOpen={onOpenCourse}
-                onRename={onRenameCourse}
-                onDelete={onDeleteCourse}
-              />
+              <h1>{course ? "开始新的学习对话" : "今天想学什么？"}</h1>
+              {course ? (
+                <p>从一个问题、例子或练习开始这次学习。</p>
+              ) : (
+                <CourseLibrary
+                  courses={courses}
+                  error={libraryError}
+                  onOpen={onOpenCourse}
+                  onRename={onRenameCourse}
+                  onDelete={onDeleteCourse}
+                />
+              )}
             </div>
           ) : (
             messages.map((message) => (

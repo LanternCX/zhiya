@@ -2,6 +2,8 @@ import type {
   CodeLanguage,
   CodingExercise,
   CourseCover,
+  CourseMaterial,
+  StoredCourseConversation,
   StoredCourse,
   Slide,
   LessonPage,
@@ -42,6 +44,22 @@ export type CourseManagement = {
     cover: CourseCover,
   ) => Promise<StoredCourse>;
   rename: (title: string, topic?: string) => Promise<StoredCourse>;
+  setOutline: (
+    sections: Array<{
+      id?: string;
+      title: string;
+      objective: string;
+      status?: "planned" | "active" | "complete";
+    }>,
+  ) => Promise<StoredCourse>;
+  createConversation: (
+    sectionId: string,
+    title: string,
+  ) => Promise<StoredCourseConversation>;
+  listMaterials: () => Promise<CourseMaterial[]>;
+  readMaterial: (
+    materialId: string,
+  ) => Promise<{ material: CourseMaterial; content: string }>;
 };
 
 export type SlideTools = {
