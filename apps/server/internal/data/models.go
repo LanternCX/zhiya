@@ -14,16 +14,17 @@ import (
 )
 
 var (
-	ErrNotFound             = errors.New("record not found")
-	ErrCourseNotFound       = errors.New("course not found")
-	ErrMaterialNotFound     = errors.New("material not found")
-	ErrSectionNotFound      = errors.New("section not found")
-	ErrConversationNotFound = errors.New("course conversation not found")
-	ErrInvalidSession       = errors.New("登录已失效，请重新登录")
-	ErrInvalidCode          = errors.New("验证码无效或已过期，请重新获取")
-	ErrEmailInUse           = errors.New("该邮箱无法使用，请换一个邮箱")
-	ErrRateLimited          = errors.New("操作太频繁，请稍后重试")
-	ErrConversationBusy     = errors.New("会话正在处理其他操作，请重试")
+	ErrNotFound               = errors.New("record not found")
+	ErrCourseNotFound         = errors.New("course not found")
+	ErrMaterialNotFound       = errors.New("material not found")
+	ErrMaterialUploadNotFound = errors.New("material upload not found")
+	ErrSectionNotFound        = errors.New("section not found")
+	ErrConversationNotFound   = errors.New("course conversation not found")
+	ErrInvalidSession         = errors.New("登录已失效，请重新登录")
+	ErrInvalidCode            = errors.New("验证码无效或已过期，请重新获取")
+	ErrEmailInUse             = errors.New("该邮箱无法使用，请换一个邮箱")
+	ErrRateLimited            = errors.New("操作太频繁，请稍后重试")
+	ErrConversationBusy       = errors.New("会话正在处理其他操作，请重试")
 )
 
 type ValidationError string

@@ -49,6 +49,8 @@ func errorResponse(err error) (int, string) {
 		e = failure{404, "未找到课程"}
 	case errors.Is(err, data.ErrMaterialNotFound):
 		e = failure{404, "未找到课程材料"}
+	case errors.Is(err, data.ErrMaterialUploadNotFound):
+		e = failure{404, "未找到课程材料上传"}
 	case errors.Is(err, data.ErrSectionNotFound):
 		e = failure{404, "未找到课程小节"}
 	case errors.Is(err, data.ErrConversationNotFound):

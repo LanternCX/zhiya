@@ -17,17 +17,105 @@ type CourseMaterial struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+type CourseMaterialUpload struct {
+	ID        string
+	CourseID  string
+	Name      string
+	MediaType string
+	ObjectKey string
+	SizeBytes int64
+	ExpiresAt time.Time
+}
+
 type MaterialModel struct{ db database }
 
-func (m MaterialModel) Create(ctx context.Context, user, courseID, name, mediaType, objectKey string, size int64) (CourseMaterial, error) {
-	var material CourseMaterial
-	material.ID = UUID()
-	err := m.db.QueryRow(ctx, `INSERT INTO course_materials(id,course_id,name,media_type,object_key,size_bytes)
-	 SELECT $1,c.id,$2,$3,$4,$5 FROM courses c WHERE c.id=$6 AND c.user_id=$7
-	 RETURNING id,course_id,name,media_type,object_key,size_bytes,created_at`, material.ID, name, mediaType, objectKey, size, courseID, user).Scan(&material.ID, &material.CourseID, &material.Name, &material.MediaType, &material.ObjectKey, &material.SizeBytes, &material.CreatedAt)
+func (m MaterialModel) StartUpload(ctx context.Context, user, courseID, name, mediaType, objectKey string, size int64, expiresAt time.Time) (CourseMaterialUpload, error) {
+	upload := CourseMaterialUpload{ID: UUID(), CourseID: courseID, Name: name, MediaType: mediaType, ObjectKey: objectKey, SizeBytes: size, ExpiresAt: expiresAt}
+	err := m.db.QueryRow(ctx, `INSERT INTO course_material_uploads(id,course_id,name,media_type,object_key,size_bytes,expires_at)
+	 SELECT $1,c.id,$2,$3,$4,$5,$6 FROM courses c WHERE c.id=$7 AND c.user_id=$8
+	 RETURNING id,course_id,name,media_type,object_key,size_bytes,expires_at`, upload.ID, name, mediaType, objectKey, size, expiresAt, courseID, user).Scan(&upload.ID, &upload.CourseID, &upload.Name, &upload.MediaType, &upload.ObjectKey, &upload.SizeBytes, &upload.ExpiresAt)
 	if err == pgx.ErrNoRows {
-		return CourseMaterial{}, ErrCourseNotFound
+		return CourseMaterialUpload{}, ErrCourseNotFound
 	}
+	return upload, err
+}
+
+func (m MaterialModel) GetUpload(ctx context.Context, user, courseID, uploadID string) (CourseMaterialUpload, error) {
+	var upload CourseMaterialUpload
+	err := m.db.QueryRow(ctx, `SELECT u.id,u.course_id,u.name,u.media_type,u.object_key,u.size_bytes,u.expires_at
+	 FROM course_material_uploads u JOIN courses c ON c.id=u.course_id
+	 WHERE u.id=$1 AND u.course_id=$2 AND c.user_id=$3 FOR UPDATE`, uploadID, courseID, user).Scan(&upload.ID, &upload.CourseID, &upload.Name, &upload.MediaType, &upload.ObjectKey, &upload.SizeBytes, &upload.ExpiresAt)
+	if err == pgx.ErrNoRows {
+		return CourseMaterialUpload{}, ErrMaterialUploadNotFound
+	}
+	return upload, err
+}
+
+func (m MaterialModel) ListUploads(ctx context.Context, user, courseID string) ([]CourseMaterialUpload, error) {
+	rows, err := m.db.Query(ctx, `SELECT u.id,u.course_id,u.name,u.media_type,u.object_key,u.size_bytes,u.expires_at
+	 FROM course_material_uploads u JOIN courses c ON c.id=u.course_id
+	 WHERE u.course_id=$1 AND c.user_id=$2`, courseID, user)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	uploads := []CourseMaterialUpload{}
+	for rows.Next() {
+		var upload CourseMaterialUpload
+		if err := rows.Scan(&upload.ID, &upload.CourseID, &upload.Name, &upload.MediaType, &upload.ObjectKey, &upload.SizeBytes, &upload.ExpiresAt); err != nil {
+			return nil, err
+		}
+		uploads = append(uploads, upload)
+	}
+	return uploads, rows.Err()
+}
+
+func (m MaterialModel) ExpiredUploads(ctx context.Context, now time.Time) ([]CourseMaterialUpload, error) {
+	rows, err := m.db.Query(ctx, `SELECT id,course_id,name,media_type,object_key,size_bytes,expires_at
+	 FROM course_material_uploads WHERE expires_at<$1`, now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	uploads := []CourseMaterialUpload{}
+	for rows.Next() {
+		var upload CourseMaterialUpload
+		if err := rows.Scan(&upload.ID, &upload.CourseID, &upload.Name, &upload.MediaType, &upload.ObjectKey, &upload.SizeBytes, &upload.ExpiresAt); err != nil {
+			return nil, err
+		}
+		uploads = append(uploads, upload)
+	}
+	return uploads, rows.Err()
+}
+
+func (m MaterialModel) RemoveUpload(ctx context.Context, uploadID string) error {
+	_, err := m.db.Exec(ctx, `DELETE FROM course_material_uploads WHERE id=$1`, uploadID)
+	return err
+}
+
+func (m MaterialModel) CancelUpload(ctx context.Context, user, courseID, uploadID string) error {
+	tag, err := m.db.Exec(ctx, `DELETE FROM course_material_uploads u USING courses c
+	 WHERE u.id=$1 AND u.course_id=$2 AND c.id=u.course_id AND c.user_id=$3`, uploadID, courseID, user)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrMaterialUploadNotFound
+	}
+	return nil
+}
+
+func (m MaterialModel) CompleteUpload(ctx context.Context, user, courseID, uploadID, objectKey string) (CourseMaterial, error) {
+	upload, err := m.GetUpload(ctx, user, courseID, uploadID)
+	if err != nil {
+		return CourseMaterial{}, err
+	}
+	var material CourseMaterial
+	err = m.db.QueryRow(ctx, `WITH removed AS (
+	 DELETE FROM course_material_uploads WHERE id=$1 RETURNING id,course_id,name,media_type,size_bytes
+	) INSERT INTO course_materials(id,course_id,name,media_type,object_key,size_bytes)
+	 SELECT id,course_id,name,media_type,$2,size_bytes FROM removed
+	 RETURNING id,course_id,name,media_type,object_key,size_bytes,created_at`, upload.ID, objectKey).Scan(&material.ID, &material.CourseID, &material.Name, &material.MediaType, &material.ObjectKey, &material.SizeBytes, &material.CreatedAt)
 	return material, err
 }
 

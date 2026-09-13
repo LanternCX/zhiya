@@ -2,40 +2,42 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"net/textproto"
 	"testing"
 )
 
-func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, contentType, content string, status int) map[string]any {
+func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, content string, status int) map[string]any {
 	a.t.Helper()
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-	header := make(textproto.MIMEHeader)
-	header.Set("Content-Disposition", `form-data; name="file"; filename="`+filename+`"`)
-	header.Set("Content-Type", contentType)
-	part, _ := writer.CreatePart(header)
-	_, _ = io.WriteString(part, content)
-	_ = writer.Close()
-	req, _ := http.NewRequest("POST", a.server.URL+"/api/courses/"+courseID+"/materials", &body)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("X-Zhiya-Request", "1")
-	req.Header.Set("Origin", a.server.URL)
+	started := a.request(c, "POST", "/courses/"+courseID+"/material-uploads", map[string]any{
+		"name": filename, "sizeBytes": len(content),
+	}, status)
+	if status != http.StatusCreated {
+		return started
+	}
+	upload := started["upload"].(map[string]any)
+	listed := a.request(c, "GET", "/courses/"+courseID+"/materials", nil, http.StatusOK)["materials"].([]any)
+	if len(listed) != 0 {
+		a.t.Fatalf("unfinished upload was listed: %v", listed)
+	}
+	req, _ := http.NewRequest("PUT", upload["url"].(string), bytes.NewReader([]byte(content)))
+	for name, value := range upload["headers"].(map[string]any) {
+		req.Header.Set(name, value.(string))
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		a.t.Fatal(err)
 	}
 	defer res.Body.Close()
 	raw, _ := io.ReadAll(res.Body)
-	if res.StatusCode != status {
-		a.t.Fatalf("upload %s = %d %s; want %d", filename, res.StatusCode, raw, status)
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		a.t.Fatalf("direct upload %s = %d %s", filename, res.StatusCode, raw)
 	}
-	var result map[string]any
-	if len(raw) > 0 && json.Unmarshal(raw, &result) != nil {
-		a.t.Fatalf("invalid JSON: %s", raw)
+	completePath := "/courses/" + courseID + "/material-uploads/" + upload["id"].(string) + "/complete"
+	result := a.request(c, "POST", completePath, nil, http.StatusCreated)
+	retried := a.request(c, "POST", completePath, nil, http.StatusCreated)
+	if retried["material"].(map[string]any)["id"] != result["material"].(map[string]any)["id"] {
+		a.t.Fatalf("retried completion created another material: %v", retried)
 	}
 	return result
 }
@@ -129,7 +131,7 @@ func TestCourseMaterialsUploadListReadAndStayPrivate(t *testing.T) {
 	}, http.StatusCreated)["course"].(map[string]any)
 	courseID := created["id"].(string)
 
-	uploaded := a.uploadMaterial(owner, courseID, "基础.md", "text/markdown", "# 变量\n变量保存数据。", http.StatusCreated)["material"].(map[string]any)
+	uploaded := a.uploadMaterial(owner, courseID, "基础.md", "# 变量\n变量保存数据。", http.StatusCreated)["material"].(map[string]any)
 	materialID := uploaded["id"].(string)
 	if uploaded["name"] != "基础.md" || uploaded["sizeBytes"] != float64(len("# 变量\n变量保存数据。")) {
 		t.Fatalf("unexpected material metadata: %v", uploaded)
@@ -139,16 +141,91 @@ func TestCourseMaterialsUploadListReadAndStayPrivate(t *testing.T) {
 	if len(materials) != 1 || materials[0].(map[string]any)["id"] != materialID {
 		t.Fatalf("uploaded material not listed: %v", materials)
 	}
-	content := a.request(owner, "GET", "/courses/"+courseID+"/materials/"+materialID, nil, http.StatusOK)
-	if content["content"] != "# 变量\n变量保存数据。" {
-		t.Fatalf("material content changed: %v", content)
+	download := a.request(owner, "GET", "/courses/"+courseID+"/materials/"+materialID+"/download", nil, http.StatusOK)
+	res, err := owner.Get(download["url"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	content, _ := io.ReadAll(res.Body)
+	if string(content) != "# 变量\n变量保存数据。" {
+		t.Fatalf("material content changed: %q", content)
 	}
 
 	a.request(other, "GET", "/courses/"+courseID+"/materials", nil, http.StatusNotFound)
-	a.request(other, "GET", "/courses/"+courseID+"/materials/"+materialID, nil, http.StatusNotFound)
-	a.uploadMaterial(owner, courseID, "讲义.pdf", "application/pdf", "%PDF", http.StatusBadRequest)
+	a.request(other, "GET", "/courses/"+courseID+"/materials/"+materialID+"/download", nil, http.StatusNotFound)
+	a.uploadMaterial(owner, courseID, "讲义.pdf", "%PDF", http.StatusBadRequest)
 	a.request(owner, "DELETE", "/courses/"+courseID+"/materials/"+materialID, map[string]any{}, http.StatusOK)
-	a.request(owner, "GET", "/courses/"+courseID+"/materials/"+materialID, nil, http.StatusNotFound)
+	a.request(owner, "GET", "/courses/"+courseID+"/materials/"+materialID+"/download", nil, http.StatusNotFound)
+}
+
+func TestDeletingCourseRemovesUnfinishedDirectUpload(t *testing.T) {
+	a := setupAccountTest(t)
+	student := a.register("unfinished-material@example.com")
+	created := a.request(student, "POST", "/courses", map[string]any{
+		"title": "待删除课程", "topic": "清理上传",
+		"cover": map[string]any{"motif": "code", "palette": "sprout", "label": "CLEANUP"},
+	}, http.StatusCreated)["course"].(map[string]any)
+	courseID := created["id"].(string)
+	started := a.request(student, "POST", "/courses/"+courseID+"/material-uploads", map[string]any{
+		"name": "notes.txt", "sizeBytes": 5,
+	}, http.StatusCreated)["upload"].(map[string]any)
+	req, _ := http.NewRequest(http.MethodPut, started["url"].(string), bytes.NewBufferString("notes"))
+	for name, value := range started["headers"].(map[string]any) {
+		req.Header.Set(name, value.(string))
+	}
+	res, err := student.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		t.Fatalf("direct upload = %v, %v", res, err)
+	}
+	_ = res.Body.Close()
+
+	a.request(student, "DELETE", "/courses/"+courseID, nil, http.StatusOK)
+	res, err = student.Get(started["url"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("unfinished object survived course deletion: %d", res.StatusCode)
+	}
+}
+
+func TestInvalidDirectUploadIsRejectedAndRemoved(t *testing.T) {
+	a := setupAccountTest(t)
+	student := a.register("invalid-material@example.com")
+	created := a.request(student, "POST", "/courses", map[string]any{
+		"title": "材料校验", "topic": "拒绝无效内容",
+		"cover": map[string]any{"motif": "code", "palette": "sprout", "label": "VALIDATE"},
+	}, http.StatusCreated)["course"].(map[string]any)
+	courseID := created["id"].(string)
+	started := a.request(student, "POST", "/courses/"+courseID+"/material-uploads", map[string]any{
+		"name": "invalid.txt", "sizeBytes": 1,
+	}, http.StatusCreated)["upload"].(map[string]any)
+	req, _ := http.NewRequest(http.MethodPut, started["url"].(string), bytes.NewReader([]byte{0xff}))
+	for name, value := range started["headers"].(map[string]any) {
+		req.Header.Set(name, value.(string))
+	}
+	res, err := student.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		t.Fatalf("direct upload = %v, %v", res, err)
+	}
+	_ = res.Body.Close()
+	completePath := "/courses/" + courseID + "/material-uploads/" + started["id"].(string) + "/complete"
+	a.request(student, "POST", completePath, nil, http.StatusBadRequest)
+	a.request(student, "POST", completePath, nil, http.StatusNotFound)
+	listed := a.request(student, "GET", "/courses/"+courseID+"/materials", nil, http.StatusOK)["materials"].([]any)
+	if len(listed) != 0 {
+		t.Fatalf("invalid material was listed: %v", listed)
+	}
+	res, err = student.Get(started["url"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusNotFound {
+		t.Fatalf("invalid object was not removed: %d", res.StatusCode)
+	}
 }
 
 func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {

@@ -13,6 +13,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
+	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,7 +23,7 @@ type application struct {
 	config      config.Config
 	learningHub *learningHub
 	runner      codeRunner
-	objects     objectStore
+	objects     objectstore.Store
 }
 
 func main() {
@@ -59,7 +60,11 @@ func main() {
 	app := &application{models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient)}
 	err = app.models.Initialize(startup)
 	if err == nil {
-		app.objects, err = newS3ObjectStore(startup, cfg.Storage)
+		var objects objectstore.Store
+		objects, err = objectstore.New(startup, cfg.Storage)
+		if err == nil {
+			app.objects = objects
+		}
 	}
 	if err == nil {
 		err = app.startLearningEvents(ctx)
@@ -90,6 +95,16 @@ func main() {
 				err := app.models.Tokens.CleanupExpired(ctx)
 				if err != nil {
 					log.Print("expired account data cleanup failed")
+				}
+				uploads, cleanupErr := app.models.Materials.ExpiredUploads(ctx, time.Now())
+				if cleanupErr != nil {
+					log.Print("expired material upload cleanup failed")
+					continue
+				}
+				for _, upload := range uploads {
+					if app.objects.Delete(ctx, upload.ObjectKey) == nil {
+						_ = app.models.Materials.RemoveUpload(ctx, upload.ID)
+					}
 				}
 			}
 		}

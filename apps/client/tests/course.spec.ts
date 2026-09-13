@@ -1535,6 +1535,7 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
   };
   let materials: Array<Record<string, unknown>> = [];
   let uploadRequests = 0;
+  let uploadedContent = "";
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [saved] } }),
   );
@@ -1545,20 +1546,41 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
         await route.fulfill({ json: { materials } });
         return;
       }
+      await route.fallback();
+    },
+  );
+  await page.route(
+    "**/api/courses/material-course/material-uploads",
+    async (route) => {
       uploadRequests += 1;
-      const input = route.request().postDataJSON() as {
-        name: string;
-        content: string;
-      };
-      expect(input).toEqual({
-        name: "notes.md",
-        content: "# 变量\n变量保存数据。",
+      const input = route.request().postDataJSON() as { name: string; sizeBytes: number };
+      expect(input).toEqual({ name: "notes.md", sizeBytes: 30 });
+      await route.fulfill({
+        status: 201,
+        json: {
+          upload: {
+            id: "notes-upload",
+            url: "https://storage.test/uploads/notes",
+            headers: { "Content-Type": "text/markdown" },
+            expiresAt: "2026-09-10T10:02:00Z",
+          },
+        },
       });
+    },
+  );
+  await page.route("https://storage.test/uploads/notes", async (route) => {
+    uploadedContent = route.request().postData() ?? "";
+    await route.fulfill({ status: 200, body: "" });
+  });
+  await page.route(
+    "**/api/courses/material-course/material-uploads/notes-upload/complete",
+    async (route) => {
+      expect(uploadedContent).toBe("# 变量\n变量保存数据。");
       const material = {
         id: "notes",
-        name: input.name,
+        name: "notes.md",
         mediaType: "text/markdown",
-        sizeBytes: new TextEncoder().encode(input.content).length,
+        sizeBytes: 30,
         createdAt: "2026-09-10T10:00:00Z",
       };
       materials = [material];
@@ -1572,13 +1594,15 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
         materials = [];
         return route.fulfill({ json: { ok: true } });
       }
-      return route.fulfill({
-        json: {
-          material: materials[0],
-          content: "# 变量\n变量保存数据。",
-        },
-      });
+      return route.fallback();
     },
+  );
+  await page.route(
+    "**/api/courses/material-course/materials/notes/download",
+    (route) => route.fulfill({ json: { material: materials[0], url: "https://storage.test/materials/notes" } }),
+  );
+  await page.route("https://storage.test/materials/notes", (route) =>
+    route.fulfill({ status: 200, contentType: "text/markdown", body: "# 变量\n变量保存数据。" }),
   );
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {

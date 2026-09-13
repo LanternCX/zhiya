@@ -6,6 +6,11 @@ import type {
   CourseMaterial,
   StoredCourseConversation,
 } from "../../domain/learning";
+import {
+  ObjectStorageError,
+  readObjectText,
+  uploadObject,
+} from "../../transport/object-storage";
 
 export const emptyCourseState = (): CourseConversationState => ({
   messages: [],
@@ -105,19 +110,47 @@ export async function listCourseMaterials(courseId: string) {
 }
 
 export async function uploadCourseMaterial(courseId: string, file: File) {
+  const { upload } = await api<{
+    upload: {
+      id: string;
+      url: string;
+      headers: Record<string, string>;
+      expiresAt: string;
+    };
+  }>(`/courses/${courseId}/material-uploads`, "POST", {
+    name: file.name,
+    sizeBytes: file.size,
+  });
+  try {
+    await uploadObject(upload, file);
+  } catch (error) {
+    if (error instanceof ObjectStorageError) {
+      throw new Error(
+        error.kind === "network"
+          ? "课程材料传输失败，请检查网络后重试"
+          : "课程材料传输失败，请重新上传",
+      );
+    }
+    throw error;
+  }
   return (
     await api<{ material: CourseMaterial }>(
-      `/courses/${courseId}/materials`,
+      `/courses/${courseId}/material-uploads/${upload.id}/complete`,
       "POST",
-      { name: file.name, content: await file.text() },
     )
   ).material;
 }
 
 export async function getCourseMaterial(courseId: string, materialId: string) {
-  return api<{ material: CourseMaterial; content: string }>(
-    `/courses/${courseId}/materials/${materialId}`,
+  const download = await api<{
+    material: CourseMaterial;
+    url: string;
+    headers?: Record<string, string>;
+  }>(
+    `/courses/${courseId}/materials/${materialId}/download`,
   );
+  const content = await readObjectText(download);
+  return { material: download.material, content };
 }
 
 export async function deleteCourseMaterial(

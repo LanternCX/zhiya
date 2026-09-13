@@ -122,3 +122,14 @@ CREATE TABLE IF NOT EXISTS course_materials (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS course_materials_course_created ON course_materials(course_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS course_material_uploads (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ name text NOT NULL,
+ media_type text NOT NULL,
+ object_key text NOT NULL UNIQUE,
+ size_bytes bigint NOT NULL,
+ expires_at timestamptz NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS course_material_uploads_expiry ON course_material_uploads(expires_at);

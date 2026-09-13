@@ -45,6 +45,24 @@ fn allowed(method: &str, path: &str) -> bool {
     ) || matches!(
         (method, segments.as_slice()),
         ("PUT", ["courses", id, "conversation"]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("GET", ["courses", id, "materials"]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("POST", ["courses", id, "material-uploads"]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("POST", ["courses", id, "material-uploads", upload, "complete"])
+            if !id.is_empty() && !upload.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("GET", ["courses", id, "materials", material, "download"])
+            if !id.is_empty() && !material.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("DELETE", ["courses", id, "materials", material])
+            if !id.is_empty() && !material.is_empty()
     )
 }
 
@@ -61,6 +79,20 @@ fn learning_bridge_accepts_only_fixed_learning_routes() {
     assert!(allowed("PATCH", "/courses/course-id"));
     assert!(allowed("DELETE", "/courses/course-id"));
     assert!(allowed("PUT", "/courses/course-id/conversation"));
+    assert!(allowed("GET", "/courses/course-id/materials"));
+    assert!(allowed("POST", "/courses/course-id/material-uploads"));
+    assert!(allowed(
+        "POST",
+        "/courses/course-id/material-uploads/upload-id/complete"
+    ));
+    assert!(allowed(
+        "GET",
+        "/courses/course-id/materials/material-id/download"
+    ));
+    assert!(allowed(
+        "DELETE",
+        "/courses/course-id/materials/material-id"
+    ));
     assert!(!allowed("PUT", "/courses/course-id/other"));
     assert!(!allowed("DELETE", "/courses/course-id/conversation"));
 }

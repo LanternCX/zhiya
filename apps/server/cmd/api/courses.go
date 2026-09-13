@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
@@ -272,71 +275,134 @@ func (a *application) listCourseMaterials(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, map[string]any{"materials": materials})
 }
 
-func (a *application) uploadCourseMaterial(w http.ResponseWriter, r *http.Request) {
+func (a *application) startCourseMaterialUpload(w http.ResponseWriter, r *http.Request) {
 	if a.objects == nil {
 		a.respondError(w, fmt.Errorf("object storage unavailable"))
 		return
 	}
-	var filename string
-	var content []byte
-	var err error
-	contentType := r.Header.Get("Content-Type")
-	if strings.HasPrefix(contentType, "application/json") {
-		var input struct {
-			Name    string `json:"name"`
-			Content string `json:"content"`
-		}
-		if err := a.readJSON(w, r, &input); err != nil {
-			a.respondError(w, err)
-			return
-		}
-		filename, content = filepath.Base(input.Name), []byte(input.Content)
-	} else {
-		r.Body = http.MaxBytesReader(w, r.Body, int64(a.config.Server.MaxBodyBytes))
-		file, header, err := r.FormFile("file")
-		if err != nil {
-			a.respondError(w, bad("课程材料无效或过大"))
-			return
-		}
-		defer file.Close()
-		filename = filepath.Base(header.Filename)
-		content, err = io.ReadAll(io.LimitReader(file, int64(a.config.Server.MaxBodyBytes)+1))
-		if err != nil {
-			a.respondError(w, bad("课程材料无效或过大"))
-			return
-		}
+	var input struct {
+		Name      string `json:"name"`
+		SizeBytes int64  `json:"sizeBytes"`
 	}
+	if err := a.readJSON(w, r, &input); err != nil {
+		a.respondError(w, err)
+		return
+	}
+	filename := filepath.Base(input.Name)
 	extension := strings.ToLower(filepath.Ext(filename))
 	mediaType := map[string]string{".md": "text/markdown", ".txt": "text/plain"}[extension]
 	if mediaType == "" {
 		a.respondError(w, bad("目前仅支持 Markdown 和 TXT 文件"))
 		return
 	}
-	if len(content) == 0 || len(content) > a.config.Server.MaxBodyBytes || !utf8.Valid(content) {
-		a.respondError(w, bad("课程材料必须是有效的 UTF-8 文本且不能超过大小限制"))
+	if filename == "." || input.SizeBytes <= 0 || input.SizeBytes > int64(a.config.Server.MaxBodyBytes) {
+		a.respondError(w, bad("课程材料不能为空且不能超过大小限制"))
 		return
 	}
-	materialID := data.UUID()
-	objectKey := "courses/" + r.PathValue("id") + "/materials/" + materialID + "/source" + extension
-	if err := a.objects.Put(r.Context(), objectKey, content, mediaType); err != nil {
-		a.respondError(w, err)
-		return
-	}
-	var material data.CourseMaterial
-	err = a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+	expiresAt := time.Now().Add(time.Duration(a.config.Storage.URLTTLSeconds) * time.Second)
+	objectKey := "uploads/courses/" + r.PathValue("id") + "/" + data.UUID() + "/source" + extension
+	var upload data.CourseMaterialUpload
+	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
 		var err error
-		material, err = m.Materials.Create(r.Context(), u.ID, r.PathValue("id"), filename, mediaType, objectKey, int64(len(content)))
+		upload, err = m.Materials.StartUpload(r.Context(), u.ID, r.PathValue("id"), filename, mediaType, objectKey, input.SizeBytes, expiresAt)
 		return err
 	})
 	if err != nil {
-		_ = a.objects.Delete(r.Context(), objectKey)
 		a.respondError(w, err)
 		return
 	}
+	request, err := a.objects.PresignUpload(r.Context(), upload.ObjectKey, upload.MediaType, upload.SizeBytes, time.Until(upload.ExpiresAt))
+	if err != nil {
+		_ = a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+			return m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID)
+		})
+		a.respondError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{"upload": map[string]any{"id": upload.ID, "url": request.URL, "headers": request.Headers, "expiresAt": upload.ExpiresAt}})
+}
+
+func (a *application) completeCourseMaterialUpload(w http.ResponseWriter, r *http.Request) {
+	if a.objects == nil {
+		a.respondError(w, fmt.Errorf("object storage unavailable"))
+		return
+	}
+	var upload data.CourseMaterialUpload
+	var material data.CourseMaterial
+	var completionFailure error
+	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+		var err error
+		upload, err = m.Materials.GetUpload(r.Context(), u.ID, r.PathValue("id"), r.PathValue("uploadId"))
+		if err != nil {
+			return err
+		}
+		if time.Now().After(upload.ExpiresAt) {
+			_ = a.objects.Delete(r.Context(), upload.ObjectKey)
+			if err = m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID); err != nil {
+				return err
+			}
+			completionFailure = bad("课程材料上传已过期，请重新上传")
+			return nil
+		}
+		content, metadata, err := a.objects.Open(r.Context(), upload.ObjectKey)
+		if err != nil {
+			return bad("课程材料尚未上传完成")
+		}
+		valid := metadata.SizeBytes == upload.SizeBytes && validUTF8Stream(content)
+		_ = content.Close()
+		if !valid {
+			_ = a.objects.Delete(r.Context(), upload.ObjectKey)
+			if err = m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID); err != nil {
+				return err
+			}
+			completionFailure = bad("课程材料必须是有效的 UTF-8 文本且大小必须与上传申请一致")
+			return nil
+		}
+		extension := strings.ToLower(filepath.Ext(upload.Name))
+		finalKey := "courses/" + upload.CourseID + "/materials/" + upload.ID + "/source" + extension
+		if err = a.objects.Copy(r.Context(), upload.ObjectKey, finalKey); err != nil {
+			return err
+		}
+		material, err = m.Materials.CompleteUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID, finalKey)
+		return err
+	})
+	if err != nil {
+		if errors.Is(err, data.ErrMaterialUploadNotFound) {
+			existingErr := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+				var getErr error
+				material, getErr = m.Materials.Get(r.Context(), u.ID, r.PathValue("id"), r.PathValue("uploadId"))
+				return getErr
+			})
+			if existingErr == nil {
+				writeJSON(w, http.StatusCreated, map[string]any{"material": material})
+				return
+			}
+		}
+		a.respondError(w, err)
+		return
+	}
+	if completionFailure != nil {
+		a.respondError(w, completionFailure)
+		return
+	}
+	_ = a.objects.Delete(r.Context(), upload.ObjectKey)
 	writeJSON(w, http.StatusCreated, map[string]any{"material": material})
 }
 
-func (a *application) getCourseMaterial(w http.ResponseWriter, r *http.Request) {
+func validUTF8Stream(content io.Reader) bool {
+	reader := bufio.NewReader(content)
+	for {
+		r, size, err := reader.ReadRune()
+		if err == io.EOF {
+			return true
+		}
+		if err != nil || (r == utf8.RuneError && size == 1) {
+			return false
+		}
+	}
+}
+
+func (a *application) downloadCourseMaterial(w http.ResponseWriter, r *http.Request) {
 	if a.objects == nil {
 		a.respondError(w, fmt.Errorf("object storage unavailable"))
 		return
@@ -351,12 +417,12 @@ func (a *application) getCourseMaterial(w http.ResponseWriter, r *http.Request) 
 		a.respondError(w, err)
 		return
 	}
-	content, err := a.objects.Get(r.Context(), material.ObjectKey)
+	request, err := a.objects.PresignDownload(r.Context(), material.ObjectKey, time.Duration(a.config.Storage.URLTTLSeconds)*time.Second)
 	if err != nil {
 		a.respondError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"material": material, "content": string(content)})
+	writeJSON(w, http.StatusOK, map[string]any{"material": material, "url": request.URL, "headers": request.Headers})
 }
 
 func (a *application) deleteCourseMaterial(w http.ResponseWriter, r *http.Request) {
@@ -383,14 +449,23 @@ func (a *application) deleteCourseMaterial(w http.ResponseWriter, r *http.Reques
 
 func (a *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
 	var materials []data.CourseMaterial
+	var uploads []data.CourseMaterialUpload
 	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
 		var err error
 		materials, err = m.Materials.List(r.Context(), u.ID, r.PathValue("id"))
+		if err == nil {
+			uploads, err = m.Materials.ListUploads(r.Context(), u.ID, r.PathValue("id"))
+		}
 		return err
 	})
 	if err == nil && a.objects != nil {
 		for _, material := range materials {
 			if err = a.objects.Delete(r.Context(), material.ObjectKey); err != nil {
+				break
+			}
+		}
+		for _, upload := range uploads {
+			if err = a.objects.Delete(r.Context(), upload.ObjectKey); err != nil {
 				break
 			}
 		}
