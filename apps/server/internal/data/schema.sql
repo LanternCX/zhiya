@@ -80,11 +80,45 @@ CREATE TABLE IF NOT EXISTS courses (
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS courses_user_updated ON courses(user_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS course_sections (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ title text NOT NULL,
+ objective text NOT NULL,
+ position integer NOT NULL,
+ status text NOT NULL DEFAULT 'planned',
+ created_at timestamptz NOT NULL DEFAULT now(),
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ UNIQUE(course_id,position)
+);
+CREATE INDEX IF NOT EXISTS course_sections_course ON course_sections(course_id,position);
 CREATE TABLE IF NOT EXISTS course_conversations (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ section_id uuid NOT NULL REFERENCES course_sections(id) ON DELETE CASCADE,
+ title text NOT NULL,
  state jsonb NOT NULL,
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS course_conversations_course ON course_conversations(course_id,created_at);
+ALTER TABLE course_conversations ADD COLUMN IF NOT EXISTS section_id uuid REFERENCES course_sections(id) ON DELETE CASCADE;
+ALTER TABLE course_conversations ADD COLUMN IF NOT EXISTS title text NOT NULL DEFAULT '开始学习';
+INSERT INTO course_sections(id,course_id,title,objective,position)
+SELECT gen_random_uuid(),c.id,'开始学习',c.topic,0 FROM courses c
+WHERE NOT EXISTS (SELECT 1 FROM course_sections s WHERE s.course_id=c.id);
+UPDATE course_conversations cc SET section_id=(
+ SELECT s.id FROM course_sections s WHERE s.course_id=cc.course_id ORDER BY s.position LIMIT 1
+) WHERE cc.section_id IS NULL;
+ALTER TABLE course_conversations ALTER COLUMN section_id SET NOT NULL;
+CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
+CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS course_materials (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ name text NOT NULL,
+ media_type text NOT NULL,
+ object_key text NOT NULL UNIQUE,
+ size_bytes bigint NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS course_materials_course_created ON course_materials(course_id,created_at DESC);

@@ -14,13 +14,16 @@ import (
 )
 
 var (
-	ErrNotFound         = errors.New("record not found")
-	ErrCourseNotFound   = errors.New("course not found")
-	ErrInvalidSession   = errors.New("登录已失效，请重新登录")
-	ErrInvalidCode      = errors.New("验证码无效或已过期，请重新获取")
-	ErrEmailInUse       = errors.New("该邮箱无法使用，请换一个邮箱")
-	ErrRateLimited      = errors.New("操作太频繁，请稍后重试")
-	ErrConversationBusy = errors.New("会话正在处理其他操作，请重试")
+	ErrNotFound             = errors.New("record not found")
+	ErrCourseNotFound       = errors.New("course not found")
+	ErrMaterialNotFound     = errors.New("material not found")
+	ErrSectionNotFound      = errors.New("section not found")
+	ErrConversationNotFound = errors.New("course conversation not found")
+	ErrInvalidSession       = errors.New("登录已失效，请重新登录")
+	ErrInvalidCode          = errors.New("验证码无效或已过期，请重新获取")
+	ErrEmailInUse           = errors.New("该邮箱无法使用，请换一个邮箱")
+	ErrRateLimited          = errors.New("操作太频繁，请稍后重试")
+	ErrConversationBusy     = errors.New("会话正在处理其他操作，请重试")
 )
 
 type ValidationError string
@@ -73,15 +76,16 @@ func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- erro
 }
 
 type Models struct {
-	Courses  CourseModel
-	Learning LearningModel
-	Users    UserModel
-	Tokens   TokenModel
-	pool     *pgxpool.Pool
+	Courses   CourseModel
+	Materials MaterialModel
+	Learning  LearningModel
+	Users     UserModel
+	Tokens    TokenModel
+	pool      *pgxpool.Pool
 }
 
 func NewModels(pool *pgxpool.Pool, policy config.Account) Models {
-	return Models{Courses: CourseModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, pool: pool}
+	return Models{Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, pool: pool}
 }
 
 type TransactionMode bool
@@ -104,7 +108,7 @@ func (m Models) Transaction(ctx context.Context, mode TransactionMode, action fu
 			return err
 		}
 	}
-	err = action(Models{Courses: CourseModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}})
+	err = action(Models{Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}})
 	var failedAttempt failedVerificationAttempt
 	if errors.As(err, &failedAttempt) {
 		// A rejected code must still consume an attempt. Verify before making other changes.

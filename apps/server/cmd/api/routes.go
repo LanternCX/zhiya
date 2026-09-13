@@ -22,6 +22,13 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("PATCH /api/courses/{id}", a.updateCourse)
 	api.HandleFunc("DELETE /api/courses/{id}", a.deleteCourse)
 	api.HandleFunc("PUT /api/courses/{id}/conversation", a.saveCourseConversation)
+	api.HandleFunc("PUT /api/courses/{id}/outline", a.replaceCourseOutline)
+	api.HandleFunc("POST /api/courses/{id}/sections/{sectionId}/conversations", a.createCourseConversation)
+	api.HandleFunc("DELETE /api/courses/{id}/sections/{sectionId}/conversations/{conversationId}", a.deleteCourseConversation)
+	api.HandleFunc("GET /api/courses/{id}/materials", a.listCourseMaterials)
+	api.HandleFunc("POST /api/courses/{id}/materials", a.uploadCourseMaterial)
+	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}", a.getCourseMaterial)
+	api.HandleFunc("DELETE /api/courses/{id}/materials/{materialId}", a.deleteCourseMaterial)
 	api.HandleFunc("GET /api/account-rules", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, data.AccountRules())
 	})

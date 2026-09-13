@@ -22,6 +22,7 @@ type application struct {
 	config      config.Config
 	learningHub *learningHub
 	runner      codeRunner
+	objects     objectStore
 }
 
 func main() {
@@ -58,11 +59,14 @@ func main() {
 	app := &application{models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient)}
 	err = app.models.Initialize(startup)
 	if err == nil {
+		app.objects, err = newS3ObjectStore(startup, cfg.Storage)
+	}
+	if err == nil {
 		err = app.startLearningEvents(ctx)
 	}
 	cancel()
 	if err != nil {
-		log.Fatal("database initialization failed: ", err)
+		log.Fatal("service initialization failed: ", err)
 	}
 	server := &http.Server{
 		Addr:              cfg.Server.Listen,

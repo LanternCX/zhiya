@@ -48,5 +48,26 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+  rustfs:
+    image: rustfs/rustfs:1.0.0-rc.6
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:?Use npm run dev:services}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:?Use npm run dev:services}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_LOGGER_LEVEL: error
+    ports:
+      - "${RUSTFS_API_BIND:?Use npm run dev:services}:9000"
+      - "${RUSTFS_CONSOLE_BIND:?Use npm run dev:services}:9001"
+    volumes:
+      - rustfs-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:9000/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
 volumes:
   postgres-data:
+  rustfs-data:

@@ -38,8 +38,11 @@ func (a *application) protect(next http.Handler) http.Handler {
 					a.respondError(w, failure{403, "请求来源无效"})
 					return
 				}
-				if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
-					a.respondError(w, failure{415, "请使用 JSON 提交"})
+				contentType := r.Header.Get("Content-Type")
+				materialUpload := r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/materials")
+				validMaterialType := strings.HasPrefix(contentType, "multipart/form-data") || strings.HasPrefix(contentType, "application/json")
+				if (!materialUpload && !strings.HasPrefix(contentType, "application/json")) || (materialUpload && !validMaterialType) {
+					a.respondError(w, failure{415, "提交格式无效"})
 					return
 				}
 			}

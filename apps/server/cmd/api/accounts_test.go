@@ -24,11 +24,12 @@ import (
 )
 
 type testApp struct {
-	t      *testing.T
-	server *httptest.Server
-	mail   map[string]string
-	db     *pgxpool.Pool
-	config config.Config
+	t       *testing.T
+	server  *httptest.Server
+	mail    map[string]string
+	db      *pgxpool.Pool
+	config  config.Config
+	objects objectStore
 }
 
 func setupAccountTest(t *testing.T) *testApp {
@@ -68,8 +69,8 @@ func setupAccountTest(t *testing.T) *testApp {
 	if err := data.NewModels(db, settings.Account).Initialize(ctx); err != nil {
 		t.Fatal(err)
 	}
-	a := &testApp{t: t, mail: make(map[string]string), db: db, config: settings}
-	app := &application{config: settings, models: data.NewModels(db, settings.Account), send: func(to, purpose, code string) error { a.mail[to+":"+purpose] = code; return nil }, learningHub: newLearningHub()}
+	a := &testApp{t: t, mail: make(map[string]string), db: db, config: settings, objects: newMemoryObjectStore()}
+	app := &application{config: settings, models: data.NewModels(db, settings.Account), send: func(to, purpose, code string) error { a.mail[to+":"+purpose] = code; return nil }, learningHub: newLearningHub(), objects: a.objects}
 	listenerContext, stopListener := context.WithCancel(context.Background())
 	t.Cleanup(stopListener)
 	if err := app.startLearningEvents(listenerContext); err != nil {
@@ -82,8 +83,8 @@ func setupAccountTest(t *testing.T) *testApp {
 
 func (a *testApp) anotherInstance() *testApp {
 	a.t.Helper()
-	other := &testApp{t: a.t, mail: a.mail, db: a.db, config: a.config}
-	app := &application{config: a.config, models: data.NewModels(a.db, a.config.Account), send: func(to, purpose, code string) error { a.mail[to+":"+purpose] = code; return nil }, learningHub: newLearningHub()}
+	other := &testApp{t: a.t, mail: a.mail, db: a.db, config: a.config, objects: a.objects}
+	app := &application{config: a.config, models: data.NewModels(a.db, a.config.Account), send: func(to, purpose, code string) error { a.mail[to+":"+purpose] = code; return nil }, learningHub: newLearningHub(), objects: a.objects}
 	listenerContext, stopListener := context.WithCancel(context.Background())
 	a.t.Cleanup(stopListener)
 	if err := app.startLearningEvents(listenerContext); err != nil {

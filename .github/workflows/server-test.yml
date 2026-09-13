@@ -30,6 +30,20 @@ jobs:
           --health-interval 2s
           --health-timeout 3s
           --health-retries 20
+      rustfs:
+        image: rustfs/rustfs:1.0.0-rc.6
+        env:
+          RUSTFS_ACCESS_KEY: zhiya-local-access
+          RUSTFS_SECRET_KEY: zhiya-local-secret-change-before-deploy
+          RUSTFS_ADDRESS: ":9000"
+          RUSTFS_CONSOLE_ENABLE: "false"
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "wget --quiet --spider http://127.0.0.1:9000/health"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
