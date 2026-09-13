@@ -34,10 +34,6 @@
 
 ![知芽当前架构](docs/assets/zhiya-architecture.svg)
 
-浏览器和 Tauri 桌面应用共享由 React、TypeScript 与 Vite 构建的学习界面，pi Agent 在客户端负责建档、课堂对话和课件编排。Go 服务提供静态文件、API、WebSocket 会话同步与模型代理，模型密钥不会进入客户端。本地开发通过 Docker Compose 运行 PostgreSQL 17 和 Mailpit；部署环境连接独立的 PostgreSQL、SMTP 与 OpenAI-compatible 模型服务。
-
-架构图使用 [Archify](https://github.com/tt-a1i/archify) 生成，可维护源文件见 [`docs/assets/zhiya-architecture.architecture.json`](docs/assets/zhiya-architecture.architecture.json)。
-
 ## 本地运行
 
 准备 Node.js 22.19+、npm、Go 1.26+ 和 Docker，然后在仓库根目录执行：

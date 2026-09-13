@@ -8,7 +8,7 @@
     "legend": {
       "mode": "hidden"
     },
-    "viewBox": [1360, 800]
+    "viewBox": [1390, 740]
   },
   "components": [
     {
@@ -16,7 +16,7 @@
       "type": "external",
       "label": "学生",
       "sublabel": "学习与互动",
-      "pos": [30, 330],
+      "pos": [30, 310],
       "size": [120, 64]
     },
     {
@@ -24,15 +24,15 @@
       "type": "frontend",
       "label": "React 学习界面",
       "sublabel": "React 19 · TypeScript 7 · Vite 8",
-      "pos": [230, 240],
+      "pos": [230, 220],
       "size": [190, 72]
     },
     {
       "id": "agent",
       "type": "backend",
       "label": "pi Agent",
-      "sublabel": "建档 · 教学 · 课件编排",
-      "pos": [230, 440],
+      "sublabel": "建档 · 大纲 · 教学 · 课件",
+      "pos": [230, 420],
       "size": [190, 72]
     },
     {
@@ -40,23 +40,23 @@
       "type": "messagebus",
       "label": "客户端传输层",
       "sublabel": "HTTP API · WebSocket · 模型流",
-      "pos": [520, 340],
+      "pos": [520, 320],
       "size": [190, 78]
     },
     {
       "id": "server",
       "type": "backend",
       "label": "Go 服务",
-      "sublabel": "静态文件 · API · 会话 · 模型代理",
-      "pos": [790, 340],
-      "size": [190, 78]
+      "sublabel": "API · 会话同步 · 模型代理 · 材料存取",
+      "pos": [770, 320],
+      "size": [230, 78]
     },
     {
       "id": "model",
       "type": "cloud",
       "label": "模型服务",
       "sublabel": "OpenAI-compatible",
-      "pos": [805, 120],
+      "pos": [805, 60],
       "size": [160, 64]
     },
     {
@@ -64,23 +64,31 @@
       "type": "external",
       "label": "SMTP 服务器",
       "sublabel": "部署环境",
-      "pos": [1160, 340],
+      "pos": [805, 590],
       "size": [160, 64]
     },
     {
       "id": "postgres",
       "type": "database",
       "label": "PostgreSQL 17",
-      "sublabel": "账号 · 会话 · 学习状态",
-      "pos": [795, 650],
-      "size": [180, 64]
+      "sublabel": "账号 · 课程 · 会话 · 材料元数据",
+      "pos": [1100, 150],
+      "size": [220, 64]
+    },
+    {
+      "id": "rustfs",
+      "type": "database",
+      "label": "RustFS",
+      "sublabel": "课程材料对象存储",
+      "pos": [1115, 320],
+      "size": [190, 64]
     },
     {
       "id": "runner",
       "type": "backend",
       "label": "go-judge",
       "sublabel": "多语言沙箱执行",
-      "pos": [1110, 650],
+      "pos": [1120, 490],
       "size": [180, 64]
     }
   ],
@@ -94,7 +102,7 @@
     {
       "kind": "region",
       "label": "Docker 部署",
-      "wraps": ["postgres", "runner"],
+      "wraps": ["postgres", "rustfs", "runner"],
       "pad": 28
     }
   ],
@@ -149,25 +157,35 @@
       "id": "server-smtp",
       "from": "server",
       "to": "smtp",
-      "label": "SMTP · 部署"
+      "label": "SMTP · 部署",
+      "labelDy": 24,
+      "fromSide": "bottom",
+      "toSide": "top"
     },
     {
       "id": "server-postgres",
       "from": "server",
       "to": "postgres",
       "label": "SQL",
-      "labelDy": 36,
-      "labelDx": -32,
-      "fromSide": "bottom",
-      "toSide": "top"
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "server-rustfs",
+      "from": "server",
+      "to": "rustfs",
+      "label": "S3 API",
+      "labelDx": 40,
+      "fromSide": "right",
+      "toSide": "left"
     },
     {
       "id": "server-runner",
       "from": "server",
       "to": "runner",
       "label": "代码提交 · 执行结果",
-      "fromSide": "bottom",
-      "toSide": "top"
+      "fromSide": "right",
+      "toSide": "left"
     }
   ]
 }
