@@ -2415,7 +2415,9 @@ test("a course outline organizes conversations and restores the selected convers
   ).toBeVisible();
 });
 
-test("a student uploads and reads a flat course material", async ({ page }) => {
+test("a student uploads, reads, and confirms deletion of a flat course material", async ({
+  page,
+}) => {
   await mockCompletedWorkspace(page);
   const state = {
     messages: [],
@@ -2459,6 +2461,7 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
   };
   let materials: Array<Record<string, unknown>> = [];
   let uploadRequests = 0;
+  let deleteRequests = 0;
   let uploadedContent = "";
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [saved] } }),
@@ -2515,6 +2518,7 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
     "**/api/courses/material-course/materials/notes",
     (route) => {
       if (route.request().method() === "DELETE") {
+        deleteRequests += 1;
         materials = [];
         return route.fulfill({ json: { ok: true } });
       }
@@ -2600,8 +2604,21 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
   await page.getByRole("button", { name: "返回课程" }).click();
   await page.getByRole("button", { name: "课程材料" }).click();
   await page.getByLabel("删除材料：notes.md").click();
+  const confirmation = page.getByRole("dialog", {
+    name: "删除课程材料？",
+  });
+  await expect(confirmation).toContainText("notes.md");
+  await confirmation.getByRole("button", { name: "取消" }).click();
+  await expect(
+    page.getByRole("button", { name: "notes.md", exact: true }),
+  ).toBeVisible();
+  expect(deleteRequests).toBe(0);
+
+  await page.getByLabel("删除材料：notes.md").click();
+  await confirmation.getByRole("button", { name: "删除材料" }).click();
   await expect(
     page.getByRole("button", { name: "notes.md", exact: true }),
   ).toHaveCount(0);
+  expect(deleteRequests).toBe(1);
   await expect(page.getByText("还没有课程材料")).toBeVisible();
 });

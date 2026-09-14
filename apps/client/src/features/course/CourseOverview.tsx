@@ -4,6 +4,7 @@ import { MessageResponse } from "../../components/ai-elements/message";
 import ChatComposer, {
   type ChatComposerMessage,
 } from "../../components/ChatComposer";
+import Confirmation from "../../components/Confirmation";
 import type {
   CourseMaterial,
   CourseSection,
@@ -49,6 +50,8 @@ export default function CourseOverview({
   const [error, setError] = useState("");
   const [composerError, setComposerError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [materialToDelete, setMaterialToDelete] =
+    useState<CourseMaterial | null>(null);
   const sections = course.sections ?? [];
   const progressSections = sections.filter(
     (section) => section.status !== "archived",
@@ -303,7 +306,7 @@ export default function CourseOverview({
                   <button
                     aria-label={`删除材料：${material.name}`}
                     disabled={busy}
-                    onClick={() => void remove(material)}
+                    onClick={() => setMaterialToDelete(material)}
                   >
                     删除
                   </button>
@@ -325,6 +328,20 @@ export default function CourseOverview({
         placeholder="例如：我想继续之前的学习"
         submitLabel="开始学习"
       />
+
+      {materialToDelete && (
+        <Confirmation
+          title="删除课程材料？"
+          text={`“${materialToDelete.name}”将从这门课程中删除，删除后无法恢复。`}
+          confirmLabel="删除材料"
+          danger
+          answer={(confirmed) => {
+            const material = materialToDelete;
+            setMaterialToDelete(null);
+            if (confirmed) void remove(material);
+          }}
+        />
+      )}
 
       {preview && (
         <section
