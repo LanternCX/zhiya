@@ -1004,7 +1004,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
     };
     expect(request.agent).toBe("teacher");
     expect(JSON.stringify(request.payload.messages)).toContain(
-      "我想继续之前的学习",
+      "请为太阳系基础安排一次新的复习",
     );
     const transcript = JSON.stringify(request.payload.messages);
     if (continuationRequests === 1) {
@@ -1172,9 +1172,9 @@ test("a saved course starts a new agent-routed session and supports rename and d
     "rgba(0, 0, 0, 0)",
   );
   await page
-    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
-    .fill("我想继续之前的学习");
-  await page.getByRole("button", { name: "开始学习" }).click();
+    .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
+    .fill("请为太阳系基础安排一次新的复习");
+  await page.getByRole("button", { name: "开始新的学习" }).click();
   await expect(
     page.getByText("这是已保存的讲解。", { exact: true }),
   ).toHaveCount(0);
@@ -1239,7 +1239,7 @@ test("the teacher agent creates and persists a course from the first request", a
   await mockCompletedWorkspace(page);
   const created = {
     id: "course-agent",
-    conversationId: "conversation-agent",
+    conversationId: "",
     title: "分数的意义",
     topic: "小学数学中的分数概念",
     status: "active" as const,
@@ -1254,30 +1254,7 @@ test("the teacher agent creates and persists a course from the first request", a
       presentedPageIds: [],
       currentPageId: "",
     },
-    sections: [
-      {
-        id: "initial-section",
-        title: "开始学习",
-        objective: "小学数学中的分数概念",
-        position: 0,
-        status: "planned" as const,
-        conversations: [
-          {
-            id: "conversation-agent",
-            sectionId: "initial-section",
-            title: "开始学习",
-            state: {
-              messages: [],
-              pages: [],
-              presentedPageIds: [],
-              currentPageId: "",
-            },
-            createdAt: "2026-09-10T08:00:00Z",
-            updatedAt: "2026-09-10T08:00:00Z",
-          },
-        ],
-      },
-    ],
+    sections: [],
     createdAt: "2026-09-10T08:00:00Z",
     updatedAt: "2026-09-10T08:00:00Z",
   };
@@ -1285,6 +1262,8 @@ test("the teacher agent creates and persists a course from the first request", a
   let persisted: { state?: { messages?: Array<{ text: string }> } } | null =
     null;
   let outline: Array<{ title: string; objective: string }> = [];
+  let conversationCreation: { title: string } | null = null;
+  let teacherInstructions = "";
   await page.route("**/api/courses", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({ json: { courses: [] } });
@@ -1312,18 +1291,48 @@ test("the teacher agent creates and persists a course from the first request", a
             ...section,
             position: index,
             status: "planned",
-            conversations: index === 0 ? created.sections[0].conversations : [],
+            conversations: [],
           })),
         },
       },
     });
   });
+  await page.route(
+    "**/api/courses/course-agent/sections/initial-section/conversations",
+    async (route) => {
+      conversationCreation = route.request().postDataJSON() as {
+        title: string;
+      };
+      await route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "conversation-agent",
+            sectionId: "initial-section",
+            title: conversationCreation.title,
+            state: {
+              messages: [],
+              pages: [],
+              presentedPageIds: [],
+              currentPageId: "",
+            },
+            createdAt: "2026-09-10T08:00:00Z",
+            updatedAt: "2026-09-10T08:00:00Z",
+          },
+        },
+      });
+    },
+  );
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
       payload: { messages: Array<{ role: string }> };
     };
     expect(request.agent).toBe("teacher");
+    teacherInstructions = request.payload.messages
+      .filter((message) => message.role === "system")
+      .map((message) => String(message.content))
+      .join("\n");
     const transcript = JSON.stringify(request.payload.messages);
     await route.fulfill(
       !transcript.includes('"name":"create_course"')
@@ -1349,7 +1358,13 @@ test("the teacher agent creates and persists a course from the first request", a
                 },
               ],
             })
-          : textResponse("我们从把一个苹果平均分开开始。"),
+          : !transcript.includes('"name":"create_course_conversation"')
+            ? toolResponse(
+                "start-fractions",
+                "create_course_conversation",
+                { sectionId: "initial-section", title: "认识分数" },
+              )
+            : textResponse("我们从把一个苹果平均分开开始。"),
     );
   });
 
@@ -1375,6 +1390,11 @@ test("the teacher agent creates and persists a course from the first request", a
     "认识分数",
     "比较分数",
   ]);
+  expect(conversationCreation).toEqual({ title: "认识分数" });
+  expect(teacherInstructions).toMatch(
+    /set_course_outline.+create_course_conversation.+first section/i,
+  );
+  expect(teacherInstructions).toMatch(/only teach after that conversation exists/i);
   await expect
     .poll(() => persisted?.state?.messages?.map((message) => message.text))
     .toContain("我们从把一个苹果平均分开开始。");
@@ -1399,7 +1419,7 @@ test("a student creates a course with teaching materials attached to the first r
   };
   const created = {
     id: "course-with-material",
-    conversationId: "conversation-with-material",
+    conversationId: "",
     title: "变量入门",
     topic: "根据讲义学习变量",
     status: "active" as const,
@@ -1409,25 +1429,7 @@ test("a student creates a course with teaching materials attached to the first r
       label: "VARIABLES",
     },
     state,
-    sections: [
-      {
-        id: "initial-section",
-        title: "开始学习",
-        objective: "根据讲义学习变量",
-        position: 0,
-        status: "planned" as const,
-        conversations: [
-          {
-            id: "conversation-with-material",
-            sectionId: "initial-section",
-            title: "开始学习",
-            state,
-            createdAt: "2026-09-14T08:00:00Z",
-            updatedAt: "2026-09-14T08:00:00Z",
-          },
-        ],
-      },
-    ],
+    sections: [],
     createdAt: "2026-09-14T08:00:00Z",
     updatedAt: "2026-09-14T08:00:00Z",
   };
@@ -1440,6 +1442,19 @@ test("a student creates a course with teaching materials attached to the first r
   };
   let uploadedContent = "";
   let uploadComplete = false;
+  const outlined = {
+    ...created,
+    sections: [
+      {
+        id: "variables-section",
+        title: "认识变量",
+        objective: "理解变量用于命名数据",
+        position: 0,
+        status: "planned" as const,
+        conversations: [],
+      },
+    ],
+  };
 
   await page.route("**/api/courses", async (route) => {
     if (route.request().method() === "GET") {
@@ -1502,7 +1517,24 @@ test("a student creates a course with teaching materials attached to the first r
     }),
   );
   await page.route("**/api/courses/course-with-material/outline", (route) =>
-    route.fulfill({ json: { course: created } }),
+    route.fulfill({ json: { course: outlined } }),
+  );
+  await page.route(
+    "**/api/courses/course-with-material/sections/variables-section/conversations",
+    (route) =>
+      route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "conversation-with-material",
+            sectionId: "variables-section",
+            title: "认识变量",
+            state,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T08:00:00Z",
+          },
+        },
+      }),
   );
   await page.route(
     "**/api/courses/course-with-material/conversation",
@@ -1557,7 +1589,15 @@ test("a student creates a course with teaching materials attached to the first r
       return;
     }
     await route.fulfill(
-      textResponse("我会按照你附带的讲义，从变量为什么需要名字开始。"),
+      !transcript.includes('"name":"create_course_conversation"')
+        ? toolResponse(
+            "start-variables",
+            "create_course_conversation",
+            { sectionId: "variables-section", title: "认识变量" },
+          )
+        : textResponse(
+            "我会按照你附带的讲义，从变量为什么需要名字开始。",
+          ),
     );
   });
 
@@ -2053,9 +2093,9 @@ test("a student starts a course conversation with teaching material from the cou
   );
   await expect(page.getByText("松开以添加教学材料")).toHaveCount(0);
   await page
-    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
+    .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
     .fill("根据这份练习继续学习循环");
-  await page.getByRole("button", { name: "开始学习" }).click();
+  await page.getByRole("button", { name: "开始新的学习" }).click();
 
   await expect(
     page.getByText("我已读到循环练习，我们从打印三颗星开始。", {
@@ -2065,7 +2105,7 @@ test("a student starts a course conversation with teaching material from the cou
   await expect(page.getByText("loops.md", { exact: true })).toBeVisible();
 });
 
-test("the course agent advances a broad continuation request to the next section", async ({
+test("the course agent advances an explicit request to start the next section", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2209,9 +2249,9 @@ test("the course agent advances a broad continuation request to the next section
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await page
-    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
-    .fill("我想继续之前的学习");
-  await page.getByRole("button", { name: "开始学习" }).click();
+    .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
+    .fill("变量已经学完，请开始下一关");
+  await page.getByRole("button", { name: "开始新的学习" }).click();
 
   await expect(
     page.getByText("接下来，我们用重复画星星来认识循环。", { exact: true }),
@@ -2226,6 +2266,93 @@ test("the course agent advances a broad continuation request to the next section
     .poll(() => persisted?.state?.messages.map(({ text }) => text))
     .toContain("接下来，我们用重复画星星来认识循环。");
   await expect(page.getByRole("banner")).toContainText("循环 · 对话");
+});
+
+test("a student resumes the most recent course conversation without starting a new one", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const savedState = {
+    messages: [
+      {
+        id: 1,
+        role: "assistant" as const,
+        text: "上次我们学到用 print 输出文字。",
+      },
+    ],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const saved = {
+    id: "resume-course",
+    conversationId: "python-basics-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state: savedState,
+    sections: [
+      {
+        id: "python-basics",
+        title: "Python 基础",
+        objective: "运行第一个 Python 程序",
+        position: 0,
+        status: "active" as const,
+        conversations: [
+          {
+            id: "python-basics-chat",
+            sectionId: "python-basics",
+            title: "第一次学习",
+            state: savedState,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T09:00:00Z",
+          },
+        ],
+      },
+      {
+        id: "expressions",
+        title: "变量与表达式",
+        objective: "使用变量保存和计算数据",
+        position: 1,
+        status: "planned" as const,
+        conversations: [],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T09:00:00Z",
+  };
+  let modelRequests = 0;
+  let newConversationRequests = 0;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route("**/api/learning/course/model", (route) => {
+    modelRequests++;
+    return route.fulfill(textResponse("不应发起新的教学请求。"));
+  });
+  await page.route(
+    "**/api/courses/resume-course/sections/*/conversations",
+    (route) => {
+      newConversationRequests++;
+      return route.fulfill({ status: 500, json: { error: "unexpected" } });
+    },
+  );
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await page.getByRole("button", { name: "继续最近学习" }).click();
+
+  await expect(
+    page.getByText("上次我们学到用 print 输出文字。", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("banner")).toContainText("Python 基础 · 对话");
+  expect(modelRequests).toBe(0);
+  expect(newConversationRequests).toBe(0);
 });
 
 test("a course outline organizes conversations and restores the selected conversation", async ({
@@ -2440,7 +2567,7 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
     sections: [
       {
         id: "start",
-        title: "开始学习",
+        title: "认识 Python",
         objective: "认识 Python",
         position: 0,
         status: "planned",
@@ -2448,7 +2575,7 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
           {
             id: "material-chat",
             sectionId: "start",
-            title: "开始学习",
+            title: "第一次 Python 学习",
             state,
             createdAt: "2026-09-10T08:00:00Z",
             updatedAt: "2026-09-10T08:00:00Z",
@@ -2594,9 +2721,9 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   await expect(page.getByText("变量保存数据。", { exact: true })).toBeVisible();
   await page.getByLabel("关闭材料预览").click();
   await page
-    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
+    .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
     .fill("根据 notes 材料教我");
-  await page.getByRole("button", { name: "开始学习" }).click();
+  await page.getByRole("button", { name: "开始新的学习" }).click();
   await expect(
     page.getByText("根据课程材料，变量用于保存数据。", { exact: true }),
   ).toBeVisible();

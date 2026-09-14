@@ -101,15 +101,6 @@ CREATE TABLE IF NOT EXISTS course_conversations (
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now()
 );
-ALTER TABLE course_conversations ADD COLUMN IF NOT EXISTS section_id uuid REFERENCES course_sections(id) ON DELETE CASCADE;
-ALTER TABLE course_conversations ADD COLUMN IF NOT EXISTS title text NOT NULL DEFAULT '开始学习';
-INSERT INTO course_sections(id,course_id,title,objective,position)
-SELECT gen_random_uuid(),c.id,'开始学习',c.topic,0 FROM courses c
-WHERE NOT EXISTS (SELECT 1 FROM course_sections s WHERE s.course_id=c.id);
-UPDATE course_conversations cc SET section_id=(
- SELECT s.id FROM course_sections s WHERE s.course_id=cc.course_id ORDER BY s.position LIMIT 1
-) WHERE cc.section_id IS NULL;
-ALTER TABLE course_conversations ALTER COLUMN section_id SET NOT NULL;
 CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
 CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
 CREATE TABLE IF NOT EXISTS course_materials (

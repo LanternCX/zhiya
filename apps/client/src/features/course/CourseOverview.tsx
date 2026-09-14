@@ -9,6 +9,7 @@ import type {
   CourseMaterial,
   CourseSection,
   StoredCourse,
+  StoredCourseConversation,
 } from "../../domain/learning";
 import CourseCover from "./CourseCover";
 import { courseMaterialAttachments } from "./course-composer";
@@ -34,10 +35,12 @@ const materialTypes = {
 export default function CourseOverview({
   course,
   onOpenSection,
+  onContinue,
   onStartLearning,
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
+  onContinue: (conversation: StoredCourseConversation) => void;
   onStartLearning: (request: string, materialNames: string[]) => void;
 }) {
   const [view, setView] = useState<"outline" | "materials">("outline");
@@ -59,6 +62,9 @@ export default function CourseOverview({
   const complete = progressSections.filter(
     (section) => section.status === "complete",
   ).length;
+  const latest = sections
+    .flatMap((section) => section.conversations)
+    .find((conversation) => conversation.id === course.conversationId);
 
   useEffect(() => {
     if (view !== "materials") return;
@@ -197,6 +203,14 @@ export default function CourseOverview({
           <small>
             {progressSections.length} 个小节 · {complete} 个已完成
           </small>
+          {latest && (
+            <button
+              className="section-primary-action"
+              onClick={() => onContinue(latest)}
+            >
+              继续最近学习
+            </button>
+          )}
         </div>
       </header>
 
@@ -322,11 +336,11 @@ export default function CourseOverview({
         className="course-home-composer"
         disabled={busy}
         error={composerError}
-        label="告诉知芽你想怎样继续这门课程"
+        label="告诉知芽你想开始什么新的学习"
         onError={setComposerError}
         onSubmit={startLearning}
-        placeholder="例如：我想继续之前的学习"
-        submitLabel="开始学习"
+        placeholder="例如：复习循环，或者练习文件读写"
+        submitLabel="开始新的学习"
       />
 
       {materialToDelete && (

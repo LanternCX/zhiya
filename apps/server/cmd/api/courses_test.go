@@ -42,6 +42,25 @@ func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, content str
 	return result
 }
 
+func TestCourseCreationStartsWithoutLearningStructure(t *testing.T) {
+	a := setupAccountTest(t)
+	student := a.register("empty-course@example.com")
+
+	created := a.request(student, "POST", "/courses", map[string]any{
+		"title": "认识人工智能",
+		"topic": "从生活中的例子理解人工智能",
+		"cover": map[string]any{
+			"motif":   "code",
+			"palette": "sprout",
+			"label":   "COMPUTING · 01",
+		},
+	}, http.StatusCreated)["course"].(map[string]any)
+
+	if created["conversationId"] != "" || len(created["sections"].([]any)) != 0 {
+		t.Fatalf("new course created placeholder learning structure: %v", created)
+	}
+}
+
 func TestCourseCRUDPersistsOneConversation(t *testing.T) {
 	a := setupAccountTest(t)
 	student := a.register("courses@example.com")
@@ -56,14 +75,23 @@ func TestCourseCRUDPersistsOneConversation(t *testing.T) {
 		},
 	}, http.StatusCreated)["course"].(map[string]any)
 	id := created["id"].(string)
-	conversationID := created["conversationId"].(string)
-	if id == "" || conversationID == "" {
-		t.Fatalf("course did not create its first conversation: %v", created)
+	if id == "" {
+		t.Fatalf("course was not created: %v", created)
 	}
 	cover := created["cover"].(map[string]any)
 	if cover["motif"] != "code" || cover["palette"] != "sprout" || cover["label"] != "COMPUTING · 01" {
 		t.Fatalf("course cover was not preserved: %v", cover)
 	}
+	outlined := a.request(student, "PUT", "/courses/"+id+"/outline", map[string]any{
+		"sections": []any{
+			map[string]any{"title": "认识人工智能", "objective": "理解人工智能能做什么"},
+		},
+	}, http.StatusOK)["course"].(map[string]any)
+	sectionID := outlined["sections"].([]any)[0].(map[string]any)["id"].(string)
+	conversation := a.request(student, "POST", "/courses/"+id+"/sections/"+sectionID+"/conversations", map[string]any{
+		"title": "生活中的人工智能",
+	}, http.StatusCreated)["conversation"].(map[string]any)
+	conversationID := conversation["id"].(string)
 
 	state := map[string]any{
 		"messages":         []any{map[string]any{"id": 1, "role": "user", "text": "什么是人工智能？"}},
@@ -249,9 +277,15 @@ func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {
 		t.Fatalf("outline order was not preserved: %v", sections)
 	}
 	first := sections[0].(map[string]any)
+	firstID := first["id"].(string)
+	firstConversation := a.request(student, "POST", "/courses/"+courseID+"/sections/"+firstID+"/conversations", map[string]any{
+		"title": "第一次学习",
+	}, http.StatusCreated)["conversation"].(map[string]any)
+	restored := a.request(student, "GET", "/courses/"+courseID, nil, http.StatusOK)["course"].(map[string]any)
+	first = restored["sections"].([]any)[0].(map[string]any)
 	conversations := first["conversations"].([]any)
-	if len(conversations) != 1 || conversations[0].(map[string]any)["id"] != created["conversationId"] {
-		t.Fatalf("initial conversation was not kept in first section: %v", first)
+	if len(conversations) != 1 || conversations[0].(map[string]any)["id"] != firstConversation["id"] {
+		t.Fatalf("first conversation was not created in the first section: %v", first)
 	}
 
 	secondID := sections[1].(map[string]any)["id"].(string)
@@ -261,13 +295,12 @@ func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {
 	if added["title"] != "循环练习" {
 		t.Fatalf("conversation title was not preserved: %v", added)
 	}
-	restored := a.request(student, "GET", "/courses/"+courseID, nil, http.StatusOK)["course"].(map[string]any)
+	restored = a.request(student, "GET", "/courses/"+courseID, nil, http.StatusOK)["course"].(map[string]any)
 	second := restored["sections"].([]any)[1].(map[string]any)
 	if len(second["conversations"].([]any)) != 1 {
 		t.Fatalf("section conversations were not restored: %v", second)
 	}
 
-	firstID := first["id"].(string)
 	updated := a.request(student, "PUT", "/courses/"+courseID+"/outline", map[string]any{
 		"sections": []any{
 			map[string]any{"id": secondID, "title": "循环与迭代", "objective": "熟练使用循环", "status": "active"},
@@ -308,9 +341,17 @@ func TestCourseConversationDeletionPreservesItsSectionAndPrivacy(t *testing.T) {
 		"cover": map[string]any{"motif": "code", "palette": "sprout", "label": "PYTHON"},
 	}, http.StatusCreated)["course"].(map[string]any)
 	courseID := created["id"].(string)
-	section := created["sections"].([]any)[0].(map[string]any)
+	outlined := a.request(owner, "PUT", "/courses/"+courseID+"/outline", map[string]any{
+		"sections": []any{
+			map[string]any{"title": "变量与类型", "objective": "理解变量和常见数据类型"},
+		},
+	}, http.StatusOK)["course"].(map[string]any)
+	section := outlined["sections"].([]any)[0].(map[string]any)
 	sectionID := section["id"].(string)
-	firstID := created["conversationId"].(string)
+	first := a.request(owner, "POST", "/courses/"+courseID+"/sections/"+sectionID+"/conversations", map[string]any{
+		"title": "第一次学习",
+	}, http.StatusCreated)["conversation"].(map[string]any)
+	firstID := first["id"].(string)
 	second := a.request(owner, "POST", "/courses/"+courseID+"/sections/"+sectionID+"/conversations", map[string]any{
 		"title": "第二次学习",
 	}, http.StatusCreated)["conversation"].(map[string]any)

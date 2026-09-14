@@ -107,14 +107,8 @@ func (m CourseModel) load(ctx context.Context, course Course) (Course, error) {
 }
 
 func (m CourseModel) Create(ctx context.Context, user, title, topic string, cover CourseCover) (Course, error) {
-	courseID, sectionID, conversationID := UUID(), UUID(), UUID()
+	courseID := UUID()
 	if _, err := m.db.Exec(ctx, `INSERT INTO courses(id,user_id,title,topic,cover_motif,cover_palette,cover_label) VALUES($1,$2,$3,$4,$5,$6,$7)`, courseID, user, title, topic, cover.Motif, cover.Palette, cover.Label); err != nil {
-		return Course{}, err
-	}
-	if _, err := m.db.Exec(ctx, `INSERT INTO course_sections(id,course_id,title,objective,position) VALUES($1,$2,$3,$4,0)`, sectionID, courseID, "开始学习", topic); err != nil {
-		return Course{}, err
-	}
-	if _, err := m.db.Exec(ctx, `INSERT INTO course_conversations(id,course_id,section_id,title,state) VALUES($1,$2,$3,$4,$5)`, conversationID, courseID, sectionID, "开始学习", emptyCourseState); err != nil {
 		return Course{}, err
 	}
 	return m.Get(ctx, user, courseID)
@@ -181,9 +175,6 @@ func (m CourseModel) ReplaceOutline(ctx context.Context, user, courseID string, 
 	used := map[string]bool{}
 	for index, item := range outline {
 		id := item.ID
-		if id == "" && index == 0 && len(current.Sections) == 1 && current.Sections[0].Title == "开始学习" {
-			id = current.Sections[0].ID
-		}
 		status := item.Status
 		if status == "" {
 			if section, ok := existing[id]; ok {

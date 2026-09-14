@@ -465,6 +465,7 @@ export default function Workspace({
                     setActiveSectionId(section.id);
                     setCourseLevel("section");
                   }}
+                  onContinue={(conversation) => openConversation(conversation)}
                   onStartLearning={(text, materialNames) => {
                     setActiveSectionId("");
                     setCourseSessionMode("new");

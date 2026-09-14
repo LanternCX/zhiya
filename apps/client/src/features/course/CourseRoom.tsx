@@ -262,7 +262,7 @@ export default function CourseRoom({
         currentConversationId: boundConversationId.current,
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
-          boundConversationId.current = created.conversationId;
+          boundConversationId.current = null;
           sessionCourse.current = created;
           setCourse(created);
           onCourseCreated(created);
@@ -395,7 +395,11 @@ export default function CourseRoom({
   ]);
 
   useEffect(() => {
-    if (!course || boundConversationId.current !== course.conversationId)
+    if (
+      !course ||
+      !boundConversationId.current ||
+      boundConversationId.current !== course.conversationId
+    )
       return;
     const state = {
       messages,
