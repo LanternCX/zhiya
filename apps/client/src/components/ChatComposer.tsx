@@ -31,7 +31,6 @@ export type ChatComposerAttachmentOptions = {
   dropHint: string;
   dropLabel: string;
   errorMessage: (code: AttachmentErrorCode) => string;
-  hint: string;
   maxFileSize?: number;
   maxFiles?: number;
   multiple?: boolean;
@@ -52,7 +51,6 @@ export type ChatComposerProps = {
   onError: (message: string) => void;
   onStop?: () => void;
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
-  placeholder: string;
   running?: boolean;
   submitLabel: string;
 };
@@ -78,7 +76,6 @@ function ChatComposerInput({
   onError,
   onStop,
   onSubmit,
-  placeholder,
   running = false,
   submitLabel,
 }: ChatComposerProps) {
@@ -164,7 +161,7 @@ function ChatComposerInput({
         <PromptInputTextarea
           aria-label={label}
           disabled={disabled}
-          placeholder={placeholder}
+          placeholder=""
         />
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">
@@ -178,7 +175,6 @@ function ChatComposerInput({
           >
             <PaperclipIcon />
           </PromptInputButton>
-          <span>{options.hint}</span>
         </PromptInputTools>
         <PromptInputSubmit
           aria-label={running ? "打断" : submitLabel}

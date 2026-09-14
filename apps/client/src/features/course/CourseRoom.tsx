@@ -658,7 +658,6 @@ export default function CourseRoom({
           onError={setError}
           onStop={interrupt}
           onSubmit={submit}
-          placeholder="告诉知芽你想学什么…"
           running={running}
           submitLabel="发送"
         />

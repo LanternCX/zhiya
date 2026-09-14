@@ -1190,11 +1190,14 @@ test("a saved course starts a new agent-routed session and supports rename and d
     page.getByRole("img", { name: "课件页面：太阳系" }),
   ).toHaveCount(0);
   await expect(page.getByRole("region", { name: "已有课程" })).toHaveCount(0);
-  await expect(page.getByRole("banner")).toContainText("太阳系基础 · 对话");
-  await page.getByRole("button", { name: "返回小节" }).click();
-  await expect(page.getByRole("region", { name: "小节主页" })).toBeVisible();
+  await expect(page.getByRole("banner")).toContainText("太阳系基础");
+  await expect(page.getByRole("banner")).not.toContainText("对话");
+  await page.getByRole("button", { name: "返回课程" }).click();
   await page
-    .getByRole("button", { name: "打开对话：认识八颗行星" })
+    .getByRole("button", { name: "查看太阳系基础的 2 次学习记录" })
+    .click();
+  await page
+    .getByRole("button", { name: "打开学习记录：认识八颗行星" })
     .click();
   await expect(
     page.getByText("这是已保存的讲解。", { exact: true }),
@@ -1202,7 +1205,6 @@ test("a saved course starts a new agent-routed session and supports rename and d
   await expect(
     page.getByText("好，我们接着认识太阳系。", { exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "返回小节" }).click();
   await page.getByRole("button", { name: "返回课程" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
   await page.getByRole("button", { name: "返回课程列表" }).click();
@@ -1825,7 +1827,6 @@ test("a student attaches new teaching material inside an existing course convers
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await page.getByRole("button", { name: "打开小节：循环" }).click();
-  await page.getByRole("button", { name: "打开对话：循环入门" }).click();
   const chooser = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "添加教学材料" }).click();
   await (await chooser).setFiles({
@@ -1905,7 +1906,6 @@ test("a failed conversation attachment remains available to retry", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await page.getByRole("button", { name: "打开小节：变量" }).click();
-  await page.getByRole("button", { name: "打开对话：变量入门" }).click();
   const input = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
   await page.locator('input[type="file"]').setInputFiles({
     name: "variables.txt",
@@ -2265,10 +2265,11 @@ test("the course agent advances an explicit request to start the next section", 
   await expect
     .poll(() => persisted?.state?.messages.map(({ text }) => text))
     .toContain("接下来，我们用重复画星星来认识循环。");
-  await expect(page.getByRole("banner")).toContainText("循环 · 对话");
+  await expect(page.getByRole("banner")).toContainText("循环");
+  await expect(page.getByRole("banner")).not.toContainText("对话");
 });
 
-test("a student resumes a course conversation from its section history", async ({
+test("a student enters a section directly whether resuming or starting", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2333,13 +2334,30 @@ test("a student resumes a course conversation from its section history", async (
   );
   await page.route("**/api/learning/course/model", (route) => {
     modelRequests++;
-    return route.fulfill(textResponse("不应发起新的教学请求。"));
+    return route.fulfill(textResponse("让我们从变量的作用开始。"));
   });
   await page.route(
     "**/api/courses/resume-course/sections/*/conversations",
     (route) => {
       newConversationRequests++;
-      return route.fulfill({ status: 500, json: { error: "unexpected" } });
+      return route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "expressions-first",
+            sectionId: "expressions",
+            title: "第一次学习",
+            state: {
+              messages: [],
+              pages: [],
+              presentedPageIds: [],
+              currentPageId: "",
+            },
+            createdAt: "2026-09-14T10:00:00Z",
+            updatedAt: "2026-09-14T10:00:00Z",
+          },
+        },
+      });
     },
   );
 
@@ -2348,18 +2366,34 @@ test("a student resumes a course conversation from its section history", async (
   await expect(
     page.getByRole("button", { name: "继续最近学习" }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: /Python 基础/ }).click();
-  await page.getByRole("button", { name: "打开对话：第一次学习" }).click();
+  await page.getByRole("button", { name: "打开小节：Python 基础" }).click();
 
   await expect(
     page.getByText("上次我们学到用 print 输出文字。", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("banner")).toContainText("Python 基础 · 对话");
+  await expect(
+    page.getByRole("textbox", { name: "告诉知芽你想学什么" }),
+  ).toHaveAttribute("placeholder", "");
+  await expect(
+    page.getByText("支持 Markdown、TXT", { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("banner")).toContainText("Python 基础");
+  await expect(page.getByRole("banner")).not.toContainText("对话");
   expect(modelRequests).toBe(0);
   expect(newConversationRequests).toBe(0);
+
+  await page.getByRole("button", { name: "返回课程" }).click();
+  await page
+    .getByRole("button", { name: "打开小节：变量与表达式" })
+    .click();
+  await expect(
+    page.getByText("让我们从变量的作用开始。", { exact: true }),
+  ).toBeVisible();
+  expect(modelRequests).toBe(1);
+  expect(newConversationRequests).toBe(1);
 });
 
-test("a course outline organizes conversations and restores the selected conversation", async ({
+test("a course outline opens lessons directly and manages history on demand", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2490,14 +2524,10 @@ test("a course outline organizes conversations and restores the selected convers
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
   await expect(page.getByRole("region", { name: "教学对话" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /变量与类型/ })).toBeVisible();
-  await page.getByRole("button", { name: /循环/ }).click();
-  await expect(page.getByRole("region", { name: "小节主页" })).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "继续此小节" }),
-  ).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "课程材料" })).toHaveCount(0);
-  await page.getByRole("button", { name: "打开对话：循环入门" }).click();
+    page.getByRole("button", { name: "打开小节：变量与类型" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "打开小节：循环" }).click();
   await expect(page.getByRole("region", { name: "教学对话" })).toBeVisible();
   await expect(page.getByRole("button", { name: "课程材料" })).toHaveCount(0);
   await expect(
@@ -2518,14 +2548,39 @@ test("a course outline organizes conversations and restores the selected convers
   expect(teacherInstructions).toContain('"title":"循环入门"');
   expect(teacherInstructions).toContain('"updatedAt":"2026-09-10T09:00:00Z"');
 
-  await page.getByRole("button", { name: "返回小节" }).click();
+  await page.getByRole("button", { name: "返回课程" }).click();
+  await page
+    .getByRole("button", { name: "查看循环的 1 次学习记录" })
+    .click();
+  const history = page.getByRole("dialog", { name: "循环的学习记录" });
+  await expect(history).toBeVisible();
+  const sectionComposer = page.getByRole("textbox", {
+    name: "告诉知芽你想在循环中学习什么",
+  });
+  await expect(sectionComposer).toHaveAttribute("placeholder", "");
   await expect(
-    page.getByRole("button", { name: "开始新对话" }),
+    page.getByText("支持 Markdown、TXT", { exact: true }),
+  ).toHaveCount(0);
+  const historyBounds = await history.boundingBox();
+  const composerBounds = await sectionComposer.evaluate((input) => {
+      const form = input.closest("form");
+      if (!form) throw new Error("Course composer form is missing");
+      const { left, right } = form.getBoundingClientRect();
+      return { left, right };
+    });
+  expect(historyBounds?.x).toBeCloseTo(composerBounds.left, 0);
+  expect((historyBounds?.x ?? 0) + (historyBounds?.width ?? 0)).toBeCloseTo(
+    composerBounds.right,
+    0,
+  );
+  await expect(
+    history.getByRole("textbox"),
   ).toHaveCount(0);
   await page
-    .getByRole("textbox", { name: "告诉知芽你想在此小节学习什么" })
+    .getByRole("textbox", { name: "告诉知芽你想在循环中学习什么" })
     .fill("再练习一次循环");
-  await page.getByRole("button", { name: "开始新的小节对话" }).click();
+  await page.getByRole("button", { name: "开始新一轮学习" }).click();
+  await expect(history).toHaveCount(0);
   await expect(
     page.getByText("循环可以重复执行。", { exact: true }),
   ).toHaveCount(0);
@@ -2533,26 +2588,29 @@ test("a course outline organizes conversations and restores the selected convers
   await expect(
     page.getByText("我们继续学习循环。", { exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "返回小节" }).click();
-  await page.getByRole("button", { name: "管理对话：新对话" }).click();
-  await page.getByRole("button", { name: "删除对话" }).click();
+  await page.getByRole("button", { name: "返回课程" }).click();
+  await page
+    .getByRole("button", { name: "查看循环的 2 次学习记录" })
+    .click();
+  await page.getByRole("button", { name: "管理学习记录：新一轮学习" }).click();
+  await page.getByRole("button", { name: "删除记录" }).click();
   await expect(
-    page.getByRole("button", { name: "确认删除对话" }),
+    page.getByRole("button", { name: "确认删除记录" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "取消" }).click();
   expect(deletedConversation).toBe(false);
   await expect(
-    page.getByRole("button", { name: "打开对话：新对话" }),
+    page.getByRole("button", { name: "打开学习记录：新一轮学习" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "管理对话：新对话" }).click();
-  await page.getByRole("button", { name: "删除对话" }).click();
-  await page.getByRole("button", { name: "确认删除对话" }).click();
+  await page.getByRole("button", { name: "管理学习记录：新一轮学习" }).click();
+  await page.getByRole("button", { name: "删除记录" }).click();
+  await page.getByRole("button", { name: "确认删除记录" }).click();
   await expect.poll(() => deletedConversation).toBe(true);
   await expect(
-    page.getByRole("button", { name: "打开对话：新对话" }),
+    page.getByRole("button", { name: "打开学习记录：新一轮学习" }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "打开对话：循环入门" }),
+    page.getByRole("button", { name: "打开学习记录：循环入门" }),
   ).toBeVisible();
 });
 
@@ -2741,7 +2799,6 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   await expect(
     page.getByText("根据课程材料，变量用于保存数据。", { exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "返回小节" }).click();
   await page.getByRole("button", { name: "返回课程" }).click();
   await page.getByRole("button", { name: "课程材料" }).click();
   await page.getByLabel("删除材料：notes.md").click();

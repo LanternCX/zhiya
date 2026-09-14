@@ -9,8 +9,10 @@ import type {
   CourseMaterial,
   CourseSection,
   StoredCourse,
+  StoredCourseConversation,
 } from "../../domain/learning";
 import CourseCover from "./CourseCover";
+import SectionHistory from "./SectionHistory";
 import { courseMaterialAttachments } from "./course-composer";
 import {
   deleteCourseMaterial,
@@ -35,10 +37,25 @@ export default function CourseOverview({
   course,
   onOpenSection,
   onStartLearning,
+  courseError,
+  onOpenConversation,
+  onCreateConversation,
+  onDeleteConversation,
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
   onStartLearning: (request: string, materialNames: string[]) => void;
+  courseError: string;
+  onOpenConversation: (conversation: StoredCourseConversation) => void;
+  onCreateConversation: (
+    section: CourseSection,
+    request: string,
+    materialNames: string[],
+  ) => Promise<void>;
+  onDeleteConversation: (
+    section: CourseSection,
+    conversation: StoredCourseConversation,
+  ) => Promise<boolean>;
 }) {
   const [view, setView] = useState<"outline" | "materials">("outline");
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
@@ -52,7 +69,9 @@ export default function CourseOverview({
   const [busy, setBusy] = useState(false);
   const [materialToDelete, setMaterialToDelete] =
     useState<CourseMaterial | null>(null);
+  const [historySectionId, setHistorySectionId] = useState("");
   const sections = course.sections ?? [];
+  const historySection = sections.find(({ id }) => id === historySectionId);
   const progressSections = sections.filter(
     (section) => section.status !== "archived",
   );
@@ -167,17 +186,24 @@ export default function CourseOverview({
       }
       if (failed > 0)
         setComposerError(`${failed} 个教学材料上传失败`);
-      onStartLearning(
-        text.trim() || "请根据我附带的教学材料继续这门课程。",
-        uploadedNames,
-      );
+      const request =
+        text.trim() ||
+        (historySection
+          ? `请根据我附带的教学材料继续学习${historySection.title}。`
+          : "请根据我附带的教学材料继续这门课程。");
+      if (historySection)
+        await onCreateConversation(historySection, request, uploadedNames);
+      else onStartLearning(request, uploadedNames);
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <section className="course-home" aria-label="课程主页">
+    <section
+      className={`course-home ${historySection ? "has-history-open" : ""}`}
+      aria-label="课程主页"
+    >
       <header className="course-home-hero">
         <div className="course-home-cover">
           <CourseCover title={course.title} cover={course.cover} />
@@ -217,26 +243,43 @@ export default function CourseOverview({
       {view === "outline" ? (
         <div className="course-home-sections">
           {sections.map((section) => (
-            <button
-              key={section.id}
+            <article
               className="course-section-card"
               data-status={section.status}
-              aria-label={`打开小节：${section.title}`}
-              onClick={() => onOpenSection(section)}
+              key={section.id}
             >
-              <span className="course-section-number">
-                {String(section.position + 1).padStart(2, "0")}
+              <button
+                aria-label={`打开小节：${section.title}`}
+                className="course-section-open"
+                onClick={() => onOpenSection(section)}
+              >
+                <span className="course-section-number">
+                  {String(section.position + 1).padStart(2, "0")}
+                </span>
+                <span className="course-section-copy">
+                  <strong>{section.title}</strong>
+                  <span>{section.objective}</span>
+                </span>
+              </button>
+              {section.conversations.length > 0 && (
+                <button
+                  aria-label={`查看${section.title}的 ${section.conversations.length} 次学习记录`}
+                  aria-controls={`section-history-${section.id}`}
+                  aria-expanded={historySectionId === section.id}
+                  className="course-section-history"
+                  onClick={() =>
+                    setHistorySectionId((current) =>
+                      current === section.id ? "" : section.id,
+                    )
+                  }
+                >
+                  查看 {section.conversations.length} 次学习记录
+                </button>
+              )}
+              <span className="course-section-status">
+                {statusLabel[section.status]}
               </span>
-              <span className="course-section-copy">
-                <strong>{section.title}</strong>
-                <span>{section.objective}</span>
-              </span>
-              <span className="course-section-meta">
-                {statusLabel[section.status]} · {section.conversations.length}{" "}
-                次学习
-              </span>
-              <span aria-hidden="true">→</span>
-            </button>
+            </article>
           ))}
         </div>
       ) : (
@@ -316,16 +359,31 @@ export default function CourseOverview({
         </section>
       )}
 
+      {historySection && (
+        <SectionHistory
+          section={historySection}
+          error={courseError}
+          onClose={() => setHistorySectionId("")}
+          onOpenConversation={onOpenConversation}
+          onDeleteConversation={(conversation) =>
+            onDeleteConversation(historySection, conversation)
+          }
+        />
+      )}
+
       <ChatComposer
         attachments={courseMaterialAttachments}
         className="course-home-composer"
         disabled={busy}
         error={composerError}
-        label="告诉知芽你想开始什么新的学习"
+        label={
+          historySection
+            ? `告诉知芽你想在${historySection.title}中学习什么`
+            : "告诉知芽你想开始什么新的学习"
+        }
         onError={setComposerError}
         onSubmit={startLearning}
-        placeholder="例如：复习循环，或者练习文件读写"
-        submitLabel="开始新的学习"
+        submitLabel={historySection ? "开始新一轮学习" : "开始新的学习"}
       />
 
       {materialToDelete && (

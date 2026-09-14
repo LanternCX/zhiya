@@ -4,7 +4,6 @@ import AccountProfile from "./features/account/Profile";
 import Security from "./features/account/Security";
 import CourseRoom from "./features/course/CourseRoom";
 import CourseOverview from "./features/course/CourseOverview";
-import SectionOverview from "./features/course/SectionOverview";
 import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
 import Icon, { type IconName } from "./components/Icon";
@@ -57,10 +56,9 @@ export default function Workspace({
   const [destination, setDestination] = useState(destinations[0]);
   const [courses, setCourses] = useState<StoredCourse[]>([]);
   const [activeCourse, setActiveCourse] = useState<StoredCourse | null>(null);
-  const [courseLevel, setCourseLevel] = useState<
-    "course" | "section" | "conversation"
-  >("course");
-  const [activeSectionId, setActiveSectionId] = useState("");
+  const [courseLevel, setCourseLevel] = useState<"course" | "conversation">(
+    "course",
+  );
   const [coursesReady, setCoursesReady] = useState(false);
   const [courseRoomToken, setCourseRoomToken] = useState(0);
   const [courseSessionMode, setCourseSessionMode] = useState<
@@ -75,6 +73,7 @@ export default function Workspace({
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const onboardingExit = useRef<HTMLButtonElement>(null);
+  const sectionConversationRequests = useRef(new Set<string>());
   const wasConfirming = useRef(false);
   useEffect(() => {
     if (!user) return;
@@ -86,7 +85,6 @@ export default function Workspace({
         setCourses(next);
         setActiveCourse(null);
         setCourseLevel("course");
-        setActiveSectionId("");
         setCourseError("");
       })
       .catch(() => current && setCourseError("暂时无法读取课程"))
@@ -138,7 +136,6 @@ export default function Workspace({
       if (next.id === "learning") {
         setActiveCourse(null);
         setCourseLevel("course");
-        setActiveSectionId("");
         setCourseRoomToken((value) => value + 1);
       }
     }
@@ -175,11 +172,9 @@ export default function Workspace({
     destination.id === "learning" &&
     Boolean(activeCourse);
   const activeSection = activeCourse?.sections?.find((section) =>
-    courseLevel === "conversation"
-      ? section.conversations.some(
-          (conversation) => conversation.id === activeCourse.conversationId,
-        )
-      : section.id === activeSectionId,
+    section.conversations.some(
+      (conversation) => conversation.id === activeCourse.conversationId,
+    ),
   );
   const openConversation = (
     conversation: StoredCourseConversation,
@@ -195,53 +190,59 @@ export default function Workspace({
     setCourses((all) =>
       all.map((item) => (item.id === updated.id ? updated : item)),
     );
-    setActiveSectionId(conversation.sectionId);
     setCourseSessionMode("existing");
     setCourseLevel("conversation");
     setCourseRoomToken((value) => value + 1);
   };
   const createSectionConversation = async (
-    request: string,
-    materialNames: string[],
+    section: CourseSection,
+    request?: string,
+    materialNames: string[] = [],
   ) => {
-    if (!activeCourse || !activeSection) return;
+    if (!activeCourse || sectionConversationRequests.current.has(section.id))
+      return;
+    sectionConversationRequests.current.add(section.id);
     try {
       const conversation = await createCourseConversation(
         activeCourse.id,
-        activeSection.id,
-        "新对话",
+        section.id,
+        section.conversations.length === 0 ? "第一次学习" : "新一轮学习",
       );
       const updated = {
         ...activeCourse,
-        sections: activeCourse.sections?.map((section) =>
-          section.id === activeSection.id
+        sections: activeCourse.sections?.map((item) =>
+          item.id === section.id
             ? {
-                ...section,
-                conversations: [...section.conversations, conversation],
+                ...item,
+                conversations: [...item.conversations, conversation],
               }
-            : section,
+            : item,
         ),
       };
       setCourseError("");
       openConversation(conversation, updated);
-      setCourseEntryRequest({
-        id: Date.now(),
-        text: request,
-        materialNames,
-      });
+      if (request)
+        setCourseEntryRequest({
+          id: Date.now(),
+          text: request,
+          materialNames,
+        });
     } catch {
-      setCourseError("暂时无法新建对话");
+      setCourseError("暂时无法开始新的学习");
       throw new Error("Could not create the section conversation");
+    } finally {
+      sectionConversationRequests.current.delete(section.id);
     }
   };
   const removeSectionConversation = async (
+    section: CourseSection,
     conversation: StoredCourseConversation,
   ) => {
-    if (!activeCourse || !activeSection) return false;
+    if (!activeCourse) return false;
     try {
       const updated = await deleteCourseConversation(
         activeCourse.id,
-        activeSection.id,
+        section.id,
         conversation.id,
       );
       setCourses((all) =>
@@ -251,7 +252,7 @@ export default function Workspace({
       setCourseError("");
       return true;
     } catch {
-      setCourseError("暂时无法删除对话");
+      setCourseError("暂时无法删除学习记录");
       return false;
     }
   };
@@ -372,10 +373,8 @@ export default function Workspace({
               aria-label={
                 courseOpen
                   ? courseLevel === "conversation"
-                    ? "返回小节"
-                    : courseLevel === "section"
-                      ? "返回课程"
-                      : "返回课程列表"
+                    ? "返回课程"
+                    : "返回课程列表"
                   : memoryOpen && !editingMemory
                     ? "停止对话"
                     : "返回学习"
@@ -383,10 +382,8 @@ export default function Workspace({
               title={
                 courseOpen
                   ? courseLevel === "conversation"
-                    ? "返回小节"
-                    : courseLevel === "section"
-                      ? "返回课程"
-                      : "返回课程列表"
+                    ? "返回课程"
+                    : "返回课程列表"
                   : memoryOpen && !editingMemory
                     ? "停止对话"
                     : "返回学习"
@@ -395,13 +392,9 @@ export default function Workspace({
               onClick={() => {
                 if (courseOpen) {
                   if (courseLevel === "conversation") {
-                    setActiveSectionId(activeSection?.id ?? "");
-                    setCourseLevel("section");
-                  } else if (courseLevel === "section") {
                     setCourseLevel("course");
                   } else {
                     setActiveCourse(null);
-                    setActiveSectionId("");
                   }
                   setCourseRoomToken((value) => value + 1);
                 } else if (memoryOpen && !editingMemory) {
@@ -420,10 +413,8 @@ export default function Workspace({
           )}
           <span>
             {courseOpen
-              ? courseLevel === "section"
-                ? `${activeCourse?.title} · ${activeSection?.title ?? "小节"}`
-                : courseLevel === "conversation"
-                  ? `${activeSection?.title ?? activeCourse?.title} · 对话`
+              ? courseLevel === "conversation"
+                  ? activeSection?.title ?? activeCourse?.title
                   : activeCourse?.title
               : memoryOpen
                 ? "学习档案"
@@ -470,12 +461,30 @@ export default function Workspace({
               {activeCourse && courseLevel === "course" && (
                 <CourseOverview
                   course={activeCourse}
+                  courseError={courseError}
                   onOpenSection={(section: CourseSection) => {
-                    setActiveSectionId(section.id);
-                    setCourseLevel("section");
+                    const latest = [...section.conversations].sort((a, b) =>
+                      b.updatedAt.localeCompare(a.updatedAt),
+                    )[0];
+                    if (latest) openConversation(latest);
+                    else {
+                      void createSectionConversation(
+                        section,
+                        `请开始${section.title}的学习。`,
+                        [],
+                      ).catch(() => undefined);
+                    }
                   }}
+                  onOpenConversation={(conversation) =>
+                    openConversation(conversation)
+                  }
+                  onCreateConversation={(section, request, materialNames) =>
+                    createSectionConversation(section, request, materialNames)
+                  }
+                  onDeleteConversation={(section, conversation) =>
+                    removeSectionConversation(section, conversation)
+                  }
                   onStartLearning={(text, materialNames) => {
-                    setActiveSectionId("");
                     setCourseSessionMode("new");
                     setCourseLevel("conversation");
                     setCourseRoomToken((value) => value + 1);
@@ -485,18 +494,6 @@ export default function Workspace({
                       materialNames,
                     });
                   }}
-                />
-              )}
-              {activeCourse && courseLevel === "section" && activeSection && (
-                <SectionOverview
-                  course={activeCourse}
-                  section={activeSection}
-                  error={courseError}
-                  onOpenConversation={(conversation) =>
-                    openConversation(conversation)
-                  }
-                  onCreateConversation={createSectionConversation}
-                  onDeleteConversation={removeSectionConversation}
                 />
               )}
               {(!activeCourse || courseLevel === "conversation") && (
@@ -518,7 +515,6 @@ export default function Workspace({
                   onOpenCourse={(course) => {
                     setActiveCourse(course);
                     setCourseLevel("course");
-                    setActiveSectionId("");
                   }}
                   onRenameCourse={renameCourse}
                   onDeleteCourse={removeCourse}
@@ -528,7 +524,6 @@ export default function Workspace({
                       ...all.filter((item) => item.id !== course.id),
                     ]);
                     setActiveCourse(course);
-                    setActiveSectionId(course.sections?.[0]?.id ?? "");
                     setCourseLevel("conversation");
                   }}
                   onCourseUpdated={(course) => {

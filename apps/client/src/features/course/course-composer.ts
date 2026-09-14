@@ -11,7 +11,6 @@ export const courseMaterialAttachments: ChatComposerAttachmentOptions = {
       : code === "accept"
         ? "目前仅支持 Markdown 和 TXT 文件"
         : "附带的课程材料过多",
-  hint: "支持 Markdown、TXT",
   maxFileSize: 3 * 1024 * 1024,
   multiple: true,
   removeLabel: (filename) => `移除材料：${filename}`,
