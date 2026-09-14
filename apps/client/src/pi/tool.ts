@@ -38,6 +38,7 @@ export function bindPersistedTool(
 
 export type CourseManagement = {
   course: StoredCourse | null;
+  currentConversationId: string | null;
   create: (
     title: string,
     topic: string,
@@ -55,6 +56,10 @@ export type CourseManagement = {
   createConversation: (
     sectionId: string,
     title: string,
+  ) => Promise<StoredCourseConversation>;
+  listConversations: () => Promise<StoredCourseConversation[]>;
+  readConversation: (
+    conversationId: string,
   ) => Promise<StoredCourseConversation>;
   listMaterials: () => Promise<CourseMaterial[]>;
   readMaterial: (

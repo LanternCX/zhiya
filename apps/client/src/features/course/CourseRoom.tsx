@@ -10,7 +10,6 @@ import type {
   ModelRetryStatus,
   CourseConversationState,
   StoredCourse,
-  StoredCourseConversation,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
 import {
@@ -104,7 +103,10 @@ export default function CourseRoom({
   activeCourse,
   coursesReady,
   roomToken,
+  newSession,
+  entryRequest,
   libraryError,
+  onEntryRequestHandled,
   onOpenCourse,
   onRenameCourse,
   onDeleteCourse,
@@ -117,14 +119,20 @@ export default function CourseRoom({
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
   roomToken: number;
+  newSession: boolean;
+  entryRequest: { id: number; text: string } | null;
   libraryError: string;
+  onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
   onRenameCourse: (course: StoredCourse, title: string) => Promise<boolean>;
   onDeleteCourse: (course: StoredCourse) => Promise<boolean>;
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
 }) {
-  const initialState = activeCourse?.state ?? emptyCourseState();
+  const initialState =
+    activeCourse && newSession
+      ? emptyCourseState()
+      : (activeCourse?.state ?? emptyCourseState());
   const [messages, setMessages] = useState<RenderedCourseMessage[]>(
     initialState.messages,
   );
@@ -146,19 +154,16 @@ export default function CourseRoom({
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
-  const [conversationToken, setConversationToken] = useState(0);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
   const presentedRef = useRef<Set<string>>(
     new Set(initialState.presentedPageIds),
   );
-  const pendingConversation = useRef<{
-    conversation: StoredCourseConversation;
-    messageStart: number;
-    existingPageIds: Set<string>;
-  } | null>(null);
   const session = useRef<CourseSession | null>(null);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
+  const boundConversationId = useRef<string | null>(
+    activeCourse && !newSession ? activeCourse.conversationId : null,
+  );
   const pendingSave = useRef<{
     course: StoredCourse;
     state: CourseConversationState;
@@ -169,6 +174,7 @@ export default function CourseRoom({
   } | null>(null);
   const saveInFlight = useRef(false);
   const thread = useRef<HTMLDivElement | null>(null);
+  const startedEntryRequest = useRef<number | null>(null);
   const flushCourseSave = async () => {
     if (saveInFlight.current || !pendingSave.current) return;
     const next = pendingSave.current;
@@ -186,12 +192,15 @@ export default function CourseRoom({
 
   useEffect(() => {
     if (!info?.available || !coursesReady) return;
-    const selectedCourse =
-      sessionCourse.current?.id === activeCourse?.id
-        ? sessionCourse.current
-        : activeCourse;
-    const initial = selectedCourse?.state ?? emptyCourseState();
+    const selectedCourse = activeCourse;
+    const startsUnbound = Boolean(selectedCourse && newSession);
+    const initial = startsUnbound
+      ? emptyCourseState()
+      : (selectedCourse?.state ?? emptyCourseState());
     sessionCourse.current = selectedCourse;
+    boundConversationId.current = startsUnbound
+      ? null
+      : (selectedCourse?.conversationId ?? null);
     setCourse(selectedCourse);
     setMessages(initial.messages);
     messagesRef.current = initial.messages;
@@ -240,8 +249,10 @@ export default function CourseRoom({
       initial,
       {
         course: selectedCourse,
+        currentConversationId: boundConversationId.current,
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
+          boundConversationId.current = created.conversationId;
           sessionCourse.current = created;
           setCourse(created);
           onCourseCreated(created);
@@ -269,7 +280,7 @@ export default function CourseRoom({
             ?.flatMap((section) => section.conversations)
             .find(
               (conversation) =>
-                conversation.id === sessionCourse.current?.conversationId,
+                conversation.id === boundConversationId.current,
             );
           const next = currentConversation
             ? {
@@ -285,34 +296,32 @@ export default function CourseRoom({
         },
         createConversation: async (sectionId, title) => {
           if (!sessionCourse.current) throw new Error("课程尚未建立");
+          if (boundConversationId.current)
+            throw new Error("当前学习对话已经建立");
           const conversation = await createStoredCourseConversation(
             sessionCourse.current.id,
             sectionId,
             title,
           );
-          let lastUser = 0;
-          for (
-            let index = messagesRef.current.length - 1;
-            index >= 0;
-            index--
-          ) {
-            if (messagesRef.current[index].role === "user") {
-              lastUser = index;
-              break;
-            }
-          }
-          pendingConversation.current = {
-            conversation,
-            messageStart: lastUser,
-            existingPageIds: new Set(pagesRef.current.map(({ id }) => id)),
+          const state: CourseConversationState = {
+            messages: messagesRef.current,
+            pages: pagesRef.current,
+            presentedPageIds: [...presentedRef.current],
+            currentPageId: pagesRef.current.at(-1)?.id ?? "",
           };
+          boundConversationId.current = conversation.id;
           const updated = {
             ...sessionCourse.current,
+            conversationId: conversation.id,
+            state,
             sections: sessionCourse.current.sections?.map((section) =>
               section.id === sectionId
                 ? {
                     ...section,
-                    conversations: [...section.conversations, conversation],
+                    conversations: [
+                      ...section.conversations,
+                      { ...conversation, state },
+                    ],
                   }
                 : section,
             ),
@@ -320,6 +329,17 @@ export default function CourseRoom({
           sessionCourse.current = updated;
           setCourse(updated);
           onCourseUpdated(updated);
+          return conversation;
+        },
+        listConversations: async () =>
+          sessionCourse.current?.sections?.flatMap(
+            (section) => section.conversations,
+          ) ?? [],
+        readConversation: async (conversationId) => {
+          const conversation = sessionCourse.current?.sections
+            ?.flatMap((section) => section.conversations)
+            .find(({ id }) => id === conversationId);
+          if (!conversation) throw new Error("找不到这条历史学习记录");
           return conversation;
         },
         listMaterials: async () => {
@@ -343,12 +363,12 @@ export default function CourseRoom({
     info?.id,
     memory,
     roomToken,
-    conversationToken,
     coursesReady,
   ]);
 
   useEffect(() => {
-    if (!course) return;
+    if (!course || boundConversationId.current !== course.conversationId)
+      return;
     const state = {
       messages,
       pages,
@@ -416,47 +436,22 @@ export default function CourseRoom({
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
     await session.current.prompt(value);
-    const pending = pendingConversation.current;
-    if (pending && sessionCourse.current) {
-      pendingConversation.current = null;
-      const nextPages = pagesRef.current.filter(
-        ({ id }) => !pending.existingPageIds.has(id),
-      );
-      const nextState: CourseConversationState = {
-        messages: messagesRef.current.slice(pending.messageStart),
-        pages: nextPages,
-        presentedPageIds: nextPages
-          .filter(({ id }) => presentedRef.current.has(id))
-          .map(({ id }) => id),
-        currentPageId: nextPages.at(-1)?.id ?? "",
-      };
-      const updated = {
-        ...sessionCourse.current,
-        conversationId: pending.conversation.id,
-        state: nextState,
-        sections: sessionCourse.current.sections?.map((section) => ({
-          ...section,
-          conversations: section.conversations.map((conversation) =>
-            conversation.id === pending.conversation.id
-              ? { ...conversation, state: nextState }
-              : conversation,
-          ),
-        })),
-      };
-      messagesRef.current = nextState.messages;
-      pagesRef.current = nextPages;
-      presentedRef.current = new Set(nextState.presentedPageIds);
-      sessionCourse.current = updated;
-      setMessages(nextState.messages);
-      setPages(nextPages);
-      setPresented(new Set(nextState.presentedPageIds));
-      setPage(Math.max(0, nextPages.length - 1));
-      setCourse(updated);
-      onCourseUpdated(updated);
-      setConversationToken((token) => token + 1);
-    }
     setBusy(false);
   };
+  useEffect(() => {
+    if (!entryRequest) return;
+    const timer = window.setTimeout(() => {
+      if (
+        !session.current ||
+        startedEntryRequest.current === entryRequest.id
+      )
+        return;
+      startedEntryRequest.current = entryRequest.id;
+      onEntryRequestHandled(entryRequest.id);
+      void runPrompt(entryRequest.text);
+    });
+    return () => window.clearTimeout(timer);
+  }, [entryRequest, onEntryRequestHandled]);
   const submit = async () => {
     const value = text.trim();
     if (!value) return;

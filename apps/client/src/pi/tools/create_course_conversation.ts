@@ -11,7 +11,7 @@ export function createCourseConversationTool(
     name: "create_course_conversation",
     label: activityLabel,
     description:
-      "Create a separate conversation under one existing outline section for an explicit relearning, review, or independent-practice activity. Do not use this for ordinary follow-up questions. Call it before teaching the new activity.",
+      "Bind the current new teaching session to one existing outline section and persist it as a separate conversation. In an unbound course session, call this exactly once after choosing the section and before teaching. Do not call it while continuing a conversation the student explicitly opened from history.",
     parameters: Type.Object({
       sectionId: Type.String({ minLength: 1 }),
       title: Type.String({ minLength: 1, maxLength: 100 }),

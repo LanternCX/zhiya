@@ -63,6 +63,13 @@ export default function Workspace({
   const [activeSectionId, setActiveSectionId] = useState("");
   const [coursesReady, setCoursesReady] = useState(false);
   const [courseRoomToken, setCourseRoomToken] = useState(0);
+  const [courseSessionMode, setCourseSessionMode] = useState<
+    "new" | "existing"
+  >("existing");
+  const [courseEntryRequest, setCourseEntryRequest] = useState<{
+    id: number;
+    text: string;
+  } | null>(null);
   const [courseError, setCourseError] = useState("");
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -188,6 +195,7 @@ export default function Workspace({
       all.map((item) => (item.id === updated.id ? updated : item)),
     );
     setActiveSectionId(conversation.sectionId);
+    setCourseSessionMode("existing");
     setCourseLevel("conversation");
     setCourseRoomToken((value) => value + 1);
   };
@@ -377,6 +385,7 @@ export default function Workspace({
               onClick={() => {
                 if (courseOpen) {
                   if (courseLevel === "conversation") {
+                    setActiveSectionId(activeSection?.id ?? "");
                     setCourseLevel("section");
                   } else if (courseLevel === "section") {
                     setCourseLevel("course");
@@ -455,7 +464,13 @@ export default function Workspace({
                     setActiveSectionId(section.id);
                     setCourseLevel("section");
                   }}
-                  onContinue={(conversation) => openConversation(conversation)}
+                  onStartLearning={(text) => {
+                    setActiveSectionId("");
+                    setCourseSessionMode("new");
+                    setCourseLevel("conversation");
+                    setCourseRoomToken((value) => value + 1);
+                    setCourseEntryRequest({ id: Date.now(), text });
+                  }}
                 />
               )}
               {activeCourse && courseLevel === "section" && activeSection && (
@@ -478,7 +493,14 @@ export default function Workspace({
                   activeCourse={activeCourse}
                   coursesReady={coursesReady}
                   roomToken={courseRoomToken}
+                  newSession={courseSessionMode === "new"}
+                  entryRequest={courseEntryRequest}
                   libraryError={courseError}
+                  onEntryRequestHandled={(id) => {
+                    setCourseEntryRequest((current) =>
+                      current?.id === id ? null : current,
+                    );
+                  }}
                   onOpenCourse={(course) => {
                     setActiveCourse(course);
                     setCourseLevel("course");

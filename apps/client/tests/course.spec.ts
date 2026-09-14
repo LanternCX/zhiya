@@ -905,7 +905,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     .toBe(true);
 });
 
-test("a saved course restores its conversation and supports rename and delete", async ({
+test("a saved course starts a new agent-routed session and supports rename and delete", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -992,11 +992,77 @@ test("a saved course restores its conversation and supports rename and delete", 
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [saved] } }),
   );
+  let continuationRequests = 0;
+  let createdConversationTitle = "";
+  const savedConversationIds: string[] = [];
+  let historyWasRead = false;
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    continuationRequests += 1;
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "slides";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    expect(request.agent).toBe("teacher");
+    expect(JSON.stringify(request.payload.messages)).toContain(
+      "我想继续之前的学习",
+    );
+    const transcript = JSON.stringify(request.payload.messages);
+    if (continuationRequests === 1) {
+      expect(transcript).toContain("Previous course transcript:\\n[]");
+    }
+    if (
+      transcript.includes('"name":"read_course_conversation"') &&
+      !transcript.includes('"name":"create_course_conversation"')
+    ) {
+      historyWasRead = transcript.includes("这是已保存的讲解。");
+    }
+    await route.fulfill(
+      !transcript.includes('"name":"list_course_conversations"')
+        ? toolResponse("list-history", "list_course_conversations", {})
+        : !transcript.includes('"name":"read_course_conversation"')
+          ? toolResponse("read-history", "read_course_conversation", {
+              conversationId: "conversation-saved",
+            })
+          : !transcript.includes('"name":"create_course_conversation"')
+            ? toolResponse("create-next", "create_course_conversation", {
+                sectionId: "solar-basics",
+                title: "继续认识太阳系",
+              })
+            : textResponse("好，我们接着认识太阳系。"),
+    );
+  });
   let deleted = false;
   await page.route("**/api/courses/**", async (route) => {
     const method = route.request().method();
     if (method === "PUT") {
+      savedConversationIds.push((
+        route.request().postDataJSON() as { conversationId: string }
+      ).conversationId);
       await route.fulfill({ json: { ok: true } });
+      return;
+    }
+    if (method === "POST") {
+      createdConversationTitle = (
+        route.request().postDataJSON() as { title: string }
+      ).title;
+      await route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "conversation-next",
+            sectionId: "solar-basics",
+            title: createdConversationTitle,
+            state: {
+              messages: [],
+              pages: [],
+              presentedPageIds: [],
+              currentPageId: "",
+            },
+            createdAt: "2026-09-10T10:00:00Z",
+            updatedAt: "2026-09-10T10:00:00Z",
+          },
+        },
+      });
       return;
     }
     if (method === "PATCH") {
@@ -1062,17 +1128,48 @@ test("a saved course restores its conversation and supports rename and delete", 
   await page.getByRole("button", { name: "打开课程：认识太阳系" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
   await expect(page.getByRole("region", { name: "教学对话" })).toHaveCount(0);
-  await page.getByRole("button", { name: "继续最近学习" }).click();
+  await expect(page.getByText("交给知芽安排", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "接下来想怎么学？" }),
+  ).toHaveCount(0);
+  const courseComposer = await page
+    .locator(".course-home-composer")
+    .boundingBox();
+  expect((courseComposer?.y ?? 0) + (courseComposer?.height ?? 0)).toBeGreaterThan(
+    900,
+  );
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
+    .fill("我想继续之前的学习");
+  await page.getByRole("button", { name: "开始学习" }).click();
   await expect(
     page.getByText("这是已保存的讲解。", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("好，我们接着认识太阳系。", { exact: true }),
   ).toBeVisible();
+  expect(continuationRequests).toBe(4);
+  expect(historyWasRead).toBe(true);
+  expect(createdConversationTitle).toBe("继续认识太阳系");
+  await expect.poll(() => savedConversationIds).toContain("conversation-next");
+  expect(savedConversationIds).not.toContain("conversation-saved");
   await expect(
     page.getByRole("img", { name: "课件页面：太阳系" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await expect(page.getByRole("region", { name: "已有课程" })).toHaveCount(0);
   await expect(page.getByRole("banner")).toContainText("太阳系基础 · 对话");
   await page.getByRole("button", { name: "返回小节" }).click();
   await expect(page.getByRole("region", { name: "小节主页" })).toBeVisible();
+  await page
+    .getByRole("button", { name: "打开对话：认识八颗行星" })
+    .click();
+  await expect(
+    page.getByText("这是已保存的讲解。", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("好，我们接着认识太阳系。", { exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "返回小节" }).click();
   await page.getByRole("button", { name: "返回课程" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
   await page.getByRole("button", { name: "返回课程列表" }).click();
@@ -1257,6 +1354,169 @@ test("the teacher agent creates and persists a course from the first request", a
   ).toBeVisible();
 });
 
+test("the course agent advances a broad continuation request to the next section", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const emptyState = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const variablesState = {
+    ...emptyState,
+    messages: [
+      { id: 1, role: "assistant" as const, text: "变量这一节已经学完。" },
+    ],
+  };
+  const saved = {
+    id: "guided-course",
+    conversationId: "variables-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state: variablesState,
+    sections: [
+      {
+        id: "variables",
+        title: "变量与类型",
+        objective: "理解变量和常见类型",
+        position: 0,
+        status: "active" as const,
+        conversations: [
+          {
+            id: "variables-chat",
+            sectionId: "variables",
+            title: "认识变量",
+            state: variablesState,
+            createdAt: "2026-09-10T08:00:00Z",
+            updatedAt: "2026-09-10T09:00:00Z",
+          },
+        ],
+      },
+      {
+        id: "loops",
+        title: "循环",
+        objective: "使用循环解决重复任务",
+        position: 1,
+        status: "planned" as const,
+        conversations: [],
+      },
+    ],
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  let outline: Array<{ id: string; status: string }> = [];
+  let newConversationTitle = "";
+  let persisted: { conversationId?: string; state?: typeof emptyState } | null =
+    null;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route("**/api/courses/guided-course/outline", async (route) => {
+    outline = (route.request().postDataJSON() as { sections: typeof outline })
+      .sections;
+    await route.fulfill({
+      json: {
+        course: {
+          ...saved,
+          sections: saved.sections.map((section) => ({
+            ...section,
+            status: section.id === "variables" ? "complete" : "active",
+          })),
+        },
+      },
+    });
+  });
+  await page.route(
+    "**/api/courses/guided-course/sections/loops/conversations",
+    async (route) => {
+      newConversationTitle = (
+        route.request().postDataJSON() as { title: string }
+      ).title;
+      await route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "loops-next",
+            sectionId: "loops",
+            title: newConversationTitle,
+            state: emptyState,
+            createdAt: "2026-09-10T10:00:00Z",
+            updatedAt: "2026-09-10T10:00:00Z",
+          },
+        },
+      });
+    },
+  );
+  await page.route(
+    "**/api/courses/guided-course/conversation",
+    async (route) => {
+      persisted = route.request().postDataJSON() as typeof persisted;
+      await route.fulfill({ json: { ok: true } });
+    },
+  );
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    await route.fulfill(
+      !transcript.includes('"name":"set_course_outline"')
+        ? toolResponse("advance-outline", "set_course_outline", {
+            sections: [
+              {
+                id: "variables",
+                title: "变量与类型",
+                objective: "理解变量和常见类型",
+                status: "complete",
+              },
+              {
+                id: "loops",
+                title: "循环",
+                objective: "使用循环解决重复任务",
+                status: "active",
+              },
+            ],
+          })
+        : !transcript.includes('"name":"create_course_conversation"')
+          ? toolResponse(
+              "advance-conversation",
+              "create_course_conversation",
+              { sectionId: "loops", title: "开始学习循环" },
+            )
+          : textResponse("接下来，我们用重复画星星来认识循环。"),
+    );
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
+    .fill("我想继续之前的学习");
+  await page.getByRole("button", { name: "开始学习" }).click();
+
+  await expect(
+    page.getByText("接下来，我们用重复画星星来认识循环。", { exact: true }),
+  ).toBeVisible();
+  expect(outline.map(({ id, status }) => ({ id, status }))).toEqual([
+    { id: "variables", status: "complete" },
+    { id: "loops", status: "active" },
+  ]);
+  expect(newConversationTitle).toBe("开始学习循环");
+  await expect.poll(() => persisted?.conversationId).toBe("loops-next");
+  await expect
+    .poll(() => persisted?.state?.messages.map(({ text }) => text))
+    .toContain("接下来，我们用重复画星星来认识循环。");
+  await expect(page.getByRole("banner")).toContainText("循环 · 对话");
+});
+
 test("a course outline organizes conversations and restores the selected conversation", async ({
   page,
 }) => {
@@ -1340,12 +1600,11 @@ test("a course outline organizes conversations and restores the selected convers
     "**/api/courses/python-course/sections/loops/conversations",
     (route) => {
       const title = (route.request().postDataJSON() as { title: string }).title;
-      const independent = title === "循环独立练习";
       return route.fulfill({
         status: 201,
         json: {
           conversation: {
-            id: independent ? "loops-independent" : "loops-practice",
+            id: "loops-practice",
             sectionId: "loops",
             title,
             state: emptyState,
@@ -1358,33 +1617,15 @@ test("a course outline organizes conversations and restores the selected convers
   );
   let deletedConversation = false;
   await page.route(
-    "**/api/courses/python-course/sections/loops/conversations/loops-independent",
+    "**/api/courses/python-course/sections/loops/conversations/loops-practice",
     (route) => {
       deletedConversation = true;
       return route.fulfill({
         json: {
           course: {
             ...saved,
-            conversationId: "loops-practice",
-            state: emptyState,
-            sections: saved.sections.map((section) =>
-              section.id === "loops"
-                ? {
-                    ...section,
-                    conversations: [
-                      ...section.conversations,
-                      {
-                        id: "loops-practice",
-                        sectionId: "loops",
-                        title: "新对话",
-                        state: emptyState,
-                        createdAt: "2026-09-10T10:00:00Z",
-                        updatedAt: "2026-09-10T10:00:00Z",
-                      },
-                    ],
-                  }
-                : section,
-            ),
+            conversationId: "loops-chat",
+            state: loopState,
           },
         },
       });
@@ -1400,20 +1641,7 @@ test("a course outline organizes conversations and restores the selected convers
       .filter((message) => message.role === "system")
       .map((message) => String(message.content))
       .join("\n");
-    const transcript = JSON.stringify(request.payload.messages);
-    await route.fulfill(
-      transcript.includes("开始一次独立练习") &&
-        !transcript.includes('"name":"create_course_conversation"')
-        ? toolResponse("independent-loops", "create_course_conversation", {
-            sectionId: "loops",
-            title: "循环独立练习",
-          })
-        : textResponse(
-            transcript.includes("开始一次独立练习")
-              ? "独立练习已经开始。"
-              : "我们继续学习循环。",
-          ),
-    );
+    await route.fulfill(textResponse("我们继续学习循环。"));
   });
 
   await page.goto("/");
@@ -1441,22 +1669,11 @@ test("a course outline organizes conversations and restores the selected convers
   expect(teacherInstructions).toContain("变量与类型");
   expect(teacherInstructions).toContain("循环");
   expect(teacherInstructions).toContain("loops-chat");
+  expect(teacherInstructions).toContain('"activeSectionId":"loops"');
+  expect(teacherInstructions).toContain('"title":"循环入门"');
+  expect(teacherInstructions).toContain('"updatedAt":"2026-09-10T09:00:00Z"');
 
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("开始一次独立练习");
-  await page.getByRole("button", { name: "发送" }).click();
-  await expect(
-    page.getByText("独立练习已经开始。", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("循环可以重复执行。", { exact: true }),
-  ).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "课程材料" })).toHaveCount(0);
   await page.getByRole("button", { name: "返回小节" }).click();
-  await expect(
-    page.getByRole("button", { name: "打开对话：循环独立练习" }),
-  ).toBeVisible();
   await page.getByRole("button", { name: "开始新对话" }).click();
   await expect(
     page.getByText("循环可以重复执行。", { exact: true }),
@@ -1465,9 +1682,7 @@ test("a course outline organizes conversations and restores the selected convers
     page.getByRole("heading", { name: "开始新的学习对话" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "返回小节" }).click();
-  await page
-    .getByRole("button", { name: "管理对话：循环独立练习" })
-    .click();
+  await page.getByRole("button", { name: "管理对话：新对话" }).click();
   await page.getByRole("button", { name: "删除对话" }).click();
   await expect(
     page.getByRole("button", { name: "确认删除对话" }),
@@ -1475,16 +1690,14 @@ test("a course outline organizes conversations and restores the selected convers
   await page.getByRole("button", { name: "取消" }).click();
   expect(deletedConversation).toBe(false);
   await expect(
-    page.getByRole("button", { name: "打开对话：循环独立练习" }),
+    page.getByRole("button", { name: "打开对话：新对话" }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "管理对话：循环独立练习" })
-    .click();
+  await page.getByRole("button", { name: "管理对话：新对话" }).click();
   await page.getByRole("button", { name: "删除对话" }).click();
   await page.getByRole("button", { name: "确认删除对话" }).click();
   await expect.poll(() => deletedConversation).toBe(true);
   await expect(
-    page.getByRole("button", { name: "打开对话：循环独立练习" }),
+    page.getByRole("button", { name: "打开对话：新对话" }),
   ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "打开对话：循环入门" }),
@@ -1665,11 +1878,10 @@ test("a student uploads and reads a flat course material", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "变量" })).toBeVisible();
   await expect(page.getByText("变量保存数据。", { exact: true })).toBeVisible();
   await page.getByLabel("关闭材料预览").click();
-  await page.getByRole("button", { name: "继续最近学习" }).click();
   await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
     .fill("根据 notes 材料教我");
-  await page.getByRole("button", { name: "发送" }).click();
+  await page.getByRole("button", { name: "开始学习" }).click();
   await expect(
     page.getByText("根据课程材料，变量用于保存数据。", { exact: true }),
   ).toBeVisible();

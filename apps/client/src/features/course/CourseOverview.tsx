@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { MessageResponse } from "../../components/ai-elements/message";
+import Icon from "../../components/Icon";
 import type {
   CourseMaterial,
   CourseSection,
   StoredCourse,
-  StoredCourseConversation,
 } from "../../domain/learning";
 import CourseCover from "./CourseCover";
 import {
@@ -30,11 +30,11 @@ const materialTypes = {
 export default function CourseOverview({
   course,
   onOpenSection,
-  onContinue,
+  onStartLearning,
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
-  onContinue: (conversation: StoredCourseConversation) => void;
+  onStartLearning: (request: string) => void;
 }) {
   const [view, setView] = useState<"outline" | "materials">("outline");
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
@@ -45,13 +45,11 @@ export default function CourseOverview({
   } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [request, setRequest] = useState("");
   const sections = course.sections ?? [];
   const progressSections = sections.filter(
     (section) => section.status !== "archived",
   );
-  const latest = sections
-    .flatMap((section) => section.conversations)
-    .find((conversation) => conversation.id === course.conversationId);
   const complete = progressSections.filter(
     (section) => section.status === "complete",
   ).length;
@@ -166,14 +164,6 @@ export default function CourseOverview({
           <small>
             {progressSections.length} 个小节 · {complete} 个已完成
           </small>
-          {latest && (
-            <button
-              className="course-home-continue"
-              onClick={() => onContinue(latest)}
-            >
-              继续最近学习
-            </button>
-          )}
         </div>
       </header>
 
@@ -293,6 +283,39 @@ export default function CourseOverview({
           )}
         </section>
       )}
+
+      <form
+        className="course-home-composer"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const value = request.trim();
+          if (!value) return;
+          onStartLearning(value);
+        }}
+      >
+        <label className="sr-only" htmlFor="course-guide-request">
+          告诉知芽你想怎样继续这门课程
+        </label>
+        <textarea
+          id="course-guide-request"
+          value={request}
+          onChange={(event) => setRequest(event.target.value)}
+          placeholder="例如：我想继续之前的学习"
+          onKeyDown={(event) => {
+            if (
+              event.key === "Enter" &&
+              !event.shiftKey &&
+              !event.nativeEvent.isComposing
+            ) {
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }
+          }}
+        />
+        <button type="submit" aria-label="开始学习" disabled={!request.trim()}>
+          <Icon name="send" />
+        </button>
+      </form>
 
       {preview && (
         <section
