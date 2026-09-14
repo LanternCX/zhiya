@@ -2268,7 +2268,7 @@ test("the course agent advances an explicit request to start the next section", 
   await expect(page.getByRole("banner")).toContainText("循环 · 对话");
 });
 
-test("a student resumes the most recent course conversation without starting a new one", async ({
+test("a student resumes a course conversation from its section history", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2345,7 +2345,11 @@ test("a student resumes the most recent course conversation without starting a n
 
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
-  await page.getByRole("button", { name: "继续最近学习" }).click();
+  await expect(
+    page.getByRole("button", { name: "继续最近学习" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: /Python 基础/ }).click();
+  await page.getByRole("button", { name: "打开对话：第一次学习" }).click();
 
   await expect(
     page.getByText("上次我们学到用 print 输出文字。", { exact: true }),
@@ -2489,6 +2493,9 @@ test("a course outline organizes conversations and restores the selected convers
   await expect(page.getByRole("button", { name: /变量与类型/ })).toBeVisible();
   await page.getByRole("button", { name: /循环/ }).click();
   await expect(page.getByRole("region", { name: "小节主页" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "继续此小节" }),
+  ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "课程材料" })).toHaveCount(0);
   await page.getByRole("button", { name: "打开对话：循环入门" }).click();
   await expect(page.getByRole("region", { name: "教学对话" })).toBeVisible();
@@ -2512,12 +2519,19 @@ test("a course outline organizes conversations and restores the selected convers
   expect(teacherInstructions).toContain('"updatedAt":"2026-09-10T09:00:00Z"');
 
   await page.getByRole("button", { name: "返回小节" }).click();
-  await page.getByRole("button", { name: "开始新对话" }).click();
+  await expect(
+    page.getByRole("button", { name: "开始新对话" }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想在此小节学习什么" })
+    .fill("再练习一次循环");
+  await page.getByRole("button", { name: "开始新的小节对话" }).click();
   await expect(
     page.getByText("循环可以重复执行。", { exact: true }),
   ).toHaveCount(0);
+  await expect(page.getByText("再练习一次循环", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "开始新的学习对话" }),
+    page.getByText("我们继续学习循环。", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "返回小节" }).click();
   await page.getByRole("button", { name: "管理对话：新对话" }).click();

@@ -200,7 +200,10 @@ export default function Workspace({
     setCourseLevel("conversation");
     setCourseRoomToken((value) => value + 1);
   };
-  const createSectionConversation = async () => {
+  const createSectionConversation = async (
+    request: string,
+    materialNames: string[],
+  ) => {
     if (!activeCourse || !activeSection) return;
     try {
       const conversation = await createCourseConversation(
@@ -221,8 +224,14 @@ export default function Workspace({
       };
       setCourseError("");
       openConversation(conversation, updated);
+      setCourseEntryRequest({
+        id: Date.now(),
+        text: request,
+        materialNames,
+      });
     } catch {
       setCourseError("暂时无法新建对话");
+      throw new Error("Could not create the section conversation");
     }
   };
   const removeSectionConversation = async (
@@ -465,7 +474,6 @@ export default function Workspace({
                     setActiveSectionId(section.id);
                     setCourseLevel("section");
                   }}
-                  onContinue={(conversation) => openConversation(conversation)}
                   onStartLearning={(text, materialNames) => {
                     setActiveSectionId("");
                     setCourseSessionMode("new");

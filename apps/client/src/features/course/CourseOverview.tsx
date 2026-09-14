@@ -9,7 +9,6 @@ import type {
   CourseMaterial,
   CourseSection,
   StoredCourse,
-  StoredCourseConversation,
 } from "../../domain/learning";
 import CourseCover from "./CourseCover";
 import { courseMaterialAttachments } from "./course-composer";
@@ -35,12 +34,10 @@ const materialTypes = {
 export default function CourseOverview({
   course,
   onOpenSection,
-  onContinue,
   onStartLearning,
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
-  onContinue: (conversation: StoredCourseConversation) => void;
   onStartLearning: (request: string, materialNames: string[]) => void;
 }) {
   const [view, setView] = useState<"outline" | "materials">("outline");
@@ -62,10 +59,6 @@ export default function CourseOverview({
   const complete = progressSections.filter(
     (section) => section.status === "complete",
   ).length;
-  const latest = sections
-    .flatMap((section) => section.conversations)
-    .find((conversation) => conversation.id === course.conversationId);
-
   useEffect(() => {
     if (view !== "materials") return;
     let current = true;
@@ -203,14 +196,6 @@ export default function CourseOverview({
           <small>
             {progressSections.length} 个小节 · {complete} 个已完成
           </small>
-          {latest && (
-            <button
-              className="section-primary-action"
-              onClick={() => onContinue(latest)}
-            >
-              继续最近学习
-            </button>
-          )}
         </div>
       </header>
 

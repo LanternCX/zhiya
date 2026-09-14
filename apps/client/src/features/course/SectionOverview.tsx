@@ -1,10 +1,15 @@
 import { useState } from "react";
+import ChatComposer, {
+  type ChatComposerMessage,
+} from "../../components/ChatComposer";
 import Icon from "../../components/Icon";
 import type {
   CourseSection,
   StoredCourse,
   StoredCourseConversation,
 } from "../../domain/learning";
+import { courseMaterialAttachments } from "./course-composer";
+import { uploadCourseMaterial } from "./courses";
 
 export default function SectionOverview({
   course,
@@ -18,7 +23,10 @@ export default function SectionOverview({
   section: CourseSection;
   error: string;
   onOpenConversation: (conversation: StoredCourseConversation) => void;
-  onCreateConversation: () => Promise<void>;
+  onCreateConversation: (
+    request: string,
+    materialNames: string[],
+  ) => Promise<void>;
   onDeleteConversation: (
     conversation: StoredCourseConversation,
   ) => Promise<boolean>;
@@ -26,9 +34,33 @@ export default function SectionOverview({
   const [busy, setBusy] = useState(false);
   const [menu, setMenu] = useState("");
   const [confirmDelete, setConfirmDelete] = useState("");
-  const latest = [...section.conversations].sort((a, b) =>
-    b.updatedAt.localeCompare(a.updatedAt),
-  )[0];
+  const [composerError, setComposerError] = useState("");
+
+  const startConversation = async ({ text, files }: ChatComposerMessage) => {
+    if (busy) throw new Error("The section overview is busy");
+    setBusy(true);
+    setComposerError("");
+    try {
+      const uploads = await Promise.allSettled(
+        files.map((file) => uploadCourseMaterial(course.id, file)),
+      );
+      const uploadedNames = uploads.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value.name] : [],
+      );
+      const failed = uploads.length - uploadedNames.length;
+      if (files.length > 0 && uploadedNames.length === 0) {
+        setComposerError("教学材料上传失败，请重试");
+        throw new Error("No course material was uploaded");
+      }
+      if (failed > 0) setComposerError(`${failed} 个教学材料上传失败`);
+      await onCreateConversation(
+        text.trim() || "请根据我附带的教学材料学习这个小节。",
+        uploadedNames,
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <section className="section-home" aria-label="小节主页">
@@ -40,27 +72,6 @@ export default function SectionOverview({
         <p>{section.objective}</p>
         <span className="section-home-course">来自《{course.title}》</span>
       </header>
-
-      <div className="section-home-actions">
-        {latest && (
-          <button
-            className="section-primary-action"
-            onClick={() => onOpenConversation(latest)}
-          >
-            继续此小节
-          </button>
-        )}
-        <button
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            await onCreateConversation();
-            setBusy(false);
-          }}
-        >
-          {busy ? "正在建立…" : "开始新对话"}
-        </button>
-      </div>
 
       {error && (
         <p className="course-context-error" role="alert">
@@ -153,6 +164,18 @@ export default function SectionOverview({
           </div>
         )}
       </section>
+
+      <ChatComposer
+        attachments={courseMaterialAttachments}
+        className="course-home-composer"
+        disabled={busy}
+        error={composerError}
+        label="告诉知芽你想在此小节学习什么"
+        onError={setComposerError}
+        onSubmit={startConversation}
+        placeholder="例如：再讲一遍这个概念，或者出一道练习题"
+        submitLabel="开始新的小节对话"
+      />
     </section>
   );
 }

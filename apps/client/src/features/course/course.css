@@ -36,6 +36,9 @@
 .course-home {
   padding-bottom: 168px;
 }
+.section-home {
+  padding-bottom: 168px;
+}
 .course-home-hero {
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
@@ -93,15 +96,6 @@
   display: block;
   margin-top: 9px;
   color: var(--muted);
-}
-.section-primary-action {
-  margin-top: 24px;
-  padding: 12px 18px;
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: 650;
 }
 .course-home-composer {
   position: fixed;
@@ -384,26 +378,6 @@
   margin-top: 22px;
   color: var(--muted);
   font-size: 13px;
-}
-.section-home-actions {
-  display: flex;
-  gap: 10px;
-  padding: 26px 0;
-}
-.section-home-actions button {
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text);
-  font-weight: 600;
-}
-.section-home-actions .section-primary-action {
-  margin: 0;
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
 }
 .section-conversations {
   margin-top: 34px;
