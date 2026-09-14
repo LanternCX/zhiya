@@ -1111,11 +1111,20 @@ test("a saved course starts a new agent-routed session and supports rename and d
   const composerBox = await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .boundingBox();
+  const conversationBox = await page
+    .getByRole("region", { name: "教学对话" })
+    .boundingBox();
+  const composerFormBox = await page.locator(".course-composer").boundingBox();
   expect(Math.abs((cardBox?.width ?? 0) - (cardBox?.height ?? 0))).toBeLessThan(
     2,
   );
   expect((cardBox?.y ?? 0) + (cardBox?.height ?? 0)).toBeLessThan(
     composerBox?.y ?? 0,
+  );
+  expect(
+    (composerFormBox?.x ?? 0) + (composerFormBox?.width ?? 0),
+  ).toBeLessThanOrEqual(
+    (conversationBox?.x ?? 0) + (conversationBox?.width ?? 0),
   );
   await expect(page.locator(".course-card-open")).toHaveCSS(
     "box-shadow",
@@ -1124,6 +1133,18 @@ test("a saved course starts a new agent-routed session and supports rename and d
   await expect(page.locator(".course-composer")).toHaveCSS(
     "box-shadow",
     "none",
+  );
+  const attachmentButton = page.getByRole("button", {
+    name: "添加教学材料",
+  });
+  await expect(attachmentButton).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await attachmentButton.hover();
+  await expect(attachmentButton).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
   );
   await page.getByRole("button", { name: "打开课程：认识太阳系" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
@@ -1137,6 +1158,18 @@ test("a saved course starts a new agent-routed session and supports rename and d
     .boundingBox();
   expect((courseComposer?.y ?? 0) + (courseComposer?.height ?? 0)).toBeGreaterThan(
     900,
+  );
+  const courseAttachmentButton = page.getByRole("button", {
+    name: "添加教学材料",
+  });
+  await expect(courseAttachmentButton).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await courseAttachmentButton.hover();
+  await expect(courseAttachmentButton).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
   );
   await page
     .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
@@ -1352,6 +1385,684 @@ test("the teacher agent creates and persists a course from the first request", a
   await expect(
     page.getByRole("img", { name: "课程封面：分数的意义" }),
   ).toBeVisible();
+});
+
+test("a student creates a course with teaching materials attached to the first request", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const state = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const created = {
+    id: "course-with-material",
+    conversationId: "conversation-with-material",
+    title: "变量入门",
+    topic: "根据讲义学习变量",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "VARIABLES",
+    },
+    state,
+    sections: [
+      {
+        id: "initial-section",
+        title: "开始学习",
+        objective: "根据讲义学习变量",
+        position: 0,
+        status: "planned" as const,
+        conversations: [
+          {
+            id: "conversation-with-material",
+            sectionId: "initial-section",
+            title: "开始学习",
+            state,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T08:00:00Z",
+          },
+        ],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T08:00:00Z",
+  };
+  const material = {
+    id: "variables-notes",
+    name: "variables.md",
+    mediaType: "text/markdown" as const,
+    sizeBytes: 43,
+    createdAt: "2026-09-14T08:01:00Z",
+  };
+  let uploadedContent = "";
+  let uploadComplete = false;
+
+  await page.route("**/api/courses", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({ json: { courses: [] } });
+      return;
+    }
+    await route.fulfill({ status: 201, json: { course: created } });
+  });
+  await page.route(
+    "**/api/courses/course-with-material/material-uploads",
+    async (route) => {
+      expect(route.request().postDataJSON()).toEqual({
+        name: "variables.md",
+        sizeBytes: 43,
+      });
+      await route.fulfill({
+        status: 201,
+        json: {
+          upload: {
+            id: "variables-upload",
+            url: "https://storage.test/uploads/variables",
+            headers: { "Content-Type": "text/markdown" },
+            expiresAt: "2026-09-14T08:03:00Z",
+          },
+        },
+      });
+    },
+  );
+  await page.route("https://storage.test/uploads/variables", async (route) => {
+    uploadedContent = route.request().postData() ?? "";
+    await route.fulfill({ status: 200, body: "" });
+  });
+  await page.route(
+    "**/api/courses/course-with-material/material-uploads/variables-upload/complete",
+    async (route) => {
+      expect(uploadedContent).toBe("# 变量\n变量是给数据起的名字。\n");
+      uploadComplete = true;
+      await route.fulfill({ status: 201, json: { material } });
+    },
+  );
+  await page.route(
+    "**/api/courses/course-with-material/materials",
+    (route) => route.fulfill({ json: { materials: [material] } }),
+  );
+  await page.route(
+    "**/api/courses/course-with-material/materials/variables-notes/download",
+    (route) =>
+      route.fulfill({
+        json: {
+          material,
+          url: "https://storage.test/materials/variables",
+        },
+      }),
+  );
+  await page.route("https://storage.test/materials/variables", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "text/markdown",
+      body: "# 变量\n变量是给数据起的名字。\n",
+    }),
+  );
+  await page.route("**/api/courses/course-with-material/outline", (route) =>
+    route.fulfill({ json: { course: created } }),
+  );
+  await page.route(
+    "**/api/courses/course-with-material/conversation",
+    (route) => route.fulfill({ json: { ok: true } }),
+  );
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (!transcript.includes('"name":"create_course"')) {
+      await route.fulfill(
+        toolResponse("create-variables", "create_course", {
+          title: "变量入门",
+          topic: "根据讲义学习变量",
+          cover: {
+            motif: "code",
+            palette: "sprout",
+            label: "VARIABLES",
+          },
+        }),
+      );
+      return;
+    }
+    expect(uploadComplete).toBe(true);
+    if (!transcript.includes('"name":"list_course_materials"')) {
+      await route.fulfill(
+        toolResponse("list-variables", "list_course_materials", {}),
+      );
+      return;
+    }
+    if (!transcript.includes('"name":"read_course_material"')) {
+      await route.fulfill(
+        toolResponse("read-variables", "read_course_material", {
+          materialId: "variables-notes",
+        }),
+      );
+      return;
+    }
+    if (!transcript.includes('"name":"set_course_outline"')) {
+      expect(transcript).toContain("变量是给数据起的名字");
+      await route.fulfill(
+        toolResponse("outline-variables", "set_course_outline", {
+          sections: [
+            {
+              title: "认识变量",
+              objective: "理解变量用于命名数据",
+            },
+          ],
+        }),
+      );
+      return;
+    }
+    await route.fulfill(
+      textResponse("我会按照你附带的讲义，从变量为什么需要名字开始。"),
+    );
+  });
+
+  await page.goto("/");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "添加教学材料" }).click();
+  await (await chooser).setFiles({
+    name: "variables.md",
+    mimeType: "text/markdown",
+    buffer: Buffer.from("# 变量\n变量是给数据起的名字。\n"),
+  });
+  await expect(
+    page.getByRole("button", { name: "移除材料：variables.md" }),
+  ).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("请根据这份讲义创建课程");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(
+    page.getByText("我会按照你附带的讲义，从变量为什么需要名字开始。", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("variables.md", { exact: true }),
+  ).toBeVisible();
+});
+
+test("the course composer validates and removes teaching materials before sending", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [] } }),
+  );
+  await page.goto("/");
+  const input = page.locator('input[type="file"]');
+
+  await input.setInputFiles({
+    name: "worksheet.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("not supported"),
+  });
+  await expect(page.getByRole("alert")).toHaveText(
+    "目前仅支持 Markdown 和 TXT 文件",
+  );
+  await expect(
+    page.getByRole("button", { name: "移除材料：worksheet.pdf" }),
+  ).toHaveCount(0);
+
+  await input.setInputFiles({
+    name: "lesson.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("lesson notes"),
+  });
+  const remove = page.getByRole("button", { name: "移除材料：lesson.txt" });
+  await expect(remove).toBeVisible();
+  const removeBox = await remove.boundingBox();
+  expect(removeBox?.width).toBe(20);
+  expect(removeBox?.height).toBe(20);
+  await remove.hover();
+  await expect(remove).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await remove.click();
+  await expect(remove).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "发送" })).toBeDisabled();
+
+  await input.setInputFiles({
+    name: "outline.md",
+    mimeType: "",
+    buffer: Buffer.from("# Outline"),
+  });
+  await expect(
+    page.getByRole("button", { name: "移除材料：outline.md" }),
+  ).toBeVisible();
+});
+
+test("a student drags teaching material onto the course composer", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  await page.goto("/");
+  const composer = page.locator(".course-composer");
+  const transfer = await page.evaluateHandle(() => {
+    const data = new DataTransfer();
+    data.items.add(
+      new File(["# 函数\n函数封装可复用的步骤。"], "functions.md", {
+        type: "text/markdown",
+      }),
+    );
+    return data;
+  });
+
+  await composer.dispatchEvent("dragenter", { dataTransfer: transfer });
+  await expect(page.getByText("松开以添加教学材料")).toBeVisible();
+
+  await composer.dispatchEvent("drop", { dataTransfer: transfer });
+  await expect(
+    page.getByRole("button", { name: "移除材料：functions.md" }),
+  ).toBeVisible();
+  await expect(page.getByText("松开以添加教学材料")).toHaveCount(0);
+});
+
+test("a student attaches new teaching material inside an existing course conversation", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const content = "# 循环\n循环会重复执行代码。";
+  const state = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const saved = {
+    id: "existing-attachment",
+    conversationId: "loops-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state,
+    sections: [
+      {
+        id: "loops",
+        title: "循环",
+        objective: "理解重复执行",
+        position: 0,
+        status: "active" as const,
+        conversations: [
+          {
+            id: "loops-chat",
+            sectionId: "loops",
+            title: "循环入门",
+            state,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T08:00:00Z",
+          },
+        ],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T08:00:00Z",
+  };
+  const material = {
+    id: "loops-notes",
+    name: "loops.txt",
+    mediaType: "text/plain" as const,
+    sizeBytes: Buffer.byteLength(content),
+    createdAt: "2026-09-14T08:01:00Z",
+  };
+  let uploadComplete = false;
+
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route(
+    "**/api/courses/existing-attachment/material-uploads",
+    (route) =>
+      route.fulfill({
+        status: 201,
+        json: {
+          upload: {
+            id: "loops-upload",
+            url: "https://storage.test/uploads/loops",
+            headers: { "Content-Type": "text/plain" },
+            expiresAt: "2026-09-14T08:03:00Z",
+          },
+        },
+      }),
+  );
+  await page.route("https://storage.test/uploads/loops", (route) =>
+    route.fulfill({ status: 200, body: "" }),
+  );
+  await page.route(
+    "**/api/courses/existing-attachment/material-uploads/loops-upload/complete",
+    (route) => {
+      uploadComplete = true;
+      return route.fulfill({ status: 201, json: { material } });
+    },
+  );
+  await page.route(
+    "**/api/courses/existing-attachment/materials",
+    (route) => route.fulfill({ json: { materials: [material] } }),
+  );
+  await page.route(
+    "**/api/courses/existing-attachment/materials/loops-notes/download",
+    (route) =>
+      route.fulfill({
+        json: { material, url: "https://storage.test/materials/loops" },
+      }),
+  );
+  await page.route("https://storage.test/materials/loops", (route) =>
+    route.fulfill({ status: 200, contentType: "text/plain", body: content }),
+  );
+  await page.route(
+    "**/api/courses/existing-attachment/conversation",
+    (route) => route.fulfill({ json: { ok: true } }),
+  );
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    expect(uploadComplete).toBe(true);
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    await route.fulfill(
+      !transcript.includes('"name":"list_course_materials"')
+        ? toolResponse("list-loops", "list_course_materials", {})
+        : !transcript.includes('"name":"read_course_material"')
+          ? toolResponse("read-loops", "read_course_material", {
+              materialId: "loops-notes",
+            })
+          : textResponse(
+              transcript.includes("循环会重复执行代码")
+                ? "我已经读到新材料，我们结合示例继续学习循环。"
+                : "我没有读到材料。",
+            ),
+    );
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await page.getByRole("button", { name: "打开小节：循环" }).click();
+  await page.getByRole("button", { name: "打开对话：循环入门" }).click();
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "添加教学材料" }).click();
+  await (await chooser).setFiles({
+    name: "loops.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(content),
+  });
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("结合这份材料继续讲循环");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(
+    page.getByText("我已经读到新材料，我们结合示例继续学习循环。", {
+      exact: true,
+    }),
+  ).toBeVisible();
+});
+
+test("a failed conversation attachment remains available to retry", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const state = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const saved = {
+    id: "attachment-retry",
+    conversationId: "retry-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state,
+    sections: [
+      {
+        id: "retry-section",
+        title: "变量",
+        objective: "理解变量",
+        position: 0,
+        status: "active" as const,
+        conversations: [
+          {
+            id: "retry-chat",
+            sectionId: "retry-section",
+            title: "变量入门",
+            state,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T08:00:00Z",
+          },
+        ],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T08:00:00Z",
+  };
+  let modelRequests = 0;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route(
+    "**/api/courses/attachment-retry/material-uploads",
+    (route) => route.fulfill({ status: 500, json: { error: "unavailable" } }),
+  );
+  await page.route("**/api/learning/course/model", (route) => {
+    modelRequests += 1;
+    return route.fulfill(textResponse("不应发送这条请求。"));
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await page.getByRole("button", { name: "打开小节：变量" }).click();
+  await page.getByRole("button", { name: "打开对话：变量入门" }).click();
+  const input = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "variables.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("变量材料"),
+  });
+  await input.fill("根据新材料继续");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page.getByRole("alert")).toHaveText(
+    "教学材料上传失败，请重试",
+  );
+  await expect(input).toHaveValue("根据新材料继续");
+  await expect(
+    page.getByRole("button", { name: "移除材料：variables.txt" }),
+  ).toBeVisible();
+  expect(modelRequests).toBe(0);
+});
+
+test("a student starts a course conversation with teaching material from the course overview", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const content = "# 循环练习\n用循环打印三颗星。";
+  const emptyState = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const saved = {
+    id: "overview-attachment",
+    conversationId: "loops-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state: emptyState,
+    sections: [
+      {
+        id: "loops",
+        title: "循环",
+        objective: "使用循环解决重复任务",
+        position: 0,
+        status: "active" as const,
+        conversations: [],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T08:00:00Z",
+  };
+  const material = {
+    id: "loops-overview-notes",
+    name: "loops.md",
+    mediaType: "text/markdown" as const,
+    sizeBytes: Buffer.byteLength(content),
+    createdAt: "2026-09-14T08:01:00Z",
+  };
+  let uploadComplete = false;
+
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/material-uploads",
+    (route) =>
+      route.fulfill({
+        status: 201,
+        json: {
+          upload: {
+            id: "overview-upload",
+            url: "https://storage.test/uploads/overview-loops",
+            headers: { "Content-Type": "text/markdown" },
+            expiresAt: "2026-09-14T08:03:00Z",
+          },
+        },
+      }),
+  );
+  await page.route("https://storage.test/uploads/overview-loops", (route) =>
+    route.fulfill({ status: 200, body: "" }),
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/material-uploads/overview-upload/complete",
+    (route) => {
+      uploadComplete = true;
+      return route.fulfill({ status: 201, json: { material } });
+    },
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/sections/loops/conversations",
+    (route) =>
+      route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "loops-next",
+            sectionId: "loops",
+            title: "练习循环",
+            state: emptyState,
+            createdAt: "2026-09-14T08:02:00Z",
+            updatedAt: "2026-09-14T08:02:00Z",
+          },
+        },
+      }),
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/materials",
+    (route) => route.fulfill({ json: { materials: [material] } }),
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/materials/loops-overview-notes/download",
+    (route) =>
+      route.fulfill({
+        json: { material, url: "https://storage.test/materials/overview-loops" },
+      }),
+  );
+  await page.route("https://storage.test/materials/overview-loops", (route) =>
+    route.fulfill({ status: 200, contentType: "text/markdown", body: content }),
+  );
+  await page.route(
+    "**/api/courses/overview-attachment/conversation",
+    (route) => route.fulfill({ json: { ok: true } }),
+  );
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    expect(uploadComplete).toBe(true);
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    expect(transcript).toContain("loops.md");
+    await route.fulfill(
+      !transcript.includes('"name":"create_course_conversation"')
+        ? toolResponse("create-loops", "create_course_conversation", {
+            sectionId: "loops",
+            title: "练习循环",
+          })
+        : !transcript.includes('"name":"list_course_materials"')
+          ? toolResponse("list-overview", "list_course_materials", {})
+          : !transcript.includes('"name":"read_course_material"')
+            ? toolResponse("read-overview", "read_course_material", {
+                materialId: "loops-overview-notes",
+              })
+            : textResponse(
+                transcript.includes("用循环打印三颗星")
+                  ? "我已读到循环练习，我们从打印三颗星开始。"
+                  : "我没有读到练习材料。",
+              ),
+    );
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await expect(
+    page.getByRole("button", { name: "添加教学材料" }),
+  ).toBeVisible();
+  const transfer = await page.evaluateHandle((body) => {
+    const data = new DataTransfer();
+    data.items.add(
+      new File([body], "loops.md", { type: "text/markdown" }),
+    );
+    return data;
+  }, content);
+  await page.locator(".course-home-composer").dispatchEvent("dragenter", {
+    dataTransfer: transfer,
+  });
+  await expect(page.getByText("松开以添加教学材料")).toBeVisible();
+  await page.locator(".course-home-composer").dispatchEvent("drop", {
+    dataTransfer: transfer,
+  });
+  const overviewRemove = page.getByRole("button", {
+    name: "移除材料：loops.md",
+  });
+  await expect(overviewRemove).toBeVisible();
+  const overviewRemoveBox = await overviewRemove.boundingBox();
+  expect(overviewRemoveBox?.width).toBe(20);
+  expect(overviewRemoveBox?.height).toBe(20);
+  await overviewRemove.hover();
+  await expect(overviewRemove).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await expect(page.getByText("松开以添加教学材料")).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想怎样继续这门课程" })
+    .fill("根据这份练习继续学习循环");
+  await page.getByRole("button", { name: "开始学习" }).click();
+
+  await expect(
+    page.getByText("我已读到循环练习，我们从打印三颗星开始。", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("loops.md", { exact: true })).toBeVisible();
 });
 
 test("the course agent advances a broad continuation request to the next section", async ({

@@ -69,6 +69,7 @@ export default function Workspace({
   const [courseEntryRequest, setCourseEntryRequest] = useState<{
     id: number;
     text: string;
+    materialNames: string[];
   } | null>(null);
   const [courseError, setCourseError] = useState("");
   const menu = useRef<HTMLDivElement>(null);
@@ -464,12 +465,16 @@ export default function Workspace({
                     setActiveSectionId(section.id);
                     setCourseLevel("section");
                   }}
-                  onStartLearning={(text) => {
+                  onStartLearning={(text, materialNames) => {
                     setActiveSectionId("");
                     setCourseSessionMode("new");
                     setCourseLevel("conversation");
                     setCourseRoomToken((value) => value + 1);
-                    setCourseEntryRequest({ id: Date.now(), text });
+                    setCourseEntryRequest({
+                      id: Date.now(),
+                      text,
+                      materialNames,
+                    });
                   }}
                 />
               )}

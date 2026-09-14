@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { MessageResponse } from "../../components/ai-elements/message";
-import Icon from "../../components/Icon";
+import ChatComposer, {
+  type ChatComposerMessage,
+} from "../../components/ChatComposer";
 import type {
   CourseMaterial,
   CourseSection,
   StoredCourse,
 } from "../../domain/learning";
 import CourseCover from "./CourseCover";
+import { courseMaterialAttachments } from "./course-composer";
 import {
   deleteCourseMaterial,
   getCourseMaterial,
@@ -34,7 +37,7 @@ export default function CourseOverview({
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
-  onStartLearning: (request: string) => void;
+  onStartLearning: (request: string, materialNames: string[]) => void;
 }) {
   const [view, setView] = useState<"outline" | "materials">("outline");
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
@@ -44,8 +47,8 @@ export default function CourseOverview({
     content: string;
   } | null>(null);
   const [error, setError] = useState("");
+  const [composerError, setComposerError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [request, setRequest] = useState("");
   const sections = course.sections ?? [];
   const progressSections = sections.filter(
     (section) => section.status !== "archived",
@@ -139,6 +142,33 @@ export default function CourseOverview({
       if (preview?.id === material.id) setPreview(null);
     } catch {
       setError("暂时无法删除课程材料");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const startLearning = async ({ text, files }: ChatComposerMessage) => {
+    if (busy) throw new Error("The course overview is busy");
+    setBusy(true);
+    setComposerError("");
+    try {
+      const uploads = await Promise.allSettled(
+        files.map((file) => uploadCourseMaterial(course.id, file)),
+      );
+      const uploadedNames = uploads.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value.name] : [],
+      );
+      const failed = uploads.length - uploadedNames.length;
+      if (files.length > 0 && uploadedNames.length === 0) {
+        setComposerError("教学材料上传失败，请重试");
+        throw new Error("No course material was uploaded");
+      }
+      if (failed > 0)
+        setComposerError(`${failed} 个教学材料上传失败`);
+      onStartLearning(
+        text.trim() || "请根据我附带的教学材料继续这门课程。",
+        uploadedNames,
+      );
     } finally {
       setBusy(false);
     }
@@ -284,38 +314,17 @@ export default function CourseOverview({
         </section>
       )}
 
-      <form
+      <ChatComposer
+        attachments={courseMaterialAttachments}
         className="course-home-composer"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const value = request.trim();
-          if (!value) return;
-          onStartLearning(value);
-        }}
-      >
-        <label className="sr-only" htmlFor="course-guide-request">
-          告诉知芽你想怎样继续这门课程
-        </label>
-        <textarea
-          id="course-guide-request"
-          value={request}
-          onChange={(event) => setRequest(event.target.value)}
-          placeholder="例如：我想继续之前的学习"
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              !event.shiftKey &&
-              !event.nativeEvent.isComposing
-            ) {
-              event.preventDefault();
-              event.currentTarget.form?.requestSubmit();
-            }
-          }}
-        />
-        <button type="submit" aria-label="开始学习" disabled={!request.trim()}>
-          <Icon name="send" />
-        </button>
-      </form>
+        disabled={busy}
+        error={composerError}
+        label="告诉知芽你想怎样继续这门课程"
+        onError={setComposerError}
+        onSubmit={startLearning}
+        placeholder="例如：我想继续之前的学习"
+        submitLabel="开始学习"
+      />
 
       {preview && (
         <section

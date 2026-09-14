@@ -163,12 +163,20 @@ export class CourseSession {
     return this.teacher.state.isStreaming;
   }
 
-  async prompt(text: string) {
+  async prompt(text: string, materialNames: string[] = []) {
     if (this.stopped || this.busy) return;
     const operation = this.cancellation;
-    this.onMessage({ id: ++this.messageSequence, role: "user", text });
+    this.onMessage({
+      id: ++this.messageSequence,
+      role: "user",
+      text,
+      ...(materialNames.length ? { materials: materialNames } : {}),
+    });
+    const agentText = materialNames.length
+      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
+      : text;
     try {
-      await this.teacher.prompt(text);
+      await this.teacher.prompt(agentText);
       await this.waitForNarrationPlayback();
       if (this.teacher.state.errorMessage)
         throw new Error(this.teacher.state.errorMessage);

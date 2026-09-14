@@ -54,6 +54,7 @@ export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  materials?: string[];
   streaming?: boolean;
   pageId?: string;
 };

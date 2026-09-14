@@ -18,13 +18,22 @@ import {
   ReasoningTrigger,
 } from "../../components/ai-elements/reasoning";
 import { Shimmer } from "../../components/ai-elements/shimmer";
-import { PromptInputSubmit } from "../../components/ai-elements/prompt-input";
+import {
+  Attachment,
+  AttachmentInfo,
+  AttachmentPreview,
+  Attachments,
+} from "../../components/ai-elements/attachments";
+import ChatComposer, {
+  type ChatComposerMessage,
+} from "../../components/ChatComposer";
 import { Spinner } from "../../components/ui/spinner";
 import SlideCanvas from "./SlideCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
+import { courseMaterialAttachments } from "./course-composer";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -34,6 +43,7 @@ import {
   replaceCourseOutline,
   saveCourseConversation,
   updateCourse,
+  uploadCourseMaterial,
 } from "./courses";
 
 type RenderedCourseMessage = CourseMessage;
@@ -120,7 +130,7 @@ export default function CourseRoom({
   coursesReady: boolean;
   roomToken: number;
   newSession: boolean;
-  entryRequest: { id: number; text: string } | null;
+  entryRequest: { id: number; text: string; materialNames: string[] } | null;
   libraryError: string;
   onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
@@ -148,7 +158,6 @@ export default function CourseRoom({
       ),
     ),
   );
-  const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
@@ -175,6 +184,7 @@ export default function CourseRoom({
   const saveInFlight = useRef(false);
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
+  const pendingInitialMaterials = useRef<File[]>([]);
   const flushCourseSave = async () => {
     if (saveInFlight.current || !pendingSave.current) return;
     const next = pendingSave.current;
@@ -256,6 +266,24 @@ export default function CourseRoom({
           sessionCourse.current = created;
           setCourse(created);
           onCourseCreated(created);
+          const initialMaterials = pendingInitialMaterials.current;
+          pendingInitialMaterials.current = [];
+          if (initialMaterials.length) {
+            const uploads = await Promise.allSettled(
+              initialMaterials.map((file) =>
+                uploadCourseMaterial(created.id, file),
+              ),
+            );
+            const failed = uploads.filter(
+              (result) => result.status === "rejected",
+            ).length;
+            if (failed)
+              setError(
+                failed === initialMaterials.length
+                  ? "课程已建立，但教学材料上传失败，请在课程主页重试"
+                  : `课程已建立，但有 ${failed} 份教学材料上传失败`,
+              );
+          }
           return created;
         },
         rename: async (title, topic) => {
@@ -430,12 +458,16 @@ export default function CourseRoom({
     });
   }, [messages, activity]);
 
-  const runPrompt = async (value: string) => {
+  const runPrompt = async (
+    value: string,
+    materialNames: string[] = [],
+    clearError = true,
+  ) => {
     if (!value || busy || !session.current) return;
-    setError("");
+    if (clearError) setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
-    await session.current.prompt(value);
+    await session.current.prompt(value, materialNames);
     setBusy(false);
   };
   useEffect(() => {
@@ -448,15 +480,45 @@ export default function CourseRoom({
         return;
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
-      void runPrompt(entryRequest.text);
+      void runPrompt(entryRequest.text, entryRequest.materialNames);
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
-  const submit = async () => {
-    const value = text.trim();
-    if (!value) return;
-    setText("");
-    await runPrompt(value);
+  const submit = async ({ text: input, files }: ChatComposerMessage) => {
+    if (busy) throw new Error("The course session is busy");
+    setError("");
+    const requested = input.trim();
+    if (!course) {
+      pendingInitialMaterials.current = files;
+      void runPrompt(
+        requested || "请根据我附带的教学材料创建课程并开始教学。",
+        files.map((file) => file.name),
+      );
+      return;
+    }
+    const uploads = await Promise.allSettled(
+      files.map((file) => uploadCourseMaterial(course.id, file)),
+    );
+    const uploadedNames = uploads.flatMap((result) =>
+      result.status === "fulfilled" ? [result.value.name] : [],
+    );
+    const failed = uploads.length - uploadedNames.length;
+    if (failed)
+      setError(
+        failed === uploads.length
+          ? "教学材料上传失败，请重试"
+          : `有 ${failed} 份教学材料上传失败`,
+      );
+    if (
+      (!requested && uploadedNames.length === 0) ||
+      (uploads.length > 0 && uploadedNames.length === 0)
+    )
+      throw new Error("No course material was uploaded");
+    void runPrompt(
+      requested || "请根据我附带的教学材料继续教学。",
+      uploadedNames,
+      failed === 0,
+    );
   };
   const interrupt = () => {
     session.current?.stopCurrent();
@@ -545,7 +607,33 @@ export default function CourseRoom({
                     {message.text}
                   </MessageResponse>
                 ) : (
-                  <p>{message.text}</p>
+                  <>
+                    <p>{message.text}</p>
+                    {message.materials?.length ? (
+                      <Attachments
+                        className="course-message-materials"
+                        variant="inline"
+                      >
+                        {message.materials.map((name) => (
+                          <Attachment
+                            data={{
+                              id: name,
+                              type: "file",
+                              filename: name,
+                              mediaType: name.endsWith(".md")
+                                ? "text/markdown"
+                                : "text/plain",
+                              url: "",
+                            }}
+                            key={name}
+                          >
+                            <AttachmentPreview />
+                            <AttachmentInfo />
+                          </Attachment>
+                        ))}
+                      </Attachments>
+                    ) : null}
+                  </>
                 )}
               </article>
             ))
@@ -558,40 +646,18 @@ export default function CourseRoom({
             {error}
           </p>
         )}
-        <form
+        <ChatComposer
+          attachments={courseMaterialAttachments}
           className="course-composer"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void submit();
-          }}
-        >
-          <label className="sr-only" htmlFor="course-prompt">
-            告诉知芽你想学什么
-          </label>
-          <textarea
-            id="course-prompt"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="告诉知芽你想学什么…"
-            disabled={!info?.available || !coursesReady}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void submit();
-              }
-            }}
-          />
-          <PromptInputSubmit
-            aria-label={running ? "打断" : "发送"}
-            className="course-submit"
-            disabled={
-              !running && (!text.trim() || !info?.available || !coursesReady)
-            }
-            onStop={interrupt}
-            status={running ? "streaming" : "ready"}
-            title={running ? "打断" : "发送"}
-          />
-        </form>
+          disabled={!info?.available || !coursesReady}
+          label="告诉知芽你想学什么"
+          onError={setError}
+          onStop={interrupt}
+          onSubmit={submit}
+          placeholder="告诉知芽你想学什么…"
+          running={running}
+          submitLabel="发送"
+        />
       </section>
 
       {current && (
