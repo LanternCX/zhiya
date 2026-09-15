@@ -251,6 +251,10 @@ async function mockCompletedWorkspace(page: Page) {
   await page.route("**/api/learning/model", (route) =>
     route.fulfill({ json: { id: "test-model", available: true } }),
   );
+  await page.route(
+    "**/api/courses/*/outline-reorganization",
+    (route) => route.fulfill({ status: 404, json: { error: "没有待处理任务" } }),
+  );
 }
 
 test("teacher follows the student's requested slide pace while keeping narration synchronized", async ({
@@ -2162,7 +2166,7 @@ test("a student starts a course conversation with teaching material from the cou
   await expect(page.getByText("loops.md", { exact: true })).toBeVisible();
 });
 
-test("the course agent advances an explicit request to start the next section", async ({
+test("the course agent can start another section without completing the current section", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2236,7 +2240,7 @@ test("the course agent advances an explicit request to start the next section", 
           ...saved,
           sections: saved.sections.map((section) => ({
             ...section,
-            status: section.id === "variables" ? "complete" : "active",
+            status: "active" as const,
           })),
         },
       },
@@ -2283,7 +2287,7 @@ test("the course agent advances an explicit request to start the next section", 
                 id: "variables",
                 title: "变量与类型",
                 objective: "理解变量和常见类型",
-                status: "complete",
+                status: "active",
               },
               {
                 id: "loops",
@@ -2307,14 +2311,14 @@ test("the course agent advances an explicit request to start the next section", 
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await page
     .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
-    .fill("变量已经学完，请开始下一关");
+    .fill("变量还要继续学，同时开始学习循环");
   await page.getByRole("button", { name: "开始新的学习" }).click();
 
   await expect(
     page.getByText("接下来，我们用重复画星星来认识循环。", { exact: true }),
   ).toBeVisible();
   expect(outline.map(({ id, status }) => ({ id, status }))).toEqual([
-    { id: "variables", status: "complete" },
+    { id: "variables", status: "active" },
     { id: "loops", status: "active" },
   ]);
   expect(newConversationTitle).toBe("开始学习循环");
@@ -2426,15 +2430,17 @@ test("the course agent reclassifies session content before publishing a revised 
               {
                 ...draftSections[1],
                 position: 1,
-                conversations: [
-                  { ...conversation, sectionId: "loops-new" },
-                ],
+                conversations: [],
               },
               {
-                ...saved.sections[0],
+                id: "history-projects",
+                title: "历史项目",
+                objective: "保留不属于新版大纲的项目学习记录",
                 position: 2,
                 status: "archived",
-                conversations: [],
+                conversations: [
+                  { ...conversation, sectionId: "history-projects" },
+                ],
               },
             ],
           },
@@ -2470,8 +2476,11 @@ test("the course agent reclassifies session content before publishing a revised 
       }
       await route.fulfill(
         toolResponse("classify-game", "assign_course_conversation", {
-          sectionId: "loops-new",
-          reason: "主要学习活动是使用循环限制游戏尝试次数",
+          newSection: {
+            title: "历史项目",
+            objective: "保留不属于新版大纲的项目学习记录",
+          },
+          reason: "该历史项目不属于新版教学大纲",
         }),
       );
       return;
@@ -2505,7 +2514,10 @@ test("the course agent reclassifies session content before publishing a revised 
     "我正在给猜数字游戏加上最多五次机会。",
   );
   expect(assignment).toMatchObject({
-    sectionId: "loops-new",
+    newSection: {
+      title: "历史项目",
+      objective: "保留不属于新版大纲的项目学习记录",
+    },
     conversationUpdatedAt: conversation.updatedAt,
   });
 });

@@ -52,7 +52,7 @@ export type CourseManagement = {
       id?: string;
       title: string;
       objective: string;
-      status?: "planned" | "active" | "complete";
+      status?: "planned" | "active" | "complete" | "archived";
     }>,
     classify?: (
       reorganization: OutlineReorganization,

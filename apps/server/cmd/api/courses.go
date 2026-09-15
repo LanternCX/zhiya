@@ -202,7 +202,7 @@ func (a *application) replaceCourseOutline(w http.ResponseWriter, r *http.Reques
 			a.respondError(w, err)
 			return
 		}
-		if section.Status != "" && section.Status != "planned" && section.Status != "active" && section.Status != "complete" {
+		if section.Status != "" && section.Status != "planned" && section.Status != "active" && section.Status != "complete" && section.Status != "archived" {
 			a.respondError(w, bad("小节状态无效"))
 			return
 		}

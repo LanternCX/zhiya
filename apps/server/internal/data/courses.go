@@ -168,10 +168,10 @@ func (m CourseModel) Update(ctx context.Context, user, id, title, topic string) 
 }
 
 func (m CourseModel) ReplaceOutline(ctx context.Context, user, courseID string, outline []OutlineSection) (Course, error) {
-	return m.replaceOutline(ctx, user, courseID, outline, false)
+	return m.replaceOutline(ctx, user, courseID, outline, false, true)
 }
 
-func (m CourseModel) replaceOutline(ctx context.Context, user, courseID string, outline []OutlineSection, preserveNewIDs bool) (Course, error) {
+func (m CourseModel) replaceOutline(ctx context.Context, user, courseID string, outline []OutlineSection, preserveNewIDs, deleteObsolete bool) (Course, error) {
 	current, err := m.Get(ctx, user, courseID)
 	if err != nil {
 		return Course{}, err
@@ -208,15 +208,15 @@ func (m CourseModel) replaceOutline(ctx context.Context, user, courseID string, 
 			}
 		}
 	}
-	position := len(outline)
-	for _, section := range current.Sections {
-		if used[section.ID] {
-			continue
+	if deleteObsolete {
+		for _, section := range current.Sections {
+			if used[section.ID] {
+				continue
+			}
+			if _, err := m.db.Exec(ctx, `DELETE FROM course_sections WHERE id=$1 AND course_id=$2`, section.ID, courseID); err != nil {
+				return Course{}, err
+			}
 		}
-		if _, err := m.db.Exec(ctx, `UPDATE course_sections SET position=$1,status='archived',updated_at=now() WHERE id=$2`, position, section.ID); err != nil {
-			return Course{}, err
-		}
-		position++
 	}
 	if _, err := m.db.Exec(ctx, `UPDATE courses SET updated_at=now() WHERE id=$1`, courseID); err != nil {
 		return Course{}, err
@@ -240,7 +240,7 @@ func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, cours
 		} else if outline[index].Status == "" {
 			outline[index].Status = section.Status
 		}
-		if outline[index].Status == "" || outline[index].Status == "archived" {
+		if outline[index].Status == "" {
 			outline[index].Status = "planned"
 		}
 	}
@@ -333,7 +333,7 @@ func (m CourseModel) AssignOutlineConversation(ctx context.Context, user, course
 			return Course{}, nil, ValidationError("课程大纲最多包含 100 个小节")
 		}
 		newSection.ID = UUID()
-		newSection.Status = "planned"
+		newSection.Status = "archived"
 		sections = append(sections, *newSection)
 		sectionID = newSection.ID
 		raw, _ = json.Marshal(sections)
@@ -372,13 +372,25 @@ func (m CourseModel) AssignOutlineConversation(ctx context.Context, user, course
 	if pending.PendingCount > 0 {
 		return Course{}, &pending, nil
 	}
-	course, err := m.replaceOutline(ctx, user, courseID, sections, true)
+	course, err := m.replaceOutline(ctx, user, courseID, sections, true, false)
 	if err != nil {
 		return Course{}, nil, err
 	}
 	if _, err := m.db.Exec(ctx, `UPDATE course_conversations c SET section_id=a.target_section_id
 		FROM course_outline_assignments a WHERE a.reorganization_id=$1 AND a.conversation_id=c.id`, reorganizationID); err != nil {
 		return Course{}, nil, err
+	}
+	retained := make(map[string]bool, len(sections))
+	for _, section := range sections {
+		retained[section.ID] = true
+	}
+	for _, section := range course.Sections {
+		if retained[section.ID] {
+			continue
+		}
+		if _, err := m.db.Exec(ctx, `DELETE FROM course_sections WHERE id=$1 AND course_id=$2`, section.ID, courseID); err != nil {
+			return Course{}, nil, err
+		}
 	}
 	if _, err := m.db.Exec(ctx, `DELETE FROM course_outline_reorganizations WHERE id=$1`, reorganizationID); err != nil {
 		return Course{}, nil, err

@@ -11,7 +11,7 @@ import { createAgent } from "../agent";
 import type { ModelGateway } from "../gateway";
 
 function classifierPrompt(reorganization: OutlineReorganization) {
-  return `You classify one K12 course conversation into a revised course outline. Decide from the conversation's actual learning content, not its previous sectionId. Assign exactly one primary teaching objective. Cross-topic questions do not outweigh the main learning activity. Call assign_course_conversation exactly once and emit no prose. If no section is a reasonable fit, propose one concise new section instead.\nRevised outline:\n${JSON.stringify(reorganization.sections)}`;
+  return `You classify one K12 course conversation into a revised course outline. Decide from the conversation's actual learning content, not its previous sectionId. Assign exactly one primary teaching objective. Cross-topic questions do not outweigh the main learning activity. Call assign_course_conversation exactly once and emit no prose. If no revised section is a reasonable fit, propose one concise archival section so the conversation remains available without adding obsolete material to the current learning outline.\nRevised outline:\n${JSON.stringify(reorganization.sections)}`;
 }
 
 function classificationContent(conversation: StoredCourseConversation) {
@@ -55,7 +55,7 @@ export async function classifyCourseConversation(options: {
     name: "assign_course_conversation",
     label: "分类历史学习",
     description:
-      "Assign this conversation to one revised outline section, or propose a new section when none fits.",
+      "Assign this conversation to one revised outline section, or propose a new archival section when none fits.",
     parameters: Type.Object({
       sectionId: Type.Optional(Type.String({ minLength: 1 })),
       newSection: Type.Optional(

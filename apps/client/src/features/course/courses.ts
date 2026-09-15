@@ -95,7 +95,7 @@ export async function replaceCourseOutline(
     id?: string;
     title: string;
     objective: string;
-    status?: "planned" | "active" | "complete";
+    status?: "planned" | "active" | "complete" | "archived";
   }>,
 ) {
   return await api<

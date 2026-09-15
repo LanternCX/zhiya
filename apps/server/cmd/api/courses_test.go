@@ -304,7 +304,7 @@ func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {
 	started := a.request(student, "PUT", "/courses/"+courseID+"/outline", map[string]any{
 		"sections": []any{
 			map[string]any{"id": secondID, "title": "循环与迭代", "objective": "熟练使用循环", "status": "active"},
-			map[string]any{"id": firstID, "title": "变量与类型", "objective": "理解变量和常见数据类型", "status": "complete"},
+			map[string]any{"id": firstID, "title": "变量与类型", "objective": "理解变量和常见数据类型", "status": "active"},
 		},
 	}, http.StatusAccepted)["reorganization"].(map[string]any)
 	var updated map[string]any
@@ -329,6 +329,9 @@ func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {
 	if updatedSections[0].(map[string]any)["id"] != secondID || updatedSections[0].(map[string]any)["status"] != "active" {
 		t.Fatalf("outline update did not preserve and reorder sections: %v", updatedSections)
 	}
+	if updatedSections[1].(map[string]any)["status"] != "active" {
+		t.Fatalf("outline update did not allow multiple active sections: %v", updatedSections)
+	}
 	if len(updatedSections[0].(map[string]any)["conversations"].([]any)) != 1 {
 		t.Fatalf("outline update lost an existing conversation: %v", updatedSections[0])
 	}
@@ -341,26 +344,50 @@ func TestCourseOutlineOrganizesMultipleConversations(t *testing.T) {
 	}, http.StatusBadRequest)
 	archiveJob := a.request(student, "PUT", "/courses/"+courseID+"/outline", map[string]any{
 		"sections": []any{
-			map[string]any{"id": secondID, "title": "循环与迭代", "objective": "熟练使用循环"},
+			map[string]any{"id": secondID, "title": "循环与迭代", "objective": "熟练使用循环", "status": "active"},
+			map[string]any{"id": firstID, "title": "变量与类型", "objective": "理解变量和常见数据类型", "status": "archived"},
 		},
 	}, http.StatusAccepted)["reorganization"].(map[string]any)
 	var archived []any
-	pendingItems := archiveJob["pending"].([]any)
+	for index, item := range archiveJob["pending"].([]any) {
+		pending := item.(map[string]any)
+		status := http.StatusAccepted
+		if index == len(archiveJob["pending"].([]any))-1 {
+			status = http.StatusOK
+		}
+		result := a.request(student, "PUT", "/courses/"+courseID+"/outline-reorganizations/"+archiveJob["id"].(string)+"/assignments/"+pending["id"].(string), map[string]any{
+			"sectionId": pending["sectionId"], "conversationUpdatedAt": pending["updatedAt"], "reason": "显式保留归档小节及其历史",
+		}, status)
+		if course, ok := result["course"].(map[string]any); ok {
+			archived = course["sections"].([]any)
+		}
+	}
+	if len(archived) != 2 || archived[1].(map[string]any)["status"] != "archived" || len(archived[1].(map[string]any)["conversations"].([]any)) != 1 {
+		t.Fatalf("explicit archive did not preserve the section and its history: %v", archived)
+	}
+
+	rebuildJob := a.request(student, "PUT", "/courses/"+courseID+"/outline", map[string]any{
+		"sections": []any{
+			map[string]any{"id": secondID, "title": "循环与迭代", "objective": "熟练使用循环", "status": "active"},
+		},
+	}, http.StatusAccepted)["reorganization"].(map[string]any)
+	var rebuilt []any
+	pendingItems := rebuildJob["pending"].([]any)
 	for index, item := range pendingItems {
 		pending := item.(map[string]any)
 		status := http.StatusAccepted
 		if index == len(pendingItems)-1 {
 			status = http.StatusOK
 		}
-		result := a.request(student, "PUT", "/courses/"+courseID+"/outline-reorganizations/"+archiveJob["id"].(string)+"/assignments/"+pending["id"].(string), map[string]any{
+		result := a.request(student, "PUT", "/courses/"+courseID+"/outline-reorganizations/"+rebuildJob["id"].(string)+"/assignments/"+pending["id"].(string), map[string]any{
 			"sectionId": secondID, "conversationUpdatedAt": pending["updatedAt"], "reason": "新版大纲将相关学习合并到循环小节",
 		}, status)
 		if course, ok := result["course"].(map[string]any); ok {
-			archived = course["sections"].([]any)
+			rebuilt = course["sections"].([]any)
 		}
 	}
-	if len(archived) != 2 || archived[0].(map[string]any)["status"] != "active" || len(archived[0].(map[string]any)["conversations"].([]any)) != 2 || archived[1].(map[string]any)["status"] != "archived" || len(archived[1].(map[string]any)["conversations"].([]any)) != 0 {
-		t.Fatalf("removed outline section did not reclassify its history: %v", archived)
+	if len(rebuilt) != 1 || rebuilt[0].(map[string]any)["status"] != "active" || len(rebuilt[0].(map[string]any)["conversations"].([]any)) != 2 {
+		t.Fatalf("outline rebuild did not delete the obsolete section after reclassifying its history: %v", rebuilt)
 	}
 }
 
@@ -417,22 +444,23 @@ func TestCourseOutlineReorganizationClassifiesConversationContentBeforePublishin
 	if messages[0].(map[string]any)["text"] != "我想给猜数字游戏加上最多五次机会" {
 		t.Fatalf("classification did not expose conversation content: %v", queued)
 	}
-	targetSectionID := work["sections"].([]any)[1].(map[string]any)["id"].(string)
 	published := a.request(student, "PUT", "/courses/"+courseID+"/outline-reorganizations/"+work["id"].(string)+"/assignments/"+conversationID, map[string]any{
-		"sectionId":             targetSectionID,
+		"newSection":            map[string]any{"title": "历史项目", "objective": "保留不属于新版大纲的项目学习记录"},
 		"conversationUpdatedAt": queued["updatedAt"],
-		"reason":                "对话的主要内容是用循环限制游戏尝试次数",
+		"reason":                "该历史项目不属于新版教学大纲",
 	}, http.StatusOK)["course"].(map[string]any)
 	sections := published["sections"].([]any)
-	if len(sections) != 3 || sections[0].(map[string]any)["title"] != "函数" || sections[1].(map[string]any)["title"] != "循环项目" {
+	if len(sections) != 3 || sections[0].(map[string]any)["title"] != "函数" || sections[1].(map[string]any)["title"] != "循环项目" || sections[2].(map[string]any)["title"] != "历史项目" || sections[2].(map[string]any)["status"] != "archived" {
 		t.Fatalf("draft outline was not published: %v", sections)
 	}
-	assigned := sections[1].(map[string]any)["conversations"].([]any)
+	assigned := sections[2].(map[string]any)["conversations"].([]any)
 	if len(assigned) != 1 || assigned[0].(map[string]any)["id"] != conversationID {
 		t.Fatalf("conversation was not assigned from its classified content: %v", sections)
 	}
-	if sections[2].(map[string]any)["status"] != "archived" {
-		t.Fatalf("replaced section was not archived: %v", sections)
+	for _, section := range sections {
+		if section.(map[string]any)["id"] == oldSectionID {
+			t.Fatalf("obsolete outline section was archived instead of deleted: %v", sections)
+		}
 	}
 }
 
@@ -506,7 +534,7 @@ func TestCourseOutlineReorganizationCanCreateASectionForUnmatchedContent(t *test
 		"conversationUpdatedAt": queued["updatedAt"], "reason": "现有大纲没有涵盖网络调试",
 	}, http.StatusOK)["course"].(map[string]any)
 	sections := published["sections"].([]any)
-	if len(sections) != 3 || sections[1].(map[string]any)["title"] != "网络程序调试" || len(sections[1].(map[string]any)["conversations"].([]any)) != 1 {
+	if len(sections) != 2 || sections[1].(map[string]any)["title"] != "网络程序调试" || sections[1].(map[string]any)["status"] != "archived" || len(sections[1].(map[string]any)["conversations"].([]any)) != 1 {
 		t.Fatalf("unmatched content did not create an assigned section: %v", sections)
 	}
 }

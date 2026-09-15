@@ -11,7 +11,7 @@ export function setCourseOutlineTool(
     name: "set_course_outline",
     label: activityLabel,
     description:
-      "Create or revise the ordered course outline. Each section is a meaningful teaching unit with a concise title and learning objective. Call this immediately after creating a course, before teaching. Update it later when the student's goals or explicit material constraints change. When revising a course with history, existing conversations are reclassified from their actual content before the new outline is published.",
+      "Create or replace the ordered course outline. Each section is a meaningful teaching unit with a concise title and learning objective. Call this immediately after creating a course, before teaching. Update it later when the student's goals or explicit material constraints change. Multiple sections may be active at the same time. Use archived only when intentionally retaining a section and its history outside the current learning flow. Omitted old sections are deleted after their conversations are reclassified; omission is not archival.",
     parameters: Type.Object({
       sections: Type.Array(
         Type.Object({
@@ -23,6 +23,7 @@ export function setCourseOutlineTool(
               Type.Literal("planned"),
               Type.Literal("active"),
               Type.Literal("complete"),
+              Type.Literal("archived"),
             ]),
           ),
         }),
@@ -37,7 +38,7 @@ export function setCourseOutlineTool(
           id?: string;
           title: string;
           objective: string;
-          status?: "planned" | "active" | "complete";
+          status?: "planned" | "active" | "complete" | "archived";
         }>;
       };
       const course = await context.management.setOutline(input.sections);
