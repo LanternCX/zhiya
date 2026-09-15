@@ -211,7 +211,7 @@ pub async fn model_request(
             .get_password()
             .map_err(|_| "Unable to read secure storage")?;
         let client = Client::builder()
-            .timeout(Duration::from_secs(120))
+            .timeout(None)
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .map_err(|_| "Network unavailable")?;

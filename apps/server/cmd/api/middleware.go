@@ -16,14 +16,14 @@ func (a *application) protect(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		if strings.HasPrefix(r.URL.Path, "/api/") {
-			timeout := config.Seconds(a.config.Server.RequestTimeoutSeconds)
-			if r.URL.Path == "/api/learning/model" {
-				timeout = 120 * time.Second
-				_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(timeout))
+			modelStream := r.URL.Path == "/api/learning/model" || r.URL.Path == "/api/learning/course/model"
+			if modelStream {
+				_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
+			} else {
+				ctx, cancel := context.WithTimeout(r.Context(), config.Seconds(a.config.Server.RequestTimeoutSeconds))
+				defer cancel()
+				r = r.WithContext(ctx)
 			}
-			ctx, cancel := context.WithTimeout(r.Context(), timeout)
-			defer cancel()
-			r = r.WithContext(ctx)
 			if r.Method != "GET" {
 				origin := r.Header.Get("Origin")
 				scheme := "http"

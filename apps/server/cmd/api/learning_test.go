@@ -12,10 +12,34 @@ import (
 	"testing"
 	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 )
+
+func TestModelStreamsHaveNoAbsoluteDeadline(t *testing.T) {
+	a := &application{config: config.Config{Server: config.Server{
+		RequestTimeoutSeconds: 1,
+	}}}
+	handler := a.protect(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, limited := r.Context().Deadline(); limited {
+			http.Error(w, "unexpected deadline", http.StatusGatewayTimeout)
+			return
+		}
+		_, _ = io.WriteString(w, "complete")
+	}))
+
+	for _, path := range []string{"/api/learning/model", "/api/learning/course/model"} {
+		response := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		handler.ServeHTTP(response, request)
+
+		if response.Code != http.StatusOK || response.Body.String() != "complete" {
+			t.Fatalf("model stream %s: %d %q", path, response.Code, response.Body.String())
+		}
+	}
+}
 
 func learningSocket(t *testing.T, a *testApp, c *http.Client) *websocket.Conn {
 	t.Helper()

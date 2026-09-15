@@ -139,7 +139,7 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 	delete(payload, "max_tokens")
 	payload["max_completion_tokens"] = 8192
 	raw, _ := json.Marshal(payload)
-	client := &http.Client{Timeout: 120 * time.Second, CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}
+	client := &http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}
 	idempotencyKey := data.UUID()
 	streamStarted := false
 	startStream := func() {

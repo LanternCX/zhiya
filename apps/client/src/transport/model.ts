@@ -49,9 +49,7 @@ async function streamingModelRequest(
           "X-Zhiya-User": expectedUser,
         },
         body,
-        signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
-          : AbortSignal.timeout(120000),
+        signal,
       }),
       onRetry,
     );
