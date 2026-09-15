@@ -1144,6 +1144,18 @@ test("a saved course starts a new agent-routed session and supports rename and d
   const attachmentButton = page.getByRole("button", {
     name: "添加教学材料",
   });
+  const submitButton = page.getByRole("button", { name: "发送" });
+  const attachmentButtonBox = await attachmentButton.boundingBox();
+  const submitButtonBox = await submitButton.boundingBox();
+  expect(composerBox?.height ?? Infinity).toBeLessThanOrEqual(64);
+  expect(
+    Math.abs(
+      (attachmentButtonBox?.y ?? 0) - (submitButtonBox?.y ?? Infinity),
+    ),
+  ).toBeLessThanOrEqual(2);
+  await expect(
+    page.getByRole("textbox", { name: "告诉知芽你想学什么" }),
+  ).toHaveAttribute("placeholder", "给知芽发消息…");
   await expect(attachmentButton).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",

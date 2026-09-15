@@ -1,7 +1,8 @@
 .chat-composer > [data-slot="input-group"] {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 30px;
   background: var(--surface);
   box-shadow: none;
 }
@@ -10,16 +11,16 @@
   box-shadow: none;
 }
 .chat-composer textarea {
-  min-height: 44px;
+  min-height: 58px;
   max-height: 140px;
-  padding: 12px 14px 6px;
+  padding: 17px 60px;
   resize: none;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--text);
   font: inherit;
-  line-height: 1.5;
+  line-height: 24px;
 }
 .chat-composer-dropzone {
   position: absolute;
@@ -107,19 +108,26 @@
   opacity: 1;
 }
 .chat-composer-footer {
-  min-height: 44px;
-  padding: 4px 8px 8px;
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  min-height: 58px;
+  padding: 9px 10px;
+  pointer-events: none;
 }
 .chat-composer-footer [data-slot="input-group-addon"] {
   padding: 0;
+}
+.chat-composer-footer button {
+  pointer-events: auto;
 }
 .chat-composer-footer span {
   color: var(--muted);
   font-size: 11px;
 }
 .chat-composer .chat-composer-attachment-button {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -133,19 +141,19 @@
 }
 .chat-composer .chat-composer-submit {
   display: grid;
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: 50%;
   background: var(--accent);
   color: var(--on-accent);
 }
 .chat-composer .chat-composer-submit svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

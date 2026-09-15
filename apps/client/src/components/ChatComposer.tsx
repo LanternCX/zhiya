@@ -161,7 +161,7 @@ function ChatComposerInput({
         <PromptInputTextarea
           aria-label={label}
           disabled={disabled}
-          placeholder=""
+          placeholder="给知芽发消息…"
         />
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">

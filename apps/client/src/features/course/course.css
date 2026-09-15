@@ -101,10 +101,10 @@
 }
 .course-home-composer > [data-slot="input-group"] {
   overflow: hidden;
-  border: 1px solid var(--glass-edge);
-  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 30px;
   background: var(--glass);
-  box-shadow: var(--glass-shadow);
+  box-shadow: none;
   backdrop-filter: blur(24px) saturate(125%);
   -webkit-backdrop-filter: blur(24px) saturate(125%);
   transition: border-color 160ms ease;
@@ -117,7 +117,7 @@
   border-color: color-mix(in srgb, var(--accent) 56%, var(--line));
 }
 .course-home-composer textarea {
-  min-height: 48px;
+  min-height: 58px;
   max-height: 128px;
 }
 .course-home-tabs {
