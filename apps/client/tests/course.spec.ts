@@ -2634,7 +2634,7 @@ test("a student enters a section directly whether resuming or starting", async (
   ).toBeVisible();
   await expect(
     page.getByRole("textbox", { name: "告诉知芽你想学什么" }),
-  ).toHaveAttribute("placeholder", "");
+  ).toHaveAttribute("placeholder", "给知芽发消息…");
   await expect(
     page.getByText("支持 Markdown、TXT", { exact: true }),
   ).toHaveCount(0);
@@ -2834,7 +2834,10 @@ test("a course outline opens lessons directly and manages history on demand", as
   const sectionComposer = page.getByRole("textbox", {
     name: "告诉知芽你想在循环中学习什么",
   });
-  await expect(sectionComposer).toHaveAttribute("placeholder", "");
+  await expect(sectionComposer).toHaveAttribute(
+    "placeholder",
+    "给知芽发消息…",
+  );
   await expect(
     page.getByText("支持 Markdown、TXT", { exact: true }),
   ).toHaveCount(0);
