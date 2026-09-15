@@ -1722,9 +1722,17 @@ test("a student drags teaching material onto the course composer", async ({
 
   await composer.dispatchEvent("dragenter", { dataTransfer: transfer });
   await expect(page.getByText("松开以添加教学材料")).toBeVisible();
-  await expect(page.locator(".chat-composer-dropzone")).not.toHaveCSS(
+  const inputGroup = composer.locator('[data-slot="input-group"]');
+  const dropzone = page.locator(".chat-composer-dropzone");
+  await expect(dropzone).not.toHaveCSS(
     "animation-name",
     "none",
+  );
+  await expect(dropzone).toHaveCSS(
+    "border-radius",
+    await inputGroup.evaluate(
+      (element) => getComputedStyle(element).borderRadius,
+    ),
   );
 
   await composer.dispatchEvent("drop", { dataTransfer: transfer });

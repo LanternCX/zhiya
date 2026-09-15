@@ -34,7 +34,7 @@
   justify-content: center;
   pointer-events: none;
   border: 2px dashed color-mix(in srgb, var(--accent) 68%, var(--line));
-  border-radius: 13px;
+  border-radius: inherit;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   color: var(--text);
   backdrop-filter: blur(12px);
