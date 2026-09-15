@@ -3,11 +3,14 @@ package main
 import (
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 )
 
 func (a *application) routes() http.Handler {
+	storageURL, _ := url.Parse(a.config.Storage.PublicEndpoint)
+	storageOrigin := storageURL.Scheme + "://" + storageURL.Host
 	api := http.NewServeMux()
 	api.HandleFunc("GET /api/learning/socket", a.learningSocket)
 	api.HandleFunc("POST /api/learning/socket-ticket", a.learningSocketTicket)
@@ -22,6 +25,16 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("PATCH /api/courses/{id}", a.updateCourse)
 	api.HandleFunc("DELETE /api/courses/{id}", a.deleteCourse)
 	api.HandleFunc("PUT /api/courses/{id}/conversation", a.saveCourseConversation)
+	api.HandleFunc("PUT /api/courses/{id}/outline", a.replaceCourseOutline)
+	api.HandleFunc("GET /api/courses/{id}/outline-reorganization", a.getCourseOutlineReorganization)
+	api.HandleFunc("PUT /api/courses/{id}/outline-reorganizations/{reorganizationId}/assignments/{conversationId}", a.assignCourseOutlineConversation)
+	api.HandleFunc("POST /api/courses/{id}/sections/{sectionId}/conversations", a.createCourseConversation)
+	api.HandleFunc("DELETE /api/courses/{id}/sections/{sectionId}/conversations/{conversationId}", a.deleteCourseConversation)
+	api.HandleFunc("GET /api/courses/{id}/materials", a.listCourseMaterials)
+	api.HandleFunc("POST /api/courses/{id}/material-uploads", a.startCourseMaterialUpload)
+	api.HandleFunc("POST /api/courses/{id}/material-uploads/{uploadId}/complete", a.completeCourseMaterialUpload)
+	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}/download", a.downloadCourseMaterial)
+	api.HandleFunc("DELETE /api/courses/{id}/materials/{materialId}", a.deleteCourseMaterial)
 	api.HandleFunc("GET /api/account-rules", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, data.AccountRules())
 	})
@@ -48,7 +61,7 @@ func (a *application) routes() http.Handler {
 	mux.Handle("/api/", protected)
 	mux.Handle("/health", protected)
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' "+storageOrigin+"; img-src 'self' data:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		http.FileServer(http.Dir(a.config.Server.WebDir)).ServeHTTP(w, r)
 	}))

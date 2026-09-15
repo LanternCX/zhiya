@@ -18,18 +18,33 @@ import {
   ReasoningTrigger,
 } from "../../components/ai-elements/reasoning";
 import { Shimmer } from "../../components/ai-elements/shimmer";
-import { PromptInputSubmit } from "../../components/ai-elements/prompt-input";
+import {
+  Attachment,
+  AttachmentInfo,
+  AttachmentPreview,
+  Attachments,
+} from "../../components/ai-elements/attachments";
+import ChatComposer, {
+  type ChatComposerMessage,
+} from "../../components/ChatComposer";
 import { Spinner } from "../../components/ui/spinner";
 import SlideCanvas from "./SlideCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
+import { courseMaterialAttachments } from "./course-composer";
 import {
   createCourse,
+  createCourseConversation as createStoredCourseConversation,
   emptyCourseState,
+  getCourseMaterial,
+  listCourseMaterials,
+  reorganizeCourseOutline,
+  resumeCourseOutlineReorganization,
   saveCourseConversation,
   updateCourse,
+  uploadCourseMaterial,
 } from "./courses";
 
 type RenderedCourseMessage = CourseMessage;
@@ -99,7 +114,10 @@ export default function CourseRoom({
   activeCourse,
   coursesReady,
   roomToken,
+  newSession,
+  entryRequest,
   libraryError,
+  onEntryRequestHandled,
   onOpenCourse,
   onRenameCourse,
   onDeleteCourse,
@@ -112,25 +130,50 @@ export default function CourseRoom({
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
   roomToken: number;
+  newSession: boolean;
+  entryRequest: { id: number; text: string; materialNames: string[] } | null;
   libraryError: string;
+  onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
   onRenameCourse: (course: StoredCourse, title: string) => Promise<boolean>;
   onDeleteCourse: (course: StoredCourse) => Promise<boolean>;
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
 }) {
-  const [messages, setMessages] = useState<RenderedCourseMessage[]>([]);
-  const [pages, setPages] = useState<LessonPage[]>([]);
-  const [presented, setPresented] = useState<Set<string>>(() => new Set());
-  const [page, setPage] = useState(0);
-  const [text, setText] = useState("");
+  const initialState =
+    activeCourse && newSession
+      ? emptyCourseState()
+      : (activeCourse?.state ?? emptyCourseState());
+  const [messages, setMessages] = useState<RenderedCourseMessage[]>(
+    initialState.messages,
+  );
+  const [pages, setPages] = useState<LessonPage[]>(initialState.pages);
+  const [presented, setPresented] = useState<Set<string>>(
+    () => new Set(initialState.presentedPageIds),
+  );
+  const [page, setPage] = useState(() =>
+    Math.max(
+      0,
+      initialState.pages.findIndex(
+        ({ id }) => id === initialState.currentPageId,
+      ),
+    ),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
+  const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
+  const pagesRef = useRef<LessonPage[]>(initialState.pages);
+  const presentedRef = useRef<Set<string>>(
+    new Set(initialState.presentedPageIds),
+  );
   const session = useRef<CourseSession | null>(null);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
+  const boundConversationId = useRef<string | null>(
+    activeCourse && !newSession ? activeCourse.conversationId : null,
+  );
   const pendingSave = useRef<{
     course: StoredCourse;
     state: CourseConversationState;
@@ -139,31 +182,49 @@ export default function CourseRoom({
     course: StoredCourse;
     state: CourseConversationState;
   } | null>(null);
-  const saveInFlight = useRef(false);
+  const saveInFlight = useRef<Promise<boolean> | null>(null);
   const thread = useRef<HTMLDivElement | null>(null);
-  const flushCourseSave = async () => {
-    if (saveInFlight.current || !pendingSave.current) return;
+  const startedEntryRequest = useRef<number | null>(null);
+  const pendingInitialMaterials = useRef<File[]>([]);
+  const flushCourseSave = async (): Promise<boolean> => {
+    if (saveInFlight.current) {
+      const saved = await saveInFlight.current;
+      return (await flushCourseSave()) && saved;
+    }
+    if (!pendingSave.current) return true;
     const next = pendingSave.current;
     pendingSave.current = null;
-    saveInFlight.current = true;
-    try {
-      await saveCourseConversation(next.course, next.state);
-    } catch {
-      setError("课程进度暂时无法保存");
-    } finally {
-      saveInFlight.current = false;
-      if (pendingSave.current) void flushCourseSave();
-    }
+    const saving = saveCourseConversation(next.course, next.state)
+      .then(() => true)
+      .catch(() => {
+        setError("课程进度暂时无法保存");
+        return false;
+      });
+    saveInFlight.current = saving;
+    await saving;
+    if (saveInFlight.current === saving) saveInFlight.current = null;
+    if (pendingSave.current) return (await flushCourseSave()) && (await saving);
+    return saving;
   };
 
   useEffect(() => {
     if (!info?.available || !coursesReady) return;
-    const initial = activeCourse?.state ?? emptyCourseState();
-    sessionCourse.current = activeCourse;
-    setCourse(activeCourse);
+    const selectedCourse = activeCourse;
+    const startsUnbound = Boolean(selectedCourse && newSession);
+    const initial = startsUnbound
+      ? emptyCourseState()
+      : (selectedCourse?.state ?? emptyCourseState());
+    sessionCourse.current = selectedCourse;
+    boundConversationId.current = startsUnbound
+      ? null
+      : (selectedCourse?.conversationId ?? null);
+    setCourse(selectedCourse);
     setMessages(initial.messages);
+    messagesRef.current = initial.messages;
     setPages(initial.pages);
+    pagesRef.current = initial.pages;
     setPresented(new Set(initial.presentedPageIds));
+    presentedRef.current = new Set(initial.presentedPageIds);
     const initialPage = initial.pages.findIndex(
       (page) => page.id === initial.currentPageId,
     );
@@ -172,17 +233,46 @@ export default function CourseRoom({
     setActivity(null);
     setModelRetry(null);
     setError("");
+    const acceptUpdatedCourse = (updated: StoredCourse) => {
+      const currentConversation = updated.sections
+        ?.flatMap((section) => section.conversations)
+        .find(
+          (conversation) =>
+            conversation.id === boundConversationId.current,
+        );
+      const next = currentConversation
+        ? {
+            ...updated,
+            conversationId: currentConversation.id,
+            state: sessionCourse.current?.state ?? updated.state,
+          }
+        : updated;
+      sessionCourse.current = next;
+      setCourse(next);
+      onCourseUpdated(next);
+      return next;
+    };
     const current = createCourseSession(
       info,
       memory,
       (message, replaceLast) =>
         setMessages((all) => {
-          if (!replaceLast) return [...all, message];
-          return [...all.slice(0, -1), message];
+          const next = !replaceLast
+            ? [...all, message]
+            : [...all.slice(0, -1), message];
+          messagesRef.current = next;
+          return next;
         }),
-      (next) => setPages(next),
+      (next) => {
+        pagesRef.current = next;
+        setPages(next);
+      },
       (pageId) => {
-        setPresented((existing) => new Set(existing).add(pageId));
+        setPresented((existing) => {
+          const next = new Set(existing).add(pageId);
+          presentedRef.current = next;
+          return next;
+        });
         setPages((existing) => {
           const index = existing.findIndex((page) => page.id === pageId);
           if (index >= 0) setPage(index);
@@ -194,12 +284,32 @@ export default function CourseRoom({
       setError,
       initial,
       {
-        course: activeCourse,
+        course: selectedCourse,
+        currentConversationId: boundConversationId.current,
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
+          boundConversationId.current = null;
           sessionCourse.current = created;
           setCourse(created);
           onCourseCreated(created);
+          const initialMaterials = pendingInitialMaterials.current;
+          pendingInitialMaterials.current = [];
+          if (initialMaterials.length) {
+            const uploads = await Promise.allSettled(
+              initialMaterials.map((file) =>
+                uploadCourseMaterial(created.id, file),
+              ),
+            );
+            const failed = uploads.filter(
+              (result) => result.status === "rejected",
+            ).length;
+            if (failed)
+              setError(
+                failed === initialMaterials.length
+                  ? "课程已建立，但教学材料上传失败，请在课程主页重试"
+                  : `课程已建立，但有 ${failed} 份教学材料上传失败`,
+              );
+          }
           return created;
         },
         rename: async (title, topic) => {
@@ -214,6 +324,93 @@ export default function CourseRoom({
           onCourseUpdated(next);
           return next;
         },
+        setOutline: async (sections, classify) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          if (!classify) throw new Error("课程大纲调整缺少内容分类器");
+          if (boundConversationId.current) {
+            pendingSave.current = {
+              course: sessionCourse.current,
+              state: {
+                ...sessionCourse.current.state,
+                messages: messagesRef.current,
+                pages: pagesRef.current,
+                presentedPageIds: [...presentedRef.current],
+              },
+            };
+            if (!(await flushCourseSave()))
+              throw new Error("保存最新课程内容后才能调整大纲");
+          }
+          const updated = await reorganizeCourseOutline(
+            sessionCourse.current.id,
+            sections,
+            classify,
+          );
+          return acceptUpdatedCourse(updated);
+        },
+        resumeOutline: async (classify) => {
+          if (!sessionCourse.current) return null;
+          const updated = await resumeCourseOutlineReorganization(
+            sessionCourse.current.id,
+            classify,
+          );
+          return updated ? acceptUpdatedCourse(updated) : null;
+        },
+        createConversation: async (sectionId, title) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          if (boundConversationId.current)
+            throw new Error("当前学习对话已经建立");
+          const conversation = await createStoredCourseConversation(
+            sessionCourse.current.id,
+            sectionId,
+            title,
+          );
+          const state: CourseConversationState = {
+            messages: messagesRef.current,
+            pages: pagesRef.current,
+            presentedPageIds: [...presentedRef.current],
+            currentPageId: pagesRef.current.at(-1)?.id ?? "",
+          };
+          boundConversationId.current = conversation.id;
+          const updated = {
+            ...sessionCourse.current,
+            conversationId: conversation.id,
+            state,
+            sections: sessionCourse.current.sections?.map((section) =>
+              section.id === sectionId
+                ? {
+                    ...section,
+                    conversations: [
+                      ...section.conversations,
+                      { ...conversation, state },
+                    ],
+                  }
+                : section,
+            ),
+          };
+          sessionCourse.current = updated;
+          setCourse(updated);
+          onCourseUpdated(updated);
+          return conversation;
+        },
+        listConversations: async () =>
+          sessionCourse.current?.sections?.flatMap(
+            (section) => section.conversations,
+          ) ?? [],
+        readConversation: async (conversationId) => {
+          const conversation = sessionCourse.current?.sections
+            ?.flatMap((section) => section.conversations)
+            .find(({ id }) => id === conversationId);
+          if (!conversation) throw new Error("找不到这条历史学习记录");
+          return conversation;
+        },
+        listMaterials: async () => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          return listCourseMaterials(sessionCourse.current.id);
+        },
+        readMaterial: async (materialId) => {
+          if (!sessionCourse.current) throw new Error("课程尚未建立");
+          return getCourseMaterial(sessionCourse.current.id, materialId);
+        },
       },
       listCodeLanguages,
     );
@@ -222,17 +419,39 @@ export default function CourseRoom({
       current.stop();
       if (session.current === current) session.current = null;
     };
-  }, [info?.available, info?.id, memory, roomToken, coursesReady]);
+  }, [
+    info?.available,
+    info?.id,
+    memory,
+    roomToken,
+    coursesReady,
+  ]);
 
   useEffect(() => {
-    if (!course) return;
+    if (
+      !course ||
+      !boundConversationId.current ||
+      boundConversationId.current !== course.conversationId
+    )
+      return;
     const state = {
       messages,
       pages,
       presentedPageIds: [...presented],
       currentPageId: pages[page]?.id ?? "",
     };
-    const updated = { ...course, state };
+    const updated = {
+      ...course,
+      state,
+      sections: course.sections?.map((section) => ({
+        ...section,
+        conversations: section.conversations.map((conversation) =>
+          conversation.id === course.conversationId
+            ? { ...conversation, state }
+            : conversation,
+        ),
+      })),
+    };
     sessionCourse.current = updated;
     latestSnapshot.current = { course, state };
     onCourseUpdated(updated);
@@ -276,19 +495,67 @@ export default function CourseRoom({
     });
   }, [messages, activity]);
 
-  const runPrompt = async (value: string) => {
+  const runPrompt = async (
+    value: string,
+    materialNames: string[] = [],
+    clearError = true,
+  ) => {
     if (!value || busy || !session.current) return;
-    setError("");
+    if (clearError) setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
-    await session.current.prompt(value);
+    await session.current.prompt(value, materialNames);
     setBusy(false);
   };
-  const submit = async () => {
-    const value = text.trim();
-    if (!value) return;
-    setText("");
-    await runPrompt(value);
+  useEffect(() => {
+    if (!entryRequest) return;
+    const timer = window.setTimeout(() => {
+      if (
+        !session.current ||
+        startedEntryRequest.current === entryRequest.id
+      )
+        return;
+      startedEntryRequest.current = entryRequest.id;
+      onEntryRequestHandled(entryRequest.id);
+      void runPrompt(entryRequest.text, entryRequest.materialNames);
+    });
+    return () => window.clearTimeout(timer);
+  }, [entryRequest, onEntryRequestHandled]);
+  const submit = async ({ text: input, files }: ChatComposerMessage) => {
+    if (busy) throw new Error("The course session is busy");
+    setError("");
+    const requested = input.trim();
+    if (!course) {
+      pendingInitialMaterials.current = files;
+      void runPrompt(
+        requested || "请根据我附带的教学材料创建课程并开始教学。",
+        files.map((file) => file.name),
+      );
+      return;
+    }
+    const uploads = await Promise.allSettled(
+      files.map((file) => uploadCourseMaterial(course.id, file)),
+    );
+    const uploadedNames = uploads.flatMap((result) =>
+      result.status === "fulfilled" ? [result.value.name] : [],
+    );
+    const failed = uploads.length - uploadedNames.length;
+    if (failed)
+      setError(
+        failed === uploads.length
+          ? "教学材料上传失败，请重试"
+          : `有 ${failed} 份教学材料上传失败`,
+      );
+    if (
+      (!requested && uploadedNames.length === 0) ||
+      (uploads.length > 0 && uploadedNames.length === 0)
+    )
+      throw new Error("No course material was uploaded");
+    void runPrompt(
+      requested || "请根据我附带的教学材料继续教学。",
+      uploadedNames,
+      failed === 0,
+    );
   };
   const interrupt = () => {
     session.current?.stopCurrent();
@@ -342,14 +609,18 @@ export default function CourseRoom({
               <div className="subject-art learning">
                 <Icon name="learning" />
               </div>
-              <h1>今天想学什么？</h1>
-              <CourseLibrary
-                courses={courses}
-                error={libraryError}
-                onOpen={onOpenCourse}
-                onRename={onRenameCourse}
-                onDelete={onDeleteCourse}
-              />
+              <h1>{course ? "开始新的学习对话" : "今天想学什么？"}</h1>
+              {course ? (
+                <p>从一个问题、例子或练习开始这次学习。</p>
+              ) : (
+                <CourseLibrary
+                  courses={courses}
+                  error={libraryError}
+                  onOpen={onOpenCourse}
+                  onRename={onRenameCourse}
+                  onDelete={onDeleteCourse}
+                />
+              )}
             </div>
           ) : (
             messages.map((message) => (
@@ -373,7 +644,33 @@ export default function CourseRoom({
                     {message.text}
                   </MessageResponse>
                 ) : (
-                  <p>{message.text}</p>
+                  <>
+                    <p>{message.text}</p>
+                    {message.materials?.length ? (
+                      <Attachments
+                        className="course-message-materials"
+                        variant="inline"
+                      >
+                        {message.materials.map((name) => (
+                          <Attachment
+                            data={{
+                              id: name,
+                              type: "file",
+                              filename: name,
+                              mediaType: name.endsWith(".md")
+                                ? "text/markdown"
+                                : "text/plain",
+                              url: "",
+                            }}
+                            key={name}
+                          >
+                            <AttachmentPreview />
+                            <AttachmentInfo />
+                          </Attachment>
+                        ))}
+                      </Attachments>
+                    ) : null}
+                  </>
                 )}
               </article>
             ))
@@ -386,40 +683,17 @@ export default function CourseRoom({
             {error}
           </p>
         )}
-        <form
+        <ChatComposer
+          attachments={courseMaterialAttachments}
           className="course-composer"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void submit();
-          }}
-        >
-          <label className="sr-only" htmlFor="course-prompt">
-            告诉知芽你想学什么
-          </label>
-          <textarea
-            id="course-prompt"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="告诉知芽你想学什么…"
-            disabled={!info?.available || !coursesReady}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void submit();
-              }
-            }}
-          />
-          <PromptInputSubmit
-            aria-label={running ? "打断" : "发送"}
-            className="course-submit"
-            disabled={
-              !running && (!text.trim() || !info?.available || !coursesReady)
-            }
-            onStop={interrupt}
-            status={running ? "streaming" : "ready"}
-            title={running ? "打断" : "发送"}
-          />
-        </form>
+          disabled={!info?.available || !coursesReady}
+          label="告诉知芽你想学什么"
+          onError={setError}
+          onStop={interrupt}
+          onSubmit={submit}
+          running={running}
+          submitLabel="发送"
+        />
       </section>
 
       {current && (

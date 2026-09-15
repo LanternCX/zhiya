@@ -24,6 +24,7 @@ type Config struct {
 	Development bool     `yaml:"development"`
 	Server      Server   `yaml:"http"`
 	Database    Database `yaml:"database"`
+	Storage     Storage  `yaml:"storage"`
 	SMTP        SMTP     `yaml:"smtp"`
 	Account     Account  `yaml:"account"`
 }
@@ -51,6 +52,15 @@ type Server struct {
 }
 type Database struct {
 	URL string `yaml:"url"`
+}
+type Storage struct {
+	Endpoint       string `yaml:"endpoint"`
+	PublicEndpoint string `yaml:"public_endpoint"`
+	Region         string `yaml:"region"`
+	Bucket         string `yaml:"bucket"`
+	AccessKey      string `yaml:"access_key"`
+	SecretKey      string `yaml:"secret_key"`
+	URLTTLSeconds  int    `yaml:"url_ttl_seconds"`
 }
 type SMTP struct {
 	Address        string `yaml:"address"`
@@ -257,6 +267,17 @@ func (c Config) Validate() error {
 	db, err := url.Parse(c.Database.URL)
 	if err != nil || db.Hostname() == "" || (db.Scheme != "postgres" && db.Scheme != "postgresql") || db.Path == "" || db.Path == "/" {
 		return fmt.Errorf("database.url must be a PostgreSQL connection URL")
+	}
+	storage, err := url.Parse(c.Storage.Endpoint)
+	if err != nil || storage.Host == "" || storage.User != nil || storage.RawQuery != "" || storage.Fragment != "" || (storage.Scheme != "https" && !(c.Development && storage.Scheme == "http" && loopback(storage.Hostname()))) {
+		return fmt.Errorf("storage.endpoint must be an HTTPS URL (loopback HTTP allowed in development)")
+	}
+	publicStorage, err := url.Parse(c.Storage.PublicEndpoint)
+	if err != nil || publicStorage.Host == "" || publicStorage.User != nil || publicStorage.RawQuery != "" || publicStorage.Fragment != "" || (publicStorage.Scheme != "https" && !(c.Development && publicStorage.Scheme == "http" && loopback(publicStorage.Hostname()))) {
+		return fmt.Errorf("storage.public_endpoint must be an HTTPS URL (loopback HTTP allowed in development)")
+	}
+	if strings.TrimSpace(c.Storage.Region) == "" || strings.TrimSpace(c.Storage.Bucket) == "" || strings.TrimSpace(c.Storage.AccessKey) == "" || strings.TrimSpace(c.Storage.SecretKey) == "" {
+		return fmt.Errorf("storage region, bucket, access_key and secret_key are required")
 	}
 	if port := db.Port(); port != "" {
 		if n, err := strconv.Atoi(port); err != nil || n < 1 || n > 65535 {

@@ -2,7 +2,11 @@ import type {
   CodeLanguage,
   CodingExercise,
   CourseCover,
+  CourseMaterial,
+  StoredCourseConversation,
   StoredCourse,
+  OutlineClassification,
+  OutlineReorganization,
   Slide,
   LessonPage,
 } from "../domain/learning";
@@ -36,12 +40,43 @@ export function bindPersistedTool(
 
 export type CourseManagement = {
   course: StoredCourse | null;
+  currentConversationId: string | null;
   create: (
     title: string,
     topic: string,
     cover: CourseCover,
   ) => Promise<StoredCourse>;
   rename: (title: string, topic?: string) => Promise<StoredCourse>;
+  setOutline: (
+    sections: Array<{
+      id?: string;
+      title: string;
+      objective: string;
+      status?: "planned" | "active" | "complete" | "archived";
+    }>,
+    classify?: (
+      reorganization: OutlineReorganization,
+      conversation: StoredCourseConversation,
+    ) => Promise<OutlineClassification>,
+  ) => Promise<StoredCourse>;
+  resumeOutline: (
+    classify: (
+      reorganization: OutlineReorganization,
+      conversation: StoredCourseConversation,
+    ) => Promise<OutlineClassification>,
+  ) => Promise<StoredCourse | null>;
+  createConversation: (
+    sectionId: string,
+    title: string,
+  ) => Promise<StoredCourseConversation>;
+  listConversations: () => Promise<StoredCourseConversation[]>;
+  readConversation: (
+    conversationId: string,
+  ) => Promise<StoredCourseConversation>;
+  listMaterials: () => Promise<CourseMaterial[]>;
+  readMaterial: (
+    materialId: string,
+  ) => Promise<{ material: CourseMaterial; content: string }>;
 };
 
 export type SlideTools = {

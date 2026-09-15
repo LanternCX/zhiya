@@ -47,6 +47,18 @@ func errorResponse(err error) (int, string) {
 		e = failure{429, err.Error()}
 	case errors.Is(err, data.ErrCourseNotFound):
 		e = failure{404, "未找到课程"}
+	case errors.Is(err, data.ErrMaterialNotFound):
+		e = failure{404, "未找到课程材料"}
+	case errors.Is(err, data.ErrMaterialUploadNotFound):
+		e = failure{404, "未找到课程材料上传"}
+	case errors.Is(err, data.ErrSectionNotFound):
+		e = failure{404, "未找到课程小节"}
+	case errors.Is(err, data.ErrConversationNotFound):
+		e = failure{404, "未找到课程对话"}
+	case errors.Is(err, data.ErrOutlineReorganizationNotFound):
+		e = failure{404, "未找到待处理的课程大纲调整"}
+	case errors.Is(err, data.ErrOutlineClassificationStale):
+		e = failure{409, err.Error()}
 	case errors.Is(err, data.ErrConversationBusy):
 		e = failure{409, err.Error()}
 	default:

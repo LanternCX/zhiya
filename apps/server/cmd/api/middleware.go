@@ -16,14 +16,14 @@ func (a *application) protect(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		if strings.HasPrefix(r.URL.Path, "/api/") {
-			timeout := config.Seconds(a.config.Server.RequestTimeoutSeconds)
-			if r.URL.Path == "/api/learning/model" {
-				timeout = 120 * time.Second
-				_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(timeout))
+			modelStream := r.URL.Path == "/api/learning/model" || r.URL.Path == "/api/learning/course/model"
+			if modelStream {
+				_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
+			} else {
+				ctx, cancel := context.WithTimeout(r.Context(), config.Seconds(a.config.Server.RequestTimeoutSeconds))
+				defer cancel()
+				r = r.WithContext(ctx)
 			}
-			ctx, cancel := context.WithTimeout(r.Context(), timeout)
-			defer cancel()
-			r = r.WithContext(ctx)
 			if r.Method != "GET" {
 				origin := r.Header.Get("Origin")
 				scheme := "http"
@@ -38,8 +38,11 @@ func (a *application) protect(next http.Handler) http.Handler {
 					a.respondError(w, failure{403, "请求来源无效"})
 					return
 				}
-				if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
-					a.respondError(w, failure{415, "请使用 JSON 提交"})
+				contentType := r.Header.Get("Content-Type")
+				materialUpload := r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/materials")
+				validMaterialType := strings.HasPrefix(contentType, "multipart/form-data") || strings.HasPrefix(contentType, "application/json")
+				if (!materialUpload && !strings.HasPrefix(contentType, "application/json")) || (materialUpload && !validMaterialType) {
+					a.respondError(w, failure{415, "提交格式无效"})
 					return
 				}
 			}

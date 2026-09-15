@@ -12,10 +12,34 @@ import (
 	"testing"
 	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 )
+
+func TestModelStreamsHaveNoAbsoluteDeadline(t *testing.T) {
+	a := &application{config: config.Config{Server: config.Server{
+		RequestTimeoutSeconds: 1,
+	}}}
+	handler := a.protect(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, limited := r.Context().Deadline(); limited {
+			http.Error(w, "unexpected deadline", http.StatusGatewayTimeout)
+			return
+		}
+		_, _ = io.WriteString(w, "complete")
+	}))
+
+	for _, path := range []string{"/api/learning/model", "/api/learning/course/model"} {
+		response := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		handler.ServeHTTP(response, request)
+
+		if response.Code != http.StatusOK || response.Body.String() != "complete" {
+			t.Fatalf("model stream %s: %d %q", path, response.Code, response.Body.String())
+		}
+	}
+}
 
 func learningSocket(t *testing.T, a *testApp, c *http.Client) *websocket.Conn {
 	t.Helper()
@@ -509,8 +533,8 @@ func TestModelProxyStopsRetryingWhenTheClientCancels(t *testing.T) {
 	}
 }
 
-func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T) {
-	started := make(chan string, 2)
+func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) {
+	started := make(chan string, 3)
 	release := make(chan struct{})
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload map[string]any
@@ -554,8 +578,9 @@ func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T
 
 	teacher := request("teacher")
 	slides := request("slides")
+	classifier := request("outline-classifier")
 	roles := map[string]bool{}
-	for range 2 {
+	for range 3 {
 		select {
 		case role := <-started:
 			roles[role] = true
@@ -564,11 +589,11 @@ func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T
 			t.Fatalf("concurrent course streams did not reach upstream: %v", roles)
 		}
 	}
-	if !roles["teacher"] || !roles["slides"] {
+	if !roles["teacher"] || !roles["slides"] || !roles["outline-classifier"] {
 		t.Fatalf("upstream roles = %v", roles)
 	}
 	close(release)
-	if <-teacher != http.StatusOK || <-slides != http.StatusOK {
+	if <-teacher != http.StatusOK || <-slides != http.StatusOK || <-classifier != http.StatusOK {
 		t.Fatal("course model streams did not complete")
 	}
 	a.request(c, "POST", "/learning/course/model", map[string]any{"agent": "other", "payload": map[string]any{}}, http.StatusBadRequest)

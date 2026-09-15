@@ -5,7 +5,7 @@
 Design a calm, trustworthy learning space where K12 students can ask questions at any time. Every screen should make clear what the student is learning, what they can do, and how to continue.
 
 - The body of [PRD #3](https://github.com/LanternCX/zhiya/issues/3) owns product requirements. [Technology selection #2](https://github.com/LanternCX/zhiya/issues/2) owns technical constraints. This document defines visual and interaction guidelines; it does not duplicate requirements or determine implementation scope.
-- The [UI references in the PRD discussion](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574) inform sage light and graphite dark palettes, Chinese serif headings, an open teaching canvas, and question states that preserve the lesson position. The visual direction defined here uses stronger depth and frosted-glass navigation and controls; the references are not a pixel-for-pixel template.
+- The [UI references in the PRD discussion](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574) inform sage light and graphite dark palettes, Chinese serif headings, an open teaching canvas, and question states that preserve the lesson position. The visual direction defined here uses tonal hierarchy and frosted-glass navigation and controls; the references are not a pixel-for-pixel template.
 - Use [Vercel design.md](https://vercel.com/design.md) only as a reference for organizing a usable design guide. Its aesthetic restrictions, including its rejection of glass effects, are not Zhiya requirements. Derive visual rules from the learning experience and the user's design direction.
 - Apply `frontend-design` to strengthen composition and craft. Product constraints and the supplied references take priority over generic stylistic suggestions.
 - Colors, type sizes, and layout dimensions below are design choices informed by the references, not claimed source values extracted from the images. Example lessons, students, and learning records illustrate the interface; they do not confirm launch content or assessment algorithms.
@@ -22,11 +22,11 @@ Do not hide necessary feedback for simplicity or add irrelevant decoration to ap
 
 ## Visual direction: a layered learning workspace
 
-Build a quiet workspace with visible depth: a softly tinted background, a clear teaching surface, and frosted-glass controls floating above it. Use deep green text, predominantly sans-serif typography, and restrained sage accents. The student should immediately distinguish the material they are studying from the controls that help them navigate, listen, and ask questions.
+Build a quiet workspace with visible hierarchy: a softly tinted background, a clear teaching surface, and frosted-glass controls around it. Use deep green text, predominantly sans-serif typography, and restrained sage accents. The student should immediately distinguish the material they are studying from the controls that help them navigate, listen, and ask questions.
 
-Use broad, connected content regions. Establish the page's composition before styling individual controls: give the lesson or current task the strongest visual presence, keep supporting context quieter, and separate persistent controls through material and placement. Spacing and typography organize content within each region; surface contrast, translucency, edges, and shadows distinguish regions at different depths.
+Use broad, connected content regions. Establish the page's composition before styling individual controls: give the lesson or current task the strongest visual presence, keep supporting context quieter, and separate persistent controls through material and placement. Spacing and typography organize content within each region; surface contrast, translucency, and edges distinguish adjacent regions.
 
-Avoid a Material-inspired component composition dominated by rounded cards, capsule inputs, filled selection tiles, and repeated elevated containers. This is a constraint on the resulting appearance, not on the name of a component library. Replacing one library with another while preserving the same card-heavy composition does not satisfy it. Depth should come from a few meaningful layers, not from making every object a floating card.
+Avoid a Material-inspired component composition dominated by rounded cards, capsule inputs, filled selection tiles, and repeated elevated containers. This is a constraint on the resulting appearance, not on the name of a component library. Replacing one library with another while preserving the same card-heavy composition does not satisfy it. Hierarchy should come from a few meaningful surfaces, not from making every object a floating card.
 
 ### Give each layer a job
 
@@ -34,7 +34,7 @@ Avoid a Material-inspired component composition dominated by rounded cards, caps
 | --- | --- | --- |
 | Background | A visibly tinted sage or deep graphite field; an optional broad, low-contrast tonal gradient | The environment surrounding the work, with little visual detail |
 | Teaching surface | A stable, opaque or nearly opaque light or dark surface, clearly separated from the background | Lesson text, images, diagrams, answers, and experiment results |
-| Floating controls | Frosted translucency, a fine edge highlight, and a soft separation shadow | Navigation, playback, the question composer, and temporary contextual panels |
+| Floating controls | Frosted translucency, a fine edge highlight, and clear tonal separation | Navigation, playback, the question composer, and temporary contextual panels |
 
 Related content can share a teaching surface. Do not wrap every section in a new surface. Make the current task identifiable even in grayscale: color accents and blur must not carry the hierarchy alone.
 
@@ -43,7 +43,7 @@ Related content can share a teaching surface. Do not wrap every section in a new
 Frosted glass is a recurring material for the app's navigation and interaction layer. Use it where content or a tonal background can visibly continue underneath. A pale rectangle over an identical flat background does not establish a glass effect.
 
 - Start with a tinted fill at roughly 72–88% opacity and a backdrop blur of 16–24 pixels. These are tuning ranges, not fixed acceptance values. Adjust them against the actual content underneath.
-- Combine translucency with a subtle 1-pixel edge highlight and a broad, low-opacity shadow. The panel should feel separated without appearing glossy, metallic, or heavily raised.
+- Combine translucency with a subtle 1-pixel edge highlight and enough tonal contrast to preserve the boundary. The panel should feel separated without appearing glossy, metallic, or heavily raised.
 - Keep text, icons, and focus indicators fully opaque. Apply transparency to the panel background, not to the entire container.
 - Keep reading areas and teaching images sharp. Glass belongs around the lesson, not over the words or diagrams the student needs to understand. An expanded answer area may use a solid inner reading region within a glass shell.
 - Use one shared glass treatment for related controls. Avoid overlapping blur panels, nested glass cards, bright reflective streaks, and excessive saturation.
@@ -73,7 +73,7 @@ For younger students, use more images, concrete examples, and conversational gui
 
 Pair state colors with text or a graphical cue. Dividers must not be the only means of identifying controls; inputs and selection controls need sufficiently clear boundaries. Body text requires at least 4.5:1 contrast against its background; large text and essential non-text control boundaries require at least 3:1. Do not dim an entire page to communicate a disabled state.
 
-Measure contrast on the composited result for translucent surfaces, not against the tint's opaque hex value. Tune glass-edge opacity and shadow strength separately for light and dark themes. Dark mode must retain a distinct background, readable teaching surface, and visible floating controls rather than flattening everything into one gray.
+Measure contrast on the composited result for translucent surfaces, not against the tint's opaque hex value. Tune glass-edge opacity and surface contrast separately for light and dark themes. Dark mode must retain a distinct background, readable teaching surface, and visible floating controls rather than flattening everything into one gray.
 
 ## Typography and reading rhythm
 
@@ -110,11 +110,11 @@ Prioritize function and brevity in interface copy. State the task, result, or ne
 - Inspect desktop designs at 1440 × 1000 and mobile designs at 390 × 844, with an additional check at 320 wide. These are design samples, not commitments to particular operating systems.
 - Fill the desktop window with the application shell; constrain reading content rather than the whole app. Onboarding uses a maximum reading width of 680 with 32-pixel side margins. Use 20 on mobile, reducing to 16 on narrow screens.
 - After onboarding, wide workspaces use a 224-wide sidebar that collapses to an 80-wide icon rail; narrow screens use a top bar and bottom navigation. Onboarding occupies the full window on every device, with all global navigation hidden until completion. Focused lessons retain back navigation, the lesson title, contents, and practice access.
-- Integrate the sidebar into the workspace canvas. Do not enclose it in a card, glass panel, rounded container, border, or shadow. Rounded highlighting belongs to the selected navigation item.
+- Integrate the sidebar into the workspace canvas. Do not enclose it in a card, glass panel, rounded container, border, or elevated treatment. Rounded highlighting belongs to the selected navigation item.
 - Recompose to one column when the content area falls below 720 wide. Never proportionally shrink the desktop artboard. Teaching examples may wrap; code and necessary data tables may scroll within their own regions.
 - Desktop lesson controls combine playback, speed, captions, pagination, and questions. Mobile separates playback and progress from the question input, accounting for safe areas and the software keyboard.
 - Use a consistent radius scale across desktop and mobile: 8 pixels for selected navigation items and small image frames, 12 for primary buttons and teaching surfaces, and 16 for floating panels and composers. Keep ordinary rectangular controls and full-width composers softly rounded rather than capsule-shaped; circles are appropriate for compact icon controls. The sidebar itself has no rounded container.
-- Separate the teaching surface from the background through a visible tonal difference and, where useful, one soft shadow. Floating glass controls receive their own fine edge and separation shadow. Do not repeat elevation on every exercise option, paragraph, or piece of metadata.
+- Separate the teaching surface from the background through a visible tonal difference. Floating glass controls receive a fine edge and clear material contrast. Do not add elevation treatments to exercise options, paragraphs, or metadata.
 - Floating controls may overlap unused margins, but must not cover reading content or answers. Reserve space for their full height, including the mobile safe area and keyboard state.
 
 ## Key screens and interactions
@@ -170,7 +170,7 @@ Images serve learning. Keep aspect ratios and label positions consistent within 
 
 微调问答期间顶部提供“停止对话”退出图标，停止后结束本轮修改并返回档案，不提供暂停、继续或断点恢复。已保存档案保留，未完成的问题关闭，旧请求不得继续写入。重新进入时发起新一轮修改；首次建档仍保留进度恢复。图标按钮提供可访问名称和悬停提示，触控区域至少 44 × 44。
 
-登录、注册和找回密码页采用同一套入口视觉。顶栏的叶芽图标、知芽字标和主题按钮直接融入背景，不使用卡片背景、边框或阴影，也不附加宣传短句或背景播放按钮。桌面端将欢迎区与表单整体放在顶栏和页脚之间，使上下留白均衡；页脚位于短页面底部，长页面则随内容自然向下排列。手机端使用单列，优先保证表单完整可用。
+登录、注册和找回密码页采用同一套入口视觉。顶栏的叶芽图标、知芽字标和主题按钮直接融入背景，不使用卡片背景、边框或独立容器，也不附加宣传短句或背景播放按钮。桌面端将欢迎区与表单整体放在顶栏和页脚之间，使上下留白均衡；页脚位于短页面底部，长页面则随内容自然向下排列。手机端使用单列，优先保证表单完整可用。
 
 入口应有适中的信息密度：欢迎文字靠近表单，避免窄小控件被大片留白包围。优先放大表单文字、输入框和主按钮，并收紧栏间距、表单内边距与字段间距；不通过整体缩放页面或压缩触控区域实现紧凑。较窄窗口允许文字自然换行，同时保留清晰的标签与完整操作区。
 
@@ -202,7 +202,7 @@ Do not expose age, full identity, or internal profile fields on ordinary learnin
 ## Reject these defaults
 
 - A flat page where background, teaching content, and controls share nearly identical tone and visual weight.
-- Repeated rounded cards, capsule composers, filled navigation tiles, and shadows on every component.
+- Repeated rounded cards, capsule composers, filled navigation tiles, and elevated treatments on ordinary components.
 - Glass on every surface, nested blur layers, or translucent body text and teaching diagrams.
 - High-contrast decorative gradients, neon glows, and reflections that compete with the lesson. A quiet background gradient that makes translucent controls legible is appropriate.
 - A marketing headline followed by a generic feature-card grid.
@@ -218,7 +218,7 @@ Check task clarity first, then hierarchy, reading measure, state feedback, and d
 
 动效验收不能只依赖静态截图：连续观察背景至少一次方向变化，实际操作主题切换、注册步骤、表单聚焦、提交与确认弹窗。检查鼠标响应、触屏滚动和减少动态效果模式；刷新后确认主题选择保留。不同高度的窗口都应保持合理留白，动画不得引入页面溢出、遮挡或输入丢失。
 
-Inspect both the complete composition and individual controls. The background, teaching surface, and floating controls must remain distinguishable at a glance and in grayscale. Check glass over different underlying content, with blur disabled, and with opaque fallback surfaces. Verify that its text stays sharp and readable, and that floating panels do not obscure content at narrow widths or with the keyboard open. If the page still reads as a grid of similarly rounded cards, revise the composition rather than adding more blur or stronger shadows.
+Inspect both the complete composition and individual controls. The background, teaching surface, and floating controls must remain distinguishable at a glance and in grayscale. Check glass over different underlying content, with blur disabled, and with opaque fallback surfaces. Verify that its text stays sharp and readable, and that floating panels do not obscure content at narrow widths or with the keyboard open. If the page still reads as a grid of similarly rounded cards, revise the composition rather than adding more blur or heavier borders.
 
 Design artifacts use editable text and layouts, semantic colors, consistent typography, and reusable visual patterns. Keep states of the same action consistent. Screenshots do not replace structural inspection: verify fonts, boundaries, and text overflow as well. A static prototype must not claim to implement voice, generation, evaluation, or synchronization. When delivering in Figma, use variables, text styles, and component instances; when delivering a frontend design gallery, use semantic HTML and shared CSS.
 

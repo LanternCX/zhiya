@@ -47,7 +47,7 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
           command === "desktop-dev" ? "dev" : "build",
           "--config", JSON.stringify({
             build: { devUrl: config.dev_origin },
-            app: { security: { csp: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ${websocketOrigin}` } },
+            app: { security: { csp: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ${websocketOrigin} https: http://127.0.0.1:* http://localhost:*` } },
           }),
           ...(command === "desktop-build" ? ["--no-bundle"] : []), ...extra];
       }

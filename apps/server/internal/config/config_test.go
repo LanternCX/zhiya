@@ -85,6 +85,8 @@ func TestInvalidConfigurationFailsWithoutLeakingSecrets(t *testing.T) {
 		{"ZHIYA_SERVER_ACCOUNT_VERIFICATION_ATTEMPTS", "1.5"},
 		{"ZHIYA_SERVER_HTTP_ORIGIN", "ftp://example.com"},
 		{"ZHIYA_SERVER_DATABASE_URL", "postgres://secret-value@[bad"},
+		{"ZHIYA_SERVER_STORAGE_ENDPOINT", "http://storage.example.com"},
+		{"ZHIYA_SERVER_STORAGE_SECRET_KEY", ""},
 		{"ZHIYA_SERVER_DEVELOPMENT", "false"},
 		{"ZHIYA_SERVER_SMTP_ADDRESS", "localhost:70000"},
 		{"ZHIYA_SERVER_ACCOUNT_RATE_WINDOW_SECONDS", "2147483648"},

@@ -80,11 +80,62 @@ CREATE TABLE IF NOT EXISTS courses (
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS courses_user_updated ON courses(user_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS course_sections (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ title text NOT NULL,
+ objective text NOT NULL,
+ position integer NOT NULL,
+ status text NOT NULL DEFAULT 'planned',
+ created_at timestamptz NOT NULL DEFAULT now(),
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ UNIQUE(course_id,position)
+);
+CREATE INDEX IF NOT EXISTS course_sections_course ON course_sections(course_id,position);
 CREATE TABLE IF NOT EXISTS course_conversations (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ section_id uuid NOT NULL REFERENCES course_sections(id) ON DELETE CASCADE,
+ title text NOT NULL,
  state jsonb NOT NULL,
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS course_conversations_course ON course_conversations(course_id,created_at);
+CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
+CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS course_outline_reorganizations (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL UNIQUE REFERENCES courses(id) ON DELETE CASCADE,
+ sections jsonb NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS course_outline_assignments (
+ reorganization_id uuid NOT NULL REFERENCES course_outline_reorganizations(id) ON DELETE CASCADE,
+ conversation_id uuid NOT NULL REFERENCES course_conversations(id) ON DELETE CASCADE,
+ conversation_updated_at timestamptz NOT NULL,
+ target_section_id uuid,
+ reason text NOT NULL DEFAULT '',
+ PRIMARY KEY(reorganization_id,conversation_id)
+);
+CREATE INDEX IF NOT EXISTS course_outline_assignments_pending ON course_outline_assignments(reorganization_id) WHERE target_section_id IS NULL;
+CREATE TABLE IF NOT EXISTS course_materials (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ name text NOT NULL,
+ media_type text NOT NULL,
+ object_key text NOT NULL UNIQUE,
+ size_bytes bigint NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS course_materials_course_created ON course_materials(course_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS course_material_uploads (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ name text NOT NULL,
+ media_type text NOT NULL,
+ object_key text NOT NULL UNIQUE,
+ size_bytes bigint NOT NULL,
+ expires_at timestamptz NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS course_material_uploads_expiry ON course_material_uploads(expires_at);

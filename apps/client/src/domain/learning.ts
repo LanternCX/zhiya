@@ -54,6 +54,7 @@ export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  materials?: string[];
   streaming?: boolean;
   pageId?: string;
 };
@@ -72,6 +73,51 @@ export type CourseConversationState = {
   pages: LessonPage[];
   presentedPageIds: string[];
   currentPageId: string;
+};
+
+export type StoredCourseConversation = {
+  id: string;
+  sectionId: string;
+  title: string;
+  state: CourseConversationState;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CourseSection = {
+  id: string;
+  title: string;
+  objective: string;
+  position: number;
+  status: "planned" | "active" | "complete" | "archived";
+  conversations: StoredCourseConversation[];
+};
+
+export type OutlineDraftSection = Pick<
+  CourseSection,
+  "id" | "title" | "objective" | "status"
+>;
+
+export type OutlineReorganization = {
+  id: string;
+  sections: OutlineDraftSection[];
+  pending: StoredCourseConversation[];
+  pendingCount: number;
+};
+
+export type OutlineClassification =
+  | { sectionId: string; reason: string }
+  | {
+      newSection: { title: string; objective: string };
+      reason: string;
+    };
+
+export type CourseMaterial = {
+  id: string;
+  name: string;
+  mediaType: "text/markdown" | "text/plain";
+  sizeBytes: number;
+  createdAt: string;
 };
 
 export type CourseCover = {
@@ -95,6 +141,7 @@ export type StoredCourse = {
   cover: CourseCover;
   status: "active";
   state: CourseConversationState;
+  sections?: CourseSection[];
   createdAt: string;
   updatedAt: string;
 };

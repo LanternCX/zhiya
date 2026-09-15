@@ -17,7 +17,7 @@ export async function modelRequest(
 }
 
 export async function courseModelRequest(
-  agent: "teacher" | "slides",
+  agent: "teacher" | "slides" | "outline-classifier",
   payload: object,
   signal?: AbortSignal,
   onRetry?: ModelRetryListener,
@@ -49,9 +49,7 @@ async function streamingModelRequest(
           "X-Zhiya-User": expectedUser,
         },
         body,
-        signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
-          : AbortSignal.timeout(120000),
+        signal,
       }),
       onRetry,
     );

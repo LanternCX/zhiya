@@ -10,10 +10,13 @@ import type {
   CourseMessage,
   CourseActivity,
   CourseConversationState,
+  OutlineReorganization,
+  StoredCourseConversation,
 } from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
+import { classifyCourseConversation } from "../agent/outline-classifier";
 import type { CodingTools, CourseManagement } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
 
@@ -42,7 +45,13 @@ export class CourseSession {
     resolve: (page: LessonPage) => void;
     reject: (error: Error) => void;
   } | null = null;
-  private modelRetries = new Map<"teacher" | "slides", ModelRetryStatus>();
+  private modelRetries = new Map<
+    "teacher" | "slides" | "outline-classifier",
+    ModelRetryStatus
+  >();
+  private classificationAgents = new Set<Agent>();
+  private outlineRecovery: Promise<boolean>;
+  private recoverOutline: () => Promise<boolean>;
 
   constructor(
     private gateway: ModelGateway,
@@ -64,12 +73,43 @@ export class CourseSession {
       (largest, message) => Math.max(largest, message.id),
       0,
     );
+    const classify = (
+      reorganization: OutlineReorganization,
+      conversation: StoredCourseConversation,
+    ) =>
+      classifyCourseConversation({
+        model: info,
+        gateway: this.gateway,
+        reorganization,
+        conversation,
+        onRetry: (status) =>
+          this.updateModelRetry("outline-classifier", status),
+        register: (agent) => this.classificationAgents.add(agent),
+        unregister: (agent) => this.classificationAgents.delete(agent),
+      });
+    const teachingManagement: CourseManagement = {
+      ...courseManagement,
+      setOutline: (sections) => courseManagement.setOutline(sections, classify),
+    };
+    this.recoverOutline = async () => {
+      try {
+        await courseManagement.resumeOutline(classify);
+        return true;
+      } catch (error) {
+        if (!this.stopped)
+          this.onError(
+            error instanceof Error ? error.message : "课程大纲调整暂时中断",
+          );
+        return false;
+      }
+    };
+    this.outlineRecovery = this.recoverOutline();
     this.teacher = createTeacherAgent({
       model: info,
       gateway: this.gateway,
       memory,
       messages: initial.messages,
-      management: courseManagement,
+      management: teachingManagement,
       slides: {
         start: (request) => this.startSlides(info, memory, request),
         cancel: () => this.cancelSlides(),
@@ -163,12 +203,25 @@ export class CourseSession {
     return this.teacher.state.isStreaming;
   }
 
-  async prompt(text: string) {
+  async prompt(text: string, materialNames: string[] = []) {
     if (this.stopped || this.busy) return;
+    if (!(await this.outlineRecovery)) {
+      this.outlineRecovery = this.recoverOutline();
+      if (!(await this.outlineRecovery)) return;
+    }
+    if (this.stopped) return;
     const operation = this.cancellation;
-    this.onMessage({ id: ++this.messageSequence, role: "user", text });
+    this.onMessage({
+      id: ++this.messageSequence,
+      role: "user",
+      text,
+      ...(materialNames.length ? { materials: materialNames } : {}),
+    });
+    const agentText = materialNames.length
+      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
+      : text;
     try {
-      await this.teacher.prompt(text);
+      await this.teacher.prompt(agentText);
       await this.waitForNarrationPlayback();
       if (this.teacher.state.errorMessage)
         throw new Error(this.teacher.state.errorMessage);
@@ -183,6 +236,8 @@ export class CourseSession {
   stopCurrent() {
     this.cancellation++;
     this.teacher.abort();
+    for (const agent of this.classificationAgents) agent.abort();
+    this.classificationAgents.clear();
     this.cancelSlides();
     this.narrationPlayback?.resolve();
     this.narrationPlayback = null;
@@ -209,7 +264,7 @@ export class CourseSession {
   }
 
   private updateModelRetry(
-    agent: "teacher" | "slides",
+    agent: "teacher" | "slides" | "outline-classifier",
     status: ModelRetryStatus | null,
   ) {
     if (status) this.modelRetries.set(agent, status);
