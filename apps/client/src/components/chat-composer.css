@@ -147,3 +147,61 @@
   width: 20px;
   height: 20px;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .chat-composer > [data-slot="input-group"] {
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 200ms ease,
+      transform 160ms ease;
+  }
+  .chat-composer-dropzone {
+    animation: chat-composer-dropzone-enter 180ms ease-out both;
+  }
+  .chat-composer-dropzone-icon {
+    animation: chat-composer-dropzone-mark 900ms ease-in-out infinite alternate;
+  }
+  .chat-composer-error,
+  .chat-composer-attachments {
+    animation: chat-composer-detail-enter 180ms ease-out both;
+  }
+  .chat-composer-attachment-button,
+  .chat-composer-attachment-remove,
+  .chat-composer-submit {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      opacity 150ms ease,
+      transform 150ms ease;
+  }
+  .chat-composer-attachment-button:active,
+  .chat-composer-attachment-remove:active,
+  .chat-composer-submit:not(:disabled):active {
+    transform: scale(0.92);
+  }
+  .chat-composer-submit:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  .chat-composer-submit:disabled {
+    opacity: 0.45;
+  }
+}
+
+@keyframes chat-composer-dropzone-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+@keyframes chat-composer-dropzone-mark {
+  to {
+    transform: translateY(-3px);
+  }
+}
+@keyframes chat-composer-detail-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}

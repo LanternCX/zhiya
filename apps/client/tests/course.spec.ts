@@ -1215,6 +1215,10 @@ test("a saved course starts a new agent-routed session and supports rename and d
     "border-radius",
     "12px",
   );
+  await expect(page.locator(".course-card-menu")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
   await page.getByRole("button", { name: "重命名", exact: true }).click();
   const rename = page.getByRole("textbox", { name: "重命名认识太阳系" });
   await rename.fill("太阳系入门");
@@ -1695,12 +1699,46 @@ test("a student drags teaching material onto the course composer", async ({
 
   await composer.dispatchEvent("dragenter", { dataTransfer: transfer });
   await expect(page.getByText("松开以添加教学材料")).toBeVisible();
+  await expect(page.locator(".chat-composer-dropzone")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
 
   await composer.dispatchEvent("drop", { dataTransfer: transfer });
   await expect(
     page.getByRole("button", { name: "移除材料：functions.md" }),
   ).toBeVisible();
+  await expect(page.locator(".chat-composer-attachments")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
   await expect(page.getByText("松开以添加教学材料")).toHaveCount(0);
+});
+
+test("course motion respects the student's reduced-motion preference", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await mockCompletedWorkspace(page);
+  await page.goto("/");
+  const composer = page.locator(".course-composer");
+  const transfer = await page.evaluateHandle(() => {
+    const data = new DataTransfer();
+    data.items.add(
+      new File(["lesson"], "lesson.txt", { type: "text/plain" }),
+    );
+    return data;
+  });
+
+  await composer.dispatchEvent("dragenter", { dataTransfer: transfer });
+
+  await expect(page.locator(".chat-composer-dropzone")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await expect(
+    composer.locator('[data-slot="input-group"]'),
+  ).toHaveCSS("transition-duration", "0s");
 });
 
 test("a student attaches new teaching material inside an existing course conversation", async ({
@@ -2523,12 +2561,20 @@ test("a course outline opens lessons directly and manages history on demand", as
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "课程主页" })).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
   await expect(page.getByRole("region", { name: "教学对话" })).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "打开小节：变量与类型" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "打开小节：循环" }).click();
   await expect(page.getByRole("region", { name: "教学对话" })).toBeVisible();
+  await expect(page.locator(".course-room")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
   await expect(page.getByRole("button", { name: "课程材料" })).toHaveCount(0);
   await expect(
     page.getByText("循环可以重复执行。", { exact: true }),
@@ -2554,6 +2600,14 @@ test("a course outline opens lessons directly and manages history on demand", as
     .click();
   const history = page.getByRole("dialog", { name: "循环的学习记录" });
   await expect(history).toBeVisible();
+  await expect(history).not.toHaveCSS("animation-name", "none");
+  await expect(page.locator(".section-history-backdrop")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await history.evaluate((element) =>
+    Promise.all(element.getAnimations().map((animation) => animation.finished)),
+  );
   const sectionComposer = page.getByRole("textbox", {
     name: "告诉知芽你想在循环中学习什么",
   });
@@ -2756,6 +2810,9 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await expect(page.getByRole("region", { name: "课程主页" })).toBeVisible();
   await page.getByRole("button", { name: "课程材料" }).click();
+  await expect(
+    page.getByRole("region", { name: "课程材料列表" }),
+  ).not.toHaveCSS("animation-name", "none");
   const uploadArea = page.getByRole("button", { name: "上传课程材料" });
   await expect(uploadArea).toContainText("拖放材料到这里");
 
@@ -2787,8 +2844,15 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   await expect(
     page.getByRole("button", { name: "notes.md", exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".course-material-item")).not.toHaveCSS(
+    "animation-name",
+    "none",
+  );
   expect(uploadRequests).toBe(1);
   await page.getByRole("button", { name: "notes.md", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "材料预览：notes.md" }),
+  ).not.toHaveCSS("animation-name", "none");
   await expect(page.getByRole("heading", { name: "变量" })).toBeVisible();
   await expect(page.getByText("变量保存数据。", { exact: true })).toBeVisible();
   await page.getByLabel("关闭材料预览").click();

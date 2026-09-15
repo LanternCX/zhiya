@@ -1347,6 +1347,33 @@
 .course-surface[data-hidden="true"] {
   display: none;
 }
+.course-home-tabs button:is(:hover, :focus-visible) {
+  color: var(--text);
+}
+.course-material-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 36%, var(--line));
+}
+.course-material-item > button:first-child:is(:hover, :focus-visible) strong,
+.section-conversation-open:is(:hover, :focus-visible) strong {
+  color: var(--accent);
+}
+.course-material-item > button:last-child:is(:hover, :focus-visible) {
+  color: color-mix(in srgb, var(--error) 76%, var(--text));
+}
+.course-material-preview > header button:is(:hover, :focus-visible),
+.section-conversation-menu-trigger:is(:hover, :focus-visible) {
+  background: var(--subtle);
+  color: var(--text);
+}
+.section-conversation-menu button:is(:hover, :focus-visible) {
+  background: var(--subtle);
+}
+.coding-page > .coding-actions button:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--accent) 54%, var(--line));
+}
+.coding-page > .coding-actions button:first-child:not(:disabled):hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
 @media (max-width: 720px) {
   .course-room {
     grid-template-columns: 1fr;
@@ -1451,12 +1478,225 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
+  .course-room {
+    animation: course-surface-enter 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transition: grid-template-columns 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .course-home {
+    animation: course-home-enter 240ms ease-out both;
+  }
+  .course-home-hero > * {
+    animation: course-content-enter 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .course-home-hero > :nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .course-home-composer {
+    transition:
+      left 240ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      width 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .course-home-progress span {
+    transition: width 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .course-home-tabs button,
+  .course-section-history,
+  .course-material-item,
+  .course-material-item button,
+  .section-conversation-open,
+  .section-conversation-menu-trigger,
+  .section-conversation-menu button,
+  .course-material-preview > header button,
+  .course-card-menu-trigger,
+  .course-card-menu button,
+  .course-thinking-trigger,
+  .course-message-body [data-streamdown="code-block-actions"] button,
+  .course-message-body [data-streamdown="mermaid-block-actions"] button,
+  .coding-page .coding-stdin,
+  .coding-page > .coding-actions button,
+  .slide-controls button {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease,
+      transform 150ms ease;
+  }
+  .course-home-tabs button[aria-pressed="true"]::after {
+    transform-origin: left;
+    animation: course-tab-indicator-enter 180ms ease-out both;
+  }
+  .course-section-card,
+  .course-section-open,
+  .course-material-upload,
+  .course-material-upload-mark,
+  .course-card-open,
+  .coding-editor-shell {
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      box-shadow 180ms ease,
+      opacity 160ms ease,
+      padding 160ms ease,
+      transform 160ms ease;
+  }
+  .course-section-open:active,
+  .course-section-history:active,
+  .course-material-item button:active,
+  .section-conversation-open:active,
+  .section-conversation-menu-trigger:active,
+  .section-conversation-menu button:active,
+  .course-material-preview > header button:active,
+  .course-card-menu-trigger:active,
+  .course-card-menu button:active,
+  .coding-page > .coding-actions button:not(:disabled):active,
+  .slide-controls button:not(:disabled):active {
+    transform: scale(0.95);
+  }
+  .course-section-open:hover .course-section-copy strong,
+  .section-conversation-open:hover strong {
+    color: var(--accent);
+  }
+  .course-section-copy strong,
+  .section-conversation-open strong,
+  .section-conversation-open > span:last-child {
+    transition:
+      color 160ms ease,
+      transform 160ms ease;
+  }
+  .section-conversation-open:hover > span:last-child {
+    transform: translateX(4px);
+  }
+  .course-material-upload[data-state="active"] .course-material-upload-mark {
+    transform: translateY(-4px);
+  }
+  .course-material-upload[data-state="busy"] .course-material-upload-mark {
+    animation: course-upload-breathe 700ms ease-in-out infinite alternate;
+  }
+  .course-material-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 36%, var(--line));
+    transform: translateY(-1px);
+  }
+  .course-material-preview > header button:hover,
+  .section-conversation-menu-trigger:hover,
+  .course-card-menu-trigger:hover,
+  .slide-controls button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .course-card-open:active {
+    transform: translateY(-1px) scale(0.985);
+  }
+  .course-thinking-trigger[aria-expanded="true"] {
+    color: var(--text);
+  }
+  .coding-page .coding-stdin:focus,
+  .coding-editor-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .course-card-menu {
+    transform-origin: right bottom;
+    animation: course-menu-enter 160ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .section-conversation-menu {
+    transform-origin: right top;
+    animation: course-menu-enter 160ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .section-history-backdrop {
+    animation: course-backdrop-enter 200ms ease-out both;
+  }
+  .section-history-card {
+    animation: course-dialog-enter 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .course-home-sections,
+  .course-home-materials {
+    animation: course-tab-content-enter 220ms ease-out both;
+  }
+  .course-material-item,
+  .section-conversation-row {
+    animation: course-list-item-enter 200ms ease-out both;
+  }
+  .course-material-preview {
+    animation: course-preview-enter 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .course-start,
+  .slide-stage,
+  .coding-page-loading {
+    animation: course-content-enter 220ms ease-out both;
+  }
+  .course-tool-activity[data-status="running"] .course-tool-mark {
+    animation: course-tool-pulse 700ms ease-in-out infinite alternate;
+  }
   .lesson-slide {
     animation: course-page-enter 280ms ease-out;
   }
   .course-activity,
   .course-message.assistant {
     animation: course-content-enter 180ms ease-out;
+  }
+}
+@keyframes course-tab-indicator-enter {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes course-upload-breathe {
+  to {
+    opacity: 0.55;
+    transform: translateY(-2px);
+  }
+}
+@keyframes course-tool-pulse {
+  to {
+    opacity: 0.25;
+    transform: scale(1.45);
+  }
+}
+@keyframes course-home-enter {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes course-surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes course-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+}
+@keyframes course-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes course-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 12px)) scale(0.985);
+  }
+}
+@keyframes course-tab-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+@keyframes course-list-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+@keyframes course-preview-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
   }
 }
 @keyframes course-page-enter {
