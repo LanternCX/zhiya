@@ -457,6 +457,9 @@
   align-items: center;
   border-bottom: 1px solid var(--line);
 }
+.section-conversation-row[data-menu-open="true"] {
+  z-index: 1;
+}
 .section-conversation-open {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 18px;

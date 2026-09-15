@@ -86,6 +86,7 @@ export default function SectionHistory({
             [...section.conversations].reverse().map((conversation) => (
               <article
                 className="section-conversation-row"
+                data-menu-open={menu === conversation.id}
                 key={conversation.id}
               >
                 <button
