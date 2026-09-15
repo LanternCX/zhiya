@@ -40,7 +40,8 @@ import {
   emptyCourseState,
   getCourseMaterial,
   listCourseMaterials,
-  replaceCourseOutline,
+  reorganizeCourseOutline,
+  resumeCourseOutlineReorganization,
   saveCourseConversation,
   updateCourse,
   uploadCourseMaterial,
@@ -181,23 +182,29 @@ export default function CourseRoom({
     course: StoredCourse;
     state: CourseConversationState;
   } | null>(null);
-  const saveInFlight = useRef(false);
+  const saveInFlight = useRef<Promise<boolean> | null>(null);
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
   const pendingInitialMaterials = useRef<File[]>([]);
-  const flushCourseSave = async () => {
-    if (saveInFlight.current || !pendingSave.current) return;
+  const flushCourseSave = async (): Promise<boolean> => {
+    if (saveInFlight.current) {
+      const saved = await saveInFlight.current;
+      return (await flushCourseSave()) && saved;
+    }
+    if (!pendingSave.current) return true;
     const next = pendingSave.current;
     pendingSave.current = null;
-    saveInFlight.current = true;
-    try {
-      await saveCourseConversation(next.course, next.state);
-    } catch {
-      setError("课程进度暂时无法保存");
-    } finally {
-      saveInFlight.current = false;
-      if (pendingSave.current) void flushCourseSave();
-    }
+    const saving = saveCourseConversation(next.course, next.state)
+      .then(() => true)
+      .catch(() => {
+        setError("课程进度暂时无法保存");
+        return false;
+      });
+    saveInFlight.current = saving;
+    await saving;
+    if (saveInFlight.current === saving) saveInFlight.current = null;
+    if (pendingSave.current) return (await flushCourseSave()) && (await saving);
+    return saving;
   };
 
   useEffect(() => {
@@ -226,6 +233,25 @@ export default function CourseRoom({
     setActivity(null);
     setModelRetry(null);
     setError("");
+    const acceptUpdatedCourse = (updated: StoredCourse) => {
+      const currentConversation = updated.sections
+        ?.flatMap((section) => section.conversations)
+        .find(
+          (conversation) =>
+            conversation.id === boundConversationId.current,
+        );
+      const next = currentConversation
+        ? {
+            ...updated,
+            conversationId: currentConversation.id,
+            state: sessionCourse.current?.state ?? updated.state,
+          }
+        : updated;
+      sessionCourse.current = next;
+      setCourse(next);
+      onCourseUpdated(next);
+      return next;
+    };
     const current = createCourseSession(
       info,
       memory,
@@ -298,29 +324,36 @@ export default function CourseRoom({
           onCourseUpdated(next);
           return next;
         },
-        setOutline: async (sections) => {
+        setOutline: async (sections, classify) => {
           if (!sessionCourse.current) throw new Error("课程尚未建立");
-          const updated = await replaceCourseOutline(
+          if (!classify) throw new Error("课程大纲调整缺少内容分类器");
+          if (boundConversationId.current) {
+            pendingSave.current = {
+              course: sessionCourse.current,
+              state: {
+                ...sessionCourse.current.state,
+                messages: messagesRef.current,
+                pages: pagesRef.current,
+                presentedPageIds: [...presentedRef.current],
+              },
+            };
+            if (!(await flushCourseSave()))
+              throw new Error("保存最新课程内容后才能调整大纲");
+          }
+          const updated = await reorganizeCourseOutline(
             sessionCourse.current.id,
             sections,
+            classify,
           );
-          const currentConversation = updated.sections
-            ?.flatMap((section) => section.conversations)
-            .find(
-              (conversation) =>
-                conversation.id === boundConversationId.current,
-            );
-          const next = currentConversation
-            ? {
-                ...updated,
-                conversationId: currentConversation.id,
-                state: sessionCourse.current.state,
-              }
-            : updated;
-          sessionCourse.current = next;
-          setCourse(next);
-          onCourseUpdated(next);
-          return next;
+          return acceptUpdatedCourse(updated);
+        },
+        resumeOutline: async (classify) => {
+          if (!sessionCourse.current) return null;
+          const updated = await resumeCourseOutlineReorganization(
+            sessionCourse.current.id,
+            classify,
+          );
+          return updated ? acceptUpdatedCourse(updated) : null;
         },
         createConversation: async (sectionId, title) => {
           if (!sessionCourse.current) throw new Error("课程尚未建立");

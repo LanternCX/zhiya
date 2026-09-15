@@ -1034,6 +1034,13 @@ test("a saved course starts a new agent-routed session and supports rename and d
   let deleted = false;
   await page.route("**/api/courses/**", async (route) => {
     const method = route.request().method();
+    if (
+      method === "GET" &&
+      route.request().url().endsWith("/outline-reorganization")
+    ) {
+      await route.fulfill({ status: 404, json: { error: "没有待处理任务" } });
+      return;
+    }
     if (method === "PUT") {
       savedConversationIds.push((
         route.request().postDataJSON() as { conversationId: string }
@@ -2305,6 +2312,190 @@ test("the course agent advances an explicit request to start the next section", 
     .toContain("接下来，我们用重复画星星来认识循环。");
   await expect(page.getByRole("banner")).toContainText("循环");
   await expect(page.getByRole("banner")).not.toContainText("对话");
+});
+
+test("the course agent reclassifies session content before publishing a revised outline", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const state = {
+    messages: [
+      {
+        id: 1,
+        role: "user" as const,
+        text: "我正在给猜数字游戏加上最多五次机会。",
+      },
+      {
+        id: 2,
+        role: "assistant" as const,
+        text: "我们可以使用循环记录尝试次数。",
+      },
+    ],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const conversation = {
+    id: "game-session",
+    sectionId: "old-basics",
+    title: "猜数字游戏",
+    state,
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const saved = {
+    id: "reorganized-course",
+    conversationId: conversation.id,
+    title: "Python 项目",
+    topic: "通过项目学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state,
+    sections: [
+      {
+        id: "old-basics",
+        title: "基础语法",
+        objective: "学习 Python 语法",
+        position: 0,
+        status: "active" as const,
+        conversations: [conversation],
+      },
+    ],
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const draftSections = [
+    {
+      id: "functions-new",
+      title: "函数",
+      objective: "使用函数组织程序",
+      status: "planned" as const,
+    },
+    {
+      id: "loops-new",
+      title: "循环项目",
+      objective: "在项目中控制重复执行",
+      status: "active" as const,
+    },
+  ];
+  const reorganization = {
+    id: "outline-job",
+    sections: draftSections,
+    pending: [conversation],
+    pendingCount: 1,
+  };
+  let classificationRequest = "";
+  let assignment: Record<string, unknown> | null = null;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route(
+    "**/api/courses/reorganized-course/outline-reorganization",
+    (route) => route.fulfill({ status: 404, json: { error: "没有待处理任务" } }),
+  );
+  await page.route("**/api/courses/reorganized-course/outline", (route) =>
+    route.fulfill({ status: 202, json: { reorganization } }),
+  );
+  await page.route(
+    "**/api/courses/reorganized-course/outline-reorganizations/outline-job/assignments/game-session",
+    async (route) => {
+      assignment = route.request().postDataJSON();
+      await route.fulfill({
+        json: {
+          course: {
+            ...saved,
+            conversationId: conversation.id,
+            sections: [
+              { ...draftSections[0], position: 0, conversations: [] },
+              {
+                ...draftSections[1],
+                position: 1,
+                conversations: [
+                  { ...conversation, sectionId: "loops-new" },
+                ],
+              },
+              {
+                ...saved.sections[0],
+                position: 2,
+                status: "archived",
+                conversations: [],
+              },
+            ],
+          },
+        },
+      });
+    },
+  );
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "outline-classifier";
+      payload: {
+        messages: Array<{ role: string; content: unknown }>;
+        tool_choice?: unknown;
+      };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (request.agent === "outline-classifier") {
+      classificationRequest = transcript;
+      if (
+        request.payload.tool_choice !== undefined &&
+        request.payload.tool_choice !== "auto"
+      ) {
+        await route.fulfill({
+          status: 400,
+          json: {
+            error: {
+              message: "Thinking mode does not support this tool_choice",
+              type: "invalid_request_error",
+            },
+          },
+        });
+        return;
+      }
+      await route.fulfill(
+        toolResponse("classify-game", "assign_course_conversation", {
+          sectionId: "loops-new",
+          reason: "主要学习活动是使用循环限制游戏尝试次数",
+        }),
+      );
+      return;
+    }
+    if (!transcript.includes('"name":"set_course_outline"')) {
+      await route.fulfill(
+        toolResponse("revise-outline", "set_course_outline", {
+          sections: draftSections.map(({ title, objective, status }) => ({
+            title,
+            objective,
+            status,
+          })),
+        }),
+      );
+      return;
+    }
+    await route.fulfill(textResponse("已经按照实际学习内容重新整理课程。"));
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 项目" }).click();
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
+    .fill("重新整理课程大纲");
+  await page.getByRole("button", { name: "开始新的学习" }).click();
+
+  await expect(
+    page.getByText("已经按照实际学习内容重新整理课程。", { exact: true }),
+  ).toBeVisible();
+  expect(classificationRequest).toContain(
+    "我正在给猜数字游戏加上最多五次机会。",
+  );
+  expect(assignment).toMatchObject({
+    sectionId: "loops-new",
+    conversationUpdatedAt: conversation.updatedAt,
+  });
 });
 
 test("a student enters a section directly whether resuming or starting", async ({

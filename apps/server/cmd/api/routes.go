@@ -26,6 +26,8 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("DELETE /api/courses/{id}", a.deleteCourse)
 	api.HandleFunc("PUT /api/courses/{id}/conversation", a.saveCourseConversation)
 	api.HandleFunc("PUT /api/courses/{id}/outline", a.replaceCourseOutline)
+	api.HandleFunc("GET /api/courses/{id}/outline-reorganization", a.getCourseOutlineReorganization)
+	api.HandleFunc("PUT /api/courses/{id}/outline-reorganizations/{reorganizationId}/assignments/{conversationId}", a.assignCourseOutlineConversation)
 	api.HandleFunc("POST /api/courses/{id}/sections/{sectionId}/conversations", a.createCourseConversation)
 	api.HandleFunc("DELETE /api/courses/{id}/sections/{sectionId}/conversations/{conversationId}", a.deleteCourseConversation)
 	api.HandleFunc("GET /api/courses/{id}/materials", a.listCourseMaterials)

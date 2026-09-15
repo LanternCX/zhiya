@@ -209,13 +209,99 @@ func (a *application) replaceCourseOutline(w http.ResponseWriter, r *http.Reques
 		outline[index] = data.OutlineSection{ID: section.ID, Title: title, Objective: objective, Status: section.Status}
 	}
 	var course data.Course
+	var reorganization data.OutlineReorganization
+	accepted := false
 	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
-		var err error
-		course, err = m.Courses.ReplaceOutline(r.Context(), u.ID, r.PathValue("id"), outline)
+		current, err := m.Courses.Get(r.Context(), u.ID, r.PathValue("id"))
+		if err != nil {
+			return err
+		}
+		conversationCount := 0
+		for _, section := range current.Sections {
+			conversationCount += len(section.Conversations)
+		}
+		if conversationCount == 0 {
+			course, err = m.Courses.ReplaceOutline(r.Context(), u.ID, current.ID, outline)
+			return err
+		}
+		reorganization, err = m.Courses.BeginOutlineReorganization(r.Context(), u.ID, current.ID, outline)
+		accepted = err == nil
 		return err
 	})
 	if err != nil {
 		a.respondError(w, err)
+		return
+	}
+	if accepted {
+		writeJSON(w, http.StatusAccepted, map[string]any{"reorganization": reorganization})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"course": course})
+}
+
+func (a *application) getCourseOutlineReorganization(w http.ResponseWriter, r *http.Request) {
+	var reorganization data.OutlineReorganization
+	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+		var err error
+		reorganization, err = m.Courses.GetOutlineReorganization(r.Context(), u.ID, r.PathValue("id"))
+		return err
+	})
+	if err != nil {
+		a.respondError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"reorganization": reorganization})
+}
+
+func (a *application) assignCourseOutlineConversation(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		SectionID             string `json:"sectionId"`
+		ConversationUpdatedAt string `json:"conversationUpdatedAt"`
+		Reason                string `json:"reason"`
+		NewSection            *struct {
+			Title     string `json:"title"`
+			Objective string `json:"objective"`
+		} `json:"newSection"`
+	}
+	if err := a.readJSON(w, r, &input); err != nil {
+		a.respondError(w, err)
+		return
+	}
+	updatedAt, err := time.Parse(time.RFC3339Nano, input.ConversationUpdatedAt)
+	if err != nil || (input.SectionID == "") == (input.NewSection == nil) {
+		a.respondError(w, bad("课程对话分类无效"))
+		return
+	}
+	var newSection *data.OutlineSection
+	if input.NewSection != nil {
+		title, titleErr := courseText(input.NewSection.Title, "小节名称", sectionTitleMax)
+		objective, objectiveErr := courseText(input.NewSection.Objective, "学习目标", sectionObjectiveMax)
+		if titleErr != nil {
+			a.respondError(w, titleErr)
+			return
+		}
+		if objectiveErr != nil {
+			a.respondError(w, objectiveErr)
+			return
+		}
+		newSection = &data.OutlineSection{Title: title, Objective: objective}
+	}
+	var course data.Course
+	var reorganization *data.OutlineReorganization
+	err = a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+		var err error
+		course, reorganization, err = m.Courses.AssignOutlineConversation(
+			r.Context(), u.ID, r.PathValue("id"), r.PathValue("reorganizationId"),
+			r.PathValue("conversationId"), input.SectionID, strings.TrimSpace(input.Reason), updatedAt, newSection,
+		)
+		return err
+	})
+	if err != nil {
+		a.respondError(w, err)
+		return
+	}
+	if reorganization != nil {
+		writeJSON(w, http.StatusAccepted, map[string]any{"reorganization": reorganization})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"course": course})

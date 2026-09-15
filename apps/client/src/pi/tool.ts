@@ -5,6 +5,8 @@ import type {
   CourseMaterial,
   StoredCourseConversation,
   StoredCourse,
+  OutlineClassification,
+  OutlineReorganization,
   Slide,
   LessonPage,
 } from "../domain/learning";
@@ -52,7 +54,17 @@ export type CourseManagement = {
       objective: string;
       status?: "planned" | "active" | "complete";
     }>,
+    classify?: (
+      reorganization: OutlineReorganization,
+      conversation: StoredCourseConversation,
+    ) => Promise<OutlineClassification>,
   ) => Promise<StoredCourse>;
+  resumeOutline: (
+    classify: (
+      reorganization: OutlineReorganization,
+      conversation: StoredCourseConversation,
+    ) => Promise<OutlineClassification>,
+  ) => Promise<StoredCourse | null>;
   createConversation: (
     sectionId: string,
     title: string,

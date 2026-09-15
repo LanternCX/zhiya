@@ -103,6 +103,21 @@ CREATE TABLE IF NOT EXISTS course_conversations (
 );
 CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
 CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS course_outline_reorganizations (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL UNIQUE REFERENCES courses(id) ON DELETE CASCADE,
+ sections jsonb NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS course_outline_assignments (
+ reorganization_id uuid NOT NULL REFERENCES course_outline_reorganizations(id) ON DELETE CASCADE,
+ conversation_id uuid NOT NULL REFERENCES course_conversations(id) ON DELETE CASCADE,
+ conversation_updated_at timestamptz NOT NULL,
+ target_section_id uuid,
+ reason text NOT NULL DEFAULT '',
+ PRIMARY KEY(reorganization_id,conversation_id)
+);
+CREATE INDEX IF NOT EXISTS course_outline_assignments_pending ON course_outline_assignments(reorganization_id) WHERE target_section_id IS NULL;
 CREATE TABLE IF NOT EXISTS course_materials (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,

@@ -93,6 +93,25 @@ export type CourseSection = {
   conversations: StoredCourseConversation[];
 };
 
+export type OutlineDraftSection = Pick<
+  CourseSection,
+  "id" | "title" | "objective" | "status"
+>;
+
+export type OutlineReorganization = {
+  id: string;
+  sections: OutlineDraftSection[];
+  pending: StoredCourseConversation[];
+  pendingCount: number;
+};
+
+export type OutlineClassification =
+  | { sectionId: string; reason: string }
+  | {
+      newSection: { title: string; objective: string };
+      reason: string;
+    };
+
 export type CourseMaterial = {
   id: string;
   name: string;

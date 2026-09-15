@@ -112,7 +112,7 @@ func (a *application) courseModelProxy(w http.ResponseWriter, r *http.Request) {
 		a.respondError(w, err)
 		return
 	}
-	if input.Agent != "teacher" && input.Agent != "slides" {
+	if input.Agent != "teacher" && input.Agent != "slides" && input.Agent != "outline-classifier" {
 		a.respondError(w, bad("课堂 Agent 无效"))
 		return
 	}

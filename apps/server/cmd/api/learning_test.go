@@ -509,8 +509,8 @@ func TestModelProxyStopsRetryingWhenTheClientCancels(t *testing.T) {
 	}
 }
 
-func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T) {
-	started := make(chan string, 2)
+func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) {
+	started := make(chan string, 3)
 	release := make(chan struct{})
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload map[string]any
@@ -554,8 +554,9 @@ func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T
 
 	teacher := request("teacher")
 	slides := request("slides")
+	classifier := request("outline-classifier")
 	roles := map[string]bool{}
-	for range 2 {
+	for range 3 {
 		select {
 		case role := <-started:
 			roles[role] = true
@@ -564,11 +565,11 @@ func TestCourseModelProxyAllowsTeacherAndSlidesToStreamConcurrently(t *testing.T
 			t.Fatalf("concurrent course streams did not reach upstream: %v", roles)
 		}
 	}
-	if !roles["teacher"] || !roles["slides"] {
+	if !roles["teacher"] || !roles["slides"] || !roles["outline-classifier"] {
 		t.Fatalf("upstream roles = %v", roles)
 	}
 	close(release)
-	if <-teacher != http.StatusOK || <-slides != http.StatusOK {
+	if <-teacher != http.StatusOK || <-slides != http.StatusOK || <-classifier != http.StatusOK {
 		t.Fatal("course model streams did not complete")
 	}
 	a.request(c, "POST", "/learning/course/model", map[string]any{"agent": "other", "payload": map[string]any{}}, http.StatusBadRequest)

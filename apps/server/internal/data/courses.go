@@ -46,10 +46,17 @@ type CourseCover struct {
 }
 
 type OutlineSection struct {
-	ID        string
-	Title     string
-	Objective string
-	Status    string
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Objective string `json:"objective"`
+	Status    string `json:"status"`
+}
+
+type OutlineReorganization struct {
+	ID           string               `json:"id"`
+	Sections     []OutlineSection     `json:"sections"`
+	Pending      []CourseConversation `json:"pending"`
+	PendingCount int                  `json:"pendingCount"`
 }
 
 type CourseModel struct{ db database }
@@ -161,6 +168,10 @@ func (m CourseModel) Update(ctx context.Context, user, id, title, topic string) 
 }
 
 func (m CourseModel) ReplaceOutline(ctx context.Context, user, courseID string, outline []OutlineSection) (Course, error) {
+	return m.replaceOutline(ctx, user, courseID, outline, false)
+}
+
+func (m CourseModel) replaceOutline(ctx context.Context, user, courseID string, outline []OutlineSection, preserveNewIDs bool) (Course, error) {
 	current, err := m.Get(ctx, user, courseID)
 	if err != nil {
 		return Course{}, err
@@ -189,7 +200,9 @@ func (m CourseModel) ReplaceOutline(ctx context.Context, user, courseID string, 
 			}
 			used[id] = true
 		} else {
-			id = UUID()
+			if !preserveNewIDs || id == "" {
+				id = UUID()
+			}
 			if _, err := m.db.Exec(ctx, `INSERT INTO course_sections(id,course_id,title,objective,position,status) VALUES($1,$2,$3,$4,$5,$6)`, id, courseID, item.Title, item.Objective, index, status); err != nil {
 				return Course{}, err
 			}
@@ -209,6 +222,169 @@ func (m CourseModel) ReplaceOutline(ctx context.Context, user, courseID string, 
 		return Course{}, err
 	}
 	return m.Get(ctx, user, courseID)
+}
+
+func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, courseID string, outline []OutlineSection) (OutlineReorganization, error) {
+	current, err := m.Get(ctx, user, courseID)
+	if err != nil {
+		return OutlineReorganization{}, err
+	}
+	existing := make(map[string]CourseSection, len(current.Sections))
+	for _, section := range current.Sections {
+		existing[section.ID] = section
+	}
+	for index := range outline {
+		section, ok := existing[outline[index].ID]
+		if !ok {
+			outline[index].ID = UUID()
+		} else if outline[index].Status == "" {
+			outline[index].Status = section.Status
+		}
+		if outline[index].Status == "" || outline[index].Status == "archived" {
+			outline[index].Status = "planned"
+		}
+	}
+	raw, err := json.Marshal(outline)
+	if err != nil {
+		return OutlineReorganization{}, err
+	}
+	if _, err := m.db.Exec(ctx, `DELETE FROM course_outline_reorganizations WHERE course_id=$1`, courseID); err != nil {
+		return OutlineReorganization{}, err
+	}
+	id := UUID()
+	if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_reorganizations(id,course_id,sections) VALUES($1,$2,$3)`, id, courseID, raw); err != nil {
+		return OutlineReorganization{}, err
+	}
+	if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_assignments(reorganization_id,conversation_id,conversation_updated_at)
+		SELECT $1,id,updated_at FROM course_conversations WHERE course_id=$2`, id, courseID); err != nil {
+		return OutlineReorganization{}, err
+	}
+	return m.loadOutlineReorganization(ctx, user, courseID, false)
+}
+
+func (m CourseModel) GetOutlineReorganization(ctx context.Context, user, courseID string) (OutlineReorganization, error) {
+	return m.loadOutlineReorganization(ctx, user, courseID, true)
+}
+
+func (m CourseModel) loadOutlineReorganization(ctx context.Context, user, courseID string, refresh bool) (OutlineReorganization, error) {
+	if _, err := m.Get(ctx, user, courseID); err != nil {
+		return OutlineReorganization{}, err
+	}
+	var result OutlineReorganization
+	var raw json.RawMessage
+	err := m.db.QueryRow(ctx, `SELECT id,sections FROM course_outline_reorganizations WHERE course_id=$1`, courseID).Scan(&result.ID, &raw)
+	if err == pgx.ErrNoRows {
+		return OutlineReorganization{}, ErrOutlineReorganizationNotFound
+	}
+	if err != nil {
+		return OutlineReorganization{}, err
+	}
+	if err := json.Unmarshal(raw, &result.Sections); err != nil {
+		return OutlineReorganization{}, err
+	}
+	if refresh {
+		if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_assignments(reorganization_id,conversation_id,conversation_updated_at)
+			SELECT $1,c.id,c.updated_at FROM course_conversations c
+			WHERE c.course_id=$2 ON CONFLICT(reorganization_id,conversation_id) DO NOTHING`, result.ID, courseID); err != nil {
+			return OutlineReorganization{}, err
+		}
+		if _, err := m.db.Exec(ctx, `UPDATE course_outline_assignments a
+			SET conversation_updated_at=c.updated_at,target_section_id=NULL,reason=''
+			FROM course_conversations c
+			WHERE a.reorganization_id=$1 AND a.conversation_id=c.id AND a.conversation_updated_at<>c.updated_at`, result.ID); err != nil {
+			return OutlineReorganization{}, err
+		}
+	}
+	rows, err := m.db.Query(ctx, `SELECT c.id,c.section_id,c.title,c.state,c.created_at,c.updated_at
+		FROM course_outline_assignments a JOIN course_conversations c ON c.id=a.conversation_id
+		WHERE a.reorganization_id=$1 AND a.target_section_id IS NULL ORDER BY c.updated_at,c.id`, result.ID)
+	if err != nil {
+		return OutlineReorganization{}, err
+	}
+	defer rows.Close()
+	result.Pending = []CourseConversation{}
+	for rows.Next() {
+		var conversation CourseConversation
+		if err := rows.Scan(&conversation.ID, &conversation.SectionID, &conversation.Title, &conversation.State, &conversation.CreatedAt, &conversation.UpdatedAt); err != nil {
+			return OutlineReorganization{}, err
+		}
+		result.Pending = append(result.Pending, conversation)
+	}
+	result.PendingCount = len(result.Pending)
+	return result, rows.Err()
+}
+
+func (m CourseModel) AssignOutlineConversation(ctx context.Context, user, courseID, reorganizationID, conversationID, sectionID, reason string, conversationUpdatedAt time.Time, newSection *OutlineSection) (Course, *OutlineReorganization, error) {
+	var storedCourseID string
+	var raw json.RawMessage
+	err := m.db.QueryRow(ctx, `SELECT r.course_id,r.sections FROM course_outline_reorganizations r JOIN courses c ON c.id=r.course_id WHERE r.id=$1 AND r.course_id=$2 AND c.user_id=$3 FOR UPDATE`, reorganizationID, courseID, user).Scan(&storedCourseID, &raw)
+	if err == pgx.ErrNoRows {
+		return Course{}, nil, ErrOutlineReorganizationNotFound
+	}
+	if err != nil {
+		return Course{}, nil, err
+	}
+	var sections []OutlineSection
+	if err := json.Unmarshal(raw, &sections); err != nil {
+		return Course{}, nil, err
+	}
+	if newSection != nil {
+		if len(sections) >= 100 {
+			return Course{}, nil, ValidationError("课程大纲最多包含 100 个小节")
+		}
+		newSection.ID = UUID()
+		newSection.Status = "planned"
+		sections = append(sections, *newSection)
+		sectionID = newSection.ID
+		raw, _ = json.Marshal(sections)
+		if _, err := m.db.Exec(ctx, `UPDATE course_outline_reorganizations SET sections=$1 WHERE id=$2`, raw, reorganizationID); err != nil {
+			return Course{}, nil, err
+		}
+	} else {
+		found := false
+		for _, section := range sections {
+			found = found || section.ID == sectionID
+		}
+		if !found {
+			return Course{}, nil, ValidationError("目标课程小节无效")
+		}
+	}
+	var queuedUpdatedAt, liveUpdatedAt time.Time
+	err = m.db.QueryRow(ctx, `SELECT a.conversation_updated_at,c.updated_at
+		FROM course_outline_assignments a JOIN course_conversations c ON c.id=a.conversation_id
+		WHERE a.reorganization_id=$1 AND a.conversation_id=$2 AND c.course_id=$3`, reorganizationID, conversationID, courseID).Scan(&queuedUpdatedAt, &liveUpdatedAt)
+	if err == pgx.ErrNoRows {
+		return Course{}, nil, ErrConversationNotFound
+	}
+	if err != nil {
+		return Course{}, nil, err
+	}
+	if !queuedUpdatedAt.Equal(conversationUpdatedAt) || !liveUpdatedAt.Equal(conversationUpdatedAt) {
+		return Course{}, nil, ErrOutlineClassificationStale
+	}
+	if _, err := m.db.Exec(ctx, `UPDATE course_outline_assignments SET target_section_id=$1,reason=$2 WHERE reorganization_id=$3 AND conversation_id=$4`, sectionID, reason, reorganizationID, conversationID); err != nil {
+		return Course{}, nil, err
+	}
+	pending, err := m.loadOutlineReorganization(ctx, user, courseID, true)
+	if err != nil {
+		return Course{}, nil, err
+	}
+	if pending.PendingCount > 0 {
+		return Course{}, &pending, nil
+	}
+	course, err := m.replaceOutline(ctx, user, courseID, sections, true)
+	if err != nil {
+		return Course{}, nil, err
+	}
+	if _, err := m.db.Exec(ctx, `UPDATE course_conversations c SET section_id=a.target_section_id
+		FROM course_outline_assignments a WHERE a.reorganization_id=$1 AND a.conversation_id=c.id`, reorganizationID); err != nil {
+		return Course{}, nil, err
+	}
+	if _, err := m.db.Exec(ctx, `DELETE FROM course_outline_reorganizations WHERE id=$1`, reorganizationID); err != nil {
+		return Course{}, nil, err
+	}
+	course, err = m.Get(ctx, user, courseID)
+	return course, nil, err
 }
 
 func (m CourseModel) CreateConversation(ctx context.Context, user, courseID, sectionID, title string) (CourseConversation, error) {

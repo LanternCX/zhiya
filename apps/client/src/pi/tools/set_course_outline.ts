@@ -11,7 +11,7 @@ export function setCourseOutlineTool(
     name: "set_course_outline",
     label: activityLabel,
     description:
-      "Create or replace the ordered course outline. Each section is a meaningful teaching unit with a concise title and learning objective. Call this immediately after creating a course, before teaching. Update it later when the student's goals or explicit material constraints change.",
+      "Create or revise the ordered course outline. Each section is a meaningful teaching unit with a concise title and learning objective. Call this immediately after creating a course, before teaching. Update it later when the student's goals or explicit material constraints change. When revising a course with history, existing conversations are reclassified from their actual content before the new outline is published.",
     parameters: Type.Object({
       sections: Type.Array(
         Type.Object({
