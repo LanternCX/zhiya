@@ -556,7 +556,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
   await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
   await expect(page.locator(".workspace-sidebar")).toHaveCSS(
     "border-right-width",
-    "1px",
+    "3px",
   );
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
