@@ -5,8 +5,12 @@ test("theme cycles, persists, and follows the system only in automatic mode", as
   await page.goto("/");
   const root = page.locator("html");
   await expect(root).toHaveAttribute("data-theme", "dark");
+  await expect(root).toHaveCSS("background-color", "rgb(14, 23, 28)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(14, 23, 28)");
   await page.getByRole("button", { name: "当前为自动主题，切换至浅色主题" }).click();
   await expect(root).toHaveAttribute("data-theme", "light");
+  await expect(root).toHaveCSS("background-color", "rgb(248, 250, 228)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(248, 250, 228)");
   await page.reload();
   await expect(root).toHaveAttribute("data-theme", "light");
   await page.getByRole("button", { name: "当前为浅色主题，切换至深色主题" }).click();
@@ -18,7 +22,7 @@ test("theme cycles, persists, and follows the system only in automatic mode", as
   await expect(root).toHaveAttribute("data-theme", "dark");
 });
 
-test("neo-brutalist visual tokens are applied without changing the page structure", async ({ page }) => {
+test("the primary action has a visible border and hard-offset shadow", async ({ page }) => {
   await page.goto("/");
   const primary = page.locator("button.primary").first();
   await expect(primary).toBeVisible();

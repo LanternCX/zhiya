@@ -103,7 +103,7 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 30px;
-  background: var(--glass);
+  background: var(--panel-fill);
   box-shadow: none;
   backdrop-filter: blur(24px) saturate(125%);
   -webkit-backdrop-filter: blur(24px) saturate(125%);
@@ -649,9 +649,13 @@
   --cover-spot: var(--accent);
 }
 .course-cover.palette-ocean {
-  --cover-paper: color-mix(in srgb, var(--muted) 17%, var(--surface));
-  --cover-ink: var(--accent);
-  --cover-spot: color-mix(in srgb, var(--accent) 38%, transparent);
+  --cover-highlight: var(--canvas-fill);
+  --cover-paper: color-mix(in srgb, var(--brand-green-soft) 72%, var(--canvas-fill));
+  --cover-ink: var(--brand-green);
+  --cover-spot: color-mix(in srgb, var(--cover-highlight) 78%, transparent);
+}
+:root[data-theme="dark"] .course-cover.palette-ocean {
+  --cover-highlight: #15271e;
 }
 .course-cover.palette-berry {
   --cover-paper: color-mix(in srgb, var(--error) 11%, var(--surface));
@@ -1793,12 +1797,6 @@
   background: transparent;
 }
 
-/* Sage paper and forest ink keep the cover readable in both themes. */
-.course-cover.palette-ocean {
-  --cover-paper: color-mix(in srgb, var(--brand-green-soft) 72%, var(--canvas-fill));
-  --cover-ink: var(--brand-green);
-  --cover-spot: color-mix(in srgb, var(--cream, var(--canvas-fill)) 78%, transparent);
-}
 .course-home-kicker,
 .course-section-number,
 .course-section-card[data-status="active"] .course-section-status,

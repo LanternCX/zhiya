@@ -27,10 +27,10 @@
   height: 112px;
   margin-bottom: 32px;
   color: var(--accent);
-  background: var(--glass);
-  border: 1px solid var(--glass-edge);
+  background: var(--panel-fill);
+  border: 1px solid var(--panel-edge);
   border-radius: 36px;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--panel-shadow);
 }
 .welcome-mark svg {
   width: 64px;
@@ -87,10 +87,10 @@
 .question-answer {
   margin-top: 12px;
   padding: 8px 24px 16px;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--panel-edge);
   border-radius: 20px;
-  background: var(--glass);
-  box-shadow: var(--glass-shadow);
+  background: var(--panel-fill);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: blur(24px) saturate(125%);
   -webkit-backdrop-filter: blur(24px) saturate(125%);
 }
@@ -188,9 +188,9 @@
   outline-offset: 2px;
 }
 .question-answer:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--glass-edge));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--panel-edge));
   box-shadow:
-    var(--glass-shadow),
+    var(--panel-shadow),
     0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .question-actions {
@@ -295,11 +295,11 @@
   height: 44px;
   min-height: 44px;
   padding: 0;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--panel-edge);
   border-radius: 50%;
-  background: var(--glass);
+  background: var(--panel-fill);
   color: var(--text);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--panel-shadow);
 }
 .learning-progress .generation-stop svg {
   width: 16px;
@@ -399,7 +399,7 @@
   min-height: 50dvh;
 }
 
-/* Neo-Brutalist learning cards and controls; content flow remains identical. */
+/* Learning controls share the theme's borders and hard-offset shadows. */
 .welcome-mark { border: 3px solid var(--line); border-radius: 12px; background: var(--accent); box-shadow: 5px 5px 0 var(--line); }
 .question-answer { border: 3px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 5px 5px 0 var(--line); backdrop-filter: none; }
 .question-option { border-bottom: 2px solid var(--line); }

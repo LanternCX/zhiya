@@ -153,7 +153,7 @@ export default function App() {
               )}
             </main>
             {!user && view === "login" && (
-              <div className="switch-auth glass">
+              <div className="switch-auth panel">
                 <span>还没有账号？</span>
                 <button
                   className="text-button"

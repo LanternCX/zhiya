@@ -19,7 +19,7 @@
   display: grid;
   grid-template-columns: 224px minmax(0, 1fr);
   height: 100dvh;
-  background-color: var(--workspace-fill);
+  background-color: var(--canvas-fill);
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
@@ -124,10 +124,10 @@
   width: 232px;
   z-index: 20;
   padding: 8px;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--panel-edge);
   border-radius: 16px;
-  background: var(--glass);
-  box-shadow: var(--glass-shadow);
+  background: var(--panel-fill);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: blur(24px) saturate(125%);
   -webkit-backdrop-filter: blur(24px) saturate(125%);
 }
@@ -285,7 +285,7 @@
     margin: 0;
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
-    background: var(--glass);
+    background: var(--panel-fill);
     backdrop-filter: blur(24px) saturate(125%);
     -webkit-backdrop-filter: blur(24px) saturate(125%);
   }
@@ -355,7 +355,7 @@
   display: none !important;
 }
 
-/* Neo-Brutalist workspace skin; grid and responsive geometry are unchanged. */
+/* Workspace navigation uses bounded controls and hard-offset shadows. */
 .workspace-sidebar { border-right: 3px solid var(--line); background: var(--surface); }
 .workspace-brand { font-weight: 800; }
 .workspace-nav button { border: 3px solid transparent; border-radius: 8px; font-weight: 700; }
@@ -379,8 +379,8 @@
 }
 .onboarding-controls .icon-button {
   color: var(--muted);
-  background: var(--glass);
-  border: 1px solid var(--glass-edge);
+  background: var(--panel-fill);
+  border: 1px solid var(--panel-edge);
   border-radius: 50%;
 }
 .is-onboarding .workspace-content {

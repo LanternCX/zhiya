@@ -163,20 +163,18 @@ test("learning and profile pages share the themed grid background", async ({
       const style = getComputedStyle(element);
       return {
         image: style.backgroundImage,
-        token: getComputedStyle(document.documentElement)
-          .getPropertyValue("--workspace-fill")
-          .trim(),
+        color: style.backgroundColor,
       };
     });
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
-  expect(await background()).toMatchObject({ token: "#e6ede8" });
+  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
   expect((await background()).image).toContain("linear-gradient");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
-  expect(await background()).toMatchObject({ token: "#e6ede8" });
+  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
   expect((await background()).image).toContain("linear-gradient");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
@@ -186,7 +184,7 @@ test("learning and profile pages share the themed grid background", async ({
   await page
     .getByRole("button", { name: "当前为浅色主题，切换至深色主题" })
     .click();
-  expect(await background()).toMatchObject({ token: "#17211f" });
+  await expect(workspace).toHaveCSS("background-color", "rgb(14, 23, 28)");
   expect((await background()).image).toContain("linear-gradient");
 });
 
