@@ -157,7 +157,7 @@ test("learning and profile pages share the themed grid background", async ({
   await mockLearning(page, () => state);
   await page.goto("/");
 
-  const workspace = page.locator(".workspace");
+  const workspace = page.locator(".workspace-body");
   const background = async () =>
     workspace.evaluate((element) => {
       const style = getComputedStyle(element);
