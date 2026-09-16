@@ -20,6 +20,10 @@
   grid-template-columns: 224px minmax(0, 1fr);
   height: 100dvh;
   background-color: var(--workspace-fill);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 .workspace-sidebar {
   position: relative;
