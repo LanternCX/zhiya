@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 test("the ambient background is bounded, animated, and static with reduced motion", async ({ page }) => {
   await page.clock.install();
   await page.goto("/");
-  await expect(page.locator("body")).not.toHaveCSS("background-image", "none");
+  await expect(page.locator("body")).toHaveCSS("background-image", "none");
   const background = page.locator("canvas.ambient-background");
   await expect(background).toBeVisible();
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));

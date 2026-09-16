@@ -125,7 +125,7 @@ test("mobile destinations show honest empty states and account pages can open th
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
 });
 
-test("learning and profile pages share a solid theme background", async ({
+test("learning and profile pages share a quiet themed background", async ({
   page,
 }) => {
   await page.route("**/api/me", (route) =>
@@ -157,25 +157,25 @@ test("learning and profile pages share a solid theme background", async ({
   await mockLearning(page, () => state);
   await page.goto("/");
 
-  const workspace = page.locator(".workspace");
+  const workspace = page.locator(".workspace-body");
   const background = async () =>
     workspace.evaluate((element) => {
       const style = getComputedStyle(element);
       return {
         image: style.backgroundImage,
-        token: getComputedStyle(document.documentElement)
-          .getPropertyValue("--workspace-fill")
-          .trim(),
+        color: style.backgroundColor,
       };
     });
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
-  expect(await background()).toEqual({ image: "none", token: "#e6ede8" });
+  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
+  expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
-  expect(await background()).toEqual({ image: "none", token: "#e6ede8" });
+  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
+  expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page
@@ -184,7 +184,8 @@ test("learning and profile pages share a solid theme background", async ({
   await page
     .getByRole("button", { name: "当前为浅色主题，切换至深色主题" })
     .click();
-  expect(await background()).toEqual({ image: "none", token: "#17211f" });
+  await expect(workspace).toHaveCSS("background-color", "rgb(30, 30, 30)");
+  expect((await background()).image).toBe("none");
 });
 
 test("onboarding blocks navigation until completion, including reload and waiting", async ({

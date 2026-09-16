@@ -103,7 +103,7 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 30px;
-  background: var(--glass);
+  background: var(--panel-fill);
   box-shadow: none;
   backdrop-filter: blur(24px) saturate(125%);
   -webkit-backdrop-filter: blur(24px) saturate(125%);
@@ -161,7 +161,8 @@
   transition: background 160ms ease;
 }
 .course-section-card:hover {
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  background: var(--brand-green-soft);
+  box-shadow: inset 3px 0 var(--brand-green);
 }
 .course-section-card[data-status="archived"] {
   opacity: 0.55;
@@ -649,9 +650,13 @@
   --cover-spot: var(--accent);
 }
 .course-cover.palette-ocean {
-  --cover-paper: color-mix(in srgb, var(--muted) 17%, var(--surface));
-  --cover-ink: var(--accent);
-  --cover-spot: color-mix(in srgb, var(--accent) 38%, transparent);
+  --cover-highlight: var(--canvas-fill);
+  --cover-paper: color-mix(in srgb, var(--brand-green-soft) 72%, var(--canvas-fill));
+  --cover-ink: var(--brand-green);
+  --cover-spot: color-mix(in srgb, var(--cover-highlight) 78%, transparent);
+}
+:root[data-theme="dark"] .course-cover.palette-ocean {
+  --cover-highlight: #15271e;
 }
 .course-cover.palette-berry {
   --cover-paper: color-mix(in srgb, var(--error) 11%, var(--surface));
@@ -804,17 +809,21 @@
 }
 .course-message-body [data-streamdown="code-block"],
 .course-message-body [data-streamdown="code-block-body"] {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  background: var(--surface);
   box-shadow: none;
 }
 .course-message-body [data-streamdown="code-block"] {
   gap: 0;
   padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-block: 16px;
 }
 .course-message-body [data-streamdown="code-block-body"] {
-  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 16px;
 }
 .course-message-body [data-streamdown="code-block-actions"],
 .course-message-body [data-streamdown="mermaid-block-actions"] {
@@ -1006,7 +1015,7 @@
   padding: 2px 5px;
   border-radius: 5px;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-  color: var(--accent);
+  color: var(--text);
   font: 0.92em/1.4 "JetBrains Mono", ui-monospace, monospace;
 }
 .coding-instructions blockquote {
@@ -1046,13 +1055,13 @@
   border-color: var(--accent);
 }
 .coding-editor-shell {
-  --code-caret: #0b6f50;
-  --code-keyword: #91415a;
-  --code-name: #29433a;
-  --code-type: #315f91;
-  --code-string: #267052;
-  --code-number: #a05a25;
-  --code-comment: #75847c;
+  --code-caret: #000000;
+  --code-keyword: #0000ff;
+  --code-name: #001080;
+  --code-type: #267f99;
+  --code-string: #a31515;
+  --code-number: #098658;
+  --code-comment: #008000;
   display: grid;
   grid-template-rows: auto minmax(220px, 1fr);
   min-height: 260px;
@@ -1199,13 +1208,13 @@
   cursor: default;
 }
 :root[data-theme="dark"] .coding-editor-shell {
-  --code-caret: #d8f58a;
-  --code-keyword: #ed9ab3;
-  --code-name: #edf4ee;
-  --code-type: #9bc2ee;
-  --code-string: #91d5ad;
-  --code-number: #eab17d;
-  --code-comment: #91a49a;
+  --code-caret: #d4d4d4;
+  --code-keyword: #569cd6;
+  --code-name: #9cdcfe;
+  --code-type: #4ec9b0;
+  --code-string: #ce9178;
+  --code-number: #b5cea8;
+  --code-comment: #8cae78;
 }
 .coding-output {
   overflow: hidden;
@@ -1244,6 +1253,10 @@
   display: inline-grid;
   min-width: 92px;
   place-items: center;
+}
+.coding-page > .coding-actions .coding-run-button:has(svg) {
+  grid-auto-flow: column;
+  gap: 8px;
 }
 .coding-page > .coding-actions button:disabled {
   opacity: 0.5;
@@ -1372,10 +1385,12 @@
   background: var(--subtle);
 }
 .coding-page > .coding-actions button:not(:disabled):hover {
-  border-color: color-mix(in srgb, var(--accent) 54%, var(--line));
+  border-color: var(--brand-green);
+  background: var(--brand-green-soft);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--line) 60%, transparent);
 }
 .coding-page > .coding-actions button:first-child:not(:disabled):hover {
-  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+  background: var(--accent-hover);
 }
 @media (max-width: 720px) {
   .course-room {
@@ -1720,5 +1735,131 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Reading surfaces share the quiet workspace canvas. */
+.course-room {
+  background: transparent;
+}
+.course-conversation,
+.slide-stage,
+.coding-page,
+.coding-page-loading {
+  background-color: transparent;
+}
+
+/* Green carries brand and conversational emphasis. */
+.course-thinking-trigger,
+.course-tool-activity {
+  color: var(--brand-green);
+}
+.course-message.user > span {
+  color: var(--text);
+  font-weight: 700;
+}
+.course-message.assistant[aria-current="step"]::before,
+.course-tool-mark {
+  background: var(--brand-green);
+}
+
+/* One coherent outline per coding control, with clear separation between rows. */
+.coding-editor-shell {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 72%, transparent);
+}
+.coding-editor-bar {
+  border-bottom: 2px solid var(--line);
+}
+.coding-page .coding-stdin {
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+.coding-page > .coding-actions button {
+  border-width: 2px;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+.coding-page > .coding-actions button:not(:disabled):active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+/* Inner classroom regions share the workspace canvas. */
+.workspace-body {
+  background-color: var(--canvas-fill);
+}
+.workspace-toolbar,
+.workspace-content,
+.course-surface,
+.workspace-empty,
+.course-home,
+.course-room,
+.slide-stage {
+  background: transparent;
+}
+
+.course-home-kicker,
+.course-section-number,
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span,
+.coding-editor-bar > span:last-child {
+  color: var(--brand-green);
+}
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span {
+  border-color: color-mix(in srgb, var(--brand-green) 52%, var(--line));
+  background: color-mix(in srgb, var(--brand-green-soft) 72%, var(--surface));
+}
+
+/* Keep editor, stdin, output, and actions in separate non-overlapping rows. */
+.coding-page {
+  grid-template-rows: auto auto auto auto auto auto;
+}
+.coding-page > .coding-editor-shell {
+  min-height: clamp(220px, 34vh, 360px);
+}
+.coding-page > label {
+  min-height: 86px;
+}
+.coding-page > .coding-actions {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  margin-top: 2px;
+}
+.coding-action-feedback {
+  margin: 0;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.course-section-card:focus-within {
+  background: var(--brand-green-soft);
+  box-shadow: inset 3px 0 var(--brand-green);
+}
+.course-message-body :not(pre) > code {
+  color: var(--text);
+  background: var(--subtle);
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+.course-message-body [data-streamdown="code-block-header"] {
+  background: var(--subtle);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.coding-page > .coding-actions button:focus-visible {
+  outline: 2px solid var(--brand-green);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coding-page > .coding-actions button:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+  .coding-page > .coding-actions button:not(:disabled):active {
+    transform: translate(1px, 1px);
   }
 }

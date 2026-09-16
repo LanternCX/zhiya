@@ -1,29 +1,60 @@
 @layer theme, base, components, utilities;
+/* Semantic colors shared by account, learning, and classroom surfaces. */
+:root {
+  --canvas-fill: #f8fae4;
+  --surface: #fffef8;
+  --subtle: #f4f0e6;
+  --text: #30352f;
+  --muted: #62685e;
+  --line: #878d7d;
+  --accent: #286443;
+  --accent-hover: #1d5135;
+  --on-accent: #ffffff;
+  --error: #c1121f;
+  --brand-green: #286443;
+  --brand-green-soft: #e0ebd8;
+  --brand-ink: #286443;
+  --panel-fill: #fffdf5;
+  --panel-edge: #171717;
+  --panel-shadow: 5px 5px 0 #789667;
+  --paper-shadow: 6px 6px 0 #789667;
+  --ambient-sage: rgb(76 143 107 / 42%);
+  --ambient-gold: rgb(244 209 137 / 45%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas-fill: #1e1e1e;
+  --surface: #252526;
+  --subtle: #333335;
+  --text: #e7e7e2;
+  --muted: #b3b5ae;
+  --line: #777b75;
+  --accent: #9bd3a9;
+  --accent-hover: #b5e3bf;
+  --on-accent: #17251c;
+  --error: #ff8b8b;
+  --brand-green: #9bd3a9;
+  --brand-green-soft: #293e31;
+  --brand-ink: #9bd3a9;
+  --panel-fill: #252526;
+  --panel-edge: #777b75;
+  --panel-shadow: 5px 5px 0 #090805;
+  --paper-shadow: 6px 6px 0 #090805;
+  --ambient-sage: rgb(109 164 131 / 27%);
+  --ambient-gold: rgb(197 177 121 / 18%);
+}
+
 @layer base {
 :root {
   color-scheme: light;
   font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  color: #142d2a;
-  background: #e6ede8;
+  color: var(--text);
+  background: var(--canvas-fill);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --surface: #fff;
-  --text: #142d2a;
-  --muted: #3f5348;
-  --line: #ccd6cb;
-  --accent: #284f3f;
-  --on-accent: #fff;
-  --error: #a23f38;
-  --subtle: #f2f5ef;
-  --canvas-fill: radial-gradient(ellipse at 8% 0%, #fafaf0 0%, transparent 45%), radial-gradient(ellipse at 95% 95%, #b1c8b5 0%, transparent 54%), linear-gradient(120deg, #e6ede8, #d3dfd6 65%, #e3e9da);
-  --workspace-fill: #e6ede8;
-  --glass: rgb(247 250 246 / 76%);
-  --glass-edge: rgb(255 255 255 / 85%);
-  --glass-shadow: 0 12px 32px -16px rgb(29 64 48 / 26%), inset 0 1px 0 rgb(255 255 255 / 65%);
-  --paper-shadow: 0 16px 50px -24px rgb(38 65 47 / 26%), 0 1px 2px rgb(38 65 47 / 5%);
-  --ambient-sage: rgb(76 143 107 / 42%);
-  --ambient-gold: rgb(244 209 137 / 45%);
 }
+
 * {
   box-sizing: border-box;
 }
@@ -137,10 +168,10 @@ p {
   z-index: -1;
   pointer-events: none;
 }
-.glass {
-  background: var(--glass);
-  border: 1px solid var(--glass-edge);
-  box-shadow: var(--glass-shadow);
+.panel {
+  background: var(--panel-fill);
+  border: 1px solid var(--panel-edge);
+  box-shadow: var(--panel-shadow);
   border-radius: 16px;
 }
 .signed-out {
@@ -517,11 +548,11 @@ footer {
 .confirmation {
   max-width: min(440px, calc(100vw - 32px));
   padding: 28px;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--panel-edge);
   border-radius: 16px;
   color: var(--text);
-  background: var(--glass);
-  box-shadow: var(--glass-shadow);
+  background: var(--panel-fill);
+  box-shadow: var(--panel-shadow);
   backdrop-filter: blur(22px) saturate(115%);
   -webkit-backdrop-filter: blur(22px) saturate(115%);
 }
@@ -647,33 +678,6 @@ footer {
     flex-direction: column;
   }
 }
-:root[data-theme="dark"] {
-    color-scheme: dark;
-    color: #f3f6ee;
-    background: #17211f;
-    --surface: #283330;
-    --text: #f3f6ee;
-    --muted: #b7c6bc;
-    --line: #50635b;
-    --accent: #b8d3a8;
-    --on-accent: #202928;
-    --error: #f2aaa0;
-    --subtle: #34423d;
-    --canvas-fill: radial-gradient(ellipse at 95% 100%, #354d3e 0%, transparent 60%), radial-gradient(ellipse at 0% 0%, #334638 0%, transparent 45%), #17211f;
-    --workspace-fill: #17211f;
-    --glass: rgb(37 54 48 / 76%);
-    --glass-edge: rgb(198 216 203 / 24%);
-    --glass-shadow: 0 12px 32px -16px rgb(0 0 0 / 65%), inset 0 1px 0 rgb(198 216 203 / 10%);
-    --paper-shadow: 0 20px 56px -24px rgb(0 0 0 / 75%), 0 1px 0 rgb(198 216 203 / 10%);
-    --ambient-sage: rgb(109 164 131 / 27%);
-    --ambient-gold: rgb(197 177 121 / 18%);
-}
-:root[data-theme="dark"] .danger {
-  color: #202928;
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .confirmation { background: var(--subtle); }
-}
 button,
 input:not([type="file"]) {
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
@@ -739,11 +743,144 @@ input:not([type="checkbox"]):not([type="file"]):focus {
   }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glass, .confirmation {
+  .panel, .confirmation {
     background: var(--subtle);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
   .confirmation::backdrop { backdrop-filter: none; }
 }
+}
+
+/* Shared surface and control treatments. */
+.panel,
+.account-surface,
+.confirmation,
+.workspace-settings {
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--paper-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+button,
+input:not([type="file"]),
+textarea {
+  border-radius: 8px;
+  border-color: var(--line);
+}
+.primary,
+.danger {
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+  font-weight: 700;
+}
+.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.primary:hover,
+.danger:hover {
+  filter: none;
+  background: var(--accent-hover);
+}
+.primary:not(:disabled):active,
+.danger:not(:disabled):active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--line);
+}
+.secondary {
+  border: 3px solid var(--line);
+  background: var(--surface);
+  box-shadow: 3px 3px 0 var(--brand-green);
+  font-weight: 650;
+}
+.secondary:not(:disabled):active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--line);
+}
+input:not([type="checkbox"]):not([type="file"]),
+textarea {
+  background: var(--surface);
+  border-width: 3px;
+}
+input:not([type="checkbox"]):not([type="file"]):focus,
+textarea:focus-visible {
+  box-shadow: 3px 3px 0 var(--accent);
+}
+body,
+.workspace {
+  background-color: var(--canvas-fill);
+}
+.ambient-background { opacity: .12; }
+.brand .wordmark,
+.workspace-brand,
+.brand .wordmark svg,
+.workspace-brand svg {
+  color: var(--brand-ink);
+}
+.workspace-nav button[aria-current] .ui-icon { color: var(--brand-green); }
+.text-button,
+.question-companion,
+.learning-surface .assistant-thinking {
+  color: var(--brand-green);
+}
+.secondary:hover,
+.theme-toggle:hover,
+.icon-button:hover,
+.text-button:hover {
+  background: var(--brand-green-soft);
+}
+.workspace-sidebar { background: color-mix(in srgb, var(--canvas-fill) 92%, transparent); }
+.workspace-nav button[aria-current] {
+  background: var(--brand-green-soft);
+  color: var(--text);
+  box-shadow: 3px 3px 0 var(--brand-green);
+}
+.user-trigger,
+.user-popover {
+  border-color: var(--brand-green);
+  box-shadow: 3px 3px 0 var(--brand-green);
+}
+.user-avatar {
+  background: var(--brand-green-soft);
+  border-color: var(--brand-green);
+}
+.subject-art {
+  background: var(--brand-green-soft);
+  color: var(--brand-ink);
+  box-shadow: 5px 5px 0 var(--brand-green);
+}
+.subject-art.explore { background: #dcecc7; color: var(--brand-ink); }
+.subject-art.lab { background: var(--accent); color: #7e6a27; }
+.subject-art.review { background: #e5edc8; color: #668650; }
+
+:root[data-theme="dark"] .workspace-sidebar,
+:root[data-theme="dark"] .workspace-settings,
+:root[data-theme="dark"] .account-surface,
+:root[data-theme="dark"] .confirmation {
+  background: var(--surface);
+}
+:root[data-theme="dark"] .workspace-nav button[aria-current] {
+  color: #eef1d9;
+  box-shadow: 3px 3px 0 #090805;
+}
+:root[data-theme="dark"] .user-trigger,
+:root[data-theme="dark"] .user-popover {
+  background: var(--surface);
+}
+:root[data-theme="dark"] .user-avatar { background: var(--brand-green); }
+:root[data-theme="dark"] .danger {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+:root[data-theme="dark"] .danger:hover { background: var(--accent-hover); }
+:root[data-theme="dark"] .subject-art { color: #d3dfac; }
+:root[data-theme="dark"] .subject-art.explore { background: #344b32; color: #b7d19c; }
+:root[data-theme="dark"] .subject-art.lab { background: #6a5745; color: #f0dcb1; }
+:root[data-theme="dark"] .subject-art.review { background: #4b3c2c; color: #dfc9a9; }
+:root[data-theme="dark"] input:not([type="checkbox"]):not([type="file"]),
+:root[data-theme="dark"] textarea {
+  background: var(--surface);
+  color: var(--text);
 }

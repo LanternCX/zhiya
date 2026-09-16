@@ -725,12 +725,12 @@ export default function CourseRoom({
                     session.current?.updateCodingExercise(current.id, {
                       result,
                     });
+                    return result;
                   } catch (error) {
-                    setError(
-                      error instanceof Error
-                        ? error.message
-                        : "代码暂时无法运行",
-                    );
+                    const message =
+                      error instanceof Error ? error.message : "代码暂时无法运行";
+                    setError(message);
+                    throw new Error(message);
                   }
                 }}
                 onEnd={async () => {

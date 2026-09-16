@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MessageResponse } from "../../components/ai-elements/message";
 import { Spinner } from "../../components/ui/spinner";
 import type { CodingExercise } from "../../domain/learning";
+import type { CodeRunResult } from "../../domain/learning";
 import CodeEditor from "./CodeEditor";
 
 function exerciseFilename(languageName: string) {
@@ -25,12 +26,15 @@ export default function CodingPage({
 }: {
   exercise: CodingExercise;
   onChange: (changes: Pick<CodingExercise, "code" | "stdin">) => void;
-  onRun: () => Promise<void>;
+  onRun: () => Promise<CodeRunResult>;
   onEnd: () => Promise<void>;
 }) {
   const [running, setRunning] = useState(false);
+  const [ending, setEnding] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [localResult, setLocalResult] = useState<CodeRunResult | null>(null);
   const ended = exercise.status === "ended";
-  const result = exercise.result;
+  const result = localResult ?? exercise.result;
   const output = result
     ? [result.compileOutput, result.stdout, result.stderr, result.message]
         .filter(Boolean)
@@ -60,6 +64,13 @@ export default function CodingPage({
           onChange={(code) => onChange({ code, stdin: exercise.stdin })}
         />
       </section>
+      <section className="coding-output" aria-label="运行结果">
+        <header>
+          <span>输出</span>
+          <span>{result ? result.status.description : "等待运行"}</span>
+        </header>
+        <pre>{result ? output || "程序没有产生输出" : "运行代码后，结果会显示在这里"}</pre>
+      </section>
       <label>
         <span>标准输入（可选）</span>
         <textarea
@@ -72,30 +83,58 @@ export default function CodingPage({
           }
         />
       </label>
-      {result && (
-        <section className="coding-output" aria-label="运行结果">
-          <header>
-            <span>输出</span>
-            <span>{result.status.description}</span>
-          </header>
-          <pre>{output || "程序没有产生输出"}</pre>
-        </section>
+      {actionError && (
+        <p className="coding-action-feedback" role="alert">
+          {actionError}
+        </p>
       )}
       <footer className="coding-actions">
         <button
+          type="button"
           aria-busy={running}
           aria-label={running ? "代码正在运行" : undefined}
           className="coding-run-button"
           disabled={ended || running}
           onClick={() => {
             setRunning(true);
-            void onRun().finally(() => setRunning(false));
+            setActionError("");
+            void onRun()
+              .then((nextResult) => {
+                setLocalResult(nextResult);
+              })
+              .catch((error) => {
+                setActionError(
+                  error instanceof Error ? error.message : "代码暂时无法运行",
+                );
+              })
+              .finally(() => setRunning(false));
           }}
         >
-          {running ? <Spinner aria-hidden="true" /> : "运行代码"}
+          {running ? (
+            <>
+              <Spinner aria-hidden="true" />
+              <span>运行中…</span>
+            </>
+          ) : (
+            "运行代码"
+          )}
         </button>
-        <button disabled={ended || running} onClick={() => void onEnd()}>
-          {ended ? "练习已结束" : "结束练习"}
+        <button
+          type="button"
+          disabled={ended || running || ending}
+          onClick={() => {
+            setEnding(true);
+            setActionError("");
+            void onEnd()
+              .catch((error) => {
+                setActionError(
+                  error instanceof Error ? error.message : "练习暂时无法结束",
+                );
+              })
+              .finally(() => setEnding(false));
+          }}
+        >
+          {ended ? "练习已结束" : ending ? "正在结束…" : "结束练习"}
         </button>
       </footer>
     </article>
