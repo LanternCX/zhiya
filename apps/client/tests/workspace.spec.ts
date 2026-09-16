@@ -125,7 +125,7 @@ test("mobile destinations show honest empty states and account pages can open th
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
 });
 
-test("learning and profile pages share the themed grid background", async ({
+test("learning and profile pages share a quiet themed background", async ({
   page,
 }) => {
   await page.route("**/api/me", (route) =>
@@ -169,13 +169,13 @@ test("learning and profile pages share the themed grid background", async ({
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
   expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
-  expect((await background()).image).toContain("linear-gradient");
+  expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
   expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
-  expect((await background()).image).toContain("linear-gradient");
+  expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page
@@ -184,8 +184,8 @@ test("learning and profile pages share the themed grid background", async ({
   await page
     .getByRole("button", { name: "当前为浅色主题，切换至深色主题" })
     .click();
-  await expect(workspace).toHaveCSS("background-color", "rgb(14, 23, 28)");
-  expect((await background()).image).toContain("linear-gradient");
+  await expect(workspace).toHaveCSS("background-color", "rgb(30, 30, 30)");
+  expect((await background()).image).toBe("none");
 });
 
 test("onboarding blocks navigation until completion, including reload and waiting", async ({

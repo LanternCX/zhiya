@@ -20,10 +20,6 @@
   grid-template-columns: 224px minmax(0, 1fr);
   height: 100dvh;
   background-color: var(--canvas-fill);
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 .workspace-sidebar {
   position: relative;
@@ -359,12 +355,12 @@
 .workspace-sidebar { border-right: 3px solid var(--line); background: var(--surface); }
 .workspace-brand { font-weight: 800; }
 .workspace-nav button { border: 3px solid transparent; border-radius: 8px; font-weight: 700; }
-.workspace-nav button:hover { border-color: var(--line); background: #d9f7ff; }
+.workspace-nav button:hover { border-color: var(--line); background: var(--brand-green-soft); }
 .workspace-nav button[aria-current] { border-color: var(--line); background: var(--accent); color: var(--text); box-shadow: 3px 3px 0 var(--line); }
 .user-trigger { border: 3px solid var(--line); background: var(--surface); box-shadow: 3px 3px 0 var(--line); }
 .user-avatar { border: 2px solid var(--line); border-radius: 8px; background: var(--accent); }
 .user-popover { border: 3px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 5px 5px 0 var(--line); backdrop-filter: none; }
-.user-popover > button:hover { background: #d9f7ff; }
+.user-popover > button:hover { background: var(--brand-green-soft); }
 .workspace-toolbar { font-weight: 700; color: var(--text); }
 .subject-art { border: 3px solid var(--line); border-radius: 12px; box-shadow: 5px 5px 0 var(--line); }
 .onboarding-controls .icon-button { border: 3px solid var(--line); border-radius: 8px; background: var(--accent); box-shadow: 3px 3px 0 var(--line); }

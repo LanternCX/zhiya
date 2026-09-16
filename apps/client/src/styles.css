@@ -4,17 +4,16 @@
   --canvas-fill: #f8fae4;
   --surface: #fffef8;
   --subtle: #f4f0e6;
-  --text: #294735;
-  --muted: #5f7660;
-  --line: #294735;
-  --accent: #f9de79;
-  --accent-hover: #f4c91f;
-  --on-accent: #294735;
+  --text: #30352f;
+  --muted: #62685e;
+  --line: #878d7d;
+  --accent: #286443;
+  --accent-hover: #1d5135;
+  --on-accent: #ffffff;
   --error: #c1121f;
-  --brand-green: #a5ca8b;
-  --brand-green-soft: #d0dd97;
-  --brand-ink: #5a975e;
-  --grid-line: rgb(47 76 49 / 13%);
+  --brand-green: #286443;
+  --brand-green-soft: #e0ebd8;
+  --brand-ink: #286443;
   --panel-fill: #fffdf5;
   --panel-edge: #171717;
   --panel-shadow: 5px 5px 0 #789667;
@@ -25,21 +24,21 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas-fill: #0e171c;
-  --surface: #2c3e2b;
-  --subtle: #3a503d;
-  --text: #f1f4e9;
-  --muted: #b3c9b6;
-  --line: #b3c9b6;
-  --accent: #7d977f;
-  --accent-hover: #879d65;
-  --on-accent: #0e171c;
+  --canvas-fill: #1e1e1e;
+  --surface: #252526;
+  --subtle: #333335;
+  --text: #e7e7e2;
+  --muted: #b3b5ae;
+  --line: #777b75;
+  --accent: #9bd3a9;
+  --accent-hover: #b5e3bf;
+  --on-accent: #17251c;
   --error: #ff8b8b;
-  --brand-green: #7d977f;
-  --brand-green-soft: #526951;
-  --grid-line: rgb(179 201 182 / 16%);
-  --panel-fill: #2c3e2b;
-  --panel-edge: #7d977f;
+  --brand-green: #9bd3a9;
+  --brand-green-soft: #293e31;
+  --brand-ink: #9bd3a9;
+  --panel-fill: #252526;
+  --panel-edge: #777b75;
   --panel-shadow: 5px 5px 0 #090805;
   --paper-shadow: 6px 6px 0 #090805;
   --ambient-sage: rgb(109 164 131 / 27%);
@@ -802,7 +801,7 @@ textarea {
 }
 input:not([type="checkbox"]):not([type="file"]),
 textarea {
-  background: #fff;
+  background: var(--surface);
   border-width: 3px;
 }
 input:not([type="checkbox"]):not([type="file"]):focus,
@@ -812,10 +811,6 @@ textarea:focus-visible {
 body,
 .workspace {
   background-color: var(--canvas-fill);
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 .ambient-background { opacity: .12; }
 .brand .wordmark,
@@ -886,6 +881,6 @@ body,
 :root[data-theme="dark"] .subject-art.review { background: #4b3c2c; color: #dfc9a9; }
 :root[data-theme="dark"] input:not([type="checkbox"]):not([type="file"]),
 :root[data-theme="dark"] textarea {
-  background: var(--brand-green-soft);
+  background: var(--surface);
   color: var(--text);
 }

@@ -153,7 +153,7 @@ test("a student runs a model-created coding page and receives a review only when
   await expect(classroom).toHaveCSS("background-image", "none");
   await expect(page.locator(".workspace-body")).toHaveCSS(
     "background-image",
-    /linear-gradient/,
+    "none",
   );
   const userSpeaker = page.locator(".course-message.user > span").first();
   const conversationText = await page.evaluate(() => {
@@ -178,6 +178,16 @@ test("a student runs a model-created coding page and receives a review only when
   );
   await expect(userSpeaker).toHaveCSS("color", conversationText);
   const editorShell = page.getByRole("region", { name: "代码编辑区" });
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    const endButton = page.getByRole("button", { name: "结束练习", exact: true });
+    await page.mouse.move(0, 0);
+    const resting = await endButton.evaluate((element) => getComputedStyle(element).backgroundColor);
+    await endButton.hover();
+    await expect(endButton).not.toHaveCSS("background-color", resting);
+    await test.info().attach(`coding-${theme}`, { body: await page.screenshot({ animations: "disabled", path: test.info().outputPath(`coding-${theme}.png`) }), contentType: "image/png" });
+  }
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
   await expect(editorShell).toHaveCSS("border-top-width", "2px");
   const stdin = page.getByRole("textbox", { name: "标准输入" });
   await expect(stdin).toHaveCSS("border-top-width", "2px");
@@ -785,8 +795,13 @@ test("teacher markdown renders before the model stream finishes", async ({
   await expect(page.getByText("第一段", { exact: true })).toBeVisible();
   const codeBlock = page.locator('[data-streamdown="code-block"]');
   const codeActions = page.locator('[data-streamdown="code-block-actions"]');
-  await expect(codeBlock).toHaveCSS("border-top-width", "0px");
-  await expect(codeBlock).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    await expect(codeBlock).toHaveCSS("border-top-width", "1px");
+    await expect(codeBlock).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(codeBlock.locator('span[style*="--shiki-dark"]').first()).toBeVisible();
+    await test.info().attach(`markdown-${theme}`, { body: await page.screenshot({ animations: "disabled", path: test.info().outputPath(`markdown-${theme}.png`) }), contentType: "image/png" });
+  }
   await expect(codeActions).toHaveCSS("border-top-width", "0px");
   await expect(codeActions).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(codeActions.getByRole("button")).toHaveCount(1);
@@ -1215,7 +1230,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
     "rgba(0, 0, 0, 0)",
   );
   await attachmentButton.hover();
-  await expect(attachmentButton).toHaveCSS(
+  await expect(attachmentButton).not.toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
   );
@@ -1240,10 +1255,14 @@ test("a saved course starts a new agent-routed session and supports rename and d
     "rgba(0, 0, 0, 0)",
   );
   await courseAttachmentButton.hover();
-  await expect(courseAttachmentButton).toHaveCSS(
+  await expect(courseAttachmentButton).not.toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
   );
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    await test.info().attach(`course-${theme}`, { body: await page.screenshot({ animations: "disabled", path: test.info().outputPath(`course-${theme}.png`) }), contentType: "image/png" });
+  }
   await page
     .getByRole("textbox", { name: "告诉知芽你想开始什么新的学习" })
     .fill("请为太阳系基础安排一次新的复习");

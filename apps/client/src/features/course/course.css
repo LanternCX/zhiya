@@ -161,7 +161,8 @@
   transition: background 160ms ease;
 }
 .course-section-card:hover {
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  background: var(--brand-green-soft);
+  box-shadow: inset 3px 0 var(--brand-green);
 }
 .course-section-card[data-status="archived"] {
   opacity: 0.55;
@@ -808,17 +809,21 @@
 }
 .course-message-body [data-streamdown="code-block"],
 .course-message-body [data-streamdown="code-block-body"] {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  background: var(--surface);
   box-shadow: none;
 }
 .course-message-body [data-streamdown="code-block"] {
   gap: 0;
   padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-block: 16px;
 }
 .course-message-body [data-streamdown="code-block-body"] {
-  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 16px;
 }
 .course-message-body [data-streamdown="code-block-actions"],
 .course-message-body [data-streamdown="mermaid-block-actions"] {
@@ -1010,7 +1015,7 @@
   padding: 2px 5px;
   border-radius: 5px;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-  color: var(--accent);
+  color: var(--text);
   font: 0.92em/1.4 "JetBrains Mono", ui-monospace, monospace;
 }
 .coding-instructions blockquote {
@@ -1050,13 +1055,13 @@
   border-color: var(--accent);
 }
 .coding-editor-shell {
-  --code-caret: #0b6f50;
-  --code-keyword: #91415a;
-  --code-name: #29433a;
-  --code-type: #315f91;
-  --code-string: #267052;
-  --code-number: #a05a25;
-  --code-comment: #75847c;
+  --code-caret: #000000;
+  --code-keyword: #0000ff;
+  --code-name: #001080;
+  --code-type: #267f99;
+  --code-string: #a31515;
+  --code-number: #098658;
+  --code-comment: #008000;
   display: grid;
   grid-template-rows: auto minmax(220px, 1fr);
   min-height: 260px;
@@ -1203,13 +1208,13 @@
   cursor: default;
 }
 :root[data-theme="dark"] .coding-editor-shell {
-  --code-caret: #d8f58a;
-  --code-keyword: #ed9ab3;
-  --code-name: #edf4ee;
-  --code-type: #9bc2ee;
-  --code-string: #91d5ad;
-  --code-number: #eab17d;
-  --code-comment: #91a49a;
+  --code-caret: #d4d4d4;
+  --code-keyword: #569cd6;
+  --code-name: #9cdcfe;
+  --code-type: #4ec9b0;
+  --code-string: #ce9178;
+  --code-number: #b5cea8;
+  --code-comment: #8cae78;
 }
 .coding-output {
   overflow: hidden;
@@ -1380,10 +1385,12 @@
   background: var(--subtle);
 }
 .coding-page > .coding-actions button:not(:disabled):hover {
-  border-color: color-mix(in srgb, var(--accent) 54%, var(--line));
+  border-color: var(--brand-green);
+  background: var(--brand-green-soft);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--line) 60%, transparent);
 }
 .coding-page > .coding-actions button:first-child:not(:disabled):hover {
-  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+  background: var(--accent-hover);
 }
 @media (max-width: 720px) {
   .course-room {
@@ -1731,7 +1738,7 @@
   }
 }
 
-/* Keep every classroom surface on the shared fine-grid visual system. */
+/* Reading surfaces share the quiet workspace canvas. */
 .course-room {
   background: transparent;
 }
@@ -1742,7 +1749,7 @@
   background-color: transparent;
 }
 
-/* Green carries conversational emphasis; yellow remains an action color. */
+/* Green carries brand and conversational emphasis. */
 .course-thinking-trigger,
 .course-tool-activity {
   color: var(--brand-green);
@@ -1779,13 +1786,9 @@
   box-shadow: 1px 1px 0 color-mix(in srgb, var(--line) 60%, transparent);
 }
 
-/* The workspace owns one continuous grid; inner classroom regions do not reset it. */
+/* Inner classroom regions share the workspace canvas. */
 .workspace-body {
   background-color: var(--canvas-fill);
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 .workspace-toolbar,
 .workspace-content,
@@ -1831,4 +1834,32 @@
   color: var(--error);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.course-section-card:focus-within {
+  background: var(--brand-green-soft);
+  box-shadow: inset 3px 0 var(--brand-green);
+}
+.course-message-body :not(pre) > code {
+  color: var(--text);
+  background: var(--subtle);
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+.course-message-body [data-streamdown="code-block-header"] {
+  background: var(--subtle);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.coding-page > .coding-actions button:focus-visible {
+  outline: 2px solid var(--brand-green);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coding-page > .coding-actions button:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+  .coding-page > .coding-actions button:not(:disabled):active {
+    transform: translate(1px, 1px);
+  }
 }
