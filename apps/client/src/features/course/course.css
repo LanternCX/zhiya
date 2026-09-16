@@ -1217,6 +1217,7 @@
   --code-comment: #8cae78;
 }
 .coding-output {
+  min-height: 112px;
   overflow: hidden;
 }
 .coding-output > header {
@@ -1771,6 +1772,14 @@
 }
 .coding-editor-bar {
   border-bottom: 2px solid var(--line);
+}
+.coding-output {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 72%, transparent);
+}
+.coding-output > header {
+  border-bottom-width: 2px;
 }
 .coding-page .coding-stdin {
   border: 2px solid var(--line);

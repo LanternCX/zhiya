@@ -191,11 +191,13 @@ test("a student runs a model-created coding page and receives a review only when
   await expect(editorShell).toHaveCSS("border-top-width", "2px");
   const stdin = page.getByRole("textbox", { name: "标准输入" });
   await expect(stdin).toHaveCSS("border-top-width", "2px");
-  await expect(page.getByRole("region", { name: "运行结果" })).toBeVisible();
+  const outputRegion = page.getByRole("region", { name: "运行结果" });
+  await expect(outputRegion).toBeVisible();
+  await expect(outputRegion).toHaveCSS("border-top-width", "2px");
+  await expect(outputRegion).not.toHaveCSS("box-shadow", "none");
   await expect(page.getByText("运行代码后，结果会显示在这里", { exact: true })).toBeVisible();
-  const outputBeforeRun = await page
-    .getByRole("region", { name: "运行结果" })
-    .boundingBox();
+  const outputBeforeRun = await outputRegion.boundingBox();
+  expect(outputBeforeRun?.height ?? 0).toBeGreaterThanOrEqual(80);
   const editorBeforeRun = await editorShell.boundingBox();
   expect((editorBeforeRun?.y ?? 0) + (editorBeforeRun?.height ?? 0)).toBeLessThan(
     outputBeforeRun?.y ?? 0,
