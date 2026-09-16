@@ -1,299 +1,271 @@
-# Zhiya Design Guidelines
+# 知芽设计指南
 
-## Sources and scope
+## 文档定位与设计原则
 
-Design a calm, trustworthy learning space where K12 students can ask questions at any time. Every screen should make clear what the student is learning, what they can do, and how to continue.
+知芽面向 K12 学生，提供安静、可信赖、随时可以提问的学习空间。每个页面都应让学生清楚自己正在学什么、可以做什么，以及如何继续。
 
-- The body of [PRD #3](https://github.com/LanternCX/zhiya/issues/3) owns product requirements. [Technology selection #2](https://github.com/LanternCX/zhiya/issues/2) owns technical constraints. This document defines visual and interaction guidelines; it does not duplicate requirements or determine implementation scope.
-- The [UI references in the PRD discussion](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574) inform the open teaching canvas and question states that preserve lesson position. The current visual direction uses a fine grid, the supplied sage-and-cream light palette, and the supplied forest dark palette; the references are not a pixel-for-pixel template.
-- Use [Vercel design.md](https://vercel.com/design.md) only as a reference for organizing a usable design guide. Its aesthetic restrictions, including its rejection of glass effects, are not Zhiya requirements. Derive visual rules from the learning experience and the user's design direction.
-- Apply `frontend-design` to strengthen composition and craft. Product constraints and the supplied references take priority over generic stylistic suggestions.
-- Colors, type sizes, and layout dimensions below are design choices informed by the references, not claimed source values extracted from the images. Example lessons, students, and learning records illustrate the interface; they do not confirm launch content or assessment algorithms.
+[产品需求 Issue #3](https://github.com/LanternCX/zhiya/issues/3) 的正文是产品需求的唯一维护入口，[技术选型 Issue #2](https://github.com/LanternCX/zhiya/issues/2) 负责技术约束。本指南只定义视觉与交互呈现规则，不复制产品需求，也不决定功能实施范围。页面示例、课程内容和演示数据不代表已确认的首版内容或评估算法。
 
-## Resolve competing requirements in this order
+设计目标发生冲突时，按以下顺序取舍：
 
-1. Knowledge accuracy, student safety, truthful states, and explicit product constraints.
-2. Clear teaching content, reading order, and understandable actions.
-3. Continuity of lesson position, student input, and learning tasks.
-4. Usability across keyboard, touch, voice, captions, and screen sizes.
-5. Brand consistency, composition, and visual detail.
+1. 知识准确、学生安全、状态真实，以及明确的产品约束。
+2. 教学内容清晰、阅读顺序合理、操作容易理解。
+3. 学习位置、学生输入和当前任务保持连续。
+4. 键盘、触控、语音、字幕与不同屏幕下的可用性。
+5. 品牌一致性、构图和视觉细节。
 
-Do not hide necessary feedback for simplicity or add irrelevant decoration to appear playful.
+面向低龄学生时，多用图片、具体例子与对话引导；面向高年级学生时，增加解释深度、参数和代码。不同学段共用一套视觉语言，不使用幼稚化吉祥物、排行榜或羞辱错误的表达。
 
-## Visual direction: a layered learning workspace
+## 视觉规范
 
-Build a quiet workspace with visible depth: a softly tinted, fine-grid background, a clear teaching surface, and a small number of controls with strong edges and hard-offset shadows. Use deep green text, predominantly sans-serif typography, and restrained sage and warm-yellow accents. The student should immediately distinguish the material they are studying from the controls that help them navigate, listen, and ask questions.
+### 整体风格与层级
 
-Use broad, connected content regions. Establish the page's composition before styling individual controls: give the lesson or current task the strongest visual presence, keep supporting context quieter, and separate persistent controls through material and placement. Spacing and typography organize content within each region; surface contrast, translucency, and edges distinguish adjacent regions.
+采用克制的新粗野主义（Neo-Brutalism）风格：细网格背景、绿色品牌元素、清晰边界和小幅硬偏移阴影。浅色主题以鼠尾草绿、米白和少量暖黄为主；深色主题以蓝黑、森林绿和低饱和绿为主。
 
-Avoid a Material-inspired component composition dominated by rounded cards, capsule inputs, filled selection tiles, and repeated elevated containers. This is a constraint on the resulting appearance, not on the name of a component library. Replacing one library with another while preserving the same card-heavy composition does not satisfy it. Hierarchy should come from a few meaningful surfaces, not from making every object a floating card.
+先组织页面，再装饰控件。教学内容或当前任务应最醒目，辅助信息保持安静；用留白、字号、字重和少量有意义的表面区分层级。相关内容可以共享一个教学区域，不为每段文字、元数据或练习选项增加卡片和阴影。
 
-### Give each layer a job
-
-| Layer | Treatment | What belongs here |
+| 层级 | 视觉处理 | 承载内容 |
 | --- | --- | --- |
-| Background | A visibly tinted sage or deep graphite field; an optional broad, low-contrast tonal gradient | The environment surrounding the work, with little visual detail |
-| Teaching surface | A stable, opaque or nearly opaque light or dark surface, clearly separated from the background | Lesson text, images, diagrams, answers, and experiment results |
-| Floating controls | Frosted translucency, a fine edge highlight, and clear tonal separation | Navigation, playback, the question composer, and temporary contextual panels |
+| 背景 | 低对比度细网格和主题底色 | 页面与工作区的连续画布 |
+| 内容表面 | 不透明或接近不透明，保证阅读稳定 | 正文、图片、图示、答案、代码与实验结果 |
+| 操作区域 | 明确边界，按需使用硬偏移阴影 | 导航、输入、播放控制和临时操作面板 |
 
-Related content can share a teaching surface. Do not wrap every section in a new surface. Make the current task identifiable even in grayscale: color accents and blur must not carry the hierarchy alone.
+主要表面与控件使用 3px 主题色边框；具体编辑区等局部控件可按组件规则调整。浅色边框用深绿，深色边框用对应的浅色语义色，不将黑色边框直接搬到深色主题。圆角按用途统一：选中项与小图片框约 8px，主按钮与内容表面约 12px，浮层与输入区域按需要使用至 16px。普通输入框不做成胶囊形；独立图标按钮可使用圆形。
 
-### Use frosted glass deliberately
+避免以重复圆角卡片、胶囊输入框、整块选项底色和层层浮起的容器主导页面。此规则约束最终构图，不限制组件库名称。换库但保留同样的卡片堆叠并不能改善层级。灰度下也应能辨认当前任务，不能只靠颜色、模糊或阴影区分内容。
 
-Translucent glass remains an optional material for interaction layers where underlying content can visibly continue underneath. The current Neo-Brutalist skin prefers opaque themed surfaces, strong edges, and hard-offset shadows; do not add blur when it weakens text or makes the page read as a stack of cards.
+### 背景、课程封面与强调色
 
-- Start with a tinted fill at roughly 72–88% opacity and a backdrop blur of 16–24 pixels. These are tuning ranges, not fixed acceptance values. Adjust them against the actual content underneath.
-- Combine translucency with a subtle 1-pixel edge highlight and enough tonal contrast to preserve the boundary. The panel should feel separated without appearing glossy, metallic, or heavily raised.
-- Keep text, icons, and focus indicators fully opaque. Apply transparency to the panel background, not to the entire container.
-- Keep reading areas and teaching images sharp. Glass belongs around the lesson, not over the words or diagrams the student needs to understand. An expanded answer area may use a solid inner reading region within a glass shell.
-- Use one shared glass treatment for related controls. Avoid overlapping blur panels, nested glass cards, bright reflective streaks, and excessive saturation.
-- Check the darkest, lightest, and busiest content that can pass underneath. Increase the tint opacity when necessary; blur alone does not guarantee readable contrast.
-- Provide a solid surface fallback when backdrop blur is unavailable, reduced transparency is requested, or rendering cost compromises smoothness. The same layout, boundaries, and hierarchy must remain clear.
+页面网格间距为 32px。工作区右侧主体拥有一张连续网格；工具栏、空状态、课程概览、对话、课件和编程页面的外层保持透明，避免网格在嵌套区域内重新起算或形成背景分层。阅读、编辑、输入和输出表面仍需保证足够的不透明度。
 
-For younger students, use more images, concrete examples, and conversational guidance. For older students, increase the depth of explanations, parameters, and code. Preserve one visual language across age groups. Avoid infantilizing mascots, leaderboards, and language that shames mistakes.
+课程列表与课程详情的封面使用一致的浅绿纸面与深绿图形，不在绿色品牌体系中插入中性灰封面。书本、指南针、烧瓶和记录等熟悉的图形配合统一叶芽标志，表达教育产品身份。学科插图可辅以柔和蓝、琥珀和紫色，但不得暗示实际不存在的学习进度或掌握程度。
 
-## Current visual skin
+暖黄仅用于浅色主题中的主要操作或小范围强调，不作为元数据、对话角色和课程状态的默认文字色。**绿色背景上禁止使用低对比度的亮黄文字或图形**，包括标签、状态标记、SVG 图案和装饰。改用与背景有足够对比度的深绿、苔绿、米白或主题正文色；深色主题使用自己的强调色。
 
-The current client uses a restrained Neo-Brutalist treatment inspired by [neobrutalism-components](https://github.com/ekmas/neobrutalism-components). The layout, grid, responsive breakpoints, and interaction model remain unchanged; the skin changes the visual language of existing surfaces and controls.
+### 主题配色
 
-- Use 3-pixel dark borders, 8–12-pixel corner radii, and small hard-offset shadows on primary surfaces and controls.
-- Keep the brand mark and structural accents green. Use the warm yellow only for a primary action or a small, intentional emphasis.
-- Apply the fine 32-pixel grid to the page canvas and workspace background. Keep the grid low contrast so it supports the composition without competing with lesson content.
-- Continue the same 32-pixel grid through the classroom shell, including the conversation, slide, and coding regions. Keep reading, editor, input, and output surfaces sufficiently opaque for legibility.
-- Reserve warm yellow for primary actions and small status accents. Conversation labels and activity text use the theme's green or primary text color so they remain distinct from warm-tinted message backgrounds.
-- Coding exercises use one coherent outline per editor, standard-input field, result panel, and action button; adjacent controls must not overlap or create doubled borders.
-- Keep icons from the existing SVG family. Do not introduce emoji or text glyphs as interface icons.
-- Preserve visible focus outlines, 44-pixel minimum touch targets, keyboard navigation, and reduced-motion behavior when applying the skin.
+两套主题共用语义角色。下表是设计配色参考，不是完整的 CSS 变量清单；背景在当前样式中通过 `--canvas-fill` 应用。色值、字号和尺寸是设计选择，不应声称它们都直接取自参考图片。
 
-### Classroom grid and contrast guardrails
-
-- The right-hand workspace body owns one continuous, low-contrast 32-pixel grid. Toolbar, empty states, course overview, conversation, slides, and coding pages remain transparent so the grid does not restart inside nested panels or form visible layers.
-- Course covers use the same sage-paper and forest-ink pairing in the course list and course overview. Do not use a neutral gray cover behind the green product palette.
-- Bright yellow text or bright yellow illustrations must never sit on a green background. If an existing yellow token would land on green, replace it with readable forest green, moss green, cream, or the theme's primary text color. This rule applies to labels, status pills, SVG artwork, icons, and decorative marks in both themes.
-- Warm yellow is limited to isolated primary actions or small emphasis areas with a verified contrast pair; it is not a default color for metadata, conversation labels, or course status text.
-- Coding exercises use explicit rows for instructions, editor, standard input, output, and actions. The editor may not overflow into the input or action rows. Run and end actions stay in their own footer, expose busy state, and show failures beside the controls instead of only in a distant conversation pane.
-- The coding output panel is always present while an exercise is open. Before the first run it says where results will appear; after running it shows the status and captured output in the same panel.
-- A completed run remains visible while the student edits or continues the current exercise. Clear the output only when a new coding exercise is presented.
-
-### Light theme palette
-
-The light theme follows the supplied sage, cream, and warm-yellow reference card.
-
-| Token | Value | Purpose |
-| --- | --- | --- |
-| `canvas` | `#F8FAE4` | Cream page and learning canvas |
-| `surface` | `#FFFEF8` | Opaque reading, account, and teaching surfaces |
-| `brand-green` | `#A5CA8B` | Brand accents, selected states, and structural highlights |
-| `brand-green-soft` | `#D0DD97` | Selected navigation and secondary emphasis |
-| `accent` | `#F9DE79` | Primary action and warm emphasis |
-| `text` | `#294735` | Body text, headings, and icon strokes |
-| `muted` | `#5F7660` | Supporting text |
-| `grid-line` | `rgb(47 76 49 / 13%)` | Fine background grid |
-
-### Dark theme palette
-
-The dark theme follows the supplied forest card and keeps the same semantic roles as the light theme. It uses a blue-black canvas, deep green surfaces, moss accents, and pale sage content colors.
-
-| Token | Value | Purpose |
-| --- | --- | --- |
-| `canvas` | `#0E171C` | Black Stallion page background |
-| `surface` | `#2C3E2B` | Aimiru Brown teaching and account surfaces |
-| `subtle` | `#3A503D` | Supporting surface regions |
-| `brand-green-soft` | `#526951` | Daylight Jungle navigation and structural color |
-| `accent` | `#7D977F` | Dinosaur primary action, avatar, and icon emphasis |
-| `text` | `#F1F4E9` | Warm light text |
-| `muted` | `#B3C9B6` | Pond’s Edge supporting text and borders |
-| `grid-line` | `rgb(179 201 182 / 16%)` | Low-contrast dark-theme grid |
-| `warm-support` | `#6A5745` | Baby Bear auxiliary illustration color |
-
-For dark mode, do not reuse light-theme yellow, black borders, or light icon colors. Map borders, icons, inputs, selected navigation, menus, empty-state art, and buttons to the dark semantic tokens above. Keep contrast at or above 4.5:1 for normal text and 3:1 for large text and essential control boundaries.
-
-## Color and surfaces
-
-两套配色共用语义色彩。主题切换参考 [Cao Xin 的博客](https://www.caoxin.xyz/)，提供“自动 → 浅色 → 深色”的循环选择，而非三套独立配色。默认跟随系统，手动选择应在刷新后保留；只有自动模式响应系统外观变化。登录页在顶栏右侧提供轻量图标按钮，登录后收进头像菜单的“外观”。以半圆、太阳和月亮区分状态，并通过可访问名称说明当前状态与下一次点击的结果；菜单关闭时仍响应系统外观变化。
-
-| Token | Sage light | Forest dark | Purpose |
+| 语义角色 | 浅色主题 | 深色主题 | 用途 |
 | --- | --- | --- | --- |
-| `canvas` | `#F8FAE4` | `#0E171C` | Background field with a low-contrast grid |
-| `surface` | `#FFFEF8` | `#2C3E2B` | Stable teaching and reading surfaces |
-| `subtle` | `#F8FAE4` | `#3A503D` | Supporting regions within a surface; use sparingly |
-| `glass-tint` | `#F7FAF6` | `#253630` | Base tint for translucent floating controls; apply background opacity separately |
-| `glass-edge` | `#FFFFFF` | `#C6D8CB` | Fine translucent highlight on glass boundaries |
-| `text` | `#294735` | `#F1F4E9` | Body text and headings |
-| `muted` | `#5F7660` | `#B3C9B6` | Supporting text, including text on the tinted background |
-| `line` | `#294735` | `#B3C9B6` | Noninteractive dividers and control boundaries |
-| `accent` | `#F9DE79` | `#7D977F` | Primary actions, focus, and companion labels |
-| `on-accent` | `#294735` | `#0E171C` | Text on primary buttons |
-| `warning` | `#7E6A27` | `#6A5745` | Attention and student role labels |
-| `error` | `#A23F38` | `#F2AAA0` | Submission errors and unrecoverable failures |
+| 画布 | `#F8FAE4` | `#0E171C` | 页面与学习画布 |
+| 内容表面 | `#FFFEF8` | `#2C3E2B` | 阅读、账号和教学区域 |
+| 辅助表面 | `#F8FAE4` | `#3A503D` | 少量辅助分区 |
+| 品牌绿 | `#A5CA8B` | `#7D977F` | 品牌强调与结构元素 |
+| 柔和品牌绿 | `#D0DD97` | `#526951` | 选中导航和次要强调 |
+| 正文 | `#294735` | `#F1F4E9` | 正文、标题与图标 |
+| 次要文字 | `#5F7660` | `#B3C9B6` | 辅助信息 |
+| 边界 | `#294735` | `#B3C9B6` | 分隔线和控件边界 |
+| 强调 | `#F9DE79` | `#7D977F` | 主要操作与焦点强调 |
+| 强调色上的文字 | `#294735` | `#0E171C` | 主按钮文字 |
+| 暖色辅助 | `#7E6A27` | `#6A5745` | 小范围提示或辅助插图 |
+| 错误 | `#A23F38` | `#F2AAA0` | 提交失败与不可恢复错误 |
+| 网格线 | `rgb(47 76 49 / 13%)` | `rgb(179 201 182 / 16%)` | 低对比度网格 |
 
-Pair state colors with text or a graphical cue. Dividers must not be the only means of identifying controls; inputs and selection controls need sufficiently clear boundaries. Body text requires at least 4.5:1 contrast against its background; large text and essential non-text control boundaries require at least 3:1. Do not dim an entire page to communicate a disabled state.
+主题提供“自动 → 浅色 → 深色”的循环选择。默认跟随系统，手动选择在刷新后保留；只有自动模式响应系统外观变化，菜单关闭时也不例外。登录页在顶栏右侧放置轻量图标按钮，登录后收进头像菜单的“外观”。以半圆、太阳和月亮表示状态，可访问名称说明当前状态与下一次点击的结果。
 
-Measure contrast on the composited result for translucent surfaces, not against the tint's opaque hex value. Tune glass-edge opacity and surface contrast separately for light and dark themes. Dark mode must retain a distinct background, readable teaching surface, and visible floating controls rather than flattening everything into one gray.
+颜色必须配合文字、图形或控件形态表达状态。普通文字对比度至少为 4.5:1，大号文字与关键控件边界至少为 3:1；采用配色表并不意味着任意组合都满足此要求。输入与选中控件必须有清晰边界，不通过降低整个容器的不透明度表达禁用。
 
-## Typography and reading rhythm
+### 半透明材质
 
-Use Noto Sans SC throughout the functional interface, including page and lesson headings, section titles, feedback, body text, controls, and experiment parameters. Reserve Noto Serif SC for the main welcome heading on the first-visit screen. Establish hierarchy through size, weight, and spacing rather than frequent changes of typeface. Use JetBrains Mono for code. Verify licensing and target-environment support before shipping. Provide local fallbacks in the same type category so font-loading failures do not prevent reading. Keep the brand name a simple sans-serif wordmark.
+默认使用不透明主题表面、明确边界和硬偏移阴影。只有底层内容确实需要透出、且不损害阅读时，才使用半透明材质；它不是导航、问卷或浮层的统一必选样式。
 
-| Role | Desktop size / line height | Mobile size / line height | Weight |
+- 调校可从约 72%–88% 的背景不透明度、16–24px 的背景模糊和细边缘高光开始。这些是可选材质的参考值，不替代普通控件边框规范，也不是验收硬指标。
+- 透明度只施加到面板背景，文字、图标和焦点指示保持不透明。阅读区与教学图片必须清晰。
+- 相关控件采用一致材质，不叠加多层模糊、嵌套玻璃卡片、强反光或高饱和装饰。
+- 在最亮、最暗和最复杂的底层内容上检查合成后的对比度，不能只测不透明色值。必要时提高背景不透明度。
+- 不支持背景模糊、用户要求减少透明效果或渲染不流畅时，回退到实色表面，保持布局与边界清楚。
+
+### 字体与阅读节奏
+
+功能界面统一使用 Noto Sans SC，包括页面与课程标题、正文、反馈、控件和实验参数。Noto Serif SC 仅用于首次欢迎页的主标题；代码使用 JetBrains Mono；品牌字标保持简洁的无衬线字体。交付前确认字体授权和目标环境支持，并提供同类本地字体回退。
+
+下表的字号与行高单位均为 px：
+
+| 用途 | 桌面字号／行高 | 手机字号／行高 | 字重 |
 | --- | --- | --- | --- |
-| Page heading | 40 / 56 | 30 / 44 | 600 |
-| Lesson heading | 32 / 48 | 28 / 42 | 600 |
-| Section heading | 24 / 36 | 22 / 34 | 600 |
-| Teaching body | 20 / 32 | 18 / 30 | 400 |
-| Interface body and controls | 16 / 26 | 16 / 26 | 400–500 |
-| Supporting text | 14 / 22 | 14 / 22 | 400 |
-| Code | 15 / 24 | 14 / 22 | 400 |
+| 页面标题 | 40 / 56 | 30 / 44 | 600 |
+| 课程标题 | 32 / 48 | 28 / 42 | 600 |
+| 章节标题 | 24 / 36 | 22 / 34 | 600 |
+| 教学正文 | 20 / 32 | 18 / 30 | 400 |
+| 界面正文与控件 | 16 / 26 | 16 / 26 | 400–500 |
+| 辅助文字 | 14 / 22 | 14 / 22 | 400 |
+| 代码 | 15 / 24 | 14 / 22 | 400 |
 
-Do not shrink an individual heading to preserve a layout. Adjust the copy, measure, or arrangement first. Allow natural Chinese wrapping without inserting spaces to simulate tracking. Left-align body text, favor clear short sentences, and generally keep reading measures around 28–36 Chinese characters.
+通过字号、字重和间距组织层级，不频繁更换字体。不要为了保住布局单独缩小某个标题，应先调整文案、行宽或排列。中文自然换行，不用插入空格模拟字距。正文左对齐，优先使用短句，阅读行宽一般控制在约 28–36 个汉字。
 
-Prioritize function and brevity in interface copy. State the task, result, or next action directly. Omit motivational slogans, repeated explanations, and routine reassurance. Keep teaching explanations and questions when they support understanding; do not repeat the heading in supporting text. Use short, specific button labels. Reserve companion labels for actual dialogue, and report learning evidence without claiming mastery from a single answer. Error messages should state the problem and available recovery action.
+## 布局与组件
 
-### 用 UI 表达，不重复解释 UI
+### 间距与响应式布局
 
-这是所有页面、组件与后续改动必须遵守的规则：图标、控件状态、布局或交互已能清楚表达的信息，不再用可见文字重复解释。先判断用户还缺少什么信息，再决定是否需要文案。
+- 间距采用 4、8、12、16、24、32、48、64px 的尺度。说明靠近对应对象，不相关任务之间留出距离。
+- 桌面检查尺寸为 1440 × 1000，手机为 390 × 844，并补查 320px 窄屏。这些是检查样本，不代表操作系统支持范围。
+- 桌面应用铺满窗口，限制阅读区域宽度而不是整个应用宽度。首次建档的阅读区域最大宽度为 680px，桌面两侧留白 32px，手机为 20px，窄屏可降至 16px。
+- 内容区域不足 720px 时重新排为单列，不按比例缩小桌面画面。教学示例可换行；代码与必要的数据表可在自身区域内滚动。
+- 浮动控件可使用空闲边缘，不遮挡正文与答案。为控件完整高度、手机安全区和软键盘预留空间。
 
-- 选中状态、密码匹配、规则满足、显示／隐藏和提交进度优先通过对应控件表达。不在已打勾的规则下再写“密码符合要求”，也不在已有进度状态旁再放一段“正在处理，请稍候”。
-- 不解释常见控件的常规用法，不重复标题、字段标签或按钮名称。文字只补充 UI 无法传达的信息，例如具体限制、错误原因、恢复方法和不可逆操作的实际后果。
-- 颜色不能单独承担状态表达；配合一致的 SVG 图形或控件形态。图标保留可访问名称，必要的状态通过屏幕阅读器播报，无需为此增加重复的可见文案。
-- 不使用锐角矩形、整块底色或左侧竖线的 Notice／Alert 作为通用提示容器。普通反馈就地呈现，不为每条提示另加卡片；把方形提示框改成圆角提示框不能解决多余容器的问题。
-- 不可逆操作的具体后果集中在最终确认弹窗中说明，页面保留明确的操作名称和必要的确认控件，不再重复堆叠警告标题与说明块。确认弹窗沿用现有浮层样式。
-- 审核每条提示时检查：去掉它是否会使用户缺少决策、纠错或继续操作所需的信息？若不会，就删除。不要为了视觉简洁隐瞒失败或删掉必要的教学解释。
+### 导航与账号入口
 
-## Spacing and responsive composition
+桌面工作区采用全高侧栏，展开宽度为 224px，可收为 80px 图标栏。内容滚动时导航保持稳定。侧栏融入画布，以克制的分隔线划界，不做成带圆角的浮动卡片；选中项可使用底色、圆角、较强字重和硬偏移阴影。
 
-- Use the spacing scale 4, 8, 12, 16, 24, 32, 48, and 64. Keep explanations close to their objects and separate unrelated tasks.
-- Inspect desktop designs at 1440 × 1000 and mobile designs at 390 × 844, with an additional check at 320 wide. These are design samples, not commitments to particular operating systems.
-- Fill the desktop window with the application shell; constrain reading content rather than the whole app. Onboarding uses a maximum reading width of 680 with 32-pixel side margins. Use 20 on mobile, reducing to 16 on narrow screens.
-- After onboarding, wide workspaces use a 224-wide sidebar that collapses to an 80-wide icon rail; narrow screens use a top bar and bottom navigation. Onboarding occupies the full window on every device, with all global navigation hidden until completion. Focused lessons retain back navigation, the lesson title, contents, and practice access.
-- Integrate the sidebar into the workspace canvas. Keep its background close to the canvas and use a restrained divider; do not turn the sidebar into a floating card. Rounded highlighting and hard-offset emphasis belong to the selected navigation item.
-- Recompose to one column when the content area falls below 720 wide. Never proportionally shrink the desktop artboard. Teaching examples may wrap; code and necessary data tables may scroll within their own regions.
-- Desktop lesson controls combine playback, speed, captions, pagination, and questions. Mobile separates playback and progress from the question input, accounting for safe areas and the software keyboard.
-- Use a consistent radius scale across desktop and mobile: 8 pixels for selected navigation items and small image frames, 12 for primary buttons and teaching surfaces, and 16 for floating panels and composers. Keep ordinary rectangular controls and full-width composers softly rounded rather than capsule-shaped; circles are appropriate for compact icon controls. The sidebar itself has no rounded container.
-- Separate the teaching surface from the background through a visible tonal difference. Floating glass controls receive a fine edge and clear material contrast. Do not add elevation treatments to exercise options, paragraphs, or metadata.
-- Floating controls may overlap unused margins, but must not cover reading content or answers. Reserve space for their full height, including the mobile safe area and keyboard state.
+完成建档后，手机采用顶栏与四个底部导航入口。学习、探索、实验和回顾使用一致的 SVG 图标；展开时显示短标签，收起时保留可访问名称和悬停提示。
 
-## Key screens and interactions
+头像菜单位于桌面侧栏底部、手机右上角，集中放置学习档案、个人资料、账号安全、外观与退出登录。不要在学习画布上重复这些入口。隐私和档案修改后果放在相关页面或确认弹窗中，不堆在学习页的常驻说明里。
 
-These rules govern presentation and reference the corresponding PRD sections without expanding feature scope.
+### 操作控件与可访问性
 
-| Screen | Visual focus and interaction | Requirement source |
+每个局部任务突出一个主要操作。按钮直接命名动作，例如继续学习、检查答案、运行代码；输入框必须有可见标签，不能只靠占位文字。
+
+**图标必须使用统一风格的 SVG，不用文字字符、Unicode 符号或 emoji 代替。** 返回、前进、播放、暂停、勾选、提问和状态图形均遵守这一规则。
+
+能用文字或图标单独说清的操作，不同时堆叠两者。具体动作优先使用文字；暂停、返回、发送、关闭和收起等紧凑操作可只用熟悉的图标，并提供可访问名称。只有两者提供不同信息时才组合，例如选项文字与选中标记。右上箭头仅用于外部链接。
+
+- 触控区域至少为 44 × 44px。键盘焦点使用高对比度 2px 轮廓，与控件间隔 2px。
+- 弹窗打开时将焦点移入，关闭后返回触发控件；非模态区域不限制键盘焦点。
+- 语音操作提供文字替代、录音状态和停止入口。拒绝麦克风权限后仍能完成任务。
+- 不将拖拽、语音、悬停或颜色作为唯一操作方式。拖拽任务应提供选择、移动按钮等替代方式。
+- 密码显示与隐藏使用眼睛、划线眼睛 SVG，保留状态、可访问名称、键盘焦点和足够的触控区域。
+
+### 文案与表单反馈
+
+文案直接说明任务、结果或下一步，使用学生能理解的日常语言。省去口号、重复解释与惯常安慰。教学说明和问题只要有助于理解就应保留；错误必须说明具体原因与可用的恢复操作。
+
+图标、控件状态、布局或交互已能表达的信息，不再用可见文字重复解释。选中、密码匹配、规则满足、显示／隐藏和提交进度优先通过控件呈现。必要状态通过屏幕阅读器播报，不为此增加重复的可见说明。
+
+- 不重复标题、标签、按钮名称或常见控件的用法。文字只补充具体限制、失败原因、恢复方式和不可逆操作的后果。
+- 字段错误就地显示；表单级失败或无法由控件表达的结果，使用简短、无容器的反馈。不用背景色块、边框、左侧竖线或额外卡片包裹普通提示，改成圆角提示框也不能解决容器多余的问题。
+- 只有需要用户决定时才使用确认弹窗。不可逆操作的具体后果集中在最终确认中，页面保留操作名称和必要确认控件。
+- 成功、错误和字段辅助提示末尾不加句号，优先使用简短单句；多个必要信息之间保留适当分隔。
+- 无法确认邮件实际发送时，用“请查看邮箱，在 10 分钟内填写验证码”这样的操作指引，不声称已经发送，也不使用“若该邮箱符合条件”“已申请发送”等含糊措辞。有效期按实际配置显示。
+- 不把内部技术限制转交给用户理解。例如密码太短时提示“密码至少需要 8 个字符”，过长时提示“密码太长，请缩短后重试”。具体限制以服务端规则为准，本指南不定义账号策略。
+- 深浅主题、窄屏和长文案下均应可读且不溢出。
+
+审核每条提示时，判断删除后是否会让学生缺少决策、纠错或继续操作所需的信息。若不会，就删除；不要为视觉简洁隐瞒失败或删掉必要的教学解释。
+
+### 图片与动效
+
+图片服务于学习。同组图片保持比例与标签位置一致，分类标签必须明确对应对象。素材缺失时给出原因和恢复方式，不留无说明的空框。使用来源和使用条件清晰的素材，不把参考页面截图当作可编辑界面。
+
+工作区采用克制的动效：侧栏平滑收放，页面与菜单轻柔出现，选中标记短促浮现。过渡约为 160–240ms，不延迟提交、不清空输入，也不改变问答字号与布局。
+
+减少动态效果模式下直接切换状态，关闭循环背景、鼠标跟随、位移动画和进度旋转，保留静态背景、焦点与状态文字。动画不能承担唯一的信息表达。教学动画应帮助解释概念，并提供暂停和文字说明，不强制播放音频。
+
+## 页面交互
+
+以下规则约束呈现方式。尚未实现的场景按真实状态显示，不能因本指南描述了设计方式，就认定功能已经可用。
+
+### 登录、注册与找回密码
+
+三类账号页面共用入口视觉。顶栏的叶芽图标、知芽字标与主题按钮直接融入背景，不附加卡片、边框、宣传短句或背景播放按钮。
+
+桌面端将欢迎区与表单放在顶栏和页脚之间，上下留白均衡。短页面的页脚位于底部，长页面随内容自然向下排列。手机采用单列，优先保证完整表单与操作区可用。
+
+欢迎文字靠近表单，避免窄小控件被大片留白包围。优先放大表单文字、输入框与主按钮，并适当收紧栏间距、内边距和字段间距；不能通过整体缩放或压缩触控区域实现紧凑。窄窗口允许文字自然换行。
+
+账号入口的背景可在主题网格上叠加低对比度柔边色块，以鼠尾草绿为主、少量暖色与亮部为辅。色块大小、轮廓和明暗不同，独立漂移、缓慢变形并自然交叠。应能辨认不规则的明暗区域，避免整张渐变图旋转、平行光带或规则圆球。停留数秒应能看出变化，且不出现闪烁、明显循环接缝、裸露图层边缘或抢眼高亮。
+
+- 色块使用不同速度、起点与变化阶段，避免同步往返；以十几秒至二十几秒的变化周期作为调校起点。
+- 鼠标移动可带动背景产生柔和、有限的偏移，表单与文字保持稳定；触屏不模拟鼠标跟随，不阻碍滚动和输入。
+- 页面进入、账号视图和验证码步骤切换采用约 240–480ms 的淡入与小幅上移，不使用整页缩放、弹跳或逐字出现，也不清空已有输入。
+- 按钮悬停轻微上移，按下给出位移或阴影反馈；输入聚焦时平滑突出边界。反馈以约 150–220ms 为起点，不延迟实际操作。
+- 提交进度在控件内表达，配合禁用与可访问播报；结果和确认弹窗轻柔出现，关闭动效后仍能辨认状态。
+
+连续氛围动画只用于账号入口，不扩展到需要持续阅读的课堂。深浅主题都需检查整个动画过程的对比度，正文与输入区域始终清晰、稳定。
+
+### 首次建档
+
+首次建档在桌面与手机上均占用主窗口。保存的完成状态到达前，隐藏工作区导航、头像菜单和其他目的地，不用尚未确认的完成状态解锁工作区。
+
+全新会话先显示“欢迎来到知芽”、一句介绍与“开始”，由学生启动模型；已有会话刷新后恢复进度，不重复欢迎。不得自行引入固定题数或新的完成门槛。
+
+问答每次聚焦一个问题，交替呈现引导与学生回答；年级、兴趣等问题可提供少量选项，并保留文字输入。诊断任务有独立的视觉焦点。首次建档与后续档案修改复用问答和思考状态。
+
+问卷使用产品自己的布局，不直接套用聊天输入框。保持清晰标题、16px 选项文字、独立选项行、24px 选择标记和可读的主题表面。“自己填写”展开输入并替代预设选项，纯文字问题默认选中它；“还不确定”也是可用选项。所有答案共用一个提交按钮，失败时保留草稿和选项，问题较长时自然滚动，不把输入区固定拆到页面底部。
+
+加载与思考期间也提供可访问的“退出建档”入口。确认退出后登出并回到登录页，不开放工作区；确认中说明已提交答案保留、未发送内容丢失。取消或退出失败时保持当前流程。
+
+### 学习档案
+
+学习档案由头像菜单进入主面板。查看、发起修改、思考、逐题回答和保存结果均在主面板内完成，不使用档案弹窗。打开档案查看区域时将焦点移到标题；工作区导航保持可用。离开有未保存账号编辑的页面时，先完成已有的离开确认。
+
+修改必须经过提问和回答，只有成功写入档案后才显示完成；普通生成文字不能替代问题或保存结果。保存后提供“查看档案”操作，不自动跳回编辑页。失败时保留必要草稿与错误反馈；首次建档已经完成，不应抑制正在进行的档案修改问答。
+
+修改问答期间，顶部提供带可访问名称与悬停提示的“停止对话”图标。停止后结束本轮修改并返回档案，保留已保存内容，关闭未完成问题，旧请求不得继续写入。此流程不提供暂停、继续或断点恢复；再次进入时发起新一轮修改。首次建档仍保留进度恢复。
+
+### 学习场景的呈现重点
+
+需求来源均指向产品需求 Issue #3；此表不扩展实施范围。
+
+| 场景 | 视觉与交互重点 | 需求来源 |
 | --- | --- | --- |
-| Initial profile | Ask one question at a time, alternating companion guidance and student replies. A few choices may support grade and interest questions while retaining text input. Give diagnostic tasks their own focus. | #3 §4 |
-| Learning home and course map | Make continuing the lesson the strongest action. Present knowledge nodes in sequence. Explain supplementary, review, and completed states in words. Exploration and the lab remain secondary destinations. | #3 §5, §6 |
-| Paginated classroom | Explain one central concept on a clear teaching surface. Keep the heading, explanation, example, and takeaway together, with playback and questions in a distinct glass control dock. Contents and pagination communicate position. | #3 §5.1 |
-| Questions and resumption | Pause narration when a question interrupts. Preserve the current page above the conversation. Use a glass composer and a stable reading region for the answer. Show the paused position and a clear resume action; do not replace the lesson with full-screen chat. | #3 §5.1 |
-| Practice and feedback | Focus on one question. Make the entire option area actionable. Explain the result and provide a next step after submission. Offer selection, move actions, or buttons as alternatives to dragging. | #3 §5.1, §6 |
-| Free exploration | Present short answers directly. Use a scrolling handout for micro-courses, with section navigation, revisiting, and follow-up questions. Keep the composer clear of the final content. | #3 §5.2 |
-| AI lab | Keep the task, adjustable variables, and observations together. They may sit side by side on desktop; mobile orders them as task, controls, and results. Show execution state and the conditions behind each result. | #3 §5.3 |
-| Learning review | Explain the next recommendation with concrete evidence from questions or experiments. Do not manufacture precision through an undefined AI mastery score. | #3 §6 |
+| 学习首页与课程导航 | 突出继续学习，按课程结构呈现内容与进度；补充、复习与完成状态清楚可辨。未实现的课程地图不展示虚构节点。 | §5、§6 |
+| 分页课堂 | 每页聚焦中心概念，把标题、解释、示例和要点放在清楚的教学区域；目录和分页表达位置，操作控件与内容分开。 | §5.1 |
+| 提问与恢复 | 提问时保留教学内容与可恢复位置，答案有稳定阅读区，不把课堂替换成全屏聊天。是否暂停、补充或调整后续内容由教学安排决定。 | §5.1 |
+| 练习与反馈 | 聚焦一道题，整个选项区域可操作，提交后说明结果与下一步；拖拽有替代操作。 | §5.1、§6 |
+| 自由探索 | 简单问题直接短答，微课程采用可滚动讲义，支持章节导航、回看与追问；输入区不遮挡末尾内容。 | §5.2 |
+| AI 实验室 | 任务、可调参数与观察结果相邻；桌面可并排，手机按任务、操作、结果排列；明确执行状态和结果条件。 | §5.3 |
+| 学习回顾 | 用回答、练习或实验的具体证据解释推荐，不用未定义的掌握度分数制造精确感。 | §6 |
 
-### Make classroom states distinguishable
+课堂中的提问输入是主要交流入口。桌面左侧放轻量播放与分页控件，右侧放更宽的独立主题输入区，历史入口置于输入区之外；不把两组控件再包进一个共享面板。手机将工具置于全宽输入区上方，兼顾安全区与软键盘。使用简短输入提示与图标发送按钮。
 
-- Narrating: playback can pause, captions are available, and the visible page remains synchronized with audio.
-- Asking: retain pagination and teaching content; switching between text and voice does not discard input.
-- Answer complete: resume from the interrupted position rather than silently advancing a page.
-- Question about later material: give a brief response and explain that the course covers it later.
-- Off-topic question: clearly confirm when a topic is saved for exploration, then return to the lesson.
-- Preparing content: preserve readable material and state which part is being prepared.
-- Network or generation failure: preserve input and position, offer retry, and distinguish a system failure from an incorrect student answer.
+### 课堂状态与学习反馈
 
-### Practice and experiment feedback
+- 讲解时，播放可暂停、字幕可用，页面与语音保持同步。
+- 提问时，保留分页和教学内容；切换文字与语音不丢失输入。需要返回原内容时，明确显示恢复位置和继续入口，不擅自翻页。
+- 回应方式由 AI 根据问题、学生意愿与教学目标决定，不按“当前知识、后续知识、偏题”强制固定分流。界面如提示已保存某个话题，必须确实完成保存。
+- 准备内容时保留已可读材料，明确正在准备的部分；旧生成结果不得覆盖新安排。
+- 网络或生成失败时保留输入与位置，提供重试，区分系统失败和学生答错。
 
-Selected, correct, and try-again states need distinguishable visual cues and accessible semantics. Add words when they explain the result or the next step, not merely to repeat the state. Do not clear an answer after an incorrect submission. Offer an actionable hint and another attempt; the timing of answer disclosure follows teaching requirements.
+选中、答对与需要重试的状态，应有可区分的视觉提示和可访问语义。文字用于解释结果或下一步，不仅重复状态。答错后保留答案，给出可执行提示和重试机会；答案披露时机遵循教学要求。
 
-Experiment data counts, parameters, outputs, and execution states must correspond. Label illustrative results as examples and do not generalize from a single run. Parameters need visible labels, ranges, and current values. Do not present unresolved programming languages or debugging capabilities as supported product commitments.
+实验的数据量、参数、输出与执行状态必须对应。示意结果标明“示例”，不从一次运行推断普遍结论。参数显示标签、范围和当前值；尚未确认的语言或调试能力不能写成已支持的承诺。
 
-## Controls, media, and motion
+### 编程练习
 
-Name the action in every button, such as resuming a lesson, checking an answer, or running an experiment. Emphasize one primary action per local task. Inputs need visible labels rather than placeholders alone. Icon buttons need accessible names.
+页面依次呈现题目说明、编辑器、运行结果、可选标准输入和操作区。编辑器、输入、输出和按钮各有清楚且完整的边界，不重叠、不形成双重描边；编辑器不能溢出到输入或按钮区域。
 
-**Never use text characters, Unicode symbols, or emoji as substitutes for SVG icons.** Arrows, back and next controls, play and pause controls, checkmarks, and question or status icons must use SVG from a consistent icon set. Keep actual text labels as text.
+练习打开时始终显示输出面板：首次运行前提示结果将出现的位置，运行后在原处展示状态和捕获的输出。学生继续编辑当前练习时保留已完成的运行结果，切换到新练习时清除旧输出。
 
-Default to either text or an icon when one communicates the meaning clearly. Do not pair them merely to repeat the same action or state. Prefer text for specific actions and familiar standalone icons for compact controls such as pause, back, and send; give icon-only controls an accessible name. Combine text and an icon only when each adds distinct information, such as an option label and its selection indicator. Reserve northeast arrows for external destinations. Indicate the current navigation item with a solid background, rounded corners, and stronger text weight.
+运行与结束按钮留在独立底部操作区，表达各自的忙碌状态，并按当前状态禁用不可用操作。失败信息在按钮附近呈现，不仅显示在远处的对话区。
 
-Touch targets are at least 44 × 44. Keyboard focus uses a high-contrast 2-pixel outline with a 2-pixel offset. Move focus into an opened dialog and return it to the trigger on close. Do not trap keyboard users in nonmodal regions. Voice interaction requires a text alternative, recording status, and a stop action; denying microphone access must still allow task completion.
+### 学生语言与数据呈现
 
-Make the question input the primary entry point in the classroom controls. Place a lightweight playback and pagination group on the left and a wider, standalone themed input on the right, with history outside the input. Do not enclose both groups in a shared panel. Use a short input hint and an icon-only send control. On mobile, place the tools above a full-width input.
+引导学生重新观察图片特征，而不是只宣布答错；描述“这次需要提示”，不把学生标记为能力不足。鼓励要关联具体行为，避免空泛表扬和连续打卡压力。用明确角色标签区分学习搭子与学生，颜色仅作辅助。
 
-Images serve learning. Keep aspect ratios and label positions consistent within a set. Classification labels must unambiguously correspond to their images. Missing images need an explanation and recovery state rather than an empty box. Use supplied assets or materials with clear provenance and usage conditions. Never substitute an image of the reference screen for editable interface content.
+普通学习页面不暴露年龄、完整身份或内部档案字段，只展示当前步骤需要的信息。数据收集、监护人流程与内容安全政策以产品需求中确认的内容为准，不能在原型里替待明确问题作决定。未实现的课程、探索、实验和学习记录显示真实空状态，不伪造百分比、排名、自动增长数值或可用的输入功能。
 
-### 账号入口的构图与动效
+## 验收与维护
 
-工作区沿用克制的动效语言：侧栏宽度平滑收放，页面与菜单轻柔出现，选中标记短促浮现。过渡约 160–240ms，不延迟提交或清空输入，不改变问答的字号与布局；首次建档与后续档案补充共用问答及思考状态。减少动态效果模式下直接切换状态。
+### 检查顺序
 
-学习档案从头像菜单进入主面板，查看、发起修改、思考、逐题回答和保存结果均在主面板内完成，不使用档案弹窗，也不在生成结束后自动跳回编辑页。修改必须经过提问和回答，成功写入档案后才显示完成；普通生成文字不替代问题或保存结果。
+先检查任务是否清楚，再检查层级、阅读宽度、状态反馈和细节。使用真实长度的中文，覆盖桌面、手机、窄屏、深浅主题、长标题、空状态、准备中、失败与恢复。
 
-微调问答期间顶部提供“停止对话”退出图标，停止后结束本轮修改并返回档案，不提供暂停、继续或断点恢复。已保存档案保留，未完成的问题关闭，旧请求不得继续写入。重新进入时发起新一轮修改；首次建档仍保留进度恢复。图标按钮提供可访问名称和悬停提示，触控区域至少 44 × 44。
+- 同时检查整体构图和单个控件。背景、教学内容与操作区域在灰度下仍可辨认，不靠增加模糊或加粗边框补救卡片堆叠。
+- 检查半透明表面在不同底层内容、关闭模糊和实色回退下的效果，保证文字清晰。
+- 检查字体、边界、文本溢出、键盘操作、屏幕阅读器、缩放和真实设备。窄屏与软键盘打开时不遮挡内容，不用隐藏溢出掩盖布局缺陷。
+- 动效不能只验收静态截图：连续观察背景至少一次方向变化，实际操作主题切换、注册步骤、聚焦、提交与确认弹窗；检查鼠标响应、触屏滚动和减少动态效果模式。
+- 刷新后确认主题选择保留，不同窗口高度下留白合理，动画不引入溢出、遮挡或输入丢失。
 
-登录、注册和找回密码页采用同一套入口视觉。顶栏的叶芽图标、知芽字标和主题按钮直接融入背景，不使用卡片背景、边框或独立容器，也不附加宣传短句或背景播放按钮。桌面端将欢迎区与表单整体放在顶栏和页脚之间，使上下留白均衡；页脚位于短页面底部，长页面则随内容自然向下排列。手机端使用单列，优先保证表单完整可用。
+### 实现与交付边界
 
-入口应有适中的信息密度：欢迎文字靠近表单，避免窄小控件被大片留白包围。优先放大表单文字、输入框和主按钮，并收紧栏间距、表单内边距与字段间距；不通过整体缩放页面或压缩触控区域实现紧凑。较窄窗口允许文字自然换行，同时保留清晰的标签与完整操作区。
+运行中的 `apps/client` 是视觉参考。使用 `npm run dev` 配合项目文档中的本地服务检查实际行为，不维护平行的 HTML/CSS 展示站。浏览器测试可以为未接入的服务提供明确模拟数据，产品页面必须呈现真实状态。
 
-入口背景由大小、轮廓和明暗不同的柔边色块组成，以鼠尾草色为主，辅以少量暖色与亮部。色块独立漂移、缓慢变形并自然交叠，应能辨认出不规则的明暗区域，避免整张渐变图旋转、平行光带或规则圆球。动态氛围参考用户指定的 [Codex 页面](https://openai.com/zh-Hans-CN/codex/)，不要求复制其素材或实现。用户停留数秒便应能看出色块位置与轮廓的变化。变化应连续平滑，不出现闪烁、明显循环接缝、裸露的图层边缘或抢夺注意力的高亮。
+前端遵循项目的 React、TypeScript、Vite 和 Tauri 职责边界，不因本指南引入另一套界面框架。行为优先复用原生语义与已有组件；使用 `frontend-design` 改善构图和细节时，产品约束与已确认的设计方向优先。
 
-- 不同色块采用不同的漂移速度、起始位置和变化阶段，避免同步往返；以十几秒至二十几秒的缓慢变化为调校起点，兼顾可感知的移动与平静的氛围。
-- 鼠标移动带动背景产生柔和、有边界的偏移，表单和文字保持稳定。触屏无需模拟鼠标跟随，也不阻拦滚动或输入。
-- 页面进入和账号视图切换使用约 240–480ms 的淡入与小幅上移；避免整页缩放、弹跳和逐字出现。验证码等步骤的内容切换也应有连贯反馈，不清空已有输入来制造动画。
-- 按钮悬停轻微上移，按下轻微收缩；输入框聚焦时平滑突出边界。交互反馈以约 150–220ms 为起点，不延迟操作执行。
-- 提交中的动作在控件内表达进度与禁用状态，并提供可访问状态播报，不额外堆叠等待说明。结果反馈与确认弹窗轻柔出现；关闭动效后，状态仍须可辨认。
-- 开启系统“减少动态效果”时，关闭背景循环、鼠标跟随、位移动画和进度旋转，保留静态背景、焦点指示与状态文字。动画不可承担唯一的信息表达。
+样式和交互设计由项目维护，包括 AI 体验。按需复用 [AI Elements](https://elements.ai-sdk.dev/)、shadcn 的图标、动画、可访问能力、输入行为和内容渲染，只引入实际使用部分并保留许可证，不直接以组件库整页布局替代产品设计。Message Response、Reasoning 和 Shimmer 用于 AI 输出，不伪造推理或显示空折叠区；保留中文输入法保护、Enter 提交和 Shift+Enter 换行。
 
-连续氛围动画仅用于账号入口，不扩展到需要持续阅读的课堂。教学动画应服务于概念解释，并提供暂停和文字说明；避免强制音频。深浅色均须检查动画完整过程中的对比度，正文和输入区域保持清晰、稳定。
+渲染与 Pi、服务端编排保持职责分离，并行模型输出及不同教学表面的设计不受单一组件库聊天布局限制；此边界不意味着所有相关能力均已实现。
 
-### 提示文案与表单反馈
+设计交付物使用可编辑文字与布局、语义颜色、统一字体和可复用模式，同类操作的状态保持一致。Figma 交付使用变量、文字样式和组件实例；静态原型不能声称实现语音、生成、评估或同步。截图与 Figma 检查不能代替运行时验收。
 
-- 提示直接说明结果或下一步操作，使用学生能理解的日常语言，删除“若该邮箱符合条件”“已申请发送”等含糊措辞。无法确认邮件实际发送时，使用“请查看邮箱，在 10 分钟内填写验证码”这类操作指引，不声称已经发送；有效期按实际配置显示。
-- 成功、错误和字段辅助提示末尾不加句号。优先使用简短单句，不堆叠重复说明；需要说明多个相关信息时，保留必要的分隔。
-- 不把内部技术限制直接交给用户理解。例如，密码太短时提示“密码至少需要 8 个字符”，过长时提示“密码太长，请缩短后重试”，不将字符数与字节数混在一条提示中。具体限制使用当前服务端规则，本指南不定义账号策略。
-- 密码显示／隐藏使用眼睛、划线眼睛 SVG 图标，不显示“显示”“隐藏”文字按钮。图标沿用现有线条风格，并保留可访问名称、状态、键盘焦点和至少 44 × 44 的触控区域。
-- 字段错误就地显示具体原因；表单级失败或无法由控件表达的结果使用简短、无容器的反馈。不要使用背景色块、边框或左侧竖线包裹普通提示。只有需要用户作出决定时才使用确认弹窗。深浅主题、窄屏和长文案都应保持可读且不溢出。
+### 参考资料
 
-## Language and student data
+以下资料用于构图、视觉和组织方式参考，不是逐像素模板，也不增加功能承诺。色卡以本指南的配色表为准。
 
-Invite students to look again at an image's features rather than merely declaring an answer wrong. Describe a need for a hint in this attempt rather than labeling the student as incapable. Tie encouragement to specific actions; avoid empty praise and streak pressure. Distinguish the companion and student with explicit role labels, using color only as a supporting cue.
-
-Do not expose age, full identity, or internal profile fields on ordinary learning screens. Show only the information needed for the current profile step. Data collection, guardian flows, and content-safety policies remain subject to the PRD's open questions; do not settle them implicitly in mockups.
-
-## Reject these defaults
-
-- A flat page where background, teaching content, and controls share nearly identical tone and visual weight.
-- Repeated rounded cards, capsule composers, filled navigation tiles, and elevated treatments on ordinary components.
-- Glass on every surface, nested blur layers, or translucent body text and teaching diagrams.
-- High-contrast decorative gradients, neon glows, and reflections that compete with the lesson. A quiet background gradient that makes translucent controls legible is appropriate.
-- A marketing headline followed by a generic feature-card grid.
-- A card for every paragraph, nested cards, and colorful badges for ordinary metadata.
-- Chat bubbles, companion avatars, or decorative illustrations that overpower teaching content.
-- Invented percentages, rankings, or automatically increasing numbers presented as learning evidence.
-- Interaction available only through dragging, voice, hover, or color.
-- Desktop columns copied to mobile, reduced text sizes, obscured content, or hidden overflow used to conceal layout defects.
-
-## Inspect and deliver
-
-Check task clarity first, then hierarchy, reading measure, state feedback, and detail. Inspect desktop and mobile with realistic Chinese copy lengths. Check light and dark themes, long headings, empty states, preparation, failure, and recovery.
-
-动效验收不能只依赖静态截图：连续观察背景至少一次方向变化，实际操作主题切换、注册步骤、表单聚焦、提交与确认弹窗。检查鼠标响应、触屏滚动和减少动态效果模式；刷新后确认主题选择保留。不同高度的窗口都应保持合理留白，动画不得引入页面溢出、遮挡或输入丢失。
-
-Inspect both the complete composition and individual controls. The background, teaching surface, and floating controls must remain distinguishable at a glance and in grayscale. Check glass over different underlying content, with blur disabled, and with opaque fallback surfaces. Verify that its text stays sharp and readable, and that floating panels do not obscure content at narrow widths or with the keyboard open. If the page still reads as a grid of similarly rounded cards, revise the composition rather than adding more blur or heavier borders.
-
-Design artifacts use editable text and layouts, semantic colors, consistent typography, and reusable visual patterns. Keep states of the same action consistent. Screenshots do not replace structural inspection: verify fonts, boundaries, and text overflow as well. A static prototype must not claim to implement voice, generation, evaluation, or synchronization. When delivering in Figma, use variables, text styles, and component instances; when delivering a frontend design gallery, use semantic HTML and shared CSS.
-
-Frontend implementation follows the project's React, TypeScript, Vite, and Tauri boundaries. These guidelines do not require another UI framework; use native semantics and existing components for behavior. Validate keyboard access, screen readers, zoom, and real devices during implementation. Figma inspection cannot substitute for runtime acceptance.
-
-## Application navigation and educational identity
-
-The running React application in `apps/client` is the visual reference. Use `npm run dev` with the documented local services to inspect actual behavior; do not maintain a parallel HTML/CSS gallery. Browser tests may use explicit API fixtures for unconnected services, but product screens must display real state.
-
-- Desktop uses a full-height workspace with a 224-pixel sidebar, collapsible to an 80-pixel icon rail. Keep the navigation stable while the content scrolls. Main destinations use familiar SVG symbols for learning, exploration, experiments, and review. Expanded navigation uses short labels; collapsed navigation retains accessible names and hover titles.
-- Anchor the avatar menu at the bottom of the desktop sidebar and at the top right on phones. Group learning records used for personalization under “学习档案”, alongside profile, account security, appearance, and sign out. The avatar menu is the account entry point; avoid repeating these actions on the learning canvas.
-- Onboarding is a full-window experience on desktop and phone. Hide workspace navigation, the avatar menu, and other destinations until the saved completion state arrives, but always provide an accessible “退出建档” control, including during loading and thinking. Confirming exit signs out and returns to login; it never unlocks the workspace. Explain that submitted answers remain saved and unsent content is lost. Canceling or a failed sign-out keeps the current flow. A fresh session shows “欢迎来到知芽”, one short introduction, and “开始” before starting the model. Reloading an existing conversation resumes it without repeating the welcome. No fixed question count or new completion threshold is introduced.
-- Phone layouts use four bottom destinations after onboarding. Reserve safe-area space and keep the answer input reachable as the viewport resizes. After onboarding, opening the learning-profile dialog moves focus inside; Escape and its close button dismiss it and return focus to the avatar. Background learning state can continue to synchronize.
-- Submitting a learning-profile correction closes the editor and selects the learning destination after any unsaved-account-edit confirmation is accepted. Reuse the same question and thinking components as initial onboarding, including the large animated icon and small caption. Initial completion does not suppress an active correction or its follow-up questions. Keep the workspace navigation available. When the local correction finishes, reopen the latest profile; retain the correction draft and show an error inside the editor on failure. Change the selected destination only after navigation is accepted.
-- The onboarding questionnaire is a product-owned interface, not a stock chat input. Preserve its clear heading hierarchy, 16-pixel option text, separated rows, 24-pixel selection indicators, and glass answer surface. Underlying form and selection primitives may come from AI Elements or shadcn, without adopting their default visual layout. “自己填写” expands an inline input and replaces the preset selection. Text-only questions start with this option selected. “还不确定” is also a choice. All answers share one submit button; failed submissions preserve drafts and selections. Do not detach a composer at the bottom of the window; let longer questions scroll naturally.
-- Follow [Apple's material hierarchy](https://developer.apple.com/design/human-interface-guidelines/materials) as a hierarchy reference: use a softly tinted grid canvas, opaque reading surfaces, and a small number of visually separated interaction layers. The current skin uses semantic color tokens, 3-pixel edges, and hard-offset shadows; translucency is optional and must retain opaque text and icons. Provide solid fallbacks when blur is unavailable or reduced transparency is requested.
-- Product styles and interaction design remain locally owned, including AI experiences. Reuse [AI Elements](https://elements.ai-sdk.dev/) and shadcn capabilities selectively: icons, animations, accessibility primitives, input behavior, and content rendering. Import only what is used, preserve licenses, and adapt composition to the product rather than replacing whole pages with stock controls. Message Response, Reasoning, and Shimmer currently render AI output; never fabricate reasoning or show an empty disclosure. Respect reduced motion and retain Chinese input-method protection, Enter to submit, and Shift+Enter for a newline. Keep renderer concerns separate from Pi and server orchestration; concurrent agent output and distinct presentation/teaching surfaces must not be constrained to one library's chat layout. This design boundary does not imply those future capabilities are implemented.
-- Educational identity comes from recognizable book, compass, flask, and record symbols, a consistent sprout brand, and meaningful task states. Use soft green, blue, amber, and violet accents for subject illustrations while retaining the shared sage/graphite palette. Illustrations never imply completed work or mastery.
-- Show truthful empty states for unavailable courses, exploration, experiments, and learning records. Do not invent a course map, progress, or a functioning chat input before its associated capability exists.
-- Keep visible navigation labels short. Familiar actions such as sending, closing, returning, and collapsing can be icon-only, with accessible names. Explain privacy and record-editing consequences inside the relevant profile or confirmation surface, not in persistent learning-page paragraphs. Teaching questions and error recovery retain the words students need.
-
-Design references: [Codex task organization](https://openai.com/index/introducing-the-codex-app/), [Doubao Aixue's educational tasks](https://apps.apple.com/cn/app/id6469102455), [Duolingo's visual readability](https://blog.duolingo.com/shape-language-duolingos-art-style/), and [Duolingo's navigation consistency](https://blog.duolingo.com/core-tabs-redesign/). These inform composition and visual clarity, not feature commitments or copied assets.
+- [需求讨论中的界面参考](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574)：开放教学区域与学习位置连续性。
+- [neobrutalism-components](https://github.com/ekmas/neobrutalism-components)：新粗野主义的边界与阴影表达。
+- [Vercel design.md](https://vercel.com/design.md)：设计指南的组织方式；其中对玻璃效果等风格的限制不是知芽需求。
+- [Apple 材质层级](https://developer.apple.com/design/human-interface-guidelines/materials)：背景、内容与操作区域的层级参考，不要求实现原生 Liquid Glass。
+- [Cao Xin 的博客](https://www.caoxin.xyz/)：主题切换方式。
+- [Codex 页面](https://openai.com/zh-Hans-CN/codex/)：账号入口背景动效的氛围参考，不要求复制素材或实现。
+- [Codex 任务组织](https://openai.com/index/introducing-the-codex-app/)、[豆包爱学](https://apps.apple.com/cn/app/id6469102455)、[Duolingo 视觉语言](https://blog.duolingo.com/shape-language-duolingos-art-style/)与[导航设计](https://blog.duolingo.com/core-tabs-redesign/)：任务组织、视觉可读性与导航一致性。
