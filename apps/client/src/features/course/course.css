@@ -1245,6 +1245,10 @@
   min-width: 92px;
   place-items: center;
 }
+.coding-page > .coding-actions .coding-run-button:has(svg) {
+  grid-auto-flow: column;
+  gap: 8px;
+}
 .coding-page > .coding-actions button:disabled {
   opacity: 0.5;
 }
@@ -1721,4 +1725,112 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Keep every classroom surface on the shared fine-grid visual system. */
+.course-room {
+  background: transparent;
+}
+.course-conversation,
+.slide-stage,
+.coding-page,
+.coding-page-loading {
+  background-color: transparent;
+}
+
+/* Green carries conversational emphasis; yellow remains an action color. */
+.course-thinking-trigger,
+.course-tool-activity {
+  color: var(--brand-green);
+}
+.course-message.user > span {
+  color: var(--text);
+  font-weight: 700;
+}
+.course-message.assistant[aria-current="step"]::before,
+.course-tool-mark {
+  background: var(--brand-green);
+}
+
+/* One coherent outline per coding control, with clear separation between rows. */
+.coding-editor-shell {
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 72%, transparent);
+}
+.coding-editor-bar {
+  border-bottom: 2px solid var(--line);
+}
+.coding-page .coding-stdin {
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+.coding-page > .coding-actions button {
+  border-width: 2px;
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+.coding-page > .coding-actions button:not(:disabled):active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+/* The workspace owns one continuous grid; inner classroom regions do not reset it. */
+.workspace-body {
+  background-color: var(--canvas-fill);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.workspace-toolbar,
+.workspace-content,
+.course-surface,
+.workspace-empty,
+.course-home,
+.course-room,
+.slide-stage {
+  background: transparent;
+}
+
+/* Sage paper and forest ink keep the cover readable in both themes. */
+.course-cover.palette-ocean {
+  --cover-paper: color-mix(in srgb, var(--brand-green-soft) 72%, var(--canvas-fill));
+  --cover-ink: var(--brand-green);
+  --cover-spot: color-mix(in srgb, var(--cream, var(--canvas-fill)) 78%, transparent);
+}
+.course-home-kicker,
+.course-section-number,
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span,
+.coding-editor-bar > span:last-child {
+  color: var(--brand-green);
+}
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span {
+  border-color: color-mix(in srgb, var(--brand-green) 52%, var(--line));
+  background: color-mix(in srgb, var(--brand-green-soft) 72%, var(--surface));
+}
+
+/* Keep editor, stdin, output, and actions in separate non-overlapping rows. */
+.coding-page {
+  grid-template-rows: auto auto auto auto auto auto;
+}
+.coding-page > .coding-editor-shell {
+  min-height: clamp(220px, 34vh, 360px);
+}
+.coding-page > label {
+  min-height: 86px;
+}
+.coding-page > .coding-actions {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  margin-top: 2px;
+}
+.coding-action-feedback {
+  margin: 0;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.5;
 }

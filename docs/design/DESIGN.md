@@ -5,7 +5,7 @@
 Design a calm, trustworthy learning space where K12 students can ask questions at any time. Every screen should make clear what the student is learning, what they can do, and how to continue.
 
 - The body of [PRD #3](https://github.com/LanternCX/zhiya/issues/3) owns product requirements. [Technology selection #2](https://github.com/LanternCX/zhiya/issues/2) owns technical constraints. This document defines visual and interaction guidelines; it does not duplicate requirements or determine implementation scope.
-- The [UI references in the PRD discussion](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574) inform sage light and graphite dark palettes, Chinese serif headings, an open teaching canvas, and question states that preserve the lesson position. The visual direction defined here uses tonal hierarchy and frosted-glass navigation and controls; the references are not a pixel-for-pixel template.
+- The [UI references in the PRD discussion](https://github.com/LanternCX/zhiya/issues/3#issuecomment-5555035574) inform the open teaching canvas and question states that preserve lesson position. The current visual direction uses a fine grid, the supplied sage-and-cream light palette, and the supplied forest dark palette; the references are not a pixel-for-pixel template.
 - Use [Vercel design.md](https://vercel.com/design.md) only as a reference for organizing a usable design guide. Its aesthetic restrictions, including its rejection of glass effects, are not Zhiya requirements. Derive visual rules from the learning experience and the user's design direction.
 - Apply `frontend-design` to strengthen composition and craft. Product constraints and the supplied references take priority over generic stylistic suggestions.
 - Colors, type sizes, and layout dimensions below are design choices informed by the references, not claimed source values extracted from the images. Example lessons, students, and learning records illustrate the interface; they do not confirm launch content or assessment algorithms.
@@ -22,7 +22,7 @@ Do not hide necessary feedback for simplicity or add irrelevant decoration to ap
 
 ## Visual direction: a layered learning workspace
 
-Build a quiet workspace with visible hierarchy: a softly tinted background, a clear teaching surface, and frosted-glass controls around it. Use deep green text, predominantly sans-serif typography, and restrained sage accents. The student should immediately distinguish the material they are studying from the controls that help them navigate, listen, and ask questions.
+Build a quiet workspace with visible depth: a softly tinted, fine-grid background, a clear teaching surface, and a small number of controls with strong edges and hard-offset shadows. Use deep green text, predominantly sans-serif typography, and restrained sage and warm-yellow accents. The student should immediately distinguish the material they are studying from the controls that help them navigate, listen, and ask questions.
 
 Use broad, connected content regions. Establish the page's composition before styling individual controls: give the lesson or current task the strongest visual presence, keep supporting context quieter, and separate persistent controls through material and placement. Spacing and typography organize content within each region; surface contrast, translucency, and edges distinguish adjacent regions.
 
@@ -40,7 +40,7 @@ Related content can share a teaching surface. Do not wrap every section in a new
 
 ### Use frosted glass deliberately
 
-Frosted glass is a recurring material for the app's navigation and interaction layer. Use it where content or a tonal background can visibly continue underneath. A pale rectangle over an identical flat background does not establish a glass effect.
+Translucent glass remains an optional material for interaction layers where underlying content can visibly continue underneath. The current Neo-Brutalist skin prefers opaque themed surfaces, strong edges, and hard-offset shadows; do not add blur when it weakens text or makes the page read as a stack of cards.
 
 - Start with a tinted fill at roughly 72–88% opacity and a backdrop blur of 16–24 pixels. These are tuning ranges, not fixed acceptance values. Adjust them against the actual content underneath.
 - Combine translucency with a subtle 1-pixel edge highlight and enough tonal contrast to preserve the boundary. The panel should feel separated without appearing glossy, metallic, or heavily raised.
@@ -52,23 +52,79 @@ Frosted glass is a recurring material for the app's navigation and interaction l
 
 For younger students, use more images, concrete examples, and conversational guidance. For older students, increase the depth of explanations, parameters, and code. Preserve one visual language across age groups. Avoid infantilizing mascots, leaderboards, and language that shames mistakes.
 
+## Current visual skin
+
+The current client uses a restrained Neo-Brutalist treatment inspired by [neobrutalism-components](https://github.com/ekmas/neobrutalism-components). The layout, grid, responsive breakpoints, and interaction model remain unchanged; the skin changes the visual language of existing surfaces and controls.
+
+- Use 3-pixel dark borders, 8–12-pixel corner radii, and small hard-offset shadows on primary surfaces and controls.
+- Keep the brand mark and structural accents green. Use the warm yellow only for a primary action or a small, intentional emphasis.
+- Apply the fine 32-pixel grid to the page canvas and workspace background. Keep the grid low contrast so it supports the composition without competing with lesson content.
+- Continue the same 32-pixel grid through the classroom shell, including the conversation, slide, and coding regions. Keep reading, editor, input, and output surfaces sufficiently opaque for legibility.
+- Reserve warm yellow for primary actions and small status accents. Conversation labels and activity text use the theme's green or primary text color so they remain distinct from warm-tinted message backgrounds.
+- Coding exercises use one coherent outline per editor, standard-input field, result panel, and action button; adjacent controls must not overlap or create doubled borders.
+- Keep icons from the existing SVG family. Do not introduce emoji or text glyphs as interface icons.
+- Preserve visible focus outlines, 44-pixel minimum touch targets, keyboard navigation, and reduced-motion behavior when applying the skin.
+
+### Classroom grid and contrast guardrails
+
+- The right-hand workspace body owns one continuous, low-contrast 32-pixel grid. Toolbar, empty states, course overview, conversation, slides, and coding pages remain transparent so the grid does not restart inside nested panels or form visible layers.
+- Course covers use the same sage-paper and forest-ink pairing in the course list and course overview. Do not use a neutral gray cover behind the green product palette.
+- Bright yellow text or bright yellow illustrations must never sit on a green background. If an existing yellow token would land on green, replace it with readable forest green, moss green, cream, or the theme's primary text color. This rule applies to labels, status pills, SVG artwork, icons, and decorative marks in both themes.
+- Warm yellow is limited to isolated primary actions or small emphasis areas with a verified contrast pair; it is not a default color for metadata, conversation labels, or course status text.
+- Coding exercises use explicit rows for instructions, editor, standard input, output, and actions. The editor may not overflow into the input or action rows. Run and end actions stay in their own footer, expose busy state, and show failures beside the controls instead of only in a distant conversation pane.
+- The coding output panel is always present while an exercise is open. Before the first run it says where results will appear; after running it shows the status and captured output in the same panel.
+- A completed run remains visible while the student edits or continues the current exercise. Clear the output only when a new coding exercise is presented.
+
+### Light theme palette
+
+The light theme follows the supplied sage, cream, and warm-yellow reference card.
+
+| Token | Value | Purpose |
+| --- | --- | --- |
+| `canvas` | `#F8FAE4` | Cream page and learning canvas |
+| `surface` | `#FFFEF8` | Opaque reading, account, and teaching surfaces |
+| `brand-green` | `#A5CA8B` | Brand accents, selected states, and structural highlights |
+| `brand-green-soft` | `#D0DD97` | Selected navigation and secondary emphasis |
+| `accent` | `#F9DE79` | Primary action and warm emphasis |
+| `text` | `#294735` | Body text, headings, and icon strokes |
+| `muted` | `#5F7660` | Supporting text |
+| `grid-line` | `rgb(47 76 49 / 13%)` | Fine background grid |
+
+### Dark theme palette
+
+The dark theme follows the supplied forest card and keeps the same semantic roles as the light theme. It uses a blue-black canvas, deep green surfaces, moss accents, and pale sage content colors.
+
+| Token | Value | Purpose |
+| --- | --- | --- |
+| `canvas` | `#0E171C` | Black Stallion page background |
+| `surface` | `#2C3E2B` | Aimiru Brown teaching and account surfaces |
+| `subtle` | `#3A503D` | Supporting surface regions |
+| `brand-green-soft` | `#526951` | Daylight Jungle navigation and structural color |
+| `accent` | `#7D977F` | Dinosaur primary action, avatar, and icon emphasis |
+| `text` | `#F1F4E9` | Warm light text |
+| `muted` | `#B3C9B6` | Pond’s Edge supporting text and borders |
+| `grid-line` | `rgb(179 201 182 / 16%)` | Low-contrast dark-theme grid |
+| `warm-support` | `#6A5745` | Baby Bear auxiliary illustration color |
+
+For dark mode, do not reuse light-theme yellow, black borders, or light icon colors. Map borders, icons, inputs, selected navigation, menus, empty-state art, and buttons to the dark semantic tokens above. Keep contrast at or above 4.5:1 for normal text and 3:1 for large text and essential control boundaries.
+
 ## Color and surfaces
 
 两套配色共用语义色彩。主题切换参考 [Cao Xin 的博客](https://www.caoxin.xyz/)，提供“自动 → 浅色 → 深色”的循环选择，而非三套独立配色。默认跟随系统，手动选择应在刷新后保留；只有自动模式响应系统外观变化。登录页在顶栏右侧提供轻量图标按钮，登录后收进头像菜单的“外观”。以半圆、太阳和月亮区分状态，并通过可访问名称说明当前状态与下一次点击的结果；菜单关闭时仍响应系统外观变化。
 
-| Token | Sage light | Graphite dark | Purpose |
+| Token | Sage light | Forest dark | Purpose |
 | --- | --- | --- | --- |
-| `canvas` | `#E6EDE8` | `#17211F` | Background field surrounding the teaching surface |
-| `surface` | `#FFFFFF` | `#283330` | Stable teaching and reading surfaces |
-| `subtle` | `#F2F5EF` | `#34423D` | Supporting regions within a surface; use sparingly |
+| `canvas` | `#F8FAE4` | `#0E171C` | Background field with a low-contrast grid |
+| `surface` | `#FFFEF8` | `#2C3E2B` | Stable teaching and reading surfaces |
+| `subtle` | `#F8FAE4` | `#3A503D` | Supporting regions within a surface; use sparingly |
 | `glass-tint` | `#F7FAF6` | `#253630` | Base tint for translucent floating controls; apply background opacity separately |
 | `glass-edge` | `#FFFFFF` | `#C6D8CB` | Fine translucent highlight on glass boundaries |
-| `text` | `#142D2A` | `#F3F6EE` | Body text and headings |
-| `muted` | `#3F5348` | `#B7C6BC` | Supporting text, including text on the tinted background |
-| `line` | `#CCD6CB` | `#50635B` | Noninteractive dividers |
-| `accent` | `#284F3F` | `#B8D3A8` | Primary actions, focus, and companion labels |
-| `on-accent` | `#FFFFFF` | `#202928` | Text on primary buttons |
-| `warning` | `#805C2D` | `#E3C38C` | Attention and student role labels |
+| `text` | `#294735` | `#F1F4E9` | Body text and headings |
+| `muted` | `#5F7660` | `#B3C9B6` | Supporting text, including text on the tinted background |
+| `line` | `#294735` | `#B3C9B6` | Noninteractive dividers and control boundaries |
+| `accent` | `#F9DE79` | `#7D977F` | Primary actions, focus, and companion labels |
+| `on-accent` | `#294735` | `#0E171C` | Text on primary buttons |
+| `warning` | `#7E6A27` | `#6A5745` | Attention and student role labels |
 | `error` | `#A23F38` | `#F2AAA0` | Submission errors and unrecoverable failures |
 
 Pair state colors with text or a graphical cue. Dividers must not be the only means of identifying controls; inputs and selection controls need sufficiently clear boundaries. Body text requires at least 4.5:1 contrast against its background; large text and essential non-text control boundaries require at least 3:1. Do not dim an entire page to communicate a disabled state.
@@ -110,7 +166,7 @@ Prioritize function and brevity in interface copy. State the task, result, or ne
 - Inspect desktop designs at 1440 × 1000 and mobile designs at 390 × 844, with an additional check at 320 wide. These are design samples, not commitments to particular operating systems.
 - Fill the desktop window with the application shell; constrain reading content rather than the whole app. Onboarding uses a maximum reading width of 680 with 32-pixel side margins. Use 20 on mobile, reducing to 16 on narrow screens.
 - After onboarding, wide workspaces use a 224-wide sidebar that collapses to an 80-wide icon rail; narrow screens use a top bar and bottom navigation. Onboarding occupies the full window on every device, with all global navigation hidden until completion. Focused lessons retain back navigation, the lesson title, contents, and practice access.
-- Integrate the sidebar into the workspace canvas. Do not enclose it in a card, glass panel, rounded container, border, or elevated treatment. Rounded highlighting belongs to the selected navigation item.
+- Integrate the sidebar into the workspace canvas. Keep its background close to the canvas and use a restrained divider; do not turn the sidebar into a floating card. Rounded highlighting and hard-offset emphasis belong to the selected navigation item.
 - Recompose to one column when the content area falls below 720 wide. Never proportionally shrink the desktop artboard. Teaching examples may wrap; code and necessary data tables may scroll within their own regions.
 - Desktop lesson controls combine playback, speed, captions, pagination, and questions. Mobile separates playback and progress from the question input, accounting for safe areas and the software keyboard.
 - Use a consistent radius scale across desktop and mobile: 8 pixels for selected navigation items and small image frames, 12 for primary buttons and teaching surfaces, and 16 for floating panels and composers. Keep ordinary rectangular controls and full-width composers softly rounded rather than capsule-shaped; circles are appropriate for compact icon controls. The sidebar itself has no rounded container.
@@ -158,7 +214,7 @@ Default to either text or an icon when one communicates the meaning clearly. Do 
 
 Touch targets are at least 44 × 44. Keyboard focus uses a high-contrast 2-pixel outline with a 2-pixel offset. Move focus into an opened dialog and return it to the trigger on close. Do not trap keyboard users in nonmodal regions. Voice interaction requires a text alternative, recording status, and a stop action; denying microphone access must still allow task completion.
 
-Make the question input the primary entry point in the classroom controls. Place a lightweight playback and pagination group on the left and a wider, standalone frosted-glass input on the right, with history outside the input. Do not enclose both groups in a shared panel. Use a short input hint and an icon-only send control. On mobile, place the tools above a full-width input.
+Make the question input the primary entry point in the classroom controls. Place a lightweight playback and pagination group on the left and a wider, standalone themed input on the right, with history outside the input. Do not enclose both groups in a shared panel. Use a short input hint and an icon-only send control. On mobile, place the tools above a full-width input.
 
 Images serve learning. Keep aspect ratios and label positions consistent within a set. Classification labels must unambiguously correspond to their images. Missing images need an explanation and recovery state rather than an empty box. Use supplied assets or materials with clear provenance and usage conditions. Never substitute an image of the reference screen for editable interface content.
 
@@ -234,7 +290,7 @@ The running React application in `apps/client` is the visual reference. Use `npm
 - Phone layouts use four bottom destinations after onboarding. Reserve safe-area space and keep the answer input reachable as the viewport resizes. After onboarding, opening the learning-profile dialog moves focus inside; Escape and its close button dismiss it and return focus to the avatar. Background learning state can continue to synchronize.
 - Submitting a learning-profile correction closes the editor and selects the learning destination after any unsaved-account-edit confirmation is accepted. Reuse the same question and thinking components as initial onboarding, including the large animated icon and small caption. Initial completion does not suppress an active correction or its follow-up questions. Keep the workspace navigation available. When the local correction finishes, reopen the latest profile; retain the correction draft and show an error inside the editor on failure. Change the selected destination only after navigation is accepted.
 - The onboarding questionnaire is a product-owned interface, not a stock chat input. Preserve its clear heading hierarchy, 16-pixel option text, separated rows, 24-pixel selection indicators, and glass answer surface. Underlying form and selection primitives may come from AI Elements or shadcn, without adopting their default visual layout. “自己填写” expands an inline input and replaces the preset selection. Text-only questions start with this option selected. “还不确定” is also a choice. All answers share one submit button; failed submissions preserve drafts and selections. Do not detach a composer at the bottom of the window; let longer questions scroll naturally.
-- Follow [Apple's material hierarchy](https://developer.apple.com/design/human-interface-guidelines/materials): use a softly tinted canvas, opaque reading surfaces, and translucent interaction layers. Apply glass materials to the questionnaire answer surface, account popover, profile shell, and mobile navigation. Keep text and icons opaque. These are cross-platform CSS materials inspired by Apple, not native Liquid Glass. Provide opaque fallbacks for unavailable blur and reduced transparency.
+- Follow [Apple's material hierarchy](https://developer.apple.com/design/human-interface-guidelines/materials) as a hierarchy reference: use a softly tinted grid canvas, opaque reading surfaces, and a small number of visually separated interaction layers. The current skin uses semantic color tokens, 3-pixel edges, and hard-offset shadows; translucency is optional and must retain opaque text and icons. Provide solid fallbacks when blur is unavailable or reduced transparency is requested.
 - Product styles and interaction design remain locally owned, including AI experiences. Reuse [AI Elements](https://elements.ai-sdk.dev/) and shadcn capabilities selectively: icons, animations, accessibility primitives, input behavior, and content rendering. Import only what is used, preserve licenses, and adapt composition to the product rather than replacing whole pages with stock controls. Message Response, Reasoning, and Shimmer currently render AI output; never fabricate reasoning or show an empty disclosure. Respect reduced motion and retain Chinese input-method protection, Enter to submit, and Shift+Enter for a newline. Keep renderer concerns separate from Pi and server orchestration; concurrent agent output and distinct presentation/teaching surfaces must not be constrained to one library's chat layout. This design boundary does not imply those future capabilities are implemented.
 - Educational identity comes from recognizable book, compass, flask, and record symbols, a consistent sprout brand, and meaningful task states. Use soft green, blue, amber, and violet accents for subject illustrations while retaining the shared sage/graphite palette. Illustrations never imply completed work or mastery.
 - Show truthful empty states for unavailable courses, exploration, experiments, and learning records. Do not invent a course map, progress, or a functioning chat input before its associated capability exists.

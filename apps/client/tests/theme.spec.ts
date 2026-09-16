@@ -17,3 +17,12 @@ test("theme cycles, persists, and follows the system only in automatic mode", as
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(root).toHaveAttribute("data-theme", "dark");
 });
+
+test("neo-brutalist visual tokens are applied without changing the page structure", async ({ page }) => {
+  await page.goto("/");
+  const primary = page.locator("button.primary").first();
+  await expect(primary).toBeVisible();
+  await expect(primary).toHaveCSS("border-top-width", "3px");
+  await expect(primary).toHaveCSS("border-right-width", "3px");
+  await expect(primary).toHaveCSS("box-shadow", /4px 4px/);
+});

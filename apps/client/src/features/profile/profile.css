@@ -398,6 +398,16 @@
 .learning-surface:has(> .error) .learning-progress {
   min-height: 50dvh;
 }
+
+/* Neo-Brutalist learning cards and controls; content flow remains identical. */
+.welcome-mark { border: 3px solid var(--line); border-radius: 12px; background: var(--accent); box-shadow: 5px 5px 0 var(--line); }
+.question-answer { border: 3px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 5px 5px 0 var(--line); backdrop-filter: none; }
+.question-option { border-bottom: 2px solid var(--line); }
+.question-option [data-slot="radio-group-item"], .question-option [data-slot="checkbox"] { border: 3px solid var(--line); }
+.question-option [data-state="checked"] { background: var(--accent); border-color: var(--line); }
+.question-answer textarea, .memory-panel textarea { border: 3px solid var(--line); border-radius: 8px; }
+.question-actions .primary { border: 3px solid var(--line); border-radius: 8px; box-shadow: 3px 3px 0 var(--line); }
+.learning-progress .generation-stop { border: 3px solid var(--line); border-radius: 8px; background: var(--accent); box-shadow: 3px 3px 0 var(--line); }
 @media (prefers-reduced-motion: no-preference) {
   .question-card,
   .learning-progress {

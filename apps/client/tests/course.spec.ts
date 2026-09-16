@@ -149,6 +149,56 @@ test("a student runs a model-created coding page and receives a review only when
   await expect(
     page.getByText("Python (3.8.1)", { exact: true }),
   ).toBeVisible();
+  const classroom = page.locator(".course-room");
+  await expect(classroom).toHaveCSS("background-image", "none");
+  await expect(page.locator(".workspace-body")).toHaveCSS(
+    "background-image",
+    /linear-gradient/,
+  );
+  const userSpeaker = page.locator(".course-message.user > span").first();
+  const conversationText = await page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--text)";
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  const brandGreen = await page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--brand-green)";
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  await expect(page.locator(".coding-page > header > span")).toHaveCSS(
+    "color",
+    brandGreen,
+  );
+  await expect(userSpeaker).toHaveCSS("color", conversationText);
+  const editorShell = page.getByRole("region", { name: "代码编辑区" });
+  await expect(editorShell).toHaveCSS("border-top-width", "2px");
+  const stdin = page.getByRole("textbox", { name: "标准输入" });
+  await expect(stdin).toHaveCSS("border-top-width", "2px");
+  await expect(page.getByRole("region", { name: "运行结果" })).toBeVisible();
+  await expect(page.getByText("运行代码后，结果会显示在这里", { exact: true })).toBeVisible();
+  const outputBeforeRun = await page
+    .getByRole("region", { name: "运行结果" })
+    .boundingBox();
+  const editorBeforeRun = await editorShell.boundingBox();
+  expect((editorBeforeRun?.y ?? 0) + (editorBeforeRun?.height ?? 0)).toBeLessThan(
+    outputBeforeRun?.y ?? 0,
+  );
+  const editorShellBox = await editorShell.boundingBox();
+  const stdinBox = await stdin.boundingBox();
+  expect((editorShellBox?.y ?? 0) + (editorShellBox?.height ?? 0)).toBeLessThan(
+    stdinBox?.y ?? 0,
+  );
+  const actionsBox = await page.locator(".coding-actions").boundingBox();
+  expect((stdinBox?.y ?? 0) + (stdinBox?.height ?? 0)).toBeLessThan(
+    actionsBox?.y ?? 0,
+  );
   const instructions = page.getByRole("region", { name: "题目说明" });
   const emphasisWeight = await instructions
     .getByText("修改程序", { exact: true })
@@ -173,7 +223,7 @@ test("a student runs a model-created coding page and receives a review only when
   const runSpinner = runningButton.locator("svg");
   await expect(runSpinner).toBeVisible();
   await expect(runSpinner).not.toHaveCSS("animation-name", "none");
-  await expect(page.getByText("运行中…", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("运行中…", { exact: true })).toBeVisible();
   releaseFirstRun();
   await expect(
     page.getByRole("button", { name: "运行代码" }),
