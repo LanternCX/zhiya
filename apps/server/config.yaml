@@ -13,6 +13,11 @@ model:
 runner:
   endpoint: "http://127.0.0.1:2358"
 
+# Logs go to stderr. Use JSON when the deployment platform collects logs.
+logging:
+  level: "info"
+  format: "text"
+
 http:
   listen: "127.0.0.1:8080"
   origin: "http://127.0.0.1:1420"

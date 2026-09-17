@@ -79,6 +79,20 @@ ZHIYA_SERVER_HTTP_LISTEN=127.0.0.1:18080 npm run dev:server
 
 也可以使用 `ZHIYA_SERVER_CONFIG` 或 `-config` 选择仓库外的完整部署配置。显式指定配置文件时不会再合并默认和本地配置。服务端会拒绝未知字段和无效配置；修改后需要重启，不支持热重载。
 
+### 服务端日志
+
+Go 服务将结构化日志写入标准错误流。开发环境默认使用紧凑、按级别着色的文本格式；非交互输出会自动关闭颜色，也可以设置 `NO_COLOR` 强制关闭。由部署平台采集日志时可切换为逐行 JSON：
+
+```yaml
+logging:
+  level: info
+  format: json
+```
+
+`logging.level` 支持 `debug`、`info`、`warn` 和 `error`，`logging.format` 支持 `text` 和 `json`。也可以通过 `ZHIYA_SERVER_LOGGING_LEVEL` 与 `ZHIYA_SERVER_LOGGING_FORMAT` 覆盖。
+
+每个 HTTP 响应都包含 `X-Request-ID`。排查服务端错误时，可使用该值关联请求完成日志和错误日志。访问日志记录方法、路由模板、状态码与耗时，不记录查询参数、请求正文、Cookie 或认证信息。日志采集、保存和轮转由运行环境负责。
+
 Docker 基础设施配置由 [`dev-services.env`](../dev-services.env) 管理。若修改 PostgreSQL 或 Mailpit 的映射端口，需要同步调整服务端连接配置。
 
 ## 常用命令

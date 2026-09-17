@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
 type failure struct {
@@ -25,6 +25,9 @@ func writeJSON(w http.ResponseWriter, status int, value any) {
 }
 func (a *application) respondError(w http.ResponseWriter, err error) {
 	status, message := errorResponse(err)
+	if status == http.StatusInternalServerError {
+		logging.ForResponse(w, a.applicationLogger()).Error("request failed", "error", err)
+	}
 	if status == 429 {
 		w.Header().Set("Retry-After", strconv.Itoa(a.config.Account.RateWindowSeconds))
 	}
@@ -62,7 +65,6 @@ func errorResponse(err error) (int, string) {
 	case errors.Is(err, data.ErrConversationBusy):
 		e = failure{409, err.Error()}
 	default:
-		log.Printf("request failed: %T", err)
 		e = failure{500, "服务暂时不可用，请稍后重试"}
 	}
 	return e.status, e.message

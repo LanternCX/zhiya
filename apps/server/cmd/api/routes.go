@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
 func (a *application) routes() http.Handler {
@@ -65,5 +66,7 @@ func (a *application) routes() http.Handler {
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		http.FileServer(http.Dir(a.config.Server.WebDir)).ServeHTTP(w, r)
 	}))
-	return mux
+	return logging.HTTPMiddleware(a.applicationLogger(), func(w http.ResponseWriter) {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "服务暂时不可用，请稍后重试"})
+	})(mux)
 }

@@ -66,11 +66,13 @@ func TestEnvironmentOverridesFileAndPathsBelongToConfigDirectory(t *testing.T) {
 	t.Setenv("ZHIYA_SERVER_ACCOUNT_SESSION_TTL_SECONDS", "120")
 	t.Setenv("ZHIYA_SERVER_SMTP_PASSWORD", "private-test-value")
 	t.Setenv("ZHIYA_SERVER_SMTP_USERNAME", "test-user")
+	t.Setenv("ZHIYA_SERVER_LOGGING_LEVEL", "debug")
+	t.Setenv("ZHIYA_SERVER_LOGGING_FORMAT", "json")
 	cfg, err := config.Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.Server.Listen != "127.0.0.1:18080" || cfg.Account.SessionTTLSeconds != 120 || cfg.SMTP.Password != "private-test-value" {
+	if cfg.Server.Listen != "127.0.0.1:18080" || cfg.Account.SessionTTLSeconds != 120 || cfg.SMTP.Password != "private-test-value" || cfg.Logging.Level != "debug" || cfg.Logging.Format != "json" {
 		t.Fatal("environment overrides were not applied")
 	}
 	if cfg.Server.WebDir != filepath.Join(dir, "../client/dist") {
@@ -90,6 +92,8 @@ func TestInvalidConfigurationFailsWithoutLeakingSecrets(t *testing.T) {
 		{"ZHIYA_SERVER_DEVELOPMENT", "false"},
 		{"ZHIYA_SERVER_SMTP_ADDRESS", "localhost:70000"},
 		{"ZHIYA_SERVER_ACCOUNT_RATE_WINDOW_SECONDS", "2147483648"},
+		{"ZHIYA_SERVER_LOGGING_LEVEL", "verbose"},
+		{"ZHIYA_SERVER_LOGGING_FORMAT", "xml"},
 		{"ZHIYA_SERVER_HTTP_LISTENN", "127.0.0.1:9000"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
