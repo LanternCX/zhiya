@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
 const maxModelRetries = 5
@@ -58,13 +59,14 @@ func (a *application) modelProxy(w http.ResponseWriter, r *http.Request) {
 		a.respondError(w, err)
 		return
 	}
+	requestLogger := logging.ForResponse(w, a.applicationLogger())
 	var finished sync.Once
 	completed := false
 	finish := func() {
 		finished.Do(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			_ = a.models.Transaction(ctx, data.StandardTransaction, func(m data.Models) error {
+			finishErr := a.models.Transaction(ctx, data.StandardTransaction, func(m data.Models) error {
 				c, err := m.Learning.Load(ctx, user)
 				if err != nil {
 					return err
@@ -86,6 +88,9 @@ func (a *application) modelProxy(w http.ResponseWriter, r *http.Request) {
 				}
 				return m.Learning.Save(ctx, user, &c)
 			})
+			if finishErr != nil {
+				requestLogger.Error("model session cleanup failed", "run_id", input.RunID, "completed", completed, "error", finishErr)
+			}
 		})
 	}
 	defer finish()
@@ -94,6 +99,11 @@ func (a *application) modelProxy(w http.ResponseWriter, r *http.Request) {
 	unregister := a.learningHub.registerExecution(user, input.RunID, cancel)
 	defer unregister()
 	if current, snapshotErr := a.models.Learning.Snapshot(ctx, user, 1<<30); snapshotErr != nil || current.RunID != input.RunID {
+		if snapshotErr != nil {
+			requestLogger.ErrorContext(ctx, "model session verification failed", "run_id", input.RunID, "error", snapshotErr)
+		} else {
+			requestLogger.InfoContext(ctx, "model session superseded", "run_id", input.RunID)
+		}
 		cancel()
 	}
 	completed = a.streamModel(ctx, w, r, input.Payload, "", func() {
@@ -140,6 +150,14 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 	payload["max_completion_tokens"] = 8192
 	raw, _ := json.Marshal(payload)
 	client := &http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}
+	requestLogger := logging.ForResponse(w, a.applicationLogger())
+	logFields := func(values ...any) []any {
+		fields := make([]any, 0, len(values)+2)
+		if agent != "" {
+			fields = append(fields, "agent", agent)
+		}
+		return append(fields, values...)
+	}
 	idempotencyKey := data.UUID()
 	streamStarted := false
 	startStream := func() {
@@ -158,18 +176,19 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 		_ = http.NewResponseController(w).Flush()
 		return true
 	}
-	fail := func(message string) {
+	fail := func(message, phase string, cause error, values ...any) {
 		if !streamStarted {
-			a.respondError(w, failure{502, message})
+			a.respondError(w, operationalFailure(http.StatusBadGateway, message, cause))
 			return
 		}
+		requestLogger.ErrorContext(ctx, "model stream failed", logFields(append([]any{"phase", phase, "error", cause}, values...)...)...)
 		rawError, _ := json.Marshal(map[string]any{"error": map[string]string{"message": message, "type": "upstream_connection_error"}})
 		_ = writeStream("data: " + string(rawError) + "\n\n")
 	}
 	for attempt := 0; attempt <= maxModelRetries; attempt++ {
 		upstream, err := http.NewRequestWithContext(ctx, "POST", a.config.Model.Endpoint, bytes.NewReader(raw))
 		if err != nil {
-			fail("暂时无法连接模型服务")
+			fail("暂时无法连接模型服务", "request", err, "attempt", attempt+1)
 			return false
 		}
 		upstream.Header.Set("Content-Type", "application/json")
@@ -184,12 +203,13 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 				return false
 			}
 			if attempt < maxModelRetries {
+				requestLogger.WarnContext(ctx, "model request retrying", logFields("phase", "request", "error", requestErr, "attempt", attempt+1, "max_retries", maxModelRetries)...)
 				if !writeStream(fmt.Sprintf(": zhiya-retry {\"attempt\":%d,\"maxRetries\":%d}\n\n", attempt+1, maxModelRetries)) || !waitModelRetry(ctx, modelRetryDelay(nil, attempt)) {
 					return false
 				}
 				continue
 			}
-			fail("暂时无法连接模型服务，请重试")
+			fail("暂时无法连接模型服务，请重试", "request", requestErr, "attempt", attempt+1)
 			return false
 		}
 		if response.StatusCode != http.StatusOK {
@@ -198,12 +218,13 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 			_, _ = io.Copy(io.Discard, response.Body)
 			_ = response.Body.Close()
 			if retryable && attempt < maxModelRetries {
+				requestLogger.WarnContext(ctx, "model request retrying", logFields("phase", "response", "upstream_status", response.StatusCode, "attempt", attempt+1, "max_retries", maxModelRetries)...)
 				if !writeStream(fmt.Sprintf(": zhiya-retry {\"attempt\":%d,\"maxRetries\":%d}\n\n", attempt+1, maxModelRetries)) || !waitModelRetry(ctx, delay) {
 					return false
 				}
 				continue
 			}
-			fail("模型服务暂时不可用，请稍后重试")
+			fail("模型服务暂时不可用，请稍后重试", "response", fmt.Errorf("model service returned status %d", response.StatusCode), "upstream_status", response.StatusCode, "attempt", attempt+1)
 			return false
 		}
 		reader := bufio.NewReader(response.Body)
@@ -234,13 +255,14 @@ func (a *application) streamModel(ctx context.Context, w http.ResponseWriter, r 
 				return true
 			}
 			if !received && ctx.Err() == nil && attempt < maxModelRetries {
+				requestLogger.WarnContext(ctx, "model request retrying", logFields("phase", "read", "error", readErr, "attempt", attempt+1, "max_retries", maxModelRetries)...)
 				if !writeStream(fmt.Sprintf(": zhiya-retry {\"attempt\":%d,\"maxRetries\":%d}\n\n", attempt+1, maxModelRetries)) || !waitModelRetry(ctx, modelRetryDelay(nil, attempt)) {
 					return false
 				}
 				break
 			}
 			if ctx.Err() == nil {
-				fail("模型连接中断，请重试")
+				fail("模型连接中断，请重试", "read", readErr, "attempt", attempt+1)
 			}
 			return false
 		}

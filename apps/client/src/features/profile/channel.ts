@@ -195,6 +195,7 @@ export class ConversationChannel implements ConversationStore {
           new APIError(
             message.status ?? 500,
             message.error ?? "操作失败，请重试",
+            message.requestId,
           ),
         );
     }

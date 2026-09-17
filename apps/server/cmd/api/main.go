@@ -72,7 +72,7 @@ func main() {
 		logger.Error("mailer initialization failed", "error", err)
 		os.Exit(1)
 	}
-	app := &application{logger: logger, models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient)}
+	app := &application{logger: logger, models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient, logger)}
 	err = app.models.Initialize(startup)
 	if err == nil {
 		var objects objectstore.Store

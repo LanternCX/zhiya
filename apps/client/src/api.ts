@@ -11,9 +11,26 @@ export class APIError extends Error {
   constructor(
     public status: number,
     message: string,
+    public requestId = "",
   ) {
-    super(message);
+    super(requestId ? `${message}（错误编号：${requestId}）` : message);
   }
+}
+
+function reportAPIFailure(
+  path: string,
+  method: string,
+  status: number,
+  requestId: string,
+  kind: "transport" | "response" | "server",
+) {
+  console.error("[zhiya] API request failed", {
+    path,
+    method,
+    status,
+    requestId: requestId || undefined,
+    kind,
+  });
 }
 
 export async function api<T = { ok: boolean }>(
@@ -25,9 +42,14 @@ export async function api<T = { ok: boolean }>(
   const expectedRevision = sessionRevision;
   let status: number;
   let text: string;
+  let requestId = "";
   try {
     if (isTauri()) {
-      const response = await invoke<{ status: number; body: string }>(
+      const response = await invoke<{
+        status: number;
+        body: string;
+        requestId?: string;
+      }>(
         "account_request",
         {
           path,
@@ -38,6 +60,7 @@ export async function api<T = { ok: boolean }>(
       );
       status = response.status;
       text = response.body;
+      requestId = response.requestId ?? "";
     } else {
       const response = await fetch(`/api${path}`, {
         method,
@@ -54,8 +77,10 @@ export async function api<T = { ok: boolean }>(
       });
       status = response.status;
       text = await response.text();
+      requestId = response.headers.get("X-Request-ID") ?? "";
     }
   } catch (err) {
+    reportAPIFailure(path, method, 0, "", "transport");
     if (typeof err === "string" && /secure storage/i.test(err))
       throw new APIError(0, "无法访问系统安全存储，请解锁后重试");
     if (typeof err === "string" && /application configuration/i.test(err))
@@ -68,9 +93,13 @@ export async function api<T = { ok: boolean }>(
   try {
     data = JSON.parse(text);
   } catch {
-    throw new APIError(status, "服务响应异常，请稍后重试");
+    reportAPIFailure(path, method, status, requestId, "response");
+    throw new APIError(status, "服务响应异常，请稍后重试", requestId);
   }
-  if (status < 200 || status >= 300)
-    throw new APIError(status, data.error ?? "操作失败，请重试");
+  if (status < 200 || status >= 300) {
+    if (status >= 500)
+      reportAPIFailure(path, method, status, requestId, "server");
+    throw new APIError(status, data.error ?? "操作失败，请重试", requestId);
+  }
   return data as T;
 }

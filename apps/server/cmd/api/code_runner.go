@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -42,6 +43,7 @@ type codeRunner interface {
 type codeRunnerClient struct {
 	endpoint string
 	http     *http.Client
+	logger   *slog.Logger
 }
 
 type codeRuntime struct {
@@ -97,8 +99,8 @@ type goJudgeResult struct {
 	FileIDs    map[string]string `json:"fileIds"`
 }
 
-func newCodeRunnerClient(settings config.Runner, client *http.Client) *codeRunnerClient {
-	return &codeRunnerClient{endpoint: strings.TrimRight(settings.Endpoint, "/"), http: client}
+func newCodeRunnerClient(settings config.Runner, client *http.Client, logger *slog.Logger) *codeRunnerClient {
+	return &codeRunnerClient{endpoint: strings.TrimRight(settings.Endpoint, "/"), http: client, logger: logger}
 }
 
 func (c *codeRunnerClient) request(ctx context.Context, method, path string, input any, output any) error {
@@ -171,7 +173,9 @@ func (c *codeRunnerClient) Run(ctx context.Context, languageID int, sourceCode, 
 			defer func() {
 				cleanupContext, cancel := context.WithTimeout(context.WithoutCancel(ctx), 2*time.Second)
 				defer cancel()
-				_ = c.request(cleanupContext, http.MethodDelete, "/file/"+url.PathEscape(artifactID), nil, nil)
+				if cleanupErr := c.request(cleanupContext, http.MethodDelete, "/file/"+url.PathEscape(artifactID), nil, nil); cleanupErr != nil {
+					c.logger.WarnContext(cleanupContext, "code runner artifact cleanup failed", "artifact_id", artifactID, "error", cleanupErr)
+				}
 			}()
 		}
 		compileOutput = compiled.Files["stderr"] + compiled.Files["stdout"]

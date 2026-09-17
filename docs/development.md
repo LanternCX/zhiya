@@ -91,7 +91,7 @@ logging:
 
 `logging.level` 支持 `debug`、`info`、`warn` 和 `error`，`logging.format` 支持 `text` 和 `json`。也可以通过 `ZHIYA_SERVER_LOGGING_LEVEL` 与 `ZHIYA_SERVER_LOGGING_FORMAT` 覆盖。
 
-每个 HTTP 响应都包含 `X-Request-ID`。排查服务端错误时，可使用该值关联请求完成日志和错误日志。访问日志记录方法、路由模板、状态码与耗时，不记录查询参数、请求正文、Cookie 或认证信息。日志采集、保存和轮转由运行环境负责。
+每个 HTTP 响应都包含 `X-Request-ID`。客户端会在服务端错误提示中显示该错误编号，并在开发者控制台记录不含请求正文的请求摘要，可用它关联请求完成日志和错误日志。WebSocket 操作同时记录连接请求 ID 与客户端操作 ID；模型流重试、最终中断、跨实例通知重连及后台资源清理失败也会单独记录。访问日志记录方法、路由模板、状态码与耗时，不记录查询参数、请求正文、Cookie、认证信息、教学内容或模型输出。日志采集、保存和轮转由运行环境负责。
 
 Docker 基础设施配置由 [`dev-services.env`](../dev-services.env) 管理。若修改 PostgreSQL 或 Mailpit 的映射端口，需要同步调整服务端连接配置。
 

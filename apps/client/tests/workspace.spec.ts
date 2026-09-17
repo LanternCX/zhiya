@@ -44,7 +44,11 @@ for (const stage of ["welcome", "question"] as const) {
     await page.route("**/api/auth/logout", (route) =>
       route.fulfill(
         failLogout
-          ? { status: 503, json: { error: "暂时无法退出，请重试" } }
+          ? {
+              status: 503,
+              headers: { "X-Request-ID": "logout-request-id" },
+              json: { error: "暂时无法退出，请重试" },
+            }
           : { json: { ok: true } },
       ),
     );
@@ -62,7 +66,9 @@ for (const stage of ["welcome", "question"] as const) {
     await expect(exit).toBeFocused();
     await exit.click();
     await dialog.getByRole("button", { name: "退出登录", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("暂时无法退出");
+    await expect(page.getByRole("alert")).toHaveText(
+      "暂时无法退出，请重试（错误编号：logout-request-id）",
+    );
     await expect(exit).toBeVisible();
     failLogout = false;
     await exit.click();

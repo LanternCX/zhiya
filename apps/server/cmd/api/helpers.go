@@ -16,6 +16,20 @@ type failure struct {
 	message string
 }
 
+type operationFailure struct {
+	response failure
+	cause    error
+}
+
+func (e operationFailure) Error() string { return e.response.message + ": " + e.cause.Error() }
+func (e operationFailure) Unwrap() []error {
+	return []error{e.response, e.cause}
+}
+
+func operationalFailure(status int, message string, cause error) error {
+	return operationFailure{response: failure{status: status, message: message}, cause: cause}
+}
+
 func (e failure) Error() string { return e.message }
 func bad(message string) error  { return failure{400, message} }
 func writeJSON(w http.ResponseWriter, status int, value any) {
@@ -25,13 +39,18 @@ func writeJSON(w http.ResponseWriter, status int, value any) {
 }
 func (a *application) respondError(w http.ResponseWriter, err error) {
 	status, message := errorResponse(err)
-	if status == http.StatusInternalServerError {
+	if status >= http.StatusInternalServerError {
 		logging.ForResponse(w, a.applicationLogger()).Error("request failed", "error", err)
 	}
 	if status == 429 {
 		w.Header().Set("Retry-After", strconv.Itoa(a.config.Account.RateWindowSeconds))
 	}
 	writeJSON(w, status, map[string]string{"error": message})
+}
+
+func (a *application) warnRequest(w http.ResponseWriter, message string, err error, values ...any) {
+	attributes := append([]any{"error", err}, values...)
+	logging.ForResponse(w, a.applicationLogger()).Warn(message, attributes...)
 }
 func errorResponse(err error) (int, string) {
 	var e failure

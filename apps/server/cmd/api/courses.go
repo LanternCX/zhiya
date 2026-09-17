@@ -399,9 +399,12 @@ func (a *application) startCourseMaterialUpload(w http.ResponseWriter, r *http.R
 	}
 	request, err := a.objects.PresignUpload(r.Context(), upload.ObjectKey, upload.MediaType, upload.SizeBytes, time.Until(upload.ExpiresAt))
 	if err != nil {
-		_ = a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
+		rollbackErr := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
 			return m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID)
 		})
+		if rollbackErr != nil {
+			a.warnRequest(w, "material upload rollback failed", rollbackErr, "upload_id", upload.ID)
+		}
 		a.respondError(w, err)
 		return
 	}
@@ -423,7 +426,9 @@ func (a *application) completeCourseMaterialUpload(w http.ResponseWriter, r *htt
 			return err
 		}
 		if time.Now().After(upload.ExpiresAt) {
-			_ = a.objects.Delete(r.Context(), upload.ObjectKey)
+			if deleteErr := a.objects.Delete(r.Context(), upload.ObjectKey); deleteErr != nil {
+				a.warnRequest(w, "expired material object cleanup failed", deleteErr, "upload_id", upload.ID)
+			}
 			if err = m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID); err != nil {
 				return err
 			}
@@ -435,9 +440,13 @@ func (a *application) completeCourseMaterialUpload(w http.ResponseWriter, r *htt
 			return bad("课程材料尚未上传完成")
 		}
 		valid := metadata.SizeBytes == upload.SizeBytes && validUTF8Stream(content)
-		_ = content.Close()
+		if closeErr := content.Close(); closeErr != nil {
+			a.warnRequest(w, "material validation stream close failed", closeErr, "upload_id", upload.ID)
+		}
 		if !valid {
-			_ = a.objects.Delete(r.Context(), upload.ObjectKey)
+			if deleteErr := a.objects.Delete(r.Context(), upload.ObjectKey); deleteErr != nil {
+				a.warnRequest(w, "invalid material object cleanup failed", deleteErr, "upload_id", upload.ID)
+			}
 			if err = m.Materials.CancelUpload(r.Context(), u.ID, r.PathValue("id"), upload.ID); err != nil {
 				return err
 			}
@@ -471,7 +480,9 @@ func (a *application) completeCourseMaterialUpload(w http.ResponseWriter, r *htt
 		a.respondError(w, completionFailure)
 		return
 	}
-	_ = a.objects.Delete(r.Context(), upload.ObjectKey)
+	if deleteErr := a.objects.Delete(r.Context(), upload.ObjectKey); deleteErr != nil {
+		a.warnRequest(w, "temporary material object cleanup failed", deleteErr, "upload_id", upload.ID)
+	}
 	writeJSON(w, http.StatusCreated, map[string]any{"material": material})
 }
 
