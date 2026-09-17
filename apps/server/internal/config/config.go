@@ -21,12 +21,17 @@ import (
 type Config struct {
 	Model       Model    `yaml:"model"`
 	Runner      Runner   `yaml:"runner"`
+	Logging     Logging  `yaml:"logging"`
 	Development bool     `yaml:"development"`
 	Server      Server   `yaml:"http"`
 	Database    Database `yaml:"database"`
 	Storage     Storage  `yaml:"storage"`
 	SMTP        SMTP     `yaml:"smtp"`
 	Account     Account  `yaml:"account"`
+}
+type Logging struct {
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
 }
 type Runner struct {
 	Endpoint string `yaml:"endpoint"`
@@ -207,6 +212,14 @@ func override(value reflect.Value, prefix string, known map[string]bool) error {
 }
 
 func (c Config) Validate() error {
+	switch c.Logging.Level {
+	case "debug", "info", "warn", "error":
+	default:
+		return fmt.Errorf("logging.level must be debug, info, warn, or error")
+	}
+	if c.Logging.Format != "text" && c.Logging.Format != "json" {
+		return fmt.Errorf("logging.format must be text or json")
+	}
 	if c.Model.Endpoint != "" {
 		u, err := url.Parse(c.Model.Endpoint)
 		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {

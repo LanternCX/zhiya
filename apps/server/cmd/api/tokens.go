@@ -16,11 +16,11 @@ func (a *application) sendChallenge(ctx context.Context, models data.Models, pur
 		return "", err
 	}
 	if err = a.send(email, purpose, codes.Code); err != nil {
-		return "", failure{503, "邮件发送失败，请稍后重新获取"}
+		return "", operationalFailure(http.StatusServiceUnavailable, "邮件发送失败，请稍后重新获取", err)
 	}
 	if newEmail != "" {
 		if err = a.send(newEmail, "email-new", codes.NewCode); err != nil {
-			return "", failure{503, "邮件发送失败，请稍后重新获取"}
+			return "", operationalFailure(http.StatusServiceUnavailable, "邮件发送失败，请稍后重新获取", err)
 		}
 	}
 	return codes.Flow, nil

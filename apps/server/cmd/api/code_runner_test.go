@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +13,7 @@ import (
 )
 
 func TestCodeLanguagesReturnsTheConfiguredRuntimeLanguages(t *testing.T) {
-	a := &application{runner: newCodeRunnerClient(config.Runner{}, http.DefaultClient)}
+	a := &application{runner: newCodeRunnerClient(config.Runner{}, http.DefaultClient, slog.Default())}
 	response := httptest.NewRecorder()
 	a.codeLanguages(response, httptest.NewRequest(http.MethodGet, "/api/code/languages", nil))
 
@@ -60,7 +62,7 @@ func TestRunCodeReturnsProgramOutput(t *testing.T) {
 
 	a := &application{
 		config: config.Config{Server: config.Server{MaxBodyBytes: 1024}},
-		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client()),
+		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client(), slog.Default()),
 	}
 	body, _ := json.Marshal(map[string]any{"languageId": 1, "sourceCode": "print(input())", "stdin": "你好\n"})
 	response := httptest.NewRecorder()
@@ -132,7 +134,7 @@ func TestRunCodeCompilesExecutesAndCleansCachedArtifact(t *testing.T) {
 
 	a := &application{
 		config: config.Config{Server: config.Server{MaxBodyBytes: 1024}},
-		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client()),
+		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client(), slog.Default()),
 	}
 	body := bytes.NewBufferString(`{"languageId":4,"sourceCode":"int main(void) { return 0; }","stdin":""}`)
 	response := httptest.NewRecorder()
@@ -174,7 +176,7 @@ func TestRunCodeCleansPartialArtifactAfterCompilationError(t *testing.T) {
 
 	a := &application{
 		config: config.Config{Server: config.Server{MaxBodyBytes: 1024}},
-		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client()),
+		runner: newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client(), slog.Default()),
 	}
 	body := bytes.NewBufferString(`{"languageId":3,"sourceCode":"const value: string = missing;","stdin":""}`)
 	response := httptest.NewRecorder()
@@ -195,7 +197,7 @@ func TestRunCodeCleansPartialArtifactAfterCompilationError(t *testing.T) {
 func TestRunCodeRejectsUnknownLanguagesAndEmptyPrograms(t *testing.T) {
 	a := &application{
 		config: config.Config{Server: config.Server{MaxBodyBytes: 1024}},
-		runner: newCodeRunnerClient(config.Runner{}, http.DefaultClient),
+		runner: newCodeRunnerClient(config.Runner{}, http.DefaultClient, slog.Default()),
 	}
 	for _, body := range []string{
 		`{"languageId":99,"sourceCode":"print(1)","stdin":""}`,
@@ -206,5 +208,39 @@ func TestRunCodeRejectsUnknownLanguagesAndEmptyPrograms(t *testing.T) {
 		if response.Code != http.StatusBadRequest {
 			t.Fatalf("expected 400, got %d: %s", response.Code, response.Body.String())
 		}
+	}
+}
+
+func TestRunCodeWarnsWhenCompiledArtifactCleanupFails(t *testing.T) {
+	requests := 0
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		switch requests {
+		case 1:
+			writeJSON(w, http.StatusOK, []map[string]any{{
+				"status": "Accepted", "files": map[string]string{"stdout": "", "stderr": ""}, "fileIds": map[string]string{"program": "compiled-program"},
+			}})
+		case 2:
+			writeJSON(w, http.StatusOK, []map[string]any{{
+				"status": "Accepted", "files": map[string]string{"stdout": "done", "stderr": ""},
+			}})
+		case 3:
+			http.Error(w, "cleanup unavailable", http.StatusServiceUnavailable)
+		default:
+			t.Fatalf("unexpected extra request: %s %s", r.Method, r.URL.String())
+		}
+	}))
+	defer upstream.Close()
+
+	var output bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&output, nil))
+	runner := newCodeRunnerClient(config.Runner{Endpoint: upstream.URL}, upstream.Client(), logger)
+	result, err := runner.Run(context.Background(), 4, "int main(void) { return 0; }", "")
+	if err != nil || result.Stdout != "done" {
+		t.Fatalf("run result = %#v, %v", result, err)
+	}
+	records := decodeApplicationLogs(t, output.String())
+	if len(records) != 1 || records[0]["msg"] != "code runner artifact cleanup failed" || records[0]["artifact_id"] != "compiled-program" {
+		t.Fatalf("cleanup failure was not logged: %v", records)
 	}
 }

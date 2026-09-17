@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,12 +12,14 @@ import (
 
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type application struct {
+	logger      *slog.Logger
 	models      data.Models
 	send        func(to, purpose, code string) error
 	config      config.Config
@@ -26,7 +28,15 @@ type application struct {
 	objects     objectstore.Store
 }
 
+func (a *application) applicationLogger() *slog.Logger {
+	if a.logger != nil {
+		return a.logger
+	}
+	return slog.Default()
+}
+
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	path := flag.String("config", os.Getenv("ZHIYA_SERVER_CONFIG"), "explicit configuration file; otherwise load config.yaml and optional config.local.yaml")
 	check := flag.Bool("check-config", false, "validate configuration and exit")
 	flag.Parse()
@@ -38,10 +48,13 @@ func main() {
 		cfg, err = config.Load(*path)
 	}
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("configuration loading failed", "error", err)
+		os.Exit(1)
 	}
+	logger = logging.New(os.Stderr, cfg.Logging)
+	slog.SetDefault(logger)
 	if *check {
-		log.Print("configuration is valid")
+		logger.Info("configuration is valid")
 		return
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -50,14 +63,16 @@ func main() {
 	defer cancel()
 	db, err := pgxpool.New(startup, cfg.Database.URL)
 	if err != nil {
-		log.Fatal("invalid database configuration")
+		logger.Error("invalid database configuration")
+		os.Exit(1)
 	}
 	defer db.Close()
 	send, err := mailer.New(cfg.SMTP, cfg.Development, data.VerificationTTL)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("mailer initialization failed", "error", err)
+		os.Exit(1)
 	}
-	app := &application{models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient)}
+	app := &application{logger: logger, models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient, logger)}
 	err = app.models.Initialize(startup)
 	if err == nil {
 		var objects objectstore.Store
@@ -71,7 +86,8 @@ func main() {
 	}
 	cancel()
 	if err != nil {
-		log.Fatal("service initialization failed: ", err)
+		logger.Error("service initialization failed", "error", err)
+		os.Exit(1)
 	}
 	server := &http.Server{
 		Addr:              cfg.Server.Listen,
@@ -80,6 +96,7 @@ func main() {
 		ReadTimeout:       config.Seconds(cfg.Server.ReadTimeoutSeconds),
 		WriteTimeout:      config.Seconds(cfg.Server.WriteTimeoutSeconds),
 		IdleTimeout:       config.Seconds(cfg.Server.IdleTimeoutSeconds),
+		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 	go func() {
 		ticker := time.NewTicker(config.Seconds(cfg.Server.CleanupIntervalSeconds))
@@ -87,30 +104,39 @@ func main() {
 		for {
 			select {
 			case <-ctx.Done():
+				logger.Info("server shutdown started")
 				shutdown, cancel := context.WithTimeout(context.Background(), config.Seconds(cfg.Server.ShutdownTimeoutSeconds))
 				defer cancel()
-				_ = server.Shutdown(shutdown)
+				if shutdownErr := server.Shutdown(shutdown); shutdownErr != nil {
+					logger.Error("server shutdown failed", "error", shutdownErr)
+				}
 				return
 			case <-ticker.C:
 				err := app.models.Tokens.CleanupExpired(ctx)
 				if err != nil {
-					log.Print("expired account data cleanup failed")
+					logger.Error("expired account data cleanup failed", "error", err)
 				}
 				uploads, cleanupErr := app.models.Materials.ExpiredUploads(ctx, time.Now())
 				if cleanupErr != nil {
-					log.Print("expired material upload cleanup failed")
+					logger.Error("expired material upload cleanup failed", "error", cleanupErr)
 					continue
 				}
 				for _, upload := range uploads {
-					if app.objects.Delete(ctx, upload.ObjectKey) == nil {
-						_ = app.models.Materials.RemoveUpload(ctx, upload.ID)
+					if deleteErr := app.objects.Delete(ctx, upload.ObjectKey); deleteErr != nil {
+						logger.Error("expired material object cleanup failed", "error", deleteErr, "upload_id", upload.ID)
+						continue
+					}
+					if removeErr := app.models.Materials.RemoveUpload(ctx, upload.ID); removeErr != nil {
+						logger.Error("expired material record cleanup failed", "error", removeErr, "upload_id", upload.ID)
 					}
 				}
 			}
 		}
 	}()
-	log.Printf("Zhiya server listening on %s", server.Addr)
+	logger.Info("server listening", "address", server.Addr)
 	if err = server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+		logger.Error("server stopped unexpectedly", "error", err)
+		os.Exit(1)
 	}
+	logger.Info("server stopped")
 }
