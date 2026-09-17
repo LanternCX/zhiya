@@ -13,7 +13,11 @@ export class APIError extends Error {
     message: string,
     public requestId = "",
   ) {
-    super(requestId ? `${message}（错误编号：${requestId}）` : message);
+    super(
+      status >= 500 && requestId
+        ? `${message}（错误编号：${requestId}）`
+        : message,
+    );
   }
 }
 
