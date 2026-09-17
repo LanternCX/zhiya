@@ -214,9 +214,14 @@ test("a student runs a model-created coding page and receives a review only when
   await stdin.evaluate((element) => {
     element.style.height = "240px";
   });
+  await expect
+    .poll(async () => {
+      const box = await page.locator(".coding-actions").boundingBox();
+      return box?.y ?? 0;
+    })
+    .toBeGreaterThan(actionsBox?.y ?? 0);
   const resizedStdinBox = await stdin.boundingBox();
   const movedActionsBox = await page.locator(".coding-actions").boundingBox();
-  expect(movedActionsBox?.y ?? 0).toBeGreaterThan(actionsBox?.y ?? 0);
   expect(
     (resizedStdinBox?.y ?? 0) + (resizedStdinBox?.height ?? 0),
   ).toBeLessThan(movedActionsBox?.y ?? 0);
