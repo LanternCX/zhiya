@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MessageResponse } from "../../components/ai-elements/message";
 import { Spinner } from "../../components/ui/spinner";
 import type { CodingExercise } from "../../domain/learning";
@@ -33,6 +33,8 @@ export default function CodingPage({
   const [ending, setEnding] = useState(false);
   const [actionError, setActionError] = useState("");
   const [localResult, setLocalResult] = useState<CodeRunResult | null>(null);
+  const stdinLabelRef = useRef<HTMLLabelElement>(null);
+  const stdinRef = useRef<HTMLTextAreaElement>(null);
   const ended = exercise.status === "ended";
   const result = localResult ?? exercise.result;
   const output = result
@@ -40,6 +42,21 @@ export default function CodingPage({
         .filter(Boolean)
         .join("\n")
     : "";
+
+  useLayoutEffect(() => {
+    const label = stdinLabelRef.current;
+    const textarea = stdinRef.current;
+    if (!label || !textarea) return;
+
+    const labelChromeHeight = label.offsetHeight - textarea.offsetHeight;
+    const observer = new ResizeObserver(() => {
+      label.style.minHeight = `${textarea.offsetHeight + labelChromeHeight}px`;
+    });
+    observer.observe(textarea);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <article className="coding-page" aria-label={`编程练习：${exercise.title}`}>
       <header>
@@ -71,9 +88,10 @@ export default function CodingPage({
         </header>
         <pre>{result ? output || "程序没有产生输出" : "运行代码后，结果会显示在这里"}</pre>
       </section>
-      <label>
+      <label ref={stdinLabelRef}>
         <span>标准输入（可选）</span>
         <textarea
+          ref={stdinRef}
           aria-label="标准输入"
           className="coding-stdin"
           value={exercise.stdin}

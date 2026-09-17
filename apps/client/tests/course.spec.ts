@@ -211,6 +211,15 @@ test("a student runs a model-created coding page and receives a review only when
   expect((stdinBox?.y ?? 0) + (stdinBox?.height ?? 0)).toBeLessThan(
     actionsBox?.y ?? 0,
   );
+  await stdin.evaluate((element) => {
+    element.style.height = "240px";
+  });
+  const resizedStdinBox = await stdin.boundingBox();
+  const movedActionsBox = await page.locator(".coding-actions").boundingBox();
+  expect(movedActionsBox?.y ?? 0).toBeGreaterThan(actionsBox?.y ?? 0);
+  expect(
+    (resizedStdinBox?.y ?? 0) + (resizedStdinBox?.height ?? 0),
+  ).toBeLessThan(movedActionsBox?.y ?? 0);
   const instructions = page.getByRole("region", { name: "题目说明" });
   const emphasisWeight = await instructions
     .getByText("修改程序", { exact: true })
