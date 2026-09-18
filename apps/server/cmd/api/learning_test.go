@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 )
@@ -117,7 +117,7 @@ func (a *testApp) learningRequest(c *http.Client, method, path string, body any,
 		}
 		return snapshot["state"].(map[string]any)
 	}
-	requestID := data.UUID()
+	requestID := identifier.New()
 	if err := wsjson.Write(context.Background(), conn, map[string]any{"type": "action", "requestId": requestID, "action": body}); err != nil {
 		a.t.Fatal(err)
 	}

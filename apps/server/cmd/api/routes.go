@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	appservice "github.com/LanternCX/zhiya/apps/server/internal/application"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
@@ -37,7 +37,7 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}/download", a.downloadCourseMaterial)
 	api.HandleFunc("DELETE /api/courses/{id}/materials/{materialId}", a.deleteCourseMaterial)
 	api.HandleFunc("GET /api/account-rules", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, data.AccountRules())
+		writeJSON(w, http.StatusOK, appservice.AccountRules())
 	})
 	api.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")

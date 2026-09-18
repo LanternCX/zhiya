@@ -5,59 +5,17 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/jackc/pgx/v5"
 )
 
-type Course struct {
-	ID             string          `json:"id"`
-	ConversationID string          `json:"conversationId"`
-	Title          string          `json:"title"`
-	Topic          string          `json:"topic"`
-	Cover          CourseCover     `json:"cover"`
-	Status         string          `json:"status"`
-	State          json.RawMessage `json:"state"`
-	Sections       []CourseSection `json:"sections"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-}
-
-type CourseSection struct {
-	ID            string               `json:"id"`
-	Title         string               `json:"title"`
-	Objective     string               `json:"objective"`
-	Position      int                  `json:"position"`
-	Status        string               `json:"status"`
-	Conversations []CourseConversation `json:"conversations"`
-}
-
-type CourseConversation struct {
-	ID        string          `json:"id"`
-	SectionID string          `json:"sectionId"`
-	Title     string          `json:"title"`
-	State     json.RawMessage `json:"state"`
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
-}
-
-type CourseCover struct {
-	Motif   string `json:"motif"`
-	Palette string `json:"palette"`
-	Label   string `json:"label"`
-}
-
-type OutlineSection struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Objective string `json:"objective"`
-	Status    string `json:"status"`
-}
-
-type OutlineReorganization struct {
-	ID           string               `json:"id"`
-	Sections     []OutlineSection     `json:"sections"`
-	Pending      []CourseConversation `json:"pending"`
-	PendingCount int                  `json:"pendingCount"`
-}
+type Course = domain.Course
+type CourseSection = domain.CourseSection
+type CourseConversation = domain.CourseConversation
+type CourseCover = domain.CourseCover
+type OutlineSection = domain.OutlineSection
+type OutlineReorganization = domain.OutlineReorganization
 
 type CourseModel struct{ db database }
 
@@ -114,7 +72,7 @@ func (m CourseModel) load(ctx context.Context, course Course) (Course, error) {
 }
 
 func (m CourseModel) Create(ctx context.Context, user, title, topic string, cover CourseCover) (Course, error) {
-	courseID := UUID()
+	courseID := identifier.New()
 	if _, err := m.db.Exec(ctx, `INSERT INTO courses(id,user_id,title,topic,cover_motif,cover_palette,cover_label) VALUES($1,$2,$3,$4,$5,$6,$7)`, courseID, user, title, topic, cover.Motif, cover.Palette, cover.Label); err != nil {
 		return Course{}, err
 	}
@@ -201,7 +159,7 @@ func (m CourseModel) replaceOutline(ctx context.Context, user, courseID string, 
 			used[id] = true
 		} else {
 			if !preserveNewIDs || id == "" {
-				id = UUID()
+				id = identifier.New()
 			}
 			if _, err := m.db.Exec(ctx, `INSERT INTO course_sections(id,course_id,title,objective,position,status) VALUES($1,$2,$3,$4,$5,$6)`, id, courseID, item.Title, item.Objective, index, status); err != nil {
 				return Course{}, err
@@ -236,7 +194,7 @@ func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, cours
 	for index := range outline {
 		section, ok := existing[outline[index].ID]
 		if !ok {
-			outline[index].ID = UUID()
+			outline[index].ID = identifier.New()
 		} else if outline[index].Status == "" {
 			outline[index].Status = section.Status
 		}
@@ -251,7 +209,7 @@ func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, cours
 	if _, err := m.db.Exec(ctx, `DELETE FROM course_outline_reorganizations WHERE course_id=$1`, courseID); err != nil {
 		return OutlineReorganization{}, err
 	}
-	id := UUID()
+	id := identifier.New()
 	if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_reorganizations(id,course_id,sections) VALUES($1,$2,$3)`, id, courseID, raw); err != nil {
 		return OutlineReorganization{}, err
 	}
@@ -264,6 +222,10 @@ func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, cours
 
 func (m CourseModel) GetOutlineReorganization(ctx context.Context, user, courseID string) (OutlineReorganization, error) {
 	return m.loadOutlineReorganization(ctx, user, courseID, true)
+}
+
+func (m CourseModel) InspectOutlineReorganization(ctx context.Context, user, courseID string) (OutlineReorganization, error) {
+	return m.loadOutlineReorganization(ctx, user, courseID, false)
 }
 
 func (m CourseModel) loadOutlineReorganization(ctx context.Context, user, courseID string, refresh bool) (OutlineReorganization, error) {
@@ -329,10 +291,10 @@ func (m CourseModel) AssignOutlineConversation(ctx context.Context, user, course
 		return Course{}, nil, err
 	}
 	if newSection != nil {
-		if len(sections) >= 100 {
-			return Course{}, nil, ValidationError("课程大纲最多包含 100 个小节")
+		if len(sections) >= domain.CourseOutlineMaxSections {
+			return Course{}, nil, ErrCourseOutlineLimit
 		}
-		newSection.ID = UUID()
+		newSection.ID = identifier.New()
 		newSection.Status = "archived"
 		sections = append(sections, *newSection)
 		sectionID = newSection.ID
@@ -346,7 +308,7 @@ func (m CourseModel) AssignOutlineConversation(ctx context.Context, user, course
 			found = found || section.ID == sectionID
 		}
 		if !found {
-			return Course{}, nil, ValidationError("目标课程小节无效")
+			return Course{}, nil, ErrOutlineTargetSectionNotFound
 		}
 	}
 	var queuedUpdatedAt, liveUpdatedAt time.Time
@@ -410,7 +372,7 @@ func (m CourseModel) CreateConversation(ctx context.Context, user, courseID, sec
 	if !exists {
 		return CourseConversation{}, ErrSectionNotFound
 	}
-	id := UUID()
+	id := identifier.New()
 	var result CourseConversation
 	err := m.db.QueryRow(ctx, `INSERT INTO course_conversations(id,course_id,section_id,title,state) VALUES($1,$2,$3,$4,$5)
 	 RETURNING id,section_id,title,state,created_at,updated_at`, id, courseID, sectionID, title, emptyCourseState).Scan(&result.ID, &result.SectionID, &result.Title, &result.State, &result.CreatedAt, &result.UpdatedAt)
