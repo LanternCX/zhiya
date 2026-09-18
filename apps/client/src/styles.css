@@ -825,6 +825,55 @@ body,
 .learning-surface .assistant-thinking {
   color: var(--brand-green);
 }
+.reasoning-live-summary {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  overflow: hidden;
+}
+.reasoning-live-status,
+.reasoning-live-separator {
+  flex: none;
+}
+.reasoning-live-status {
+  white-space: nowrap;
+}
+.reasoning-live-separator {
+  color: var(--muted);
+  opacity: 0.55;
+}
+.reasoning-live-preview {
+  position: relative;
+  height: 1.5em;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 0.2em,
+    black calc(100% - 0.2em),
+    transparent
+  );
+}
+.reasoning-live-line {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.learning-surface .assistant-reasoning-trigger {
+  gap: 10px;
+  font-size: clamp(14px, 2vw, 16px);
+}
+.learning-surface .assistant-reasoning-trigger > svg:first-child {
+  width: 20px;
+  height: 20px;
+}
 .secondary:hover,
 .theme-toggle:hover,
 .icon-button:hover,
