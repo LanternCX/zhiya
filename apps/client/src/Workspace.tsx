@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { useAccount } from "./features/account/useAccount";
 import AccountProfile from "./features/account/Profile";
 import Security from "./features/account/Security";
@@ -22,6 +28,14 @@ import type {
   StoredCourseConversation,
 } from "./domain/learning";
 import "./workspace.css";
+import { matchRoutes, useLocation, useNavigate } from "react-router";
+import {
+  conversationPath,
+  coursePath,
+  pageRoutes,
+  returnPath,
+  usePage,
+} from "./routes";
 
 const destinations: {
   id: IconName;
@@ -42,39 +56,83 @@ export default function Workspace({
   account: ReturnType<typeof useAccount>;
   feedback: ReactNode;
 }) {
+  const page = usePage();
+  const location = useLocation();
+  const routeNavigate = useNavigate();
+  const learningPage = [
+    "learning",
+    "course",
+    "conversation",
+    "new-conversation",
+  ].includes(page);
+  // Retain the route of the hidden classroom, matching its existing lifetime
+  // when visiting account pages or other workspace destinations.
+  const [retainedLearningLocation, retainLearningLocation] = useState(location);
+  const learningLocation = learningPage ? location : retainedLearningLocation;
+  const learningMatch = matchRoutes(pageRoutes, learningLocation)?.at(-1);
+  const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [memoryOpen, setMemoryOpen] = useState(false);
+  const memoryOpen = page === "learning-profile";
   const [editingMemory, setEditingMemory] = useState(true);
   const [endingMemory, setEndingMemory] = useState(false);
   const [onboarding, setOnboarding] = useState(true);
+  const [profileReady, setProfileReady] = useState(false);
+  const receiveOnboarding = useCallback((value: boolean) => {
+    setOnboarding(value);
+    setProfileReady(true);
+  }, []);
   const [learningContext, setLearningContext] = useState<{
     memory: string;
     model: ModelInfo | null;
   }>({ memory: "", model: null });
-  const [destination, setDestination] = useState(destinations[0]);
+  const destination =
+    destinations.find((item) => item.id === page) ?? destinations[0];
   const [courses, setCourses] = useState<StoredCourse[]>([]);
-  const [activeCourse, setActiveCourse] = useState<StoredCourse | null>(null);
-  const [courseLevel, setCourseLevel] = useState<"course" | "conversation">(
-    "course",
-  );
+  const storedCourse = courses.find((course) => course.id === courseId);
+  const conversation = storedCourse?.sections
+    ?.flatMap((section) => section.conversations)
+    .find((item) => item.id === conversationId);
+  const activeCourse = storedCourse
+    ? conversation
+      ? {
+          ...storedCourse,
+          conversationId: conversation.id,
+          state: conversation.state,
+        }
+      : storedCourse
+    : null;
+  const courseLevel =
+    learningMatch?.route.id === "course" ? "course" : "conversation";
   const [coursesReady, setCoursesReady] = useState(false);
-  const [courseRoomToken, setCourseRoomToken] = useState(0);
-  const [courseSessionMode, setCourseSessionMode] = useState<
-    "new" | "existing"
-  >("existing");
+  const courseRoomToken: string =
+    learningLocation.state?.roomKey ?? learningLocation.key;
+  const newSession = learningMatch?.route.id === "new-conversation";
   const [courseEntryRequest, setCourseEntryRequest] = useState<{
     id: number;
     text: string;
     materialNames: string[];
   } | null>(null);
   const [courseError, setCourseError] = useState("");
+  const routeError =
+    page === "not-found"
+      ? "页面不存在"
+      : learningPage && courseId && coursesReady
+        ? (!storedCourse
+            ? courseError || "课程不存在或无法访问"
+            : conversationId && !conversation
+              ? "学习对话不存在或无法访问"
+              : "")
+        : "";
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const onboardingExit = useRef<HTMLButtonElement>(null);
   const sectionConversationRequests = useRef(new Set<string>());
   const wasConfirming = useRef(false);
+  useEffect(() => {
+    if (learningPage) retainLearningLocation(location);
+  }, [learningPage, location]);
   useEffect(() => {
     if (!user) return;
     let current = true;
@@ -83,8 +141,6 @@ export default function Workspace({
       .then((next) => {
         if (!current) return;
         setCourses(next);
-        setActiveCourse(null);
-        setCourseLevel("course");
         setCourseError("");
       })
       .catch(() => current && setCourseError("暂时无法读取课程"))
@@ -93,6 +149,24 @@ export default function Workspace({
       current = false;
     };
   }, [user?.id]);
+  useEffect(() => {
+    if (!profileReady) return;
+    if (onboarding && page !== "onboarding") {
+      void routeNavigate(
+        `/onboarding?returnTo=${encodeURIComponent(location.pathname + location.search)}`,
+        { replace: true },
+      );
+    } else if (!onboarding && page === "onboarding") {
+      void routeNavigate(returnPath(location.search), { replace: true });
+    }
+  }, [
+    profileReady,
+    onboarding,
+    page,
+    location.pathname,
+    location.search,
+    routeNavigate,
+  ]);
   useEffect(() => {
     if (wasConfirming.current && !account.confirmation)
       (onboarding ? onboardingExit : trigger).current?.focus();
@@ -129,16 +203,17 @@ export default function Workspace({
     email: "更换邮箱",
     delete: "注销账号",
   };
-  const go = async (next: typeof destination) => {
-    if (await navigate("home")) {
-      setMemoryOpen(false);
-      setDestination(next);
-      if (next.id === "learning") {
-        setActiveCourse(null);
-        setCourseLevel("course");
-        setCourseRoomToken((value) => value + 1);
-      }
-    }
+  const go = (next: typeof destination) => {
+    void routeNavigate(next.id === "learning" ? "/learn" : `/${next.id}`);
+  };
+  const locateSession = (course: StoredCourse) => {
+    const pathname = course.conversationId
+      ? conversationPath(course.id, course.conversationId)
+      : `${coursePath(course.id)}/conversations/new`;
+    if (learningLocation.pathname === pathname) return;
+    const state = { roomKey: courseRoomToken };
+    if (learningPage) void routeNavigate(pathname, { replace: true, state });
+    else retainLearningLocation({ ...learningLocation, pathname, state });
   };
   const renameCourse = async (course: StoredCourse, title: string) => {
     try {
@@ -146,7 +221,6 @@ export default function Workspace({
       setCourses((all) =>
         all.map((item) => (item.id === updated.id ? updated : item)),
       );
-      if (activeCourse?.id === updated.id) setActiveCourse(updated);
       setCourseError("");
       return true;
     } catch {
@@ -167,6 +241,7 @@ export default function Workspace({
     }
   };
   const courseOpen =
+    learningPage &&
     view === "home" &&
     !memoryOpen &&
     destination.id === "learning" &&
@@ -186,13 +261,10 @@ export default function Workspace({
       conversationId: conversation.id,
       state: conversation.state,
     };
-    setActiveCourse(updated);
     setCourses((all) =>
       all.map((item) => (item.id === updated.id ? updated : item)),
     );
-    setCourseSessionMode("existing");
-    setCourseLevel("conversation");
-    setCourseRoomToken((value) => value + 1);
+    void routeNavigate(conversationPath(source.id, conversation.id));
   };
   const createSectionConversation = async (
     section: CourseSection,
@@ -248,7 +320,6 @@ export default function Workspace({
       setCourses((all) =>
         all.map((item) => (item.id === updated.id ? updated : item)),
       );
-      setActiveCourse(updated);
       setCourseError("");
       return true;
     } catch {
@@ -276,7 +347,7 @@ export default function Workspace({
               title={item.title}
               aria-label={item.title}
               aria-current={
-                view === "home" && !memoryOpen && destination.id === item.id
+                view === "home" && !memoryOpen && page !== "not-found" && destination.id === item.id
                   ? "page"
                   : undefined
               }
@@ -316,7 +387,7 @@ export default function Workspace({
             <button
               onClick={async () => {
                 setMenuOpen(false);
-                if (await navigate("home")) setMemoryOpen(true);
+                void routeNavigate("/learning-profile");
               }}
             >
               <Icon name="review" />
@@ -325,7 +396,7 @@ export default function Workspace({
             <button
               onClick={async () => {
                 setMenuOpen(false);
-                if (await navigate("profile")) setMemoryOpen(false);
+                void navigate("profile");
               }}
             >
               <Icon name="profile" />
@@ -334,7 +405,7 @@ export default function Workspace({
             <button
               onClick={async () => {
                 setMenuOpen(false);
-                if (await navigate("security")) setMemoryOpen(false);
+                void navigate("security");
               }}
             >
               <Icon name="shield" />
@@ -392,11 +463,10 @@ export default function Workspace({
               onClick={() => {
                 if (courseOpen) {
                   if (courseLevel === "conversation") {
-                    setCourseLevel("course");
+                    void routeNavigate(coursePath(activeCourse!.id));
                   } else {
-                    setActiveCourse(null);
+                    void routeNavigate("/learn");
                   }
-                  setCourseRoomToken((value) => value + 1);
                 } else if (memoryOpen && !editingMemory) {
                   setEndingMemory(true);
                 } else {
@@ -414,8 +484,8 @@ export default function Workspace({
           <span>
             {courseOpen
               ? courseLevel === "conversation"
-                  ? activeSection?.title ?? activeCourse?.title
-                  : activeCourse?.title
+                ? (activeSection?.title ?? activeCourse?.title)
+                : activeCourse?.title
               : memoryOpen
                 ? "学习档案"
                 : view === "home"
@@ -449,97 +519,115 @@ export default function Workspace({
             setEditing={setEditingMemory}
             ending={endingMemory}
             setEnding={setEndingMemory}
-            onOnboardingChange={setOnboarding}
+            onOnboardingChange={receiveOnboarding}
             onContextChange={setLearningContext}
           />
-          {!onboarding && !memoryOpen && (
-            <section
-              className="course-surface"
-              data-hidden={view !== "home" || destination.id !== "learning"}
-              aria-label="学习空间"
-            >
-              {activeCourse && courseLevel === "course" && (
-                <CourseOverview
-                  course={activeCourse}
-                  courseError={courseError}
-                  onOpenSection={(section: CourseSection) => {
-                    const latest = [...section.conversations].sort((a, b) =>
-                      b.updatedAt.localeCompare(a.updatedAt),
-                    )[0];
-                    if (latest) openConversation(latest);
-                    else {
-                      void createSectionConversation(
-                        section,
-                        `请开始${section.title}的学习。`,
-                        [],
-                      ).catch(() => undefined);
-                    }
-                  }}
-                  onOpenConversation={(conversation) =>
-                    openConversation(conversation)
-                  }
-                  onCreateConversation={(section, request, materialNames) =>
-                    createSectionConversation(section, request, materialNames)
-                  }
-                  onDeleteConversation={(section, conversation) =>
-                    removeSectionConversation(section, conversation)
-                  }
-                  onStartLearning={(text, materialNames) => {
-                    setCourseSessionMode("new");
-                    setCourseLevel("conversation");
-                    setCourseRoomToken((value) => value + 1);
-                    setCourseEntryRequest({
-                      id: Date.now(),
-                      text,
-                      materialNames,
-                    });
-                  }}
-                />
-              )}
-              {(!activeCourse || courseLevel === "conversation") && (
-                <CourseRoom
-                  info={learningContext.model}
-                  memory={learningContext.memory}
-                  courses={courses}
-                  activeCourse={activeCourse}
-                  coursesReady={coursesReady}
-                  roomToken={courseRoomToken}
-                  newSession={courseSessionMode === "new"}
-                  entryRequest={courseEntryRequest}
-                  libraryError={courseError}
-                  onEntryRequestHandled={(id) => {
-                    setCourseEntryRequest((current) =>
-                      current?.id === id ? null : current,
-                    );
-                  }}
-                  onOpenCourse={(course) => {
-                    setActiveCourse(course);
-                    setCourseLevel("course");
-                  }}
-                  onRenameCourse={renameCourse}
-                  onDeleteCourse={removeCourse}
-                  onCourseCreated={(course) => {
-                    setCourses((all) => [
-                      course,
-                      ...all.filter((item) => item.id !== course.id),
-                    ]);
-                    setActiveCourse(course);
-                    setCourseLevel("conversation");
-                  }}
-                  onCourseUpdated={(course) => {
-                    setCourses((all) =>
-                      all.map((item) =>
-                        item.id === course.id ? course : item,
-                      ),
-                    );
-                    setActiveCourse((current) =>
-                      current?.id === course.id ? course : current,
-                    );
-                  }}
-                />
-              )}
+          {!onboarding && routeError && (
+            <section className="workspace-empty">
+              <h1>{routeError}</h1>
+              <button
+                className="text-button"
+                onClick={() => void routeNavigate("/learn")}
+              >
+                返回学习
+              </button>
             </section>
           )}
+          {!onboarding && learningPage && courseId && !coursesReady && (
+            <p role="status">正在读取课程…</p>
+          )}
+          {!onboarding &&
+            !memoryOpen &&
+            !routeError &&
+            (!courseId || coursesReady) && (
+              <section
+                className="course-surface"
+                data-hidden={view !== "home" || destination.id !== "learning"}
+                aria-label="学习空间"
+              >
+                {activeCourse && courseLevel === "course" && (
+                  <CourseOverview
+                    course={activeCourse}
+                    courseError={courseError}
+                    onOpenSection={(section: CourseSection) => {
+                      const latest = [...section.conversations].sort((a, b) =>
+                        b.updatedAt.localeCompare(a.updatedAt),
+                      )[0];
+                      if (latest) openConversation(latest);
+                      else {
+                        void createSectionConversation(
+                          section,
+                          `请开始${section.title}的学习。`,
+                          [],
+                        ).catch(() => undefined);
+                      }
+                    }}
+                    onOpenConversation={(conversation) =>
+                      openConversation(conversation)
+                    }
+                    onCreateConversation={(section, request, materialNames) =>
+                      createSectionConversation(section, request, materialNames)
+                    }
+                    onDeleteConversation={(section, conversation) =>
+                      removeSectionConversation(section, conversation)
+                    }
+                    onStartLearning={(text, materialNames) => {
+                      void routeNavigate(
+                        `${coursePath(activeCourse.id)}/conversations/new`,
+                      );
+                      setCourseEntryRequest({
+                        id: Date.now(),
+                        text,
+                        materialNames,
+                      });
+                    }}
+                  />
+                )}
+                {(!activeCourse || courseLevel === "conversation") && (
+                  <CourseRoom
+                    key={courseRoomToken}
+                    info={learningContext.model}
+                    memory={learningContext.memory}
+                    courses={courses}
+                    activeCourse={activeCourse}
+                    coursesReady={coursesReady}
+                    newSession={newSession}
+                    entryRequest={courseEntryRequest}
+                    libraryError={courseError}
+                    onEntryRequestHandled={(id) => {
+                      setCourseEntryRequest((current) =>
+                        current?.id === id ? null : current,
+                      );
+                    }}
+                    onOpenCourse={(course) => {
+                      void routeNavigate(coursePath(course.id));
+                    }}
+                    onRenameCourse={renameCourse}
+                    onDeleteCourse={removeCourse}
+                    onCourseCreated={(course) => {
+                      setCourses((all) => [
+                        course,
+                        ...all.filter((item) => item.id !== course.id),
+                      ]);
+                      locateSession(course);
+                    }}
+                    onCourseUpdated={(course) => {
+                      setCourses((all) =>
+                        all.map((item) =>
+                          item.id === course.id ? course : item,
+                        ),
+                      );
+                      if (
+                        course.conversationId &&
+                        course.id === courseId &&
+                        courseLevel === "conversation"
+                      )
+                        locateSession(course);
+                    }}
+                  />
+                )}
+              </section>
+            )}
           {!onboarding &&
             !memoryOpen &&
             view === "home" &&

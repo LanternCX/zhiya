@@ -1,4 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import "./course.css";
 import type { CourseSession } from "../../pi";
 import { createCourseSession } from "./runtime";
@@ -113,7 +120,6 @@ export default function CourseRoom({
   courses,
   activeCourse,
   coursesReady,
-  roomToken,
   newSession,
   entryRequest,
   libraryError,
@@ -129,7 +135,6 @@ export default function CourseRoom({
   courses: StoredCourse[];
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
-  roomToken: number;
   newSession: boolean;
   entryRequest: { id: number; text: string; materialNames: string[] } | null;
   libraryError: string;
@@ -140,6 +145,18 @@ export default function CourseRoom({
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
 }) {
+  // Long-running sessions must notify the current page, not the route that
+  // happened to be visible when generation started.
+  const courseCallbacks = useRef<{
+    onCourseCreated: typeof onCourseCreated;
+    onCourseUpdated: typeof onCourseUpdated;
+  } | null>(null);
+  useLayoutEffect(() => {
+    courseCallbacks.current = { onCourseCreated, onCourseUpdated };
+    return () => {
+      courseCallbacks.current = null;
+    };
+  }, [onCourseCreated, onCourseUpdated]);
   const initialState =
     activeCourse && newSession
       ? emptyCourseState()
@@ -237,8 +254,7 @@ export default function CourseRoom({
       const currentConversation = updated.sections
         ?.flatMap((section) => section.conversations)
         .find(
-          (conversation) =>
-            conversation.id === boundConversationId.current,
+          (conversation) => conversation.id === boundConversationId.current,
         );
       const next = currentConversation
         ? {
@@ -249,7 +265,7 @@ export default function CourseRoom({
         : updated;
       sessionCourse.current = next;
       setCourse(next);
-      onCourseUpdated(next);
+      courseCallbacks.current?.onCourseUpdated(next);
       return next;
     };
     const current = createCourseSession(
@@ -291,7 +307,7 @@ export default function CourseRoom({
           boundConversationId.current = null;
           sessionCourse.current = created;
           setCourse(created);
-          onCourseCreated(created);
+          courseCallbacks.current?.onCourseCreated(created);
           const initialMaterials = pendingInitialMaterials.current;
           pendingInitialMaterials.current = [];
           if (initialMaterials.length) {
@@ -321,7 +337,7 @@ export default function CourseRoom({
           const next = { ...updated, state: sessionCourse.current.state };
           sessionCourse.current = next;
           setCourse(next);
-          onCourseUpdated(next);
+          courseCallbacks.current?.onCourseUpdated(next);
           return next;
         },
         setOutline: async (sections, classify) => {
@@ -389,7 +405,7 @@ export default function CourseRoom({
           };
           sessionCourse.current = updated;
           setCourse(updated);
-          onCourseUpdated(updated);
+          courseCallbacks.current?.onCourseUpdated(updated);
           return conversation;
         },
         listConversations: async () =>
@@ -419,13 +435,7 @@ export default function CourseRoom({
       current.stop();
       if (session.current === current) session.current = null;
     };
-  }, [
-    info?.available,
-    info?.id,
-    memory,
-    roomToken,
-    coursesReady,
-  ]);
+  }, [info?.available, info?.id, memory, coursesReady]);
 
   useEffect(() => {
     if (
@@ -454,7 +464,7 @@ export default function CourseRoom({
     };
     sessionCourse.current = updated;
     latestSnapshot.current = { course, state };
-    onCourseUpdated(updated);
+    courseCallbacks.current?.onCourseUpdated(updated);
     const timer = window.setTimeout(() => {
       pendingSave.current = { course, state };
       void flushCourseSave();
@@ -510,10 +520,7 @@ export default function CourseRoom({
   useEffect(() => {
     if (!entryRequest) return;
     const timer = window.setTimeout(() => {
-      if (
-        !session.current ||
-        startedEntryRequest.current === entryRequest.id
-      )
+      if (!session.current || startedEntryRequest.current === entryRequest.id)
         return;
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
@@ -728,7 +735,9 @@ export default function CourseRoom({
                     return result;
                   } catch (error) {
                     const message =
-                      error instanceof Error ? error.message : "代码暂时无法运行";
+                      error instanceof Error
+                        ? error.message
+                        : "代码暂时无法运行";
                     setError(message);
                     throw new Error(message);
                   }
