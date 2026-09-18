@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
 )
 
 func (a *application) protect(next http.Handler) http.Handler {
@@ -48,7 +47,7 @@ func (a *application) protect(next http.Handler) http.Handler {
 			}
 			if strings.HasPrefix(r.URL.Path, "/api/auth/") || r.Method != "GET" {
 				ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-				if err := a.models.Tokens.Limit(r.Context(), "ip:"+ip, a.config.Account.IPLimit); err != nil {
+				if err := a.accountService().LimitIP(r.Context(), ip); err != nil {
 					a.respondError(w, err)
 					return
 				}
@@ -63,26 +62,4 @@ func sessionToken(r *http.Request) string {
 		return ""
 	}
 	return c.Value
-}
-
-// Authentication and mutation share a transaction so revocation cannot race a write.
-func (a *application) withUser(r *http.Request, mode data.TransactionMode, action func(data.Models, data.User) error) error {
-	return a.models.Transaction(r.Context(), mode, func(models data.Models) error {
-		token := sessionToken(r)
-		if token == "" {
-			return data.ErrInvalidSession
-		}
-		u, err := models.Users.GetBySession(r.Context(), token, r.Header.Get("X-Zhiya-User"))
-		if err != nil {
-			return err
-		}
-		return action(models, u)
-	})
-}
-func (a *application) emailInput(r *http.Request, email, prefix string, max int) (string, error) {
-	email, err := data.NormalizeEmail(email)
-	if err != nil {
-		return "", err
-	}
-	return email, a.models.Tokens.Limit(r.Context(), prefix+email, max)
 }

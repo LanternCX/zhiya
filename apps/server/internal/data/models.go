@@ -27,11 +27,9 @@ var (
 	ErrEmailInUse                    = errors.New("该邮箱无法使用，请换一个邮箱")
 	ErrRateLimited                   = errors.New("操作太频繁，请稍后重试")
 	ErrConversationBusy              = errors.New("会话正在处理其他操作，请重试")
+	ErrCourseOutlineLimit            = errors.New("course outline section limit reached")
+	ErrOutlineTargetSectionNotFound  = errors.New("outline target section not found")
 )
-
-type ValidationError string
-
-func (e ValidationError) Error() string { return string(e) }
 
 type database interface {
 	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)

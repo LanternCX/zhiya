@@ -10,10 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	appservice "github.com/LanternCX/zhiya/apps/server/internal/application"
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
+	"github.com/LanternCX/zhiya/apps/server/internal/modelproxy"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -26,6 +29,10 @@ type application struct {
 	learningHub *learningHub
 	runner      codeRunner
 	objects     objectstore.Store
+	accounts    *appservice.AccountService
+	model       *modelproxy.Client
+	courses     *appservice.CourseService
+	learning    *appservice.LearningService
 }
 
 func (a *application) applicationLogger() *slog.Logger {
@@ -33,6 +40,34 @@ func (a *application) applicationLogger() *slog.Logger {
 		return a.logger
 	}
 	return slog.Default()
+}
+
+func (a *application) accountService() *appservice.AccountService {
+	if a.accounts != nil {
+		return a.accounts
+	}
+	return appservice.NewAccountService(a.models, a.config.Account, a.send)
+}
+
+func (a *application) modelClient() *modelproxy.Client {
+	if a.model != nil {
+		return a.model
+	}
+	return modelproxy.New(a.config.Model)
+}
+
+func (a *application) courseService() *appservice.CourseService {
+	if a.courses != nil {
+		return a.courses
+	}
+	return appservice.NewCourseService(a.models, a.objects, a.config.Server.MaxBodyBytes, a.config.Storage.URLTTLSeconds)
+}
+
+func (a *application) learningService() *appservice.LearningService {
+	if a.learning != nil {
+		return a.learning
+	}
+	return appservice.NewLearningService(a.models)
 }
 
 func main() {
@@ -67,12 +102,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
-	send, err := mailer.New(cfg.SMTP, cfg.Development, data.VerificationTTL)
+	send, err := mailer.New(cfg.SMTP, cfg.Development, domain.VerificationTTL)
 	if err != nil {
 		logger.Error("mailer initialization failed", "error", err)
 		os.Exit(1)
 	}
-	app := &application{logger: logger, models: data.NewModels(db, cfg.Account), send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient, logger)}
+	models := data.NewModels(db, cfg.Account)
+	app := &application{logger: logger, models: models, send: send, config: cfg, learningHub: newLearningHub(), runner: newCodeRunnerClient(cfg.Runner, http.DefaultClient, logger), accounts: appservice.NewAccountService(models, cfg.Account, send), model: modelproxy.New(cfg.Model), learning: appservice.NewLearningService(models)}
 	err = app.models.Initialize(startup)
 	if err == nil {
 		var objects objectstore.Store
@@ -112,23 +148,15 @@ func main() {
 				}
 				return
 			case <-ticker.C:
-				err := app.models.Tokens.CleanupExpired(ctx)
+				err := app.accountService().CleanupExpired(ctx)
 				if err != nil {
 					logger.Error("expired account data cleanup failed", "error", err)
 				}
-				uploads, cleanupErr := app.models.Materials.ExpiredUploads(ctx, time.Now())
+				cleanupErr := app.courseService().CleanupExpired(ctx, time.Now(), func(message string, err error, values ...any) {
+					logger.Error(message, append([]any{"error", err}, values...)...)
+				})
 				if cleanupErr != nil {
 					logger.Error("expired material upload cleanup failed", "error", cleanupErr)
-					continue
-				}
-				for _, upload := range uploads {
-					if deleteErr := app.objects.Delete(ctx, upload.ObjectKey); deleteErr != nil {
-						logger.Error("expired material object cleanup failed", "error", deleteErr, "upload_id", upload.ID)
-						continue
-					}
-					if removeErr := app.models.Materials.RemoveUpload(ctx, upload.ID); removeErr != nil {
-						logger.Error("expired material record cleanup failed", "error", removeErr, "upload_id", upload.ID)
-					}
 				}
 			}
 		}
