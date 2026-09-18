@@ -1,6 +1,7 @@
 import {
   Reasoning,
   ReasoningContent,
+  ReasoningLiveSummary,
   ReasoningTrigger,
 } from "../../components/ai-elements/reasoning";
 import {
@@ -11,29 +12,35 @@ import {
 import { Shimmer } from "../../components/ai-elements/shimmer";
 import { BrainIcon } from "lucide-react";
 import type { AssistantOutput } from "../../domain/learning";
+import { useElapsedSeconds } from "../../lib/use-elapsed-seconds";
 
 export default function AssistantResponse({
   output,
   active,
   stopped = false,
+  thinkingLabel,
 }: {
   output: AssistantOutput;
   active: boolean;
   stopped?: boolean;
+  thinkingLabel: string;
 }) {
+  const elapsed = useElapsedSeconds(active);
+
   return (
     <div className="ai-elements w-full">
       {output.reasoning ? (
-        <Reasoning isStreaming={output.isReasoning}>
+        <Reasoning duration={elapsed} isStreaming={output.isReasoning}>
           <ReasoningTrigger
-            className="assistant-thinking"
+            className="assistant-thinking assistant-reasoning-trigger"
             getThinkingMessage={(streaming, seconds) =>
               streaming ? (
-                <Shimmer duration={1}>正在思考…</Shimmer>
+                <ReasoningLiveSummary
+                  status={`${thinkingLabel} · ${seconds ?? 0} 秒`}
+                  preview={output.reasoning}
+                />
               ) : (
-                <span>
-                  {seconds === undefined ? "已思考" : `已思考 ${seconds} 秒`}
-                </span>
+                <span>思路已整理</span>
               )
             }
           />
@@ -52,7 +59,9 @@ export default function AssistantResponse({
           {stopped ? (
             <span>已停止</span>
           ) : (
-            <Shimmer duration={1}>思考中</Shimmer>
+            <Shimmer duration={1}>
+              {`${thinkingLabel} · ${elapsed ?? 0} 秒`}
+            </Shimmer>
           )}
         </div>
       ) : null}

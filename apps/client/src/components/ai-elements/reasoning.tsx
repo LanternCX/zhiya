@@ -7,11 +7,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useElapsedSeconds } from "@/lib/use-elapsed-seconds";
 import { cjk } from "@streamdown/cjk";
 import { code } from "./code-theme";
 import { math } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ComponentProps, ReactNode } from "react";
 import {
   createContext,
@@ -52,9 +54,6 @@ export type ReasoningProps = ComponentProps<typeof Collapsible> & {
   duration?: number;
 };
 
-const AUTO_CLOSE_DELAY = 1000;
-const MS_IN_S = 1000;
-
 export const Reasoning = memo(
   ({
     className,
@@ -66,71 +65,24 @@ export const Reasoning = memo(
     children,
     ...props
   }: ReasoningProps) => {
-    const resolvedDefaultOpen = defaultOpen ?? isStreaming;
-    // Track if defaultOpen was explicitly set to false (to prevent auto-open)
-    const isExplicitlyClosed = defaultOpen === false;
-
     const [isOpen, setIsOpen] = useControllableState<boolean>({
-      defaultProp: resolvedDefaultOpen,
+      defaultProp: defaultOpen ?? false,
       onChange: onOpenChange,
       prop: open,
     });
-    const [duration, setDuration] = useControllableState<number | undefined>({
-      defaultProp: undefined,
-      prop: durationProp,
-    });
-
-    const hasEverStreamedRef = useRef(isStreaming);
-    const [hasAutoClosed, setHasAutoClosed] = useState(false);
-    const startTimeRef = useRef<number | null>(null);
-
-    // Track when streaming starts and compute duration
-    useEffect(() => {
-      if (isStreaming) {
-        hasEverStreamedRef.current = true;
-        if (startTimeRef.current === null) {
-          startTimeRef.current = Date.now();
-        }
-      } else if (startTimeRef.current !== null) {
-        setDuration(Math.ceil((Date.now() - startTimeRef.current) / MS_IN_S));
-        startTimeRef.current = null;
-      }
-    }, [isStreaming, setDuration]);
-
-    // Auto-open when streaming starts (unless explicitly closed)
-    useEffect(() => {
-      if (isStreaming && !isOpen && !isExplicitlyClosed) {
-        setIsOpen(true);
-      }
-    }, [isStreaming, isOpen, setIsOpen, isExplicitlyClosed]);
-
-    // Auto-close when streaming ends (once only, and only if it ever streamed)
-    useEffect(() => {
-      if (
-        hasEverStreamedRef.current &&
-        !isStreaming &&
-        isOpen &&
-        !hasAutoClosed
-      ) {
-        const timer = setTimeout(() => {
-          setIsOpen(false);
-          setHasAutoClosed(true);
-        }, AUTO_CLOSE_DELAY);
-
-        return () => clearTimeout(timer);
-      }
-    }, [isStreaming, isOpen, setIsOpen, hasAutoClosed]);
+    const measuredDuration = useElapsedSeconds(isStreaming);
+    const duration = durationProp ?? measuredDuration;
 
     const handleOpenChange = useCallback(
       (newOpen: boolean) => {
         setIsOpen(newOpen);
       },
-      [setIsOpen]
+      [setIsOpen],
     );
 
     const contextValue = useMemo(
       () => ({ duration, isOpen, isStreaming, setIsOpen }),
-      [duration, isOpen, isStreaming, setIsOpen]
+      [duration, isOpen, isStreaming, setIsOpen],
     );
 
     return (
@@ -154,14 +106,121 @@ export type ReasoningTriggerProps = ComponentProps<
   getThinkingMessage?: (isStreaming: boolean, duration?: number) => ReactNode;
 };
 
+const REASONING_LINE_LENGTH = 36;
+const REASONING_FIRST_BATCH_LENGTH = 12;
+const REASONING_LINE_INTERVAL = 350;
+const REASONING_BOUNDARIES = new Set([
+  "。",
+  "！",
+  "？",
+  "；",
+  ".",
+  "!",
+  "?",
+  ";",
+  "\n",
+]);
+
+function reasoningLine(value: string) {
+  const plainText = value
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^\s*(?:#{1,6}|[-+*>])\s+/gm, "")
+    .replace(/[*_~`]/g, "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+  const characters = Array.from(plainText);
+  const completed: string[] = [];
+  let start = 0;
+  for (let index = 0; index < characters.length; index += 1) {
+    if (!REASONING_BOUNDARIES.has(characters[index])) continue;
+    const line = characters.slice(start, index + 1).join("").trim();
+    if (line) completed.push(line);
+    start = index + 1;
+  }
+  const trailing = characters.slice(start);
+  const completeBatches = Math.floor(trailing.length / REASONING_LINE_LENGTH);
+  if (completeBatches > 0) {
+    const batchStart = (completeBatches - 1) * REASONING_LINE_LENGTH;
+    return trailing
+      .slice(batchStart, batchStart + REASONING_LINE_LENGTH)
+      .join("")
+      .trim();
+  }
+  if (completed.length > 0) return completed.at(-1) ?? "";
+  if (trailing.length >= REASONING_FIRST_BATCH_LENGTH)
+    return `${trailing.slice(0, REASONING_FIRST_BATCH_LENGTH).join("")}…`;
+  return "";
+}
+
+export const ReasoningLiveSummary = memo(
+  ({ status, preview }: { status: string; preview?: string }) => {
+    const { isOpen } = useReasoning();
+    const reducedMotion = useReducedMotion();
+    const candidate = useMemo(() => reasoningLine(preview ?? ""), [preview]);
+    const [displayedLine, setDisplayedLine] = useState(candidate);
+    const lastUpdate = useRef(candidate ? Date.now() : 0);
+
+    useEffect(() => {
+      if (!candidate || candidate === displayedLine) return;
+      const remaining = Math.max(
+        0,
+        REASONING_LINE_INTERVAL - (Date.now() - lastUpdate.current),
+      );
+      const timer = window.setTimeout(() => {
+        setDisplayedLine(candidate);
+        lastUpdate.current = Date.now();
+      }, remaining);
+      return () => window.clearTimeout(timer);
+    }, [candidate, displayedLine]);
+
+    return (
+      <span className="reasoning-live-summary">
+        <Shimmer as="span" className="reasoning-live-status" duration={1}>
+          {status}
+        </Shimmer>
+        {displayedLine && !isOpen ? (
+          <>
+            <span className="reasoning-live-separator" aria-hidden="true">
+              ｜
+            </span>
+            <span className="reasoning-live-preview" aria-hidden="true">
+              <AnimatePresence initial={false} mode="sync">
+                <motion.span
+                  key={displayedLine}
+                  className="reasoning-live-line"
+                  initial={
+                    reducedMotion ? false : { opacity: 0, y: "100%" }
+                  }
+                  animate={{ opacity: 1, y: "0%" }}
+                  exit={
+                    reducedMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, y: "-100%" }
+                  }
+                  transition={{ duration: reducedMotion ? 0 : 0.18 }}
+                >
+                  {displayedLine}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+          </>
+        ) : null}
+      </span>
+    );
+  },
+);
+
 const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
-  if (isStreaming || duration === 0) {
-    return <Shimmer duration={1}>Thinking...</Shimmer>;
+  if (isStreaming) {
+    return (
+      <Shimmer duration={1}>
+        {`Thinking · ${duration ?? 0}s`}
+      </Shimmer>
+    );
   }
-  if (duration === undefined) {
-    return <p>Thought for a few seconds</p>;
-  }
-  return <p>Thought for {duration} seconds</p>;
+  return <p>Thought completed</p>;
 };
 
 export const ReasoningTrigger = memo(
@@ -224,3 +283,4 @@ export const ReasoningContent = memo(
 Reasoning.displayName = "Reasoning";
 ReasoningTrigger.displayName = "ReasoningTrigger";
 ReasoningContent.displayName = "ReasoningContent";
+ReasoningLiveSummary.displayName = "ReasoningLiveSummary";

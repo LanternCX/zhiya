@@ -15,6 +15,7 @@ import { MessageResponse } from "../../components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
+  ReasoningLiveSummary,
   ReasoningTrigger,
 } from "../../components/ai-elements/reasoning";
 import { Shimmer } from "../../components/ai-elements/shimmer";
@@ -34,6 +35,7 @@ import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
 import { courseMaterialAttachments } from "./course-composer";
+import { useElapsedSeconds } from "../../lib/use-elapsed-seconds";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -75,17 +77,28 @@ function Activity({ activity }: { activity: CourseActivity | null }) {
           className="course-thinking-trigger"
           getThinkingMessage={(streaming, seconds) =>
             streaming ? (
-              <Shimmer className="course-thinking-shimmer" duration={1}>
-                正在思考教学节奏…
-              </Shimmer>
+              <ReasoningLiveSummary
+                status={`正在组织本次讲解… · ${seconds ?? 0} 秒`}
+                preview={activity.text}
+              />
             ) : (
-              <span>{seconds ? `已思考 ${seconds} 秒` : "已完成思考"}</span>
+              <span>讲解思路已整理</span>
             )
           }
         />
         {activity.text && <ReasoningContent>{activity.text}</ReasoningContent>}
       </Reasoning>
     );
+  return <ToolActivity activity={activity} />;
+}
+
+function ToolActivity({
+  activity,
+}: {
+  activity: Extract<CourseActivity, { kind: "tool" }>;
+}) {
+  const elapsed = useElapsedSeconds(activity.status === "running");
+
   return (
     <div
       className="course-activity course-tool-activity"
@@ -95,7 +108,9 @@ function Activity({ activity }: { activity: CourseActivity | null }) {
       {activity.status === "running" && <Spinner />}
       <span className="course-tool-mark" aria-hidden="true" />
       {activity.status === "running" ? (
-        <Shimmer duration={1}>{`正在${activity.label}`}</Shimmer>
+        <Shimmer duration={1}>
+          {`正在${activity.label} · ${elapsed ?? 0} 秒`}
+        </Shimmer>
       ) : (
         <span>
           {activity.status === "error"

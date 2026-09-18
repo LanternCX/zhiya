@@ -753,7 +753,11 @@ test("teacher markdown renders before the model stream finishes", async ({
         }),
       );
       const encoder = new TextEncoder();
-      const event = (content: string, finishReason: string | null = null) =>
+      const event = (
+        content: string,
+        finishReason: string | null = null,
+        reasoningContent = "",
+      ) =>
         `data: ${JSON.stringify({
           id: "streaming-teacher",
           object: "chat.completion.chunk",
@@ -762,7 +766,13 @@ test("teacher markdown renders before the model stream finishes", async ({
           choices: [
             {
               index: 0,
-              delta: { role: "assistant", content },
+              delta: {
+                role: "assistant",
+                content,
+                ...(reasoningContent
+                  ? { reasoning_content: reasoningContent }
+                  : {}),
+              },
               finish_reason: finishReason,
             },
           ],
@@ -772,8 +782,32 @@ test("teacher markdown renders before the model stream finishes", async ({
           start(controller) {
             controller.enqueue(
               encoder.encode(
-                event("# 流式标题\n\n第一段\n\n```js\nconst answer = 42;\n```"),
+                event(
+                  "# 流式标题\n\n第一段\n\n```js\nconst answer = 42;\n```",
+                  null,
+                  "先核对学习目标，再组织讲解顺序。",
+                ),
               ),
+            );
+            window.addEventListener(
+              "continue-teacher-reasoning-partial",
+              () => {
+                controller.enqueue(
+                  encoder.encode(event("", null, "接着选择")),
+                );
+              },
+              { once: true },
+            );
+            window.addEventListener(
+              "continue-teacher-reasoning",
+              () => {
+                controller.enqueue(
+                  encoder.encode(
+                    event("", null, "一个容易验证的例子。"),
+                  ),
+                );
+              },
+              { once: true },
             );
             window.addEventListener(
               "finish-teacher-stream",
@@ -799,7 +833,7 @@ test("teacher markdown renders before the model stream finishes", async ({
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect(
-    page.getByText("正在思考教学节奏…", { exact: true }),
+    page.getByText(/正在组织本次讲解… · \d+ 秒/),
   ).toBeVisible({
     timeout: 500,
   });
@@ -808,6 +842,35 @@ test("teacher markdown renders before the model stream finishes", async ({
   );
 
   await expect(page.getByRole("heading", { name: "流式标题" })).toBeVisible();
+  const reasoningTrigger = page.getByRole("button", {
+    name: /正在组织本次讲解/,
+  });
+  await expect(reasoningTrigger).toHaveAttribute("aria-expanded", "false");
+  const livePreview = reasoningTrigger.locator(".reasoning-live-preview");
+  await expect(livePreview).toHaveText("先核对学习目标，再组织讲解顺序。");
+  await expect(livePreview).toHaveCSS("white-space", "nowrap");
+  await expect(livePreview).toHaveCSS("overflow-x", "hidden");
+  await expect(livePreview).toHaveCSS("overflow-y", "hidden");
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("continue-teacher-reasoning-partial")),
+  );
+  await page.waitForTimeout(400);
+  await expect(livePreview).toHaveText("先核对学习目标，再组织讲解顺序。");
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("continue-teacher-reasoning")),
+  );
+  await expect(livePreview).toHaveText(
+    "接着选择一个容易验证的例子。",
+  );
+  const reasoningContent = reasoningTrigger
+    .locator("xpath=..")
+    .locator('[data-slot="collapsible-content"]');
+  await expect(reasoningContent).not.toBeVisible();
+  await reasoningTrigger.click();
+  await expect(livePreview).toHaveCount(0);
+  await expect(reasoningContent).toContainText(
+    "先核对学习目标，再组织讲解顺序。",
+  );
   await expect(page.getByText("第一段", { exact: true })).toBeVisible();
   const codeBlock = page.locator('[data-streamdown="code-block"]');
   const codeActions = page.locator('[data-streamdown="code-block-actions"]');
@@ -932,7 +995,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill(`开始两页课程。${"这是一段很长的学习背景。".repeat(120)}`);
   await page.getByRole("button", { name: "发送" }).click();
-  await expect(page.getByText("正在准备课件", { exact: true })).toBeVisible();
+  await expect(page.getByText(/正在准备课件 · \d+ 秒/)).toBeVisible();
   finishPreparingFirstSlide();
 
   const slides = page.getByRole("region", { name: "课堂页面" });
