@@ -1347,7 +1347,8 @@ test("a saved course starts a new agent-routed session and supports rename and d
   ).toBeVisible();
 });
 
-test("the teacher agent creates and persists a course from the first request", async ({
+for (const background of [false, true]) {
+test(`the teacher agent creates and persists a course from the first request${background ? " while another page is open" : ""}`, async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -1378,12 +1379,15 @@ test("the teacher agent creates and persists a course from the first request", a
   let outline: Array<{ title: string; objective: string }> = [];
   let conversationCreation: { title: string } | null = null;
   let teacherInstructions = "";
+  let releaseCreation = () => {};
+  const creationGate = new Promise<void>((resolve) => { releaseCreation = resolve; });
   await page.route("**/api/courses", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({ json: { courses: [] } });
       return;
     }
     creation = route.request().postDataJSON() as typeof creation;
+    if (background) await creationGate;
     await route.fulfill({ status: 201, json: { course: created } });
   });
   await page.route(
@@ -1488,9 +1492,20 @@ test("the teacher agent creates and persists a course from the first request", a
     .fill("我想理解分数");
   await page.getByRole("button", { name: "发送" }).click();
 
-  await expect(
-    page.getByText("我们从把一个苹果平均分开开始。", { exact: true }),
-  ).toBeVisible();
+  if (background) {
+    await expect.poll(() => creation).not.toBeNull();
+    await page.getByRole("button", { name: "自由探索" }).click();
+    releaseCreation();
+    await expect.poll(() => persisted?.state?.messages?.map((message) => message.text))
+      .toContain("我们从把一个苹果平均分开开始。");
+    await expect(page).toHaveURL(/#\/explore$/);
+    await expect(page.getByRole("heading", { name: "探索即将开放" })).toBeVisible();
+  } else {
+    await expect(
+      page.getByText("我们从把一个苹果平均分开开始。", { exact: true }),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/#\/courses\/course-agent\/conversations\/conversation-agent$/);
+  }
   expect(creation).toEqual({
     title: "分数的意义",
     topic: "小学数学中的分数概念",
@@ -1520,6 +1535,7 @@ test("the teacher agent creates and persists a course from the first request", a
     page.getByRole("img", { name: "课程封面：分数的意义" }),
   ).toBeVisible();
 });
+}
 
 test("a student creates a course with teaching materials attached to the first request", async ({
   page,
@@ -2052,6 +2068,9 @@ test("a failed conversation attachment remains available to retry", async ({
     "**/api/courses/attachment-retry/material-uploads",
     (route) => route.fulfill({ status: 500, json: { error: "unavailable" } }),
   );
+  await page.route("**/api/courses/attachment-retry/conversation", (route) =>
+    route.fulfill({ json: { ok: true } }),
+  );
   await page.route("**/api/learning/course/model", (route) => {
     modelRequests += 1;
     return route.fulfill(textResponse("不应发送这条请求。"));
@@ -2061,6 +2080,7 @@ test("a failed conversation attachment remains available to retry", async ({
   await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
   await page.getByRole("button", { name: "打开小节：变量" }).click();
   const input = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await expect(input).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles({
     name: "variables.txt",
     mimeType: "text/plain",

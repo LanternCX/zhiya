@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("brand text remains readable in both themes", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole("heading", { name: "登录知芽" })).toBeVisible();
   for (const theme of ["light", "dark"]) {
     await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
     const contrast = await page.locator(".brand .wordmark").first().evaluate((element) => {

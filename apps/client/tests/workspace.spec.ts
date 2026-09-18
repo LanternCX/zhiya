@@ -240,10 +240,11 @@ test("onboarding blocks navigation until completion, including reload and waitin
     waiting = true;
     return { state: state() };
   });
-  await page.goto("/");
+  await page.goto("/#/lab");
   await expect(
     page.getByRole("heading", { name: "你想怎样认识 AI？" }),
   ).toBeVisible();
+  await expect(page).toHaveURL(/#\/onboarding\?returnTo=%2Flab$/);
   await expect(page.getByRole("button", { name: "用户菜单" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "主导航" })).toHaveCount(0);
   await page.reload();
@@ -299,7 +300,8 @@ test("onboarding blocks navigation until completion, including reload and waitin
   completed = true;
   waiting = false;
   learning.sync(state());
-  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "实验准备中" })).toBeVisible();
+  await expect(page).toHaveURL(/#\/lab$/);
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
   await expect(page.getByRole("button", { name: "用户菜单" })).toBeVisible();
 });

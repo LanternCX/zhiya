@@ -5,11 +5,31 @@ import { setActiveUser } from "../../transport/identity";
 import type { User } from "../../api";
 import type { Flow, View } from "./types";
 import type { ConfirmationOptions } from "../../components/Confirmation";
+import {
+  useBeforeUnload,
+  useBlocker,
+  useLocation,
+  useNavigate,
+} from "react-router";
+import { accountPaths, isAuthPage, usePage } from "../../routes";
 
 export function useAccount() {
   const [policy, setPolicy] = useState<AccountPolicy | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [view, setView] = useState<View>("login");
+  const page = usePage();
+  const location = useLocation();
+  const routeNavigate = useNavigate();
+  const internalNavigation = useRef(false);
+  const feedbackDestination = useRef<string | null>(null);
+  const view: View = Object.hasOwn(accountPaths, page)
+    ? (page as View)
+    : "home";
+  function setView(next: View) {
+    feedbackDestination.current = accountPaths[next];
+    internalNavigation.current = true;
+    void routeNavigate(accountPaths[next], { replace: true });
+    internalNavigation.current = false;
+  }
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -22,8 +42,56 @@ export function useAccount() {
   const epoch = useRef(0);
   const running = useRef(false);
   const channel = useRef<BroadcastChannel | null>(null);
-  const [confirmation, setConfirmation] = useState<ConfirmationOptions | null>(null);
-  const pendingConfirmation = useRef<((confirmed: boolean) => void) | null>(null);
+  const [confirmation, setConfirmation] = useState<ConfirmationOptions | null>(
+    null,
+  );
+  const pendingConfirmation = useRef<((confirmed: boolean) => void) | null>(
+    null,
+  );
+  const unsaved = Boolean(
+    view === "profile" &&
+      user &&
+      (nickname !== user.nickname || avatarDraft !== null),
+  );
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !internalNavigation.current &&
+      !loading &&
+      currentLocation.pathname !== nextLocation.pathname &&
+      (busy || unsaved),
+  );
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    if (pendingConfirmation.current) return;
+    if (running.current) {
+      blocker.reset();
+      return;
+    }
+    const generation = epoch.current;
+    void confirmAction({
+      title: "放弃未保存的修改？",
+      text: "资料尚未保存，离开后这些修改将丢失。",
+      confirmLabel: "放弃修改",
+    }).then((confirmed) => {
+      if (confirmed && generation === epoch.current) blocker.proceed();
+      else blocker.reset();
+    });
+  }, [blocker]);
+  useBeforeUnload((event) => {
+    if (!unsaved) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+  useEffect(() => {
+    setFlow(null);
+    setAvatarDraft(null);
+    if (user) setNickname(user.nickname);
+    if (feedbackDestination.current !== location.pathname) {
+      setError("");
+      setNotice("");
+    }
+    feedbackDestination.current = null;
+  }, [location.pathname]);
   function answerConfirmation(confirmed: boolean) {
     const resolve = pendingConfirmation.current;
     pendingConfirmation.current = null;
@@ -31,14 +99,15 @@ export function useAccount() {
     resolve?.(confirmed);
   }
   function confirmAction(options: ConfirmationOptions) {
-    if (running.current || pendingConfirmation.current) return Promise.resolve(false);
+    if (running.current || pendingConfirmation.current)
+      return Promise.resolve(false);
     return new Promise<boolean>((resolve) => {
       pendingConfirmation.current = resolve;
       setConfirmation(options);
     });
   }
 
-  async function load() {
+  async function load(resetNavigation = false) {
     const generation = ++epoch.current;
     answerConfirmation(false);
     running.current = false;
@@ -61,12 +130,12 @@ export function useAccount() {
       setActiveUser(me.id);
       setUser(me);
       setNickname(me.nickname);
-      setView("home");
+      if (resetNavigation) setView("home");
     } catch (err) {
       if (generation !== epoch.current) return;
       if (rulesLoaded && err instanceof APIError && err.status === 401) {
         setUser(null);
-        setView("login");
+        if (resetNavigation) setView("login");
       } else {
         setOffline(true);
         setError(message(err));
@@ -89,7 +158,7 @@ export function useAccount() {
     channel.current = current;
     current.onmessage = () => {
       setNotice("");
-      void load();
+      void load(true);
     };
     return () => {
       current.close();
@@ -136,7 +205,10 @@ export function useAccount() {
       }
     }
   }
-  async function runConfirmed(options: ConfirmationOptions, action: () => Promise<void>) {
+  async function runConfirmed(
+    options: ConfirmationOptions,
+    action: () => Promise<void>,
+  ) {
     const generation = epoch.current;
     if (!(await confirmAction(options)) || generation !== epoch.current) return;
     await run(action);
@@ -152,38 +224,42 @@ export function useAccount() {
   }
   async function navigate(next: View) {
     if (busy) return false;
-    const generation = epoch.current;
-    if (
-      view === "profile" &&
-      user &&
-      (nickname !== user.nickname || avatarDraft !== null) &&
-      !(await confirmAction({
-        title: "放弃未保存的修改？",
-        text: "资料尚未保存，离开后这些修改将丢失。",
-        confirmLabel: "放弃修改",
-      }))
-    )
-      return false;
-    if (generation !== epoch.current) return false;
-    setView(next);
-    setFlow(null);
-    setError("");
-    setNotice("");
-    setAvatarDraft(null);
-    if (user) setNickname(user.nickname);
+    if (next === view) {
+      setFlow(null);
+      setError("");
+      setNotice("");
+      return true;
+    }
+    await routeNavigate(
+      accountPaths[next] +
+        (isAuthPage(next) && isAuthPage(page) ? location.search : ""),
+    );
     return true;
   }
   async function logout(all: boolean, context?: "onboarding") {
-    const unsaved = view === "profile" && user && (nickname !== user.nickname || avatarDraft !== null);
-    await runConfirmed({
-      title: all ? "退出全部设备？" : "退出登录？",
-      text: context === "onboarding" ? "退出后返回登录页。已提交的回答会保留，当前未提交的内容将丢失。" : (all ? "当前及其他设备都会退出，需要重新登录才能继续使用。" : "当前设备将退出，需要重新登录才能继续使用。")
-        + (unsaved ? "资料尚未保存，退出后这些修改将丢失。" : "已保存的资料会保留。"),
-      confirmLabel: all ? "退出全部设备" : "退出登录",
-    }, async () => {
-      await api(all ? "/auth/logout-all" : "/auth/logout", "POST", {});
-      clearSession(all ? "已退出全部设备" : "已退出登录");
-    });
+    const unsaved =
+      view === "profile" &&
+      user &&
+      (nickname !== user.nickname || avatarDraft !== null);
+    await runConfirmed(
+      {
+        title: all ? "退出全部设备？" : "退出登录？",
+        text:
+          context === "onboarding"
+            ? "退出后返回登录页。已提交的回答会保留，当前未提交的内容将丢失。"
+            : (all
+                ? "当前及其他设备都会退出，需要重新登录才能继续使用。"
+                : "当前设备将退出，需要重新登录才能继续使用。") +
+              (unsaved
+                ? "资料尚未保存，退出后这些修改将丢失。"
+                : "已保存的资料会保留。"),
+        confirmLabel: all ? "退出全部设备" : "退出登录",
+      },
+      async () => {
+        await api(all ? "/auth/logout-all" : "/auth/logout", "POST", {});
+        clearSession(all ? "已退出全部设备" : "已退出登录");
+      },
+    );
   }
   function sendCode(purpose: "register" | "reset", target: string) {
     return run(async () => {
@@ -198,7 +274,9 @@ export function useAccount() {
   }
   function sendEmailCode(target: string) {
     return run(async () => {
-      const result = await api<{ flow: string }>("/me/email/start", "POST", { email: target });
+      const result = await api<{ flow: string }>("/me/email/start", "POST", {
+        email: target,
+      });
       setFlow({ id: result.flow, email: target, sentAt: Date.now() });
       setNotice("验证码已分别发送至原邮箱和新邮箱，请使用最新收到的验证码");
     });

@@ -231,7 +231,7 @@ export default function Profile({
     isReasoning: Boolean(active),
   };
   useEffect(() => {
-    onOnboardingChange(!state?.completed);
+    if (state) onOnboardingChange(!state.completed);
   }, [state?.completed, onOnboardingChange]);
   useEffect(() => {
     if (progress?.saved) setCorrection("");
