@@ -1,6 +1,7 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -13,6 +14,8 @@ import type {
   CourseActivity,
   CourseMessage,
   LessonPage,
+  AnimationPlaybackCommand,
+  AnimationPlaybackState,
   ModelInfo,
   ModelRetryStatus,
   CourseConversationState,
@@ -37,6 +40,7 @@ import ChatComposer, {
 } from "../../components/ChatComposer";
 import { Spinner } from "../../components/ui/spinner";
 import SlideCanvas from "./SlideCanvas";
+import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
@@ -183,18 +187,18 @@ export default function CourseRoom({
   const [presented, setPresented] = useState<Set<string>>(
     () => new Set(initialState.presentedPageIds),
   );
-  const [page, setPage] = useState(() =>
-    Math.max(
-      0,
-      initialState.pages.findIndex(
-        ({ id }) => id === initialState.currentPageId,
-      ),
-    ),
+  const [currentPageId, setCurrentPageId] = useState(
+    () =>
+      initialState.currentPageId ||
+      initialState.presentedPageIds.at(-1) ||
+      initialState.pages[0]?.id ||
+      "",
   );
   const [busy, setBusy] = useState(false);
   const [codeRunning, setCodeRunning] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
+  const [generatingPages, setGeneratingPages] = useState(false);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
@@ -220,6 +224,23 @@ export default function CourseRoom({
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
   const pendingInitialMaterials = useRef<File[]>([]);
+  const animationControllers = useRef(new Map<string, AnimationController>());
+  const pendingAnimationCommands = useRef(
+    new Map<string, AnimationPlaybackCommand[]>(),
+  );
+  const registerAnimationController = useCallback(
+    (pageId: string, controller: AnimationController | null) => {
+      if (!controller) {
+        animationControllers.current.delete(pageId);
+        return;
+      }
+      animationControllers.current.set(pageId, controller);
+      const pending = pendingAnimationCommands.current.get(pageId) ?? [];
+      pendingAnimationCommands.current.delete(pageId);
+      for (const command of pending) controller.control(command);
+    },
+    [],
+  );
   const flushCourseSave = async (): Promise<boolean> => {
     if (saveInFlight.current) {
       const saved = await saveInFlight.current;
@@ -259,10 +280,12 @@ export default function CourseRoom({
     pagesRef.current = initial.pages;
     setPresented(new Set(initial.presentedPageIds));
     presentedRef.current = new Set(initial.presentedPageIds);
-    const initialPage = initial.pages.findIndex(
-      (page) => page.id === initial.currentPageId,
+    setCurrentPageId(
+      initial.currentPageId ||
+        initial.presentedPageIds.at(-1) ||
+        initial.pages[0]?.id ||
+        "",
     );
-    setPage(Math.max(0, initialPage));
     setBusy(false);
     setActivity(null);
     setModelRetry(null);
@@ -296,9 +319,10 @@ export default function CourseRoom({
           messagesRef.current = next;
           return next;
         }),
-      (next) => {
+      (next, generating) => {
         pagesRef.current = next;
         setPages(next);
+        setGeneratingPages(generating);
       },
       (pageId) => {
         setPresented((existing) => {
@@ -308,7 +332,7 @@ export default function CourseRoom({
         });
         setPages((existing) => {
           const index = existing.findIndex((page) => page.id === pageId);
-          if (index >= 0) setPage(index);
+          if (index >= 0) setCurrentPageId(pageId);
           return existing;
         });
       },
@@ -392,6 +416,20 @@ export default function CourseRoom({
           if (!sessionCourse.current) throw new Error("课程尚未建立");
           if (boundConversationId.current)
             throw new Error("当前学习对话已经建立");
+          const section = sessionCourse.current.sections?.find(
+            (candidate) => candidate.id === sectionId,
+          );
+          if (!section) {
+            const available = (sessionCourse.current.sections ?? []).map(
+              (candidate) => ({
+                id: candidate.id,
+                title: candidate.title,
+              }),
+            );
+            throw new Error(
+              `课程小节 ${sectionId} 不存在。请使用当前大纲中的真实小节：${JSON.stringify(available)}`,
+            );
+          }
           const conversation = await createStoredCourseConversation(
             sessionCourse.current.id,
             sectionId,
@@ -446,6 +484,35 @@ export default function CourseRoom({
         },
       },
       listCodeLanguages,
+      {
+        control: (pageId, command) => {
+          const controller = animationControllers.current.get(pageId);
+          if (controller) return controller.control(command);
+          const page = pagesRef.current.find(
+            (candidate) => candidate.kind === "animation" && candidate.id === pageId,
+          );
+          if (!page) throw new Error(`找不到动画页面 ${pageId}`);
+          pendingAnimationCommands.current.set(pageId, [
+            ...(pendingAnimationCommands.current.get(pageId) ?? []),
+            command,
+          ]);
+          return {
+            pageId,
+            status: "idle",
+            step: 0,
+            ...(command.action === "play" ? { buttonId: command.buttonId } : {}),
+          } satisfies AnimationPlaybackState;
+        },
+        playback: (pageId) => {
+          const controller = animationControllers.current.get(pageId);
+          if (controller) return controller.read();
+          const page = pagesRef.current.find(
+            (candidate) => candidate.kind === "animation" && candidate.id === pageId,
+          );
+          if (!page) throw new Error(`找不到动画页面 ${pageId}`);
+          return { pageId, status: "idle", step: 0 };
+        },
+      },
     );
     session.current = current;
     return () => {
@@ -467,7 +534,7 @@ export default function CourseRoom({
       messages,
       pages,
       presentedPageIds: [...presented],
-      currentPageId: pages[page]?.id ?? "",
+      currentPageId,
     };
     const updated = {
       ...course,
@@ -489,7 +556,14 @@ export default function CourseRoom({
       void flushCourseSave();
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [course?.id, course?.conversationId, messages, pages, presented, page]);
+  }, [
+    course?.id,
+    course?.conversationId,
+    messages,
+    pages,
+    presented,
+    currentPageId,
+  ]);
 
   useEffect(
     () => () => {
@@ -589,7 +663,12 @@ export default function CourseRoom({
     setBusy(false);
   };
   const running = busy;
-  const current = pages[Math.min(page, Math.max(0, pages.length - 1))];
+  const presentedPages = [...presented]
+    .map((id) => pages.find((candidate) => candidate.id === id))
+    .filter((candidate): candidate is LessonPage => Boolean(candidate));
+  const current =
+    presentedPages.find((candidate) => candidate.id === currentPageId) ??
+    presentedPages.at(-1);
 
   useEffect(() => {
     const container = thread.current;
@@ -613,18 +692,13 @@ export default function CourseRoom({
     return () => window.cancelAnimationFrame(frame);
   }, [current?.id]);
 
-  const previousPage = page - 1;
-  const nextPage = page + 1;
-  const canGoPrevious =
-    !busy &&
-    !codeRunning &&
-    previousPage >= 0 &&
-    presented.has(pages[previousPage]?.id ?? "");
-  const canGoNext =
-    !busy &&
-    !codeRunning &&
-    nextPage < pages.length &&
-    presented.has(pages[nextPage]?.id ?? "");
+  const presentedPage = current
+    ? presentedPages.findIndex((candidate) => candidate.id === current.id)
+    : -1;
+  const previousPage = presentedPages[presentedPage - 1];
+  const nextPage = presentedPages[presentedPage + 1];
+  const canGoPrevious = !busy && !codeRunning && Boolean(previousPage);
+  const canGoNext = !busy && !codeRunning && Boolean(nextPage);
 
   return (
     <section
@@ -706,6 +780,21 @@ export default function CourseRoom({
             ))
           )}
           <Activity activity={activity} />
+          {generatingPages &&
+            !(
+              activity?.kind === "tool" &&
+              activity.name === "create_slides" &&
+              activity.status === "running"
+            ) && (
+              <ToolActivity
+                activity={{
+                  kind: "tool",
+                  name: "background-pages",
+                  label: "准备课件",
+                  status: "running",
+                }}
+              />
+            )}
           <ConnectionRetry status={modelRetry} />
         </div>
         {error && (
@@ -728,7 +817,29 @@ export default function CourseRoom({
 
       {current && (
         <section className="slide-stage" aria-label="课堂页面">
-          {current.kind === "slide" ? (
+          {pages
+            .filter(
+              (candidate) =>
+                candidate.kind === "animation" && presented.has(candidate.id),
+            )
+            .map((animation) =>
+              animation.kind === "animation" ? (
+                <div
+                  className="animation-page-slot"
+                  hidden={current.id !== animation.id}
+                  key={animation.id}
+                >
+                  <AnimationCanvas
+                    active={current.id === animation.id}
+                    page={animation}
+                    onController={(controller) =>
+                      registerAnimationController(animation.id, controller)
+                    }
+                  />
+                </div>
+              ) : null,
+            )}
+          {current.kind === "animation" ? null : current.kind === "slide" ? (
             <SlideCanvas key={current.id} slide={current} />
           ) : (
             <Suspense
@@ -802,16 +913,16 @@ export default function CourseRoom({
               aria-label="上一页"
               title="上一页"
               disabled={!canGoPrevious}
-              onClick={() => setPage(previousPage)}
+              onClick={() => previousPage && setCurrentPageId(previousPage.id)}
             >
               ←
             </button>
-            <span>{`${page + 1} / ${presented.size}`}</span>
+            <span>{`${presentedPage + 1} / ${presentedPages.length}`}</span>
             <button
               aria-label="下一页"
               title="下一页"
               disabled={!canGoNext}
-              onClick={() => setPage(nextPage)}
+              onClick={() => nextPage && setCurrentPageId(nextPage.id)}
             >
               →
             </button>

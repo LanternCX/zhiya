@@ -8,6 +8,8 @@ import type {
   OutlineClassification,
   OutlineReorganization,
   Slide,
+  AnimationPlaybackCommand,
+  AnimationPlaybackState,
   LessonPage,
 } from "../domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
@@ -58,7 +60,10 @@ export type CourseManagement = {
       reorganization: OutlineReorganization,
       conversation: StoredCourseConversation,
     ) => Promise<OutlineClassification>,
-  ) => Promise<StoredCourse>;
+  ) => Promise<
+    | StoredCourse
+    | { taskId: string; status: "running"; kind: "outline-classifier" }
+  >;
   resumeOutline: (
     classify: (
       reorganization: OutlineReorganization,
@@ -80,10 +85,53 @@ export type CourseManagement = {
 };
 
 export type SlideTools = {
-  start: (request: SlideRequest) => Promise<Slide>;
+  start: (request: SlideRequest) => {
+    taskId: string;
+    status: "running";
+  };
   cancel: () => void;
   read: () => { pages: Slide[]; generating: boolean };
   next: () => Promise<LessonPage>;
+};
+
+export type AnimationTools = {
+  start: (request: { pageId: string; goal: string }) => {
+    taskId: string;
+    pageId: string;
+    status: "running";
+  };
+  show: (pageId: string) => Promise<LessonPage>;
+  read: () => Array<{
+    taskId: string;
+    pageId: string;
+    status: "running" | "complete" | "failed" | "cancelled";
+    error?: string;
+  }>;
+  cancel: (taskId: string) => void;
+  control: (
+    pageId: string,
+    command: AnimationPlaybackCommand,
+  ) => AnimationPlaybackState;
+  playback: (pageId: string) => AnimationPlaybackState;
+};
+
+export type AgentTaskSummary = {
+  taskId: string;
+  kind: "slides" | "animation" | "outline-classifier";
+  status: "running" | "complete" | "failed" | "cancelled";
+  pageId?: string;
+  sections?: Array<{
+    id: string;
+    title: string;
+    objective: string;
+    status: "planned" | "active" | "complete" | "archived";
+  }>;
+  error?: string;
+};
+
+export type AgentTaskTools = {
+  read: () => AgentTaskSummary[];
+  cancel: (taskId: string) => AgentTaskSummary;
 };
 
 export type TeachingToolContext = {

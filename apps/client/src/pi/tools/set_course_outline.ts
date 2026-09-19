@@ -41,13 +41,24 @@ export function setCourseOutlineTool(
           status?: "planned" | "active" | "complete" | "archived";
         }>;
       };
-      const course = await context.management.setOutline(input.sections);
+      const result = await context.management.setOutline(input.sections);
+      if ("taskId" in result) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Course outline task started: ${JSON.stringify(result)}. Do not create a section conversation until the completion notice arrives. Continue helping the student without waiting.`,
+            },
+          ],
+          details: result,
+        };
+      }
       return {
         content: [
           {
             type: "text",
             text: `The course outline is ready: ${JSON.stringify(
-              course.sections?.map(({ id, title, objective, status }) => ({
+              result.sections?.map(({ id, title, objective, status }) => ({
                 id,
                 title,
                 objective,
@@ -56,7 +67,7 @@ export function setCourseOutlineTool(
             )}`,
           },
         ],
-        details: { courseId: course.id },
+        details: { courseId: result.id },
       };
     },
   };
