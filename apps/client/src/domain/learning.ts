@@ -23,6 +23,54 @@ export type Slide = {
   layout: "explain" | "steps" | "compare";
 };
 
+export type AnimationNode = {
+  id: string;
+  shape: "rectangle" | "circle" | "diamond" | "text" | "group";
+  label: string;
+  groupId?: string;
+};
+
+export type AnimationEdge = {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  arrow?: boolean;
+};
+
+export type AnimationAction =
+  | { type: "show" | "hide" | "highlight"; targetId: string }
+  | { type: "flow"; targetId: string }
+  | { type: "update"; targetId: string; value: string };
+
+export type AnimationButton = {
+  id: string;
+  label: string;
+  steps: AnimationAction[][];
+};
+
+export type AnimationPage = {
+  kind: "animation";
+  id: string;
+  title: string;
+  layout: "horizontal" | "vertical" | "grid";
+  nodes: AnimationNode[];
+  edges: AnimationEdge[];
+  buttons: AnimationButton[];
+};
+
+export type AnimationPlaybackCommand =
+  | { action: "play"; buttonId: string }
+  | { action: "pause" }
+  | { action: "reset" };
+
+export type AnimationPlaybackState = {
+  pageId: string;
+  status: "idle" | "playing" | "paused" | "complete";
+  buttonId?: string;
+  step: number;
+};
+
 export type CodingExercise = {
   kind: "coding";
   id: string;
@@ -37,7 +85,7 @@ export type CodingExercise = {
   result?: CodeRunResult;
 };
 
-export type LessonPage = Slide | CodingExercise;
+export type LessonPage = Slide | AnimationPage | CodingExercise;
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {
