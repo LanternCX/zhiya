@@ -341,7 +341,7 @@ test("a student runs a model-created coding page and receives a review only when
   await page.getByRole("button", { name: "运行代码" }).click();
   await expect(page.getByText("正在重新运行…", { exact: true })).toBeVisible();
   await expect(page.getByText("第 1 次运行", { exact: true })).toHaveCount(0);
-  expect(runRequests).toBe(2);
+  await expect.poll(() => runRequests).toBe(2);
   releaseSecondRun();
   await expect.poll(() => submittedCode).toBe("if True:\npass");
   await expect(page.getByText("第 2 次运行", { exact: true })).toBeVisible();
