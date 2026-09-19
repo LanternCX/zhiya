@@ -23,7 +23,6 @@ export function createSlidesAgent(options: {
     tools: [publishSlideTool(options.publish)],
     systemPrompt: slidesPrompt(options.memory),
     request: (payload, signal) => {
-      payload.parallel_tool_calls = false;
       return options.gateway.course("slides", payload, signal, options.onRetry);
     },
   });

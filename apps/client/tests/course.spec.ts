@@ -333,6 +333,565 @@ async function mockCompletedWorkspace(page: Page) {
   );
 }
 
+test("the teacher sends DeepSeek-compatible completion fields", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let payload: Record<string, unknown> & {
+    tools?: Array<{
+      function: {
+        name: string;
+        description: string;
+        parameters: Record<string, unknown>;
+      };
+    }>;
+  } = {};
+  await page.route("**/api/learning/course/model", async (route) => {
+    payload = route.request().postDataJSON().payload;
+    await route.fulfill(textResponse("我们开始学习。"));
+  });
+
+  await page.goto("/");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("教我认识三角形");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page.getByText("我们开始学习。")).toBeVisible();
+  expect(payload.max_tokens).toBe(8192);
+  expect(payload).not.toHaveProperty("max_completion_tokens");
+  expect(payload).not.toHaveProperty("store");
+  expect(payload).not.toHaveProperty("parallel_tool_calls");
+  expect(
+    payload.tools?.find((tool) => tool.function.name === "control_animation")
+      ?.function.parameters.type,
+  ).toBe("object");
+  const animationDescription = payload.tools?.find(
+    (tool) => tool.function.name === "create_animation",
+  )?.function.description;
+  expect(animationDescription).toMatch(/8 nodes.+10 edges.+3 buttons/i);
+  expect(animationDescription).toMatch(/no colors.+coordinates.+code/i);
+});
+
+test("animation generation stays in the background until the teacher presents its page", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let releaseAnimation = () => {};
+  const animationReady = new Promise<void>((resolve) => {
+    releaseAnimation = resolve;
+  });
+  let animationModelCalls = 0;
+  let teacherSawCompletionNotice = false;
+
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "animation";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    const toolResults = request.payload.messages.filter(
+      (message) => message.role === "tool",
+    ).length;
+
+    if (request.agent === "animation") {
+      animationModelCalls += 1;
+      if (toolResults === 0) {
+        await animationReady;
+        await route.fulfill(
+          toolResponse("publish-water-cycle", "publish_animation", {
+            pageId: "water-cycle",
+            title: "水循环",
+            layout: "horizontal",
+            nodes: [
+              { id: "sea", shape: "rectangle", label: "海洋" },
+              { id: "cloud", shape: "circle", label: "云" },
+              { id: "rain", shape: "diamond", label: "降雨" },
+            ],
+            edges: [
+              { id: "evaporation", source: "sea", target: "cloud", label: "蒸发" },
+              { id: "precipitation", source: "cloud", target: "rain", label: "凝结" },
+            ],
+            buttons: [
+              {
+                id: "play-cycle",
+                label: "播放水循环",
+                steps: [
+                  [{ type: "highlight", targetId: "sea" }],
+                  [{ type: "flow", targetId: "evaporation" }],
+                  [{ type: "highlight", targetId: "cloud" }],
+                ],
+              },
+            ],
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse(""));
+      }
+      return;
+    }
+
+    if (transcript.includes("请播放动画")) {
+      if (!transcript.includes('"name":"control_animation"')) {
+        await route.fulfill(
+          toolResponse("play-water-cycle", "control_animation", {
+            pageId: "water-cycle",
+            action: "play",
+            buttonId: "play-cycle",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse("动画正在播放。"));
+      }
+      return;
+    }
+
+    if (transcript.includes("现在展示")) {
+      teacherSawCompletionNotice = transcript.includes(
+        "Background child-agent task completed",
+      );
+      if (!transcript.includes('"name":"show_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("show-water-cycle", "show_lesson_page", {
+            pageId: "water-cycle",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse("我们来看水循环。"));
+      }
+      return;
+    }
+    if (transcript.includes("动画准备好了吗")) {
+      await route.fulfill(textResponse("我还可以继续回答你，动画正在后台生成。"));
+      return;
+    }
+    if (toolResults === 0) {
+      await route.fulfill(
+        toolResponse("create-water-cycle", "create_animation", {
+          pageId: "water-cycle",
+          goal: "用三个节点演示水循环",
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("动画已在后台开始生成。"));
+    }
+  });
+
+  await page.goto("/");
+  const prompt = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await prompt.fill("画一个水循环动画");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByText("动画已在后台开始生成。", { exact: true })).toBeVisible();
+
+  await prompt.fill("动画准备好了吗");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(
+    page.getByText("我还可以继续回答你，动画正在后台生成。", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
+
+  await prompt.fill("现在展示");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
+  releaseAnimation();
+  const classroom = page.getByRole("region", { name: "课堂页面" });
+  await expect(
+    classroom.getByRole("img", { name: "动画页面：水循环" }),
+  ).toBeVisible();
+  await expect(classroom.getByRole("button", { name: "播放水循环" })).toBeVisible();
+  expect(animationModelCalls).toBe(1);
+  expect(teacherSawCompletionNotice).toBe(true);
+
+  await prompt.fill("请播放动画");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByText("动画正在播放。", { exact: true })).toBeVisible();
+  await expect(
+    classroom.getByRole("button", { name: "播放水循环" }),
+  ).toBeDisabled();
+});
+
+test("the animation agent simplifies a scene that exceeds the element limit", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let animationModelCalls = 0;
+  let receivedValidationError = false;
+
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "animation";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+
+    if (request.agent === "animation") {
+      animationModelCalls += 1;
+      if (animationModelCalls === 1) {
+        await route.fulfill(
+          toolResponse("publish-too-complex", "publish_animation", {
+            pageId: "corrected-cycle",
+            title: "过度复杂的水循环",
+            layout: "horizontal",
+            nodes: [
+              { id: "n1", shape: "rectangle", label: "海洋" },
+              { id: "n2", shape: "rectangle", label: "水汽" },
+              { id: "n3", shape: "circle", label: "云" },
+              { id: "n4", shape: "diamond", label: "凝结" },
+              { id: "n5", shape: "rectangle", label: "降雨" },
+              { id: "n6", shape: "rectangle", label: "河流" },
+              { id: "n7", shape: "rectangle", label: "地下水" },
+              { id: "n8", shape: "rectangle", label: "植物" },
+              { id: "n9", shape: "rectangle", label: "湖泊" },
+            ],
+            edges: [],
+            buttons: [
+              {
+                id: "play-cycle",
+                label: "播放",
+                steps: [[{ type: "highlight", targetId: "n1" }]],
+              },
+            ],
+          }),
+        );
+        return;
+      }
+      receivedValidationError = transcript.includes('"role":"tool"');
+      if (animationModelCalls === 2) {
+        await route.fulfill(
+          toolResponse("publish-too-many-actions", "publish_animation", {
+            pageId: "corrected-cycle",
+            title: "动作过多的水循环",
+            layout: "horizontal",
+            nodes: [
+              { id: "sea", shape: "rectangle", label: "海洋" },
+              { id: "cloud", shape: "circle", label: "云" },
+            ],
+            edges: [],
+            buttons: [
+              {
+                id: "b1",
+                label: "第一段",
+                steps: [
+                  [
+                    { type: "highlight", targetId: "sea" },
+                    { type: "highlight", targetId: "cloud" },
+                  ],
+                  [
+                    { type: "show", targetId: "sea" },
+                    { type: "show", targetId: "cloud" },
+                  ],
+                  [
+                    { type: "hide", targetId: "sea" },
+                    { type: "hide", targetId: "cloud" },
+                  ],
+                ],
+              },
+              {
+                id: "b2",
+                label: "第二段",
+                steps: [
+                  [
+                    { type: "highlight", targetId: "sea" },
+                    { type: "highlight", targetId: "cloud" },
+                  ],
+                  [
+                    { type: "show", targetId: "sea" },
+                    { type: "show", targetId: "cloud" },
+                  ],
+                  [
+                    { type: "hide", targetId: "sea" },
+                    { type: "hide", targetId: "cloud" },
+                  ],
+                ],
+              },
+              {
+                id: "b3",
+                label: "第三段",
+                steps: [[{ type: "highlight", targetId: "sea" }]],
+              },
+            ],
+          }),
+        );
+        return;
+      }
+      await route.fulfill(
+        toolResponse("publish-corrected", "publish_animation", {
+          pageId: "corrected-cycle",
+          title: "简化的水循环",
+          layout: "horizontal",
+          nodes: [
+            { id: "sea", shape: "rectangle", label: "海洋" },
+            { id: "cloud", shape: "circle", label: "云" },
+          ],
+          edges: [
+            {
+              id: "evaporation",
+              source: "sea",
+              target: "cloud",
+              label: "蒸发",
+            },
+          ],
+          buttons: [
+            {
+              id: "play-cycle",
+              label: "播放",
+              steps: [[{ type: "flow", targetId: "evaporation" }]],
+            },
+          ],
+        }),
+      );
+      return;
+    }
+
+    if (transcript.includes("Background child-agent task completed")) {
+      if (!transcript.includes('"name":"show_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("show-corrected", "show_lesson_page", {
+            pageId: "corrected-cycle",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse("修正后的动画已经展示。"));
+      }
+      return;
+    }
+    if (!transcript.includes('"name":"create_animation"')) {
+      await route.fulfill(
+        toolResponse("create-corrected", "create_animation", {
+          pageId: "corrected-cycle",
+          goal: "用少量元素绘制水循环，并在过于复杂时简化",
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("动画正在后台生成。"));
+    }
+  });
+
+  await page.goto("/");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("画一个简单的水循环动画");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(
+    page.getByText("修正后的动画已经展示。", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "动画页面：简化的水循环" }),
+  ).toBeVisible();
+  expect(animationModelCalls).toBe(3);
+  expect(receivedValidationError).toBe(true);
+});
+
+test("the animation agent gets one same-context correction when it stops without publishing", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let animationModelCalls = 0;
+  let correctionKeptFirstTurn = false;
+
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "animation";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+
+    if (request.agent === "animation") {
+      animationModelCalls += 1;
+      if (animationModelCalls === 1) {
+        await route.fulfill(textResponse("我先描述一下这个动画。"));
+        return;
+      }
+      correctionKeptFirstTurn = transcript.includes("我先描述一下这个动画。");
+      await route.fulfill(
+        toolResponse("publish-after-correction", "publish_animation", {
+          pageId: "retry-once",
+          title: "一次纠错后的动画",
+          layout: "horizontal",
+          nodes: [
+            { id: "start", shape: "circle", label: "开始" },
+            { id: "finish", shape: "rectangle", label: "完成" },
+          ],
+          edges: [
+            { id: "path", source: "start", target: "finish", label: "过程" },
+          ],
+          buttons: [
+            {
+              id: "play",
+              label: "播放",
+              steps: [[{ type: "flow", targetId: "path" }]],
+            },
+          ],
+        }),
+      );
+      return;
+    }
+
+    if (transcript.includes("Background child-agent task completed")) {
+      if (!transcript.includes('"name":"show_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("show-after-correction", "show_lesson_page", {
+            pageId: "retry-once",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse("纠错后的动画已经展示。"));
+      }
+      return;
+    }
+    if (!transcript.includes('"name":"create_animation"')) {
+      await route.fulfill(
+        toolResponse("create-retry-once", "create_animation", {
+          pageId: "retry-once",
+          goal: "画一个简单过程",
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("动画正在后台生成。"));
+    }
+  });
+
+  await page.goto("/");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("画一个需要纠错一次的动画");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(
+    page.getByText("纠错后的动画已经展示。", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "动画页面：一次纠错后的动画" }),
+  ).toBeVisible();
+  expect(animationModelCalls).toBe(2);
+  expect(correctionKeptFirstTurn).toBe(true);
+});
+
+test("the teacher can inspect and cancel one background animation task", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let releaseAnimation = () => {};
+  const animationReleased = new Promise<void>((resolve) => {
+    releaseAnimation = resolve;
+  });
+
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "animation";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    const toolResults = request.payload.messages.filter(
+      (message) => message.role === "tool",
+    ).length;
+
+    if (request.agent === "animation") {
+      await animationReleased;
+      if (!route.request().isNavigationRequest()) {
+        await route.fulfill(textResponse(""));
+      }
+      return;
+    }
+    if (transcript.includes("取消这个动画")) {
+      if (!transcript.includes('"name":"read_agent_tasks"')) {
+        await route.fulfill(
+          toolResponse("read-animation-tasks", "read_agent_tasks", {}),
+        );
+      } else if (!transcript.includes('"name":"cancel_agent_task"')) {
+        await route.fulfill(
+          toolResponse("cancel-animation-task", "cancel_agent_task", {
+            taskId: "animation-1-cancel-me",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse("动画任务已取消。"));
+      }
+      return;
+    }
+    if (toolResults === 0) {
+      await route.fulfill(
+        toolResponse("create-cancellable", "create_animation", {
+          pageId: "cancel-me",
+          goal: "创建一个稍后取消的动画",
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("动画任务已开始。"));
+    }
+  });
+
+  await page.goto("/");
+  const prompt = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await prompt.fill("创建一个动画");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByText("动画任务已开始。", { exact: true })).toBeVisible();
+
+  await prompt.fill("取消这个动画");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByText("动画任务已取消。", { exact: true })).toBeVisible();
+  releaseAnimation();
+  await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
+});
+
+test("two animation child agents run while the teacher remains responsive", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let startedAnimations = 0;
+  let releaseAnimations = () => {};
+  const released = new Promise<void>((resolve) => {
+    releaseAnimations = resolve;
+  });
+
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "animation";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    if (request.agent === "animation") {
+      startedAnimations++;
+      await released;
+      await route.fulfill(textResponse(""));
+      return;
+    }
+    const toolResults = request.payload.messages.filter(
+      (message) => message.role === "tool",
+    ).length;
+    if (toolResults === 0) {
+      await route.fulfill(
+        toolResponse("create-animation-a", "create_animation", {
+          pageId: "parallel-a",
+          goal: "创建动画 A",
+        }),
+      );
+    } else if (toolResults === 1) {
+      await route.fulfill(
+        toolResponse("create-animation-b", "create_animation", {
+          pageId: "parallel-b",
+          goal: "创建动画 B",
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("两个动画都在后台生成，我仍然可以回答你。"));
+    }
+  });
+
+  await page.goto("/");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("同时创建两个动画");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(
+    page.getByText("两个动画都在后台生成，我仍然可以回答你。", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(startedAnimations).toBe(2);
+  releaseAnimations();
+});
+
 test("teacher follows the student's requested slide pace while keeping narration synchronized", async ({
   page,
 }) => {
@@ -373,6 +932,83 @@ test("teacher follows the student's requested slide pace while keeping narration
   expect(teacherInstructions).toMatch(
     /show one page.+explain that page.+show_next_slide/i,
   );
+});
+
+test("background slide generation does not change the visible page before presentation", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  let releaseSlide = () => {};
+  const slideReady = new Promise<void>((resolve) => {
+    releaseSlide = resolve;
+  });
+  let teacherReceivedSlideCompletion = false;
+  await page.route("**/api/learning/course/model", async (route: Route) => {
+    const request = route.request().postDataJSON() as {
+      agent: "teacher" | "slides";
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    const toolResults = request.payload.messages.filter(
+      (message) => message.role === "tool",
+    ).length;
+    if (request.agent === "slides") {
+      if (toolResults === 0) {
+        await slideReady;
+        await route.fulfill(
+          toolResponse("prepared-slide", "publish_slide", {
+            title: "准备完成但尚未展示",
+            body: "只有 Teacher 显式展示后学生才能看到。",
+            bullets: [],
+            layout: "explain",
+          }),
+        );
+      } else {
+        await route.fulfill(textResponse(""));
+      }
+      return;
+    }
+    if (transcript.includes("现在展示第一页")) {
+      if (!transcript.includes('"name":"show_next_slide"')) {
+        await route.fulfill(
+          toolResponse("show-prepared-slide", "show_next_slide", {}),
+        );
+      } else {
+        await route.fulfill(textResponse("现在开始讲解这一页。"));
+      }
+    } else if (transcript.includes("Background child-agent task completed")) {
+      teacherReceivedSlideCompletion = true;
+      await route.fulfill(textResponse(""));
+    } else if (!transcript.includes('"name":"create_slides"')) {
+      await route.fulfill(
+        toolResponse("prepare-hidden-slide", "create_slides", {
+          goal: "生成一页但先不要展示",
+          pageCount: 1,
+          replaceCurrent: false,
+        }),
+      );
+    } else {
+      await route.fulfill(textResponse("页面正在后台准备。"));
+    }
+  });
+
+  await page.goto("/");
+  const prompt = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await prompt.fill("生成一页但先不要展示");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByText("页面正在后台准备。", { exact: true })).toBeVisible();
+  releaseSlide();
+  await expect.poll(() => teacherReceivedSlideCompletion).toBe(true);
+  await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
+
+  await prompt.fill("现在展示第一页");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(
+    page.getByRole("img", { name: "课件页面：准备完成但尚未展示" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("现在开始讲解这一页。", { exact: true }),
+  ).toBeVisible();
 });
 
 test("a student sees when the model connection is retrying", async ({
@@ -500,7 +1136,12 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
 
     if (request.agent === "teacher") {
       const simpler = transcript.includes("换成简单一点的例子");
-      if ((simpler && toolResults < 2) || (!simpler && toolResults === 0)) {
+      const createCalls = (transcript.match(/"name":"create_slides"/g) ?? [])
+        .length;
+      const showCalls = (transcript.match(/"name":"show_next_slide"/g) ?? [])
+        .length;
+      const expectedCreates = simpler ? 2 : 1;
+      if (createCalls < expectedCreates) {
         await route.fulfill(
           toolResponse(
             simpler ? "slides-simple" : "slides-first",
@@ -510,6 +1151,14 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
               pageCount: 2,
               replaceCurrent: simpler,
             },
+          ),
+        );
+      } else if (showCalls < createCalls) {
+        await route.fulfill(
+          toolResponse(
+            simpler ? "show-simple" : "show-first",
+            "show_next_slide",
+            {},
           ),
         );
       } else {
@@ -649,6 +1298,7 @@ test("a failed slide task is reported and a later request can retry", async ({
   );
 
   let slideAttempts = 0;
+  let successfulSlidePublished = false;
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
@@ -658,9 +1308,8 @@ test("a failed slide task is reported and a later request can retry", async ({
       (message) => message.role === "tool",
     ).length;
     if (request.agent === "teacher") {
-      const retrying = JSON.stringify(request.payload.messages).includes(
-        "请重试课件",
-      );
+      const transcript = JSON.stringify(request.payload.messages);
+      const retrying = transcript.includes("请重试课件");
       if ((!retrying && toolResults === 0) || (retrying && toolResults < 2)) {
         await route.fulfill(
           toolResponse(`slides-${crypto.randomUUID()}`, "create_slides", {
@@ -668,6 +1317,13 @@ test("a failed slide task is reported and a later request can retry", async ({
             pageCount: 1,
             replaceCurrent: true,
           }),
+        );
+      } else if (
+        successfulSlidePublished &&
+        !transcript.includes('"name":"show_next_slide"')
+      ) {
+        await route.fulfill(
+          toolResponse("show-retry-page", "show_next_slide", {}),
         );
       } else {
         await route.fulfill(textResponse("我会根据实际生成结果继续。"));
@@ -683,6 +1339,7 @@ test("a failed slide task is reported and a later request can retry", async ({
       });
       return;
     }
+    successfulSlidePublished = true;
     await route.fulfill(
       toolResponse("retry-page", "publish_slide", {
         title: "机器怎样从例子中学习？",
@@ -934,6 +1591,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
   const firstSlide = new Promise<void>((resolve) => {
     finishPreparingFirstSlide = resolve;
   });
+  let firstSlidePublished = false;
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
@@ -945,6 +1603,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     if (request.agent === "slides") {
       if (toolResults === 0) {
         await firstSlide;
+        firstSlidePublished = true;
         await route.fulfill(
           toolResponse("synchronized-page-1", "publish_slide", {
             title: "第一页",
@@ -968,6 +1627,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
       return;
     }
 
+    const transcript = JSON.stringify(request.payload.messages);
     if (toolResults === 0) {
       await route.fulfill(
         toolResponse("synchronized-slides", "create_slides", {
@@ -976,7 +1636,17 @@ test("the next slide follows its explanation and keeps the conversation anchor",
           replaceCurrent: false,
         }),
       );
-    } else if (toolResults === 1) {
+    } else if (
+      firstSlidePublished &&
+      !transcript.includes('"name":"show_next_slide"')
+    ) {
+      await route.fulfill(
+        toolResponse("show-synchronized-page-1", "show_next_slide", {}),
+      );
+    } else if (
+      transcript.includes("继续讲这两页") &&
+      (transcript.match(/"name":"show_next_slide"/g) ?? []).length === 1
+    ) {
       await route.fulfill(
         textAndToolResponse(
           "第一页讲解开始。\n\n需要慢慢读完第二行。",
@@ -985,6 +1655,10 @@ test("the next slide follows its explanation and keeps the conversation anchor",
           {},
         ),
       );
+    } else if (!firstSlidePublished) {
+      await route.fulfill(textResponse("课件正在后台生成，我可以继续响应。"));
+    } else if (!transcript.includes("继续讲这两页")) {
+      await route.fulfill(textResponse(""));
     } else {
       await route.fulfill(textResponse("现在讲解第二页。"));
     }
@@ -996,12 +1670,19 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     .fill(`开始两页课程。${"这是一段很长的学习背景。".repeat(120)}`);
   await page.getByRole("button", { name: "发送" }).click();
   await expect(page.getByText(/正在准备课件 · \d+ 秒/)).toBeVisible();
+  await expect(
+    page.getByText("课件正在后台生成，我可以继续响应。", { exact: true }),
+  ).toBeVisible();
   finishPreparingFirstSlide();
 
   const slides = page.getByRole("region", { name: "课堂页面" });
   await expect(
     slides.getByRole("img", { name: "课件页面：第一页" }),
   ).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("继续讲这两页");
+  await page.getByRole("button", { name: "发送" }).click();
   await expect(page.getByText("第一页讲解开始。", { exact: true })).toBeVisible(
     { timeout: 500 },
   );
@@ -1034,7 +1715,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
   ).toBeVisible();
   const firstPageAnchor = page.locator(
     '.course-message[data-page-id="synchronized-page-1"]',
-  );
+  ).filter({ hasText: "第一页讲解开始。" });
   await expect(firstPageAnchor).toBeVisible();
   await expect(firstPageAnchor).toHaveAttribute("aria-current", "step");
   await expect
@@ -1410,6 +2091,122 @@ test("a saved course starts a new agent-routed session and supports rename and d
   ).toBeVisible();
 });
 
+test("classroom pagination follows presentation order across mixed hidden pages", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const slides = [
+    {
+      kind: "slide" as const,
+      id: "shown-first",
+      title: "第一张已展示页面",
+      body: "第一页",
+      bullets: [],
+      layout: "explain" as const,
+    },
+    {
+      kind: "animation" as const,
+      id: "hidden-animation",
+      title: "尚未展示的动画",
+      layout: "horizontal" as const,
+      nodes: [{ id: "node", shape: "rectangle" as const, label: "隐藏" }],
+      edges: [],
+      buttons: [
+        {
+          id: "play",
+          label: "播放",
+          steps: [[{ type: "highlight" as const, targetId: "node" }]],
+        },
+      ],
+    },
+    {
+      kind: "coding" as const,
+      id: "hidden-coding",
+      title: "尚未展示的练习",
+      instructions: "隐藏",
+      languageId: 71,
+      languageName: "Python",
+      starterCode: "print('hidden')",
+      code: "print('hidden')",
+      stdin: "",
+      status: "active" as const,
+    },
+    {
+      kind: "slide" as const,
+      id: "shown-second",
+      title: "第二张已展示页面",
+      body: "第二页",
+      bullets: [],
+      layout: "explain" as const,
+    },
+    {
+      kind: "slide" as const,
+      id: "shown-third",
+      title: "第三张已展示页面",
+      body: "第三页",
+      bullets: [],
+      layout: "explain" as const,
+    },
+  ];
+  const state = {
+    messages: [],
+    pages: slides,
+    presentedPageIds: ["shown-first", "shown-second", "shown-third"],
+    currentPageId: "shown-second",
+  };
+  const conversation = {
+    id: "mixed-conversation",
+    sectionId: "mixed-section",
+    title: "混合页面",
+    state,
+    createdAt: "2026-09-19T00:00:00Z",
+    updatedAt: "2026-09-19T00:00:00Z",
+  };
+  const course = {
+    id: "mixed-course",
+    conversationId: conversation.id,
+    title: "混合课堂",
+    topic: "验证课堂页面顺序",
+    status: "active" as const,
+    cover: {
+      motif: "geometry" as const,
+      palette: "sprout" as const,
+      label: "ORDER",
+    },
+    state,
+    sections: [
+      {
+        id: "mixed-section",
+        title: "页面顺序",
+        objective: "保持讲解与展示同步",
+        position: 0,
+        status: "active" as const,
+        conversations: [conversation],
+      },
+    ],
+    createdAt: "2026-09-19T00:00:00Z",
+    updatedAt: "2026-09-19T00:00:00Z",
+  };
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [course] } }),
+  );
+
+  await page.goto("/#/courses/mixed-course/conversations/mixed-conversation");
+
+  const classroom = page.getByRole("region", { name: "课堂页面" });
+  await expect(
+    classroom.getByRole("img", { name: "课件页面：第二张已展示页面" }),
+  ).toBeVisible();
+  await expect(classroom.getByText("2 / 3", { exact: true })).toBeVisible();
+  await expect(classroom.getByRole("button", { name: "上一页" })).toBeEnabled();
+  await classroom.getByRole("button", { name: "上一页" }).click();
+  await expect(
+    classroom.getByRole("img", { name: "课件页面：第一张已展示页面" }),
+  ).toBeVisible();
+  await expect(classroom.getByText("1 / 3", { exact: true })).toBeVisible();
+  await expect(classroom.getByRole("button", { name: "下一页" })).toBeEnabled();
+});
+
 for (const background of [false, true]) {
 test(`the teacher agent creates and persists a course from the first request${background ? " while another page is open" : ""}`, async ({
   page,
@@ -1442,6 +2239,8 @@ test(`the teacher agent creates and persists a course from the first request${ba
   let outline: Array<{ title: string; objective: string }> = [];
   let conversationCreation: { title: string } | null = null;
   let teacherInstructions = "";
+  let teacherReceivedAuthoritativeSection = false;
+  const initialSectionId = "11111111-1111-4111-8111-111111111111";
   let releaseCreation = () => {};
   const creationGate = new Promise<void>((resolve) => { releaseCreation = resolve; });
   await page.route("**/api/courses", async (route) => {
@@ -1468,7 +2267,7 @@ test(`the teacher agent creates and persists a course from the first request${ba
         course: {
           ...created,
           sections: outline.map((section, index) => ({
-            id: index === 0 ? "initial-section" : `section-${index}`,
+            id: index === 0 ? initialSectionId : `section-${index}`,
             ...section,
             position: index,
             status: "planned",
@@ -1479,7 +2278,7 @@ test(`the teacher agent creates and persists a course from the first request${ba
     });
   });
   await page.route(
-    "**/api/courses/course-agent/sections/initial-section/conversations",
+    `**/api/courses/course-agent/sections/${initialSectionId}/conversations`,
     async (route) => {
       conversationCreation = route.request().postDataJSON() as {
         title: string;
@@ -1489,7 +2288,7 @@ test(`the teacher agent creates and persists a course from the first request${ba
         json: {
           conversation: {
             id: "conversation-agent",
-            sectionId: "initial-section",
+            sectionId: initialSectionId,
             title: conversationCreation.title,
             state: {
               messages: [],
@@ -1515,6 +2314,10 @@ test(`the teacher agent creates and persists a course from the first request${ba
       .map((message) => String(message.content))
       .join("\n");
     const transcript = JSON.stringify(request.payload.messages);
+    teacherReceivedAuthoritativeSection =
+      teacherReceivedAuthoritativeSection ||
+      (transcript.includes("Background child-agent task completed") &&
+        transcript.includes(initialSectionId));
     await route.fulfill(
       !transcript.includes('"name":"create_course"')
         ? toolResponse("create-fractions", "create_course", {
@@ -1539,13 +2342,16 @@ test(`the teacher agent creates and persists a course from the first request${ba
                 },
               ],
             })
-          : !transcript.includes('"name":"create_course_conversation"')
+          : !transcript.includes('"name":"create_course_conversation"') &&
+              teacherReceivedAuthoritativeSection
             ? toolResponse(
                 "start-fractions",
                 "create_course_conversation",
-                { sectionId: "initial-section", title: "认识分数" },
+                { sectionId: initialSectionId, title: "认识分数" },
               )
-            : textResponse("我们从把一个苹果平均分开开始。"),
+            : transcript.includes('"name":"create_course_conversation"')
+              ? textResponse("我们从把一个苹果平均分开开始。")
+              : textResponse("课程大纲正在后台建立。"),
     );
   });
 
@@ -1583,6 +2389,7 @@ test(`the teacher agent creates and persists a course from the first request${ba
     "比较分数",
   ]);
   expect(conversationCreation).toEqual({ title: "认识分数" });
+  expect(teacherReceivedAuthoritativeSection).toBe(true);
   expect(teacherInstructions).toMatch(
     /set_course_outline.+create_course_conversation.+first section/i,
   );
@@ -1738,6 +2545,10 @@ test("a student creates a course with teaching materials attached to the first r
       payload: { messages: Array<{ role: string; content: unknown }> };
     };
     const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Background child-agent task completed")) {
+      await route.fulfill(textResponse(""));
+      return;
+    }
     if (!transcript.includes('"name":"create_course"')) {
       await route.fulfill(
         toolResponse("create-variables", "create_course", {
@@ -2455,6 +3266,10 @@ test("the course agent can start another section without completing the current 
       payload: { messages: Array<{ role: string; content: unknown }> };
     };
     const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Background child-agent task completed")) {
+      await route.fulfill(textResponse(""));
+      return;
+    }
     await route.fulfill(
       !transcript.includes('"name":"set_course_outline"')
         ? toolResponse("advance-outline", "set_course_outline", {
@@ -2673,7 +3488,7 @@ test("the course agent reclassifies session content before publishing a revised 
       );
       return;
     }
-    await route.fulfill(textResponse("已经按照实际学习内容重新整理课程。"));
+    await route.fulfill(textResponse("课程大纲正在后台重新整理。"));
   });
 
   await page.goto("/");
@@ -2684,18 +3499,18 @@ test("the course agent reclassifies session content before publishing a revised 
   await page.getByRole("button", { name: "开始新的学习" }).click();
 
   await expect(
-    page.getByText("已经按照实际学习内容重新整理课程。", { exact: true }),
+    page.getByText("课程大纲正在后台重新整理。", { exact: true }),
   ).toBeVisible();
-  expect(classificationRequest).toContain(
-    "我正在给猜数字游戏加上最多五次机会。",
-  );
-  expect(assignment).toMatchObject({
-    newSection: {
-      title: "历史项目",
-      objective: "保留不属于新版大纲的项目学习记录",
-    },
-    conversationUpdatedAt: conversation.updatedAt,
-  });
+  await expect
+    .poll(() => classificationRequest)
+    .toContain("我正在给猜数字游戏加上最多五次机会。");
+  await expect.poll(() => assignment).toMatchObject({
+      newSection: {
+        title: "历史项目",
+        objective: "保留不属于新版大纲的项目学习记录",
+      },
+      conversationUpdatedAt: conversation.updatedAt,
+    });
 });
 
 test("a student enters a section directly whether resuming or starting", async ({

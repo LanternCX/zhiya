@@ -9,7 +9,7 @@ export interface ModelGateway {
     onRetry?: ModelRetryListener,
   ): Promise<Response>;
   course(
-    agent: "teacher" | "slides" | "outline-classifier",
+    agent: "teacher" | "slides" | "animation" | "outline-classifier",
     payload: object,
     signal?: AbortSignal,
     onRetry?: ModelRetryListener,

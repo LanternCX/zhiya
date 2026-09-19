@@ -17,7 +17,7 @@ export async function modelRequest(
 }
 
 export async function courseModelRequest(
-  agent: "teacher" | "slides" | "outline-classifier",
+  agent: "teacher" | "slides" | "animation" | "outline-classifier",
   payload: object,
   signal?: AbortSignal,
   onRetry?: ModelRetryListener,
