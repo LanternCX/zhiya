@@ -175,6 +175,18 @@ test("course content blends into the workspace canvas", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  const sidebar = await page.locator(".workspace-sidebar").boundingBox();
+  expect(sidebar?.width).toBe(220);
+  await page.getByRole("button", { name: "收起侧栏" }).click();
+  await expect(page.locator(".workspace-sidebar")).toHaveCSS("width", "72px");
+  await page.getByRole("button", { name: "展开侧栏" }).click();
+
+  const courseSurface = await page.locator(".course-surface").boundingBox();
+  const courseRoom = await page.locator(".course-room").boundingBox();
+  expect(courseRoom?.height).toBe(courseSurface?.height);
+  await expect(
+    page.locator('.course-composer > [data-slot="input-group"]'),
+  ).toHaveCSS("border-radius", "8px");
   await expect(page.locator(".course-conversation")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",

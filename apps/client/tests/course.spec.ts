@@ -1575,6 +1575,51 @@ test("a saved course starts a new agent-routed session and supports rename and d
   expect((courseComposer?.y ?? 0) + (courseComposer?.height ?? 0)).toBeGreaterThan(
     900,
   );
+  await expect(
+    page.locator(
+      '.course-home-composer > [data-slot="input-group"]',
+    ),
+  ).toHaveCSS("border-radius", "30px");
+  const workspaceBody = await page.locator(".workspace-body").boundingBox();
+  expect(
+    Math.abs(
+      (courseComposer?.x ?? 0) + (courseComposer?.width ?? 0) / 2 -
+        ((workspaceBody?.x ?? 0) + (workspaceBody?.width ?? 0) / 2),
+    ),
+  ).toBeLessThan(1);
+  await page.setViewportSize({ width: 844, height: 898 });
+  await page.getByRole("button", { name: "收起侧栏" }).click();
+  await expect
+    .poll(async () => {
+      const collapsedComposer = await page
+        .locator(".course-home-composer")
+        .boundingBox();
+      const collapsedWorkspaceBody = await page
+        .locator(".workspace-body")
+        .boundingBox();
+      return Math.abs(
+        (collapsedComposer?.x ?? 0) + (collapsedComposer?.width ?? 0) / 2 -
+          ((collapsedWorkspaceBody?.x ?? 0) +
+            (collapsedWorkspaceBody?.width ?? 0) / 2),
+      );
+    })
+    .toBeLessThan(1);
+  await expect
+    .poll(async () => {
+      const collapsedComposer = await page
+        .locator(".course-home-composer")
+        .boundingBox();
+      const collapsedWorkspaceBody = await page
+        .locator(".workspace-body")
+        .boundingBox();
+      return (
+        (collapsedWorkspaceBody?.width ?? 0) -
+        (collapsedComposer?.width ?? 0)
+      );
+    })
+    .toBe(80);
+  await page.getByRole("button", { name: "展开侧栏" }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const courseAttachmentButton = page.getByRole("button", {
     name: "添加教学材料",
   });

@@ -1,8 +1,11 @@
+:where(.chat-composer) {
+  --chat-composer-radius: var(--radius-md);
+}
 .chat-composer > [data-slot="input-group"] {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--chat-composer-radius);
   background: var(--surface);
   box-shadow: none;
 }
