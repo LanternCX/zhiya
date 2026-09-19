@@ -71,22 +71,37 @@ test("a student runs a model-created coding page and receives a review only when
   await mockCompletedWorkspace(page);
   await page.route("**/api/code/languages", (route) =>
     route.fulfill({
-      json: { languages: [{ id: 71, name: "Python (3.8.1)" }] },
+      json: {
+        languages: [
+          { id: 4, name: "C" },
+          { id: 1, name: "Python" },
+        ],
+      },
     }),
   );
   let submittedCode = "";
+  let submittedLanguageId = 0;
   let runRequests = 0;
   let releaseFirstRun = () => {};
+  let releaseSecondRun = () => {};
   const firstRunPending = new Promise<void>((resolve) => {
     releaseFirstRun = resolve;
   });
+  const secondRunPending = new Promise<void>((resolve) => {
+    releaseSecondRun = resolve;
+  });
   await page.route("**/api/code/runs", async (route) => {
-    submittedCode = route.request().postDataJSON().sourceCode;
+    const submission = route.request().postDataJSON();
+    submittedCode = submission.sourceCode;
+    submittedLanguageId = submission.languageId;
     runRequests++;
     if (runRequests === 1) await firstRunPending;
+    if (runRequests === 2) await secondRunPending;
     await route.fulfill({
       json: {
-        stdout: "你好，知芽！\n",
+        stdout: submission.sourceCode.includes("你好，知芽")
+          ? "你好，知芽！\n"
+          : `第 ${runRequests} 次运行\n`,
         stderr: "",
         compileOutput: "",
         message: "",
@@ -126,7 +141,7 @@ test("a student runs a model-created coding page and receives a review only when
           title: "打印一声问候",
           instructions:
             "**修改程序**，完成下面的任务：\n\n- 使用 `print` 输出：你好，知芽！",
-          languageId: 71,
+          languageId: 4,
           languageName: "Python (3.8.1)",
           starterCode: "print('你好')",
         }),
@@ -177,9 +192,60 @@ test("a student runs a model-created coding page and receives a review only when
     brandGreen,
   );
   await expect(userSpeaker).toHaveCSS("color", conversationText);
+  const userMessage = page.locator(".course-message.user").first();
   const editorShell = page.getByRole("region", { name: "代码编辑区" });
   for (const theme of ["light", "dark"]) {
     await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    const bubbleColors = await userMessage.evaluate((element) => {
+      const channels = (color: string) => {
+        const values = color.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+        return color.startsWith("color(srgb")
+          ? values.map((value) => value * 255)
+          : values;
+      };
+      const luminance = (color: string) => {
+        const values = channels(color).map((value) => {
+          const s = value / 255;
+          return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+        });
+        return values[0] * 0.2126 + values[1] * 0.7152 + values[2] * 0.0722;
+      };
+      const probe = document.createElement("span");
+      probe.style.background = "var(--canvas-fill)";
+      document.body.append(probe);
+      const canvas = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      const style = getComputedStyle(element);
+      const background = style.backgroundColor;
+      const text = getComputedStyle(
+        element.querySelector("p") ?? element,
+      ).color;
+      const backgroundChannels = channels(background);
+      const canvasChannels = channels(canvas);
+      const backgroundDifference = Math.max(
+        ...backgroundChannels.map((value, index) =>
+          Math.abs(value - canvasChannels[index]),
+        ),
+      );
+      const textLuminance = luminance(text);
+      const backgroundLuminance = luminance(background);
+      return {
+        background,
+        backgroundDifference,
+        borderColor: style.borderTopColor,
+        borderWidth: style.borderTopWidth,
+        textContrast:
+          (Math.max(textLuminance, backgroundLuminance) + 0.05) /
+          (Math.min(textLuminance, backgroundLuminance) + 0.05),
+      };
+    });
+    expect(
+      bubbleColors.backgroundDifference,
+      `${theme} user message separation`,
+    ).toBeGreaterThanOrEqual(28);
+    expect(bubbleColors.textContrast, `${theme} user message text contrast`).toBeGreaterThanOrEqual(4.5);
+    expect(bubbleColors.borderWidth).toBe("1px");
+    expect(bubbleColors.borderColor).not.toBe(bubbleColors.background);
     const endButton = page.getByRole("button", { name: "结束练习", exact: true });
     await page.mouse.move(0, 0);
     const resting = await endButton.evaluate((element) => getComputedStyle(element).backgroundColor);
@@ -188,13 +254,23 @@ test("a student runs a model-created coding page and receives a review only when
     await test.info().attach(`coding-${theme}`, { body: await page.screenshot({ animations: "disabled", path: test.info().outputPath(`coding-${theme}.png`) }), contentType: "image/png" });
   }
   await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
-  await expect(editorShell).toHaveCSS("border-top-width", "2px");
+  await expect(editorShell).toHaveCSS("border-top-width", "1px");
   const stdin = page.getByRole("textbox", { name: "标准输入" });
-  await expect(stdin).toHaveCSS("border-top-width", "2px");
+  await expect(stdin).toHaveCSS("border-top-width", "1px");
+  const controlBoundary = await page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--line-strong)";
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  await expect(stdin).toHaveCSS("border-top-color", controlBoundary);
+  await expect(
+    page.locator('.course-composer > [data-slot="input-group"]'),
+  ).toHaveCSS("border-top-color", controlBoundary);
   const outputRegion = page.getByRole("region", { name: "运行结果" });
   await expect(outputRegion).toBeVisible();
-  await expect(outputRegion).toHaveCSS("border-top-width", "2px");
-  await expect(outputRegion).not.toHaveCSS("box-shadow", "none");
   await expect(page.getByText("运行代码后，结果会显示在这里", { exact: true })).toBeVisible();
   const outputBeforeRun = await outputRegion.boundingBox();
   expect(outputBeforeRun?.height ?? 0).toBeGreaterThanOrEqual(80);
@@ -250,14 +326,25 @@ test("a student runs a model-created coding page and receives a review only when
   await expect(runSpinner).toBeVisible();
   await expect(runSpinner).not.toHaveCSS("animation-name", "none");
   await expect(page.getByText("运行中…", { exact: true })).toBeVisible();
+  await expect(editor).toHaveAttribute("contenteditable", "false");
+  await expect(stdin).toBeDisabled();
   releaseFirstRun();
   await expect(
     page.getByRole("button", { name: "运行代码" }),
   ).toBeEnabled();
+  await expect(editor).toHaveAttribute("contenteditable", "true");
+  await expect(stdin).toBeEnabled();
   await expect.poll(() => submittedCode).toBe("if True:\n    pass");
+  expect(submittedLanguageId).toBe(1);
+  await expect(page.getByText("第 1 次运行", { exact: true })).toBeVisible();
   await editor.press("Shift+Tab");
   await page.getByRole("button", { name: "运行代码" }).click();
+  await expect(page.getByText("正在重新运行…", { exact: true })).toBeVisible();
+  await expect(page.getByText("第 1 次运行", { exact: true })).toHaveCount(0);
+  await expect.poll(() => runRequests).toBe(2);
+  releaseSecondRun();
   await expect.poll(() => submittedCode).toBe("if True:\npass");
+  await expect(page.getByText("第 2 次运行", { exact: true })).toBeVisible();
   await editor.fill("if True:");
   await editor.press("Enter");
   await editor.type("pass");
@@ -297,6 +384,143 @@ test("a student runs a model-created coding page and receives a review only when
   await expect(page.getByText(/还可以把问候语提取成变量/)).toBeVisible();
   await expect(page.getByRole("button", { name: "练习已结束" })).toBeDisabled();
   await expect(editor).toHaveAttribute("contenteditable", "false");
+});
+
+test("a failed rerun removes the previously saved coding result", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const previousResult = {
+    stdout: "旧结果\n",
+    stderr: "",
+    compileOutput: "",
+    message: "",
+    status: { description: "Completed" },
+    time: "0.01",
+    memory: 3200,
+  };
+  const codingPage = {
+    kind: "coding" as const,
+    id: "saved-code",
+    title: "打印一声问候",
+    instructions: "运行代码。",
+    languageId: 1,
+    languageName: "Python",
+    starterCode: "print('你好')",
+    code: "print('你好')",
+    stdin: "",
+    status: "active" as const,
+    result: previousResult,
+  };
+  const overviewPage = {
+    kind: "slide" as const,
+    id: "saved-overview",
+    title: "开始",
+    body: "先看示例。",
+    bullets: [],
+    layout: "explain" as const,
+  };
+  const savedState = {
+    messages: [],
+    pages: [overviewPage, codingPage],
+    presentedPageIds: [overviewPage.id, codingPage.id],
+    currentPageId: codingPage.id,
+  };
+  const saved = {
+    id: "saved-code-course",
+    conversationId: "saved-code-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state: savedState,
+    sections: [
+      {
+        id: "python-basics",
+        title: "Python 基础",
+        objective: "运行第一个 Python 程序",
+        position: 0,
+        status: "active" as const,
+        conversations: [
+          {
+            id: "saved-code-chat",
+            sectionId: "python-basics",
+            title: "第一次学习",
+            state: savedState,
+            createdAt: "2026-09-14T08:00:00Z",
+            updatedAt: "2026-09-14T09:00:00Z",
+          },
+        ],
+      },
+    ],
+    createdAt: "2026-09-14T08:00:00Z",
+    updatedAt: "2026-09-14T09:00:00Z",
+  };
+  let savedRequest: {
+    state?: { pages?: Array<{ id: string; result?: unknown }> };
+  } | null = null;
+  let releaseFailedRun = () => {};
+  const failedRunPending = new Promise<void>((resolve) => {
+    releaseFailedRun = resolve;
+  });
+  let runRequests = 0;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [saved] } }),
+  );
+  await page.route("**/api/code/languages", (route) =>
+    route.fulfill({ json: { languages: [{ id: 1, name: "Python" }] } }),
+  );
+  await page.route("**/api/code/runs", async (route) => {
+    runRequests++;
+    if (runRequests === 1) {
+      await failedRunPending;
+      await route.fulfill({
+        json: { ...previousResult, stdout: "过期结果\n" },
+      });
+      return;
+    }
+    await route.fulfill({ status: 500, json: { error: "执行失败" } });
+  });
+  await page.route(
+    "**/api/courses/saved-code-course/conversation",
+    async (route) => {
+      savedRequest = route.request().postDataJSON();
+      await route.fulfill({ json: { ok: true } });
+    },
+  );
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "打开课程：Python 入门" }).click();
+  await page
+    .getByRole("button", { name: "打开小节：Python 基础" })
+    .click();
+  await expect(page.getByText("旧结果", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "运行代码" }).click();
+  await expect(page.getByRole("button", { name: "上一页" })).toBeDisabled();
+  await page.getByRole("button", { name: "返回课程" }).click();
+  await page
+    .getByRole("button", { name: "打开小节：Python 基础" })
+    .click();
+  await page.getByRole("button", { name: "运行代码" }).click();
+  await expect(
+    page
+      .getByRole("article", { name: "编程练习：打印一声问候" })
+      .getByRole("alert"),
+  ).toContainText("执行失败");
+  await expect(page.getByText("旧结果", { exact: true })).toHaveCount(0);
+  releaseFailedRun();
+  await expect(page.getByText("过期结果", { exact: true })).toHaveCount(0);
+  await expect
+    .poll(
+      () =>
+        savedRequest?.state?.pages?.find(({ id }) => id === codingPage.id)
+          ?.result,
+    )
+    .toBeUndefined();
 });
 
 async function mockCompletedWorkspace(page: Page) {
@@ -582,7 +806,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
   await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
   await expect(page.locator(".workspace-sidebar")).toHaveCSS(
     "border-right-width",
-    "3px",
+    "1px",
   );
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
@@ -1235,6 +1459,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
     await route.fulfill({ status: 405, json: { error: "unexpected request" } });
   });
 
+  await page.setViewportSize({ width: 844, height: 898 });
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "今天想学什么？" }),
@@ -1263,6 +1488,10 @@ test("a saved course starts a new agent-routed session and supports rename and d
     (libraryBox?.y ?? 0) - ((headingBox?.y ?? 0) + (headingBox?.height ?? 0)),
   ).toBeGreaterThanOrEqual(32);
   const cardBox = await page.locator(".course-card").boundingBox();
+  const copyBox = await page.locator(".course-card-copy").boundingBox();
+  const menuButtonBox = await page
+    .getByRole("button", { name: "管理课程：认识太阳系" })
+    .boundingBox();
   const composerBox = await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .boundingBox();
@@ -1273,13 +1502,33 @@ test("a saved course starts a new agent-routed session and supports rename and d
   expect(Math.abs((cardBox?.width ?? 0) - (cardBox?.height ?? 0))).toBeLessThan(
     2,
   );
-  expect((cardBox?.y ?? 0) + (cardBox?.height ?? 0)).toBeLessThan(
-    composerBox?.y ?? 0,
+  expect(
+    Math.abs((menuButtonBox?.width ?? 0) - (menuButtonBox?.height ?? 0)),
+  ).toBeLessThan(1);
+  expect(menuButtonBox?.y ?? 0).toBeGreaterThanOrEqual(copyBox?.y ?? Infinity);
+  expect((menuButtonBox?.y ?? 0) - (copyBox?.y ?? 0)).toBeLessThanOrEqual(12);
+  expect(
+    (copyBox?.x ?? 0) +
+      (copyBox?.width ?? 0) -
+      ((menuButtonBox?.x ?? 0) + (menuButtonBox?.width ?? 0)),
+  ).toBeLessThanOrEqual(12);
+  await expect(page.getByText("太阳系基础", { exact: true })).toBeHidden();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const wideCardBox = await page.locator(".course-card").boundingBox();
+  const wideComposerBox = await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .boundingBox();
+  const wideConversationBox = await page
+    .getByRole("region", { name: "教学对话" })
+    .boundingBox();
+  const wideComposerFormBox = await page.locator(".course-composer").boundingBox();
+  expect((wideCardBox?.y ?? 0) + (wideCardBox?.height ?? 0)).toBeLessThan(
+    wideComposerBox?.y ?? 0,
   );
   expect(
-    (composerFormBox?.x ?? 0) + (composerFormBox?.width ?? 0),
+    (wideComposerFormBox?.x ?? 0) + (wideComposerFormBox?.width ?? 0),
   ).toBeLessThanOrEqual(
-    (conversationBox?.x ?? 0) + (conversationBox?.width ?? 0),
+    (wideConversationBox?.x ?? 0) + (wideConversationBox?.width ?? 0),
   );
   await expect(page.locator(".course-card-open")).toHaveCSS(
     "box-shadow",
@@ -1295,7 +1544,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
   const submitButton = page.getByRole("button", { name: "发送" });
   const attachmentButtonBox = await attachmentButton.boundingBox();
   const submitButtonBox = await submitButton.boundingBox();
-  expect(composerBox?.height ?? Infinity).toBeLessThanOrEqual(64);
+  expect(wideComposerBox?.height ?? Infinity).toBeLessThanOrEqual(64);
   expect(
     Math.abs(
       (attachmentButtonBox?.y ?? 0) - (submitButtonBox?.y ?? Infinity),
@@ -1326,6 +1575,51 @@ test("a saved course starts a new agent-routed session and supports rename and d
   expect((courseComposer?.y ?? 0) + (courseComposer?.height ?? 0)).toBeGreaterThan(
     900,
   );
+  await expect(
+    page.locator(
+      '.course-home-composer > [data-slot="input-group"]',
+    ),
+  ).toHaveCSS("border-radius", "30px");
+  const workspaceBody = await page.locator(".workspace-body").boundingBox();
+  expect(
+    Math.abs(
+      (courseComposer?.x ?? 0) + (courseComposer?.width ?? 0) / 2 -
+        ((workspaceBody?.x ?? 0) + (workspaceBody?.width ?? 0) / 2),
+    ),
+  ).toBeLessThan(1);
+  await page.setViewportSize({ width: 844, height: 898 });
+  await page.getByRole("button", { name: "收起侧栏" }).click();
+  await expect
+    .poll(async () => {
+      const collapsedComposer = await page
+        .locator(".course-home-composer")
+        .boundingBox();
+      const collapsedWorkspaceBody = await page
+        .locator(".workspace-body")
+        .boundingBox();
+      return Math.abs(
+        (collapsedComposer?.x ?? 0) + (collapsedComposer?.width ?? 0) / 2 -
+          ((collapsedWorkspaceBody?.x ?? 0) +
+            (collapsedWorkspaceBody?.width ?? 0) / 2),
+      );
+    })
+    .toBeLessThan(1);
+  await expect
+    .poll(async () => {
+      const collapsedComposer = await page
+        .locator(".course-home-composer")
+        .boundingBox();
+      const collapsedWorkspaceBody = await page
+        .locator(".workspace-body")
+        .boundingBox();
+      return (
+        (collapsedWorkspaceBody?.width ?? 0) -
+        (collapsedComposer?.width ?? 0)
+      );
+    })
+    .toBe(80);
+  await page.getByRole("button", { name: "展开侧栏" }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const courseAttachmentButton = page.getByRole("button", {
     name: "添加教学材料",
   });
@@ -1384,7 +1678,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
   await page.getByRole("button", { name: "管理课程：认识太阳系" }).click();
   await expect(page.locator(".course-card-menu")).toHaveCSS(
     "border-radius",
-    "12px",
+    "8px",
   );
   await expect(page.locator(".course-card-menu")).not.toHaveCSS(
     "animation-name",
