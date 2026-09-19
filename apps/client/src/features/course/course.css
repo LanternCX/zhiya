@@ -12,11 +12,11 @@
   max-width: 1040px;
 }
 .workspace:has(.course-room) {
-  background: color-mix(in srgb, var(--surface) 42%, var(--subtle));
+  background: var(--canvas-fill);
 }
 .course-room {
   display: grid;
-  grid-template-columns: minmax(300px, 0.72fr) minmax(460px, 1.28fr);
+  grid-template-columns: minmax(320px, 420px) minmax(460px, 1fr);
   gap: 0;
   height: calc(100dvh - 100px);
   min-height: 0;
@@ -547,6 +547,7 @@
 .course-thread {
   overflow-y: auto;
   padding: 24px 20px;
+  background: transparent;
   scrollbar-width: thin;
 }
 .course-start {
@@ -591,11 +592,15 @@
 }
 .course-card {
   position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1.45fr) minmax(0, 0.8fr);
   min-width: 0;
   aspect-ratio: 1;
+  container-type: inline-size;
   animation: course-card-enter 360ms both;
 }
 .course-card-open {
+  grid-area: 1 / 1 / -1 / -1;
   display: grid;
   grid-template-rows: minmax(0, 1.45fr) minmax(0, 0.8fr);
   width: 100%;
@@ -603,16 +608,17 @@
   overflow: hidden;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-  border-radius: 14px;
+  border-radius: 6px;
   background: var(--surface);
   color: var(--text);
   text-align: left;
   box-shadow: none;
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease;
 }
 .course-card-open:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+  transform: none;
+  border-color: var(--line-strong);
+  background: var(--subtle);
   box-shadow: none;
 }
 .course-cover {
@@ -703,7 +709,7 @@
   white-space: nowrap;
 }
 .course-card-copy strong {
-  padding-right: 22px;
+  padding-right: clamp(28px, 20cqi, 36px);
   font-size: 15px;
 }
 .course-card-copy > span {
@@ -712,15 +718,17 @@
   font-size: 11px;
 }
 .course-card-menu-trigger {
-  position: absolute;
-  right: 7px;
-  bottom: 50px;
+  position: relative;
+  grid-area: 2 / 1;
+  align-self: start;
+  justify-self: end;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  min-height: 28px;
+  width: clamp(24px, 16cqi, 28px);
+  height: clamp(24px, 16cqi, 28px);
+  min-height: 0;
+  margin: clamp(5px, 4cqi, 7px);
   padding: 0;
   border: 0;
   border-radius: 9px;
@@ -732,8 +740,17 @@
   color: var(--text);
 }
 .course-card-menu-trigger svg {
-  width: 15px;
-  height: 15px;
+  width: 54%;
+  height: 54%;
+}
+@container (max-width: 190px) {
+  .course-card-copy {
+    grid-template-rows: 1fr;
+    align-items: center;
+  }
+  .course-card-copy > span {
+    display: none;
+  }
 }
 .course-card-menu {
   position: absolute;
@@ -743,9 +760,9 @@
   min-width: 116px;
   padding: 4px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: none;
+  box-shadow: var(--panel-shadow);
 }
 .course-card-menu button,
 .course-card-menu input {
@@ -895,8 +912,10 @@
 .course-message.user {
   margin-left: 12%;
   padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  color: var(--text);
 }
 .course-message.user > span {
   color: var(--accent);
@@ -1388,7 +1407,7 @@
 .coding-page > .coding-actions button:not(:disabled):hover {
   border-color: var(--brand-green);
   background: var(--brand-green-soft);
-  box-shadow: 3px 4px 0 color-mix(in srgb, var(--line) 60%, transparent);
+  box-shadow: none;
 }
 .coding-page > .coding-actions button:first-child:not(:disabled):hover {
   background: var(--accent-hover);
@@ -1743,11 +1762,10 @@
 .course-room {
   background: transparent;
 }
-.course-conversation,
 .slide-stage,
 .coding-page,
 .coding-page-loading {
-  background-color: transparent;
+  background-color: var(--surface);
 }
 
 /* Green carries brand and conversational emphasis. */
@@ -1766,33 +1784,25 @@
 
 /* One coherent outline per coding control, with clear separation between rows. */
 .coding-editor-shell {
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 72%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: none;
 }
 .coding-editor-bar {
-  border-bottom: 2px solid var(--line);
-}
-.coding-output {
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 72%, transparent);
-}
-.coding-output > header {
-  border-bottom-width: 2px;
+  border-bottom: 1px solid var(--line);
 }
 .coding-page .coding-stdin {
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
 }
 .coding-page > .coding-actions button {
-  border-width: 2px;
-  box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 60%, transparent);
+  border-width: 1px;
+  box-shadow: none;
 }
 .coding-page > .coding-actions button:not(:disabled):active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 color-mix(in srgb, var(--line) 60%, transparent);
+  transform: scale(.98);
+  box-shadow: none;
 }
 
 /* Inner classroom regions share the workspace canvas. */
@@ -1804,8 +1814,7 @@
 .course-surface,
 .workspace-empty,
 .course-home,
-.course-room,
-.slide-stage {
+.course-room {
   background: transparent;
 }
 

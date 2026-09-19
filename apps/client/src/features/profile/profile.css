@@ -399,15 +399,15 @@
   min-height: 50dvh;
 }
 
-/* Learning controls share the theme's borders and hard-offset shadows. */
-.welcome-mark { border: 3px solid var(--line); border-radius: 12px; background: var(--accent); box-shadow: 5px 5px 0 var(--line); }
-.question-answer { border: 3px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 5px 5px 0 var(--line); backdrop-filter: none; }
-.question-option { border-bottom: 2px solid var(--line); }
-.question-option [data-slot="radio-group-item"], .question-option [data-slot="checkbox"] { border: 3px solid var(--line); }
-.question-option [data-state="checked"] { background: var(--accent); border-color: var(--line); }
-.question-answer textarea, .memory-panel textarea { border: 3px solid var(--line); border-radius: 8px; }
-.question-actions .primary { border: 3px solid var(--line); border-radius: 8px; box-shadow: 3px 3px 0 var(--line); }
-.learning-progress .generation-stop { border: 3px solid var(--line); border-radius: 8px; background: var(--accent); box-shadow: 3px 3px 0 var(--line); }
+/* Learning controls use the same quiet boundaries as the workspace. */
+.welcome-mark { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-active); box-shadow: none; }
+.question-answer { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: none; backdrop-filter: none; }
+.question-option { border-bottom: 1px solid var(--line); }
+.question-option [data-slot="radio-group-item"], .question-option [data-slot="checkbox"] { border: 1px solid var(--line-strong); }
+.question-option [data-state="checked"] { background: var(--accent); border-color: var(--accent); }
+.question-answer textarea, .memory-panel textarea { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
+.question-actions .primary { border: 1px solid var(--accent); border-radius: var(--radius-sm); box-shadow: none; }
+.learning-progress .generation-stop { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); box-shadow: none; }
 @media (prefers-reduced-motion: no-preference) {
   .question-card,
   .learning-progress {
