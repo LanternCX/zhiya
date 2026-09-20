@@ -20,6 +20,7 @@ import (
 
 type Config struct {
 	Model       Model    `yaml:"model"`
+	Speech      Speech   `yaml:"speech"`
 	Runner      Runner   `yaml:"runner"`
 	Development bool     `yaml:"development"`
 	Server      Server   `yaml:"http"`
@@ -27,6 +28,13 @@ type Config struct {
 	Storage     Storage  `yaml:"storage"`
 	SMTP        SMTP     `yaml:"smtp"`
 	Account     Account  `yaml:"account"`
+}
+type Speech struct {
+	Endpoint string `yaml:"endpoint"`
+	APIKey   string `yaml:"api_key"`
+	ASRModel string `yaml:"asr_model"`
+	TTSModel string `yaml:"tts_model"`
+	TTSVoice string `yaml:"tts_voice"`
 }
 type Runner struct {
 	Endpoint string `yaml:"endpoint"`
@@ -207,6 +215,18 @@ func override(value reflect.Value, prefix string, known map[string]bool) error {
 }
 
 func (c Config) Validate() error {
+	if c.Speech.Endpoint != "" {
+		u, err := url.Parse(c.Speech.Endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "wss" && !(c.Development && u.Scheme == "ws" && loopback(u.Hostname()))) {
+			return fmt.Errorf("speech.endpoint must be a secure WebSocket URL (loopback WS allowed in development)")
+		}
+		if c.Speech.APIKey == "" {
+			return fmt.Errorf("speech.api_key is required when speech.endpoint is configured")
+		}
+		if c.Speech.ASRModel == "" || c.Speech.TTSModel == "" || c.Speech.TTSVoice == "" {
+			return fmt.Errorf("speech models and voice are required when speech.endpoint is configured")
+		}
+	}
 	if c.Model.Endpoint != "" {
 		u, err := url.Parse(c.Model.Endpoint)
 		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {

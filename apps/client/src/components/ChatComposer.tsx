@@ -1,5 +1,5 @@
-import { useRef, useState, type DragEvent } from "react";
-import { FileUpIcon, PaperclipIcon } from "lucide-react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
+import { FileUpIcon, MicIcon, MicOffIcon, PaperclipIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -21,7 +21,9 @@ import {
   usePromptInputController,
   type PromptInputMessage,
 } from "./ai-elements/prompt-input";
+import { float32ToPcm16, SpeechStream } from "../transport/speech";
 import "./chat-composer.css";
+import "./speech-controls.css";
 
 type AttachmentErrorCode = "max_files" | "max_file_size" | "accept";
 
@@ -51,6 +53,8 @@ export type ChatComposerProps = {
   onError: (message: string) => void;
   onStop?: () => void;
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
+  onVoiceTranscript?: (text: string, final: boolean) => void;
+  onVoiceError?: (message: string) => void;
   running?: boolean;
   submitLabel: string;
 };
@@ -78,16 +82,61 @@ function ChatComposerInput({
   onSubmit,
   running = false,
   submitLabel,
+  onVoiceTranscript,
+  onVoiceError,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
   const controller = usePromptInputController();
   const [dragging, setDragging] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const speech = useRef<SpeechStream | null>(null);
+  const voiceText = useRef("");
+  const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode } | null>(null);
   const dragDepth = useRef(0);
   const canSubmit = Boolean(
     controller.textInput.value.trim() || attachments.files.length,
   );
   const hasFiles = (event: DragEvent<HTMLFormElement>) =>
     event.dataTransfer.types.includes("Files");
+  const stopRecording = () => {
+    audio.current?.processor.disconnect();
+    audio.current?.source.disconnect();
+    audio.current?.stream.getTracks().forEach((track) => track.stop());
+    void audio.current?.context.close();
+    audio.current = null;
+    speech.current?.stop();
+    speech.current?.close();
+    speech.current = null;
+    setRecording(false);
+  };
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const voice = new SpeechStream((event) => {
+        if (event.type === "transcript") {
+          onVoiceTranscript?.(event.text, event.final);
+          const current = controller.textInput.value;
+          const base = voiceText.current && current.endsWith(voiceText.current)
+            ? current.slice(0, -voiceText.current.length)
+            : current;
+          voiceText.current = event.text;
+          controller.textInput.setInput(`${base}${event.text}`);
+        }
+        if (event.type === "error") { onVoiceError?.(event.message); stopRecording(); }
+      });
+      await voice.startAsr();
+      const context = new AudioContext();
+      const source = context.createMediaStreamSource(stream);
+      const processor = context.createScriptProcessor(4096, 1, 1);
+      processor.onaudioprocess = (event) => voice.sendAudio(float32ToPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
+      source.connect(processor); processor.connect(context.destination);
+      speech.current = voice; audio.current = { context, stream, source, processor }; setRecording(true);
+    } catch (error) {
+      onVoiceError?.(error instanceof Error ? error.message : "无法访问麦克风");
+      stopRecording();
+    }
+  };
+  useEffect(() => stopRecording, []);
 
   return (
     <PromptInput
@@ -166,6 +215,15 @@ function ChatComposerInput({
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">
         <PromptInputTools>
+          <PromptInputButton
+            aria-label={recording ? "停止录音" : "语音输入"}
+            className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
+            disabled={disabled || running}
+            onClick={() => (recording ? stopRecording() : void startRecording())}
+            tooltip={recording ? "停止录音" : "语音输入"}
+          >
+            {recording ? <MicOffIcon /> : <MicIcon />}
+          </PromptInputButton>
           <PromptInputButton
             aria-label={options.addLabel}
             className="chat-composer-attachment-button"

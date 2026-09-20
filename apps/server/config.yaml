@@ -9,6 +9,14 @@ model:
   id: ""
   api_key: ""
 
+# DashScope realtime speech relay. Keep live credentials in environment variables.
+speech:
+  endpoint: ""
+  api_key: ""
+  asr_model: "qwen-audio-3.0-asr-flash-streaming"
+  tts_model: "qwen3-tts-flash-realtime"
+  tts_voice: "Cherry"
+
 # The code runner is only reached by the Go server. Development binds it to loopback.
 runner:
   endpoint: "http://127.0.0.1:2358"
