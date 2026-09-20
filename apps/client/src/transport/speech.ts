@@ -46,3 +46,56 @@ export function float32ToPcm16(input: Float32Array, sourceRate: number, targetRa
   }
   return output;
 }
+
+export class NarrationPlayer {
+  private stream: SpeechStream | null = null;
+  private context: AudioContext | null = null;
+  private nextTime = 0;
+  private sources = new Set<AudioBufferSourceNode>();
+  private readonly onIdle: () => void;
+  private queue: string[] = [];
+  private busy = false;
+
+  constructor(onIdle: () => void) { this.onIdle = onIdle; }
+  async speak(text: string) {
+    if (!text.trim()) return;
+    if (!this.stream) {
+      this.stream = new SpeechStream((event) => {
+        if (event.type === "audio") this.enqueue(event.data, event.sampleRate);
+        if (event.type === "complete") { this.busy = false; void this.pump(); }
+      });
+      await this.stream.connect();
+    }
+    this.queue.push(text); await this.pump();
+  }
+  stop() {
+    this.stream?.stopTts(); this.stream?.close(); this.stream = null;
+    this.queue = []; this.busy = false;
+    for (const source of this.sources) source.stop();
+    this.sources.clear(); this.nextTime = 0;
+    this.onIdle();
+  }
+  private async pump() {
+    if (this.busy || !this.queue.length || !this.stream) { if (!this.busy && !this.queue.length && !this.sources.size) this.onIdle(); return; }
+    this.busy = true; this.stream.startTts(this.queue.shift()!);
+  }
+  private enqueue(encoded: string, sampleRate: number) {
+    const context = this.context ??= new AudioContext();
+    const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
+    const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
+    const channel = buffer.getChannelData(0); const view = new DataView(bytes.buffer);
+    for (let index = 0; index < channel.length; index++) channel[index] = view.getInt16(index * 2, true) / 0x8000;
+    const source = context.createBufferSource(); source.buffer = buffer; source.connect(context.destination);
+    this.sources.add(source); const start = Math.max(context.currentTime, this.nextTime); this.nextTime = start + buffer.duration;
+    source.onended = () => { this.sources.delete(source); if (!this.sources.size) { this.nextTime = 0; this.onIdle(); } };
+    source.start(start);
+  }
+}
+
+export function takeCompletedSentences(text: string, consumed: number, flush = false) {
+  const result: string[] = []; let cursor = consumed;
+  const pattern = /[。！？!?；;\n]/g; let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) { if (match.index + 1 > consumed) { result.push(text.slice(cursor, match.index + 1).trim()); cursor = match.index + 1; } }
+  if (flush && cursor < text.length) result.push(text.slice(cursor).trim());
+  return { sentences: result.filter(Boolean), consumed: cursor };
+}

@@ -33,6 +33,7 @@ import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
+import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
 import {
   createCourse,
@@ -170,6 +171,10 @@ export default function CourseRoom({
     new Set(initialState.presentedPageIds),
   );
   const session = useRef<CourseSession | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const narrationPlayer = useRef<NarrationPlayer | null>(null);
+  const narrationMessage = useRef<number | null>(null);
+  const narrationConsumed = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const boundConversationId = useRef<string | null>(
     activeCourse && !newSession ? activeCourse.conversationId : null,
@@ -415,8 +420,15 @@ export default function CourseRoom({
       listCodeLanguages,
     );
     session.current = current;
+    narrationPlayer.current?.stop();
+    narrationPlayer.current = new NarrationPlayer(() => {
+      const latest = messagesRef.current.at(-1);
+      if (latest?.role === "assistant" && !latest.streaming) current.finishNarration(latest.id);
+    });
     return () => {
       current.stop();
+      narrationPlayer.current?.stop();
+      narrationPlayer.current = null;
       if (session.current === current) session.current = null;
     };
   }, [
@@ -480,9 +492,32 @@ export default function CourseRoom({
         break;
       }
     }
-    if (!latest || latest.streaming) return;
-    session.current?.finishNarration(latest.id);
-  }, [messages]);
+    if (!latest) return;
+    if (latest.id !== narrationMessage.current) {
+      narrationMessage.current = latest.id;
+      narrationConsumed.current = 0;
+    }
+    const extracted = takeCompletedSentences(
+      latest.text,
+      narrationConsumed.current,
+      !latest.streaming,
+    );
+    narrationConsumed.current = extracted.consumed;
+    if (!voiceEnabled) {
+      if (!latest.streaming) session.current?.finishNarration(latest.id);
+      return;
+    }
+    for (const sentence of extracted.sentences)
+      void narrationPlayer.current?.speak(sentence);
+  }, [messages, voiceEnabled]);
+
+  useEffect(() => {
+    if (voiceEnabled) return;
+    narrationPlayer.current?.stop();
+    const latest = messagesRef.current.at(-1);
+    if (latest?.role === "assistant" && !latest.streaming)
+      session.current?.finishNarration(latest.id);
+  }, [voiceEnabled]);
 
   useEffect(() => {
     const element = thread.current;
@@ -691,6 +726,7 @@ export default function CourseRoom({
           onError={setError}
           onStop={interrupt}
           onSubmit={submit}
+          onToggleVoice={() => setVoiceEnabled((enabled) => !enabled)}
           running={running}
           submitLabel="发送"
         />

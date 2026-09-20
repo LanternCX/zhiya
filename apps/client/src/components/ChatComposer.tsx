@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { FileUpIcon, MicIcon, MicOffIcon, PaperclipIcon } from "lucide-react";
+import { FileUpIcon, MicIcon, MicOffIcon, PaperclipIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -55,6 +55,8 @@ export type ChatComposerProps = {
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
   onVoiceTranscript?: (text: string, final: boolean) => void;
   onVoiceError?: (message: string) => void;
+  voiceEnabled?: boolean;
+  onToggleVoice?: () => void;
   running?: boolean;
   submitLabel: string;
 };
@@ -84,6 +86,8 @@ function ChatComposerInput({
   submitLabel,
   onVoiceTranscript,
   onVoiceError,
+  voiceEnabled = true,
+  onToggleVoice,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
   const controller = usePromptInputController();
@@ -215,6 +219,16 @@ function ChatComposerInput({
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">
         <PromptInputTools>
+          {onToggleVoice && (
+            <PromptInputButton
+              aria-label={voiceEnabled ? "关闭语音" : "开启语音"}
+              className="chat-composer-voice-toggle"
+              onClick={onToggleVoice}
+              tooltip={voiceEnabled ? "关闭语音" : "开启语音"}
+            >
+              {voiceEnabled ? <Volume2Icon /> : <VolumeXIcon />}
+            </PromptInputButton>
+          )}
           <PromptInputButton
             aria-label={recording ? "停止录音" : "语音输入"}
             className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}

@@ -10,3 +10,11 @@
   color: var(--destructive);
   background: color-mix(in srgb, var(--destructive) 12%, transparent);
 }
+.chat-composer .chat-composer-voice-toggle {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+}
