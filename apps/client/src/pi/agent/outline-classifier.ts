@@ -98,7 +98,6 @@ export async function classifyCourseConversation(options: {
     systemPrompt: classifierPrompt(options.reorganization),
     shouldStopAfterTurn: () => classification !== null,
     request: (payload, signal) => {
-      payload.parallel_tool_calls = false;
       return options.gateway.course(
         "outline-classifier",
         payload,

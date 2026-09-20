@@ -37,6 +37,11 @@ export function createAgent(setup: AgentSetup) {
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
     contextWindow: 32768,
     maxTokens: 8192,
+    compat: {
+      supportsStore: false,
+      supportsDeveloperRole: false,
+      maxTokensField: "max_tokens",
+    },
   };
   return new Agent({
     initialState: {

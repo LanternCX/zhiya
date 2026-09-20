@@ -406,6 +406,49 @@ func TestModelProxyRetriesTransientUpstreamFailures(t *testing.T) {
 	}
 }
 
+func TestModelProxySendsDeepSeekCompatibleCompletionFields(t *testing.T) {
+	var upstreamPayload map[string]any
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&upstreamPayload); err != nil {
+			t.Errorf("decode upstream payload: %v", err)
+		}
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = io.WriteString(w, "data: [DONE]\n\n")
+	}))
+	defer upstream.Close()
+	t.Setenv("ZHIYA_SERVER_MODEL_ENDPOINT", upstream.URL)
+	t.Setenv("ZHIYA_SERVER_MODEL_ID", "deepseek-flash")
+	t.Setenv("ZHIYA_SERVER_MODEL_API_KEY", "server-secret")
+	a := setupAccountTest(t)
+	c := a.register("deepseek-fields@example.com")
+	run := a.request(c, "POST", "/learning/action", map[string]any{"action": "claim"}, http.StatusOK)["runId"].(string)
+	body, _ := json.Marshal(map[string]any{
+		"runId": run,
+		"payload": map[string]any{
+			"messages":   []any{map[string]any{"role": "user", "content": "hello"}},
+			"max_tokens": 8192,
+		},
+	})
+	req, _ := http.NewRequest(http.MethodPost, a.server.URL+"/api/learning/model", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Zhiya-Request", "1")
+	res, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	_, _ = io.ReadAll(res.Body)
+
+	if upstreamPayload["max_tokens"] != float64(8192) {
+		t.Fatalf("max_tokens = %v; want 8192", upstreamPayload["max_tokens"])
+	}
+	for _, field := range []string{"max_completion_tokens", "store", "parallel_tool_calls"} {
+		if value, ok := upstreamPayload[field]; ok {
+			t.Fatalf("unsupported field %q forwarded with value %v", field, value)
+		}
+	}
+}
+
 func TestModelProxyStopsAfterFiveRetriesAndReleasesExecution(t *testing.T) {
 	attempts := 0
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -534,7 +577,7 @@ func TestModelProxyStopsRetryingWhenTheClientCancels(t *testing.T) {
 }
 
 func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) {
-	started := make(chan string, 3)
+	started := make(chan string, 4)
 	release := make(chan struct{})
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload map[string]any
@@ -578,9 +621,10 @@ func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) 
 
 	teacher := request("teacher")
 	slides := request("slides")
+	animation := request("animation")
 	classifier := request("outline-classifier")
 	roles := map[string]bool{}
-	for range 3 {
+	for range 4 {
 		select {
 		case role := <-started:
 			roles[role] = true
@@ -589,11 +633,11 @@ func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) 
 			t.Fatalf("concurrent course streams did not reach upstream: %v", roles)
 		}
 	}
-	if !roles["teacher"] || !roles["slides"] || !roles["outline-classifier"] {
+	if !roles["teacher"] || !roles["slides"] || !roles["animation"] || !roles["outline-classifier"] {
 		t.Fatalf("upstream roles = %v", roles)
 	}
 	close(release)
-	if <-teacher != http.StatusOK || <-slides != http.StatusOK || <-classifier != http.StatusOK {
+	if <-teacher != http.StatusOK || <-slides != http.StatusOK || <-animation != http.StatusOK || <-classifier != http.StatusOK {
 		t.Fatal("course model streams did not complete")
 	}
 	a.request(c, "POST", "/learning/course/model", map[string]any{"agent": "other", "payload": map[string]any{}}, http.StatusBadRequest)

@@ -1,6 +1,5 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
-import type { Slide } from "../../domain/learning";
 
 export type SlideRequest = {
   goal: string;
@@ -11,13 +10,13 @@ export type SlideRequest = {
 export const activityLabel = "准备课件";
 
 export function createSlidesTool(
-  start: (request: SlideRequest) => Promise<Slide>,
+  start: (request: SlideRequest) => { taskId: string; status: "running" },
 ): AgentTool {
   return {
     name: "create_slides",
     label: "生成课件",
     description:
-      "Start generating one or more presentation pages. Use this whenever visual teaching pages help. The first completed page is returned while remaining pages continue in the background.",
+      "Start generating one or more presentation pages in the background and return the task immediately. Generated pages stay hidden until show_next_slide or show_lesson_page presents them. Use this whenever text-led visual teaching pages help.",
     parameters: Type.Object({
       goal: Type.String(),
       pageCount: Type.Integer({ minimum: 1, maximum: 10 }),
@@ -25,15 +24,15 @@ export function createSlidesTool(
     }),
     executionMode: "sequential",
     execute: async (_id, params) => {
-      const first = await start(params as SlideRequest);
+      const task = start(params as SlideRequest);
       return {
         content: [
           {
             type: "text",
-            text: `The first page is now visible: ${JSON.stringify(first)}. Remaining requested pages continue in the background. Base your explanation on pages that are actually visible.`,
+            text: `Slide task started: ${JSON.stringify(task)}. Continue teaching without waiting. Generated pages remain hidden until you present them; never refer to a page as visible before a show tool succeeds.`,
           },
         ],
-        details: { first },
+        details: task,
       };
     },
   };

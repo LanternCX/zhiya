@@ -40,9 +40,7 @@ func New(settings config.Model) *Client {
 func (c *Client) Stream(ctx context.Context, payload map[string]any, agent string, logger *slog.Logger, write func(string) bool, onDone func()) (bool, *Failure) {
 	payload["model"] = c.settings.ID
 	payload["stream"] = true
-	payload["store"] = false
-	delete(payload, "max_tokens")
-	payload["max_completion_tokens"] = 8192
+	payload["max_tokens"] = 8192
 	raw, _ := json.Marshal(payload)
 	idempotencyKey := identifier.New()
 	for attempt := 0; attempt <= maxRetries; attempt++ {
