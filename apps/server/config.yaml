@@ -11,7 +11,7 @@ model:
 
 # DashScope realtime speech relay. Keep live credentials in environment variables.
 speech:
-  endpoint: ""
+  endpoint: "wss://dashscope.aliyuncs.com/api-ws/v1/inference"
   api_key: ""
   asr_model: "qwen-audio-3.0-asr-flash-streaming"
   tts_model: "qwen3-tts-flash-realtime"

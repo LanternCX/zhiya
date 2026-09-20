@@ -220,9 +220,6 @@ func (c Config) Validate() error {
 		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "wss" && !(c.Development && u.Scheme == "ws" && loopback(u.Hostname()))) {
 			return fmt.Errorf("speech.endpoint must be a secure WebSocket URL (loopback WS allowed in development)")
 		}
-		if c.Speech.APIKey == "" {
-			return fmt.Errorf("speech.api_key is required when speech.endpoint is configured")
-		}
 		if c.Speech.ASRModel == "" || c.Speech.TTSModel == "" || c.Speech.TTSVoice == "" {
 			return fmt.Errorf("speech models and voice are required when speech.endpoint is configured")
 		}

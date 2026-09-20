@@ -32,6 +32,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 	defer browser.CloseNow()
 	ctx := r.Context()
 	var upstream *websocket.Conn
+	var taskID string
 	closeUpstream := func() {
 		if upstream != nil {
 			upstream.Close(websocket.StatusNormalClosure, "done")
@@ -64,7 +65,8 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 				send(map[string]string{"type": "error", "message": "无法连接语音服务"})
 				continue
 			}
-			task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": data.UUID(), "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": a.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
+			taskID = data.UUID()
+			task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": a.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(task))
 			send(map[string]string{"type": "ready"})
 			go a.forwardSpeech(ctx, upstream, browser, "asr")
@@ -90,7 +92,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			go a.forwardSpeech(ctx, upstream, browser, "tts")
 		case "stop":
 			if upstream != nil {
-				_ = upstream.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"header": map[string]any{"action": "finish-task", "streaming": "duplex"}, "payload": map[string]any{"input": map[string]any{}}}))
+				_ = upstream.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"header": map[string]any{"action": "finish-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"input": map[string]any{}}}))
 			}
 		case "tts-stop":
 			closeUpstream()
