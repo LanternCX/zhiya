@@ -93,6 +93,7 @@ function ChatComposerInput({
   const controller = usePromptInputController();
   const [dragging, setDragging] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [multiline, setMultiline] = useState(false);
   const speech = useRef<SpeechStream | null>(null);
   const voiceText = useRef("");
   const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode } | null>(null);
@@ -102,6 +103,19 @@ function ChatComposerInput({
   );
   const hasFiles = (event: DragEvent<HTMLFormElement>) =>
     event.dataTransfer.types.includes("Files");
+  const updateMultiline = (element: HTMLTextAreaElement) => {
+    if (!element.value) {
+      setMultiline(false);
+      return;
+    }
+    const style = window.getComputedStyle(element);
+    const lineHeight = Number.parseFloat(style.lineHeight) || 24;
+    const padding =
+      Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
+    setMultiline(
+      element.value.includes("\n") || element.scrollHeight - padding > lineHeight * 1.5,
+    );
+  };
   const stopRecording = () => {
     audio.current?.processor.disconnect();
     audio.current?.source.disconnect();
@@ -145,7 +159,11 @@ function ChatComposerInput({
   return (
     <PromptInput
       accept={options.accept}
-      className={["chat-composer", className].filter(Boolean).join(" ")}
+      className={[
+        "chat-composer",
+        multiline && "chat-composer-multiline",
+        className,
+      ].filter(Boolean).join(" ")}
       maxFiles={options.maxFiles}
       maxFileSize={options.maxFileSize}
       multiple={options.multiple}
@@ -172,9 +190,10 @@ function ChatComposerInput({
         setDragging(false);
       }}
       onError={({ code }) => onError(options.errorMessage(code))}
-      onSubmit={async ({ text, files }) =>
-        onSubmit({ text, files: await toFiles(files) })
-      }
+      onSubmit={async ({ text, files }) => {
+        await onSubmit({ text, files: await toFiles(files) });
+        setMultiline(false);
+      }}
     >
       {dragging && (
         <div className="chat-composer-dropzone" role="status">
@@ -214,6 +233,7 @@ function ChatComposerInput({
         <PromptInputTextarea
           aria-label={label}
           disabled={disabled}
+          onInput={(event) => updateMultiline(event.currentTarget)}
           placeholder="给知芽发消息…"
         />
       </PromptInputBody>
