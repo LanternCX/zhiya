@@ -12,8 +12,9 @@
 }
 .chat-composer textarea {
   min-height: 58px;
-  max-height: 140px;
-  padding: 17px 60px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 14px 14px 68px;
   resize: none;
   border: 0;
   outline: 0;
@@ -113,6 +114,7 @@
   z-index: 2;
   min-height: 58px;
   padding: 9px 10px;
+  background: var(--surface);
   pointer-events: none;
 }
 .chat-composer-footer [data-slot="input-group-addon"] {
