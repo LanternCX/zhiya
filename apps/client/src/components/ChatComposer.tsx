@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { FileUpIcon, MicIcon, MicOffIcon, PaperclipIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import { FileUpIcon, MicIcon, MicOffIcon, PlusIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -219,6 +219,15 @@ function ChatComposerInput({
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">
         <PromptInputTools>
+          <PromptInputButton
+            aria-label={options.addLabel}
+            className="chat-composer-attachment-button"
+            disabled={disabled || running}
+            onClick={() => attachments.openFileDialog()}
+            tooltip={options.addLabel}
+          >
+            <PlusIcon />
+          </PromptInputButton>
           {onToggleVoice && (
             <PromptInputButton
               aria-label={voiceEnabled ? "关闭语音" : "开启语音"}
@@ -229,6 +238,8 @@ function ChatComposerInput({
               {voiceEnabled ? <Volume2Icon /> : <VolumeXIcon />}
             </PromptInputButton>
           )}
+        </PromptInputTools>
+        <PromptInputTools className="chat-composer-submit-tools">
           <PromptInputButton
             aria-label={recording ? "停止录音" : "语音输入"}
             className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
@@ -238,24 +249,15 @@ function ChatComposerInput({
           >
             {recording ? <MicOffIcon /> : <MicIcon />}
           </PromptInputButton>
-          <PromptInputButton
-            aria-label={options.addLabel}
-            className="chat-composer-attachment-button"
-            disabled={disabled || running}
-            onClick={() => attachments.openFileDialog()}
-            tooltip={options.addLabel}
-          >
-            <PaperclipIcon />
-          </PromptInputButton>
+          <PromptInputSubmit
+            aria-label={running ? "打断" : submitLabel}
+            className="chat-composer-submit"
+            disabled={!running && (disabled || !canSubmit)}
+            onStop={onStop}
+            status={running ? "streaming" : "ready"}
+            title={running ? "打断" : submitLabel}
+          />
         </PromptInputTools>
-        <PromptInputSubmit
-          aria-label={running ? "打断" : submitLabel}
-          className="chat-composer-submit"
-          disabled={!running && (disabled || !canSubmit)}
-          onStop={onStop}
-          status={running ? "streaming" : "ready"}
-          title={running ? "打断" : submitLabel}
-        />
       </PromptInputFooter>
     </PromptInput>
   );
