@@ -78,6 +78,18 @@ func TestEnvironmentOverridesFileAndPathsBelongToConfigDirectory(t *testing.T) {
 	}
 }
 
+func TestSpeechCredentialsAreConfiguredIndependently(t *testing.T) {
+	t.Setenv("ZHIYA_SERVER_SPEECH_ASR_API_KEY", "asr-secret")
+	t.Setenv("ZHIYA_SERVER_SPEECH_TTS_API_KEY", "tts-secret")
+	cfg, err := config.Load("../../config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Speech.ASRAPIKey != "asr-secret" || cfg.Speech.TTSAPIKey != "tts-secret" {
+		t.Fatalf("speech credentials were not separated: %#v", cfg.Speech)
+	}
+}
+
 func TestInvalidConfigurationFailsWithoutLeakingSecrets(t *testing.T) {
 	for _, tc := range []struct{ name, value string }{
 		{"ZHIYA_SERVER_HTTP_REQUEST_TIMEOUT_SECONDS", "0"},

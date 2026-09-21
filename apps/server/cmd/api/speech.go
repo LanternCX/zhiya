@@ -21,7 +21,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 		a.respondError(w, err)
 		return
 	}
-	if a.config.Speech.Endpoint == "" || a.config.Speech.APIKey == "" {
+	if a.config.Speech.Endpoint == "" || (a.config.Speech.ASRAPIKey == "" && a.config.Speech.TTSAPIKey == "") {
 		a.respondError(w, failure{503, "语音服务尚未配置"})
 		return
 	}
@@ -59,8 +59,12 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 		}
 		switch command.Type {
 		case "start":
+			if a.config.Speech.ASRAPIKey == "" {
+				send(map[string]string{"type": "error", "message": "ASR API Key 尚未配置"})
+				continue
+			}
 			closeUpstream()
-			upstream, err = a.dialSpeech(ctx)
+			upstream, err = a.dialSpeech(ctx, a.config.Speech.ASRAPIKey)
 			if err != nil {
 				send(map[string]string{"type": "error", "message": "无法连接语音服务"})
 				continue
@@ -71,12 +75,16 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			send(map[string]string{"type": "ready"})
 			go a.forwardSpeech(ctx, upstream, browser, "asr")
 		case "tts-start":
+			if a.config.Speech.TTSAPIKey == "" {
+				send(map[string]string{"type": "error", "message": "TTS API Key 尚未配置"})
+				continue
+			}
 			closeUpstream()
 			if strings.TrimSpace(command.Text) == "" {
 				send(map[string]string{"type": "error", "message": "没有可朗读的文本"})
 				continue
 			}
-			upstream, err = a.dialTTS(ctx)
+			upstream, err = a.dialTTS(ctx, a.config.Speech.TTSAPIKey)
 			if err != nil {
 				send(map[string]string{"type": "error", "message": "无法连接语音服务"})
 				continue
@@ -101,12 +109,12 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *application) dialSpeech(ctx context.Context) (*websocket.Conn, error) {
-	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + a.config.Speech.APIKey}}})
+func (a *application) dialSpeech(ctx context.Context, apiKey string) (*websocket.Conn, error) {
+	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
 	return conn, err
 }
-func (a *application) dialTTS(ctx context.Context) (*websocket.Conn, error) {
-	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint+"?model="+a.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + a.config.Speech.APIKey}}})
+func (a *application) dialTTS(ctx context.Context, apiKey string) (*websocket.Conn, error) {
+	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint+"?model="+a.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
 	return conn, err
 }
 func (a *application) forwardSpeech(ctx context.Context, upstream, browser *websocket.Conn, mode string) {

@@ -30,11 +30,12 @@ type Config struct {
 	Account     Account  `yaml:"account"`
 }
 type Speech struct {
-	Endpoint string `yaml:"endpoint"`
-	APIKey   string `yaml:"api_key"`
-	ASRModel string `yaml:"asr_model"`
-	TTSModel string `yaml:"tts_model"`
-	TTSVoice string `yaml:"tts_voice"`
+	Endpoint  string `yaml:"endpoint"`
+	ASRAPIKey string `yaml:"asr_api_key"`
+	TTSAPIKey string `yaml:"tts_api_key"`
+	ASRModel  string `yaml:"asr_model"`
+	TTSModel  string `yaml:"tts_model"`
+	TTSVoice  string `yaml:"tts_voice"`
 }
 type Runner struct {
 	Endpoint string `yaml:"endpoint"`
