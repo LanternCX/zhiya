@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>知芽实时语音测试</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="product">知芽 · Voice Lab</p>
+          <h1>实时语音识别</h1>
+        </div>
+        <div id="status" class="status" data-state="idle" role="status" aria-live="polite">准备就绪</div>
+      </header>
+
+      <section class="recorder" aria-labelledby="recorder-heading">
+        <div class="mode-tabs" role="tablist" aria-label="语音测试模式">
+          <button id="asr-tab" class="mode-tab active" type="button" role="tab" aria-selected="true">语音识别 ASR</button>
+          <button id="tts-tab" class="mode-tab" type="button" role="tab" aria-selected="false">语音合成 TTS</button>
+        </div>
+        <div id="asr-panel" role="tabpanel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Qwen-Audio-3.0-ASR-Flash-Streaming</p>
+            <h2 id="recorder-heading">麦克风输入</h2>
+          </div>
+          <div class="actions">
+            <button id="clear" class="button button-secondary" type="button">清空</button>
+            <button id="start" class="button button-primary" type="button">开始录音</button>
+            <button id="stop" class="button button-danger" type="button" disabled>停止并完成</button>
+          </div>
+        </div>
+
+        <div class="meter" aria-hidden="true"><div id="level" class="meter-level"></div></div>
+        <p id="error" class="error" role="alert" hidden></p>
+
+        <div class="transcript-grid">
+          <article class="transcript-block">
+            <div class="block-label"><span class="signal"></span>实时结果</div>
+            <p id="live-transcript" class="transcript live" aria-live="polite">等待语音…</p>
+          </article>
+          <article class="transcript-block final-block">
+            <div class="block-label">最终结果</div>
+            <p id="final-transcript" class="transcript">尚无最终结果</p>
+          </article>
+        </div>
+        </div>
+        <div id="tts-panel" role="tabpanel" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Qwen3-TTS-Flash-Realtime</p>
+              <h2>文本输入</h2>
+            </div>
+            <div class="actions">
+              <button id="tts-clear" class="button button-secondary" type="button">清空</button>
+              <button id="tts-start" class="button button-primary" type="button">开始合成</button>
+              <button id="tts-stop" class="button button-danger" type="button" disabled>停止播放</button>
+            </div>
+          </div>
+          <div class="tts-form">
+            <label for="tts-text">要朗读的内容</label>
+            <textarea id="tts-text" rows="5">你好，我是知芽。今天我们来学习什么是变量。</textarea>
+            <label for="tts-voice">音色</label>
+            <select id="tts-voice"><option value="Cherry">Cherry</option></select>
+          </div>
+          <div class="tts-output">
+            <div class="block-label">播放状态</div>
+            <p id="tts-message" class="transcript">等待文本…</p>
+            <a id="tts-download" class="download" hidden download="zhiya-tts.wav">下载 WAV</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="asr-metrics" class="metrics" aria-label="实时指标">
+        <div class="metric"><span>首次文字</span><strong id="first-latency">—</strong></div>
+        <div class="metric"><span>句末延迟</span><strong id="final-latency">—</strong></div>
+        <div class="metric"><span>结果包数</span><strong id="packets">0</strong></div>
+        <div class="metric"><span>输入格式</span><strong>16 kHz PCM</strong></div>
+      </section>
+      <section id="tts-metrics" class="metrics" aria-label="语音合成指标" hidden>
+        <div class="metric"><span>首个音频</span><strong id="tts-first-latency">—</strong></div>
+        <div class="metric"><span>音频分片</span><strong id="tts-chunks">0</strong></div>
+        <div class="metric"><span>音频时长</span><strong id="tts-duration">0 ms</strong></div>
+        <div class="metric"><span>合成状态</span><strong id="tts-status">待开始</strong></div>
+      </section>
+    </main>
+    <script type="module" src="./client.mjs"></script>
+  </body>
+</html>

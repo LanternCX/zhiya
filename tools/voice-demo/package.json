@@ -1,0 +1,14 @@
+{
+  "name": "@zhiya/voice-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "web": "node --env-file=.env.local web/server.mjs",
+    "asr:mock": "set VOICE_PROVIDER=mock&& set VOICE_MODE=asr&& node src/index.mjs",
+    "tts:mock": "set VOICE_PROVIDER=mock&& set VOICE_MODE=tts&& node src/index.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
