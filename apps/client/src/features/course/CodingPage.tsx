@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MessageResponse } from "../../components/ai-elements/message";
 import { Spinner } from "../../components/ui/spinner";
 import type { CodingExercise } from "../../domain/learning";
@@ -20,26 +20,47 @@ function exerciseFilename(languageName: string) {
 
 export default function CodingPage({
   exercise,
+  running,
   onChange,
   onRun,
   onEnd,
 }: {
   exercise: CodingExercise;
+  running: boolean;
   onChange: (changes: Pick<CodingExercise, "code" | "stdin">) => void;
   onRun: () => Promise<CodeRunResult>;
   onEnd: () => Promise<void>;
 }) {
-  const [running, setRunning] = useState(false);
+  const [rerunning, setRerunning] = useState(false);
   const [ending, setEnding] = useState(false);
   const [actionError, setActionError] = useState("");
-  const [localResult, setLocalResult] = useState<CodeRunResult | null>(null);
+  const [localResult, setLocalResult] = useState<
+    CodeRunResult | null | undefined
+  >(undefined);
+  const stdinLabelRef = useRef<HTMLLabelElement>(null);
+  const stdinRef = useRef<HTMLTextAreaElement>(null);
   const ended = exercise.status === "ended";
-  const result = localResult ?? exercise.result;
+  const result = localResult === undefined ? exercise.result : localResult;
   const output = result
     ? [result.compileOutput, result.stdout, result.stderr, result.message]
         .filter(Boolean)
         .join("\n")
     : "";
+
+  useLayoutEffect(() => {
+    const label = stdinLabelRef.current;
+    const textarea = stdinRef.current;
+    if (!label || !textarea) return;
+
+    const labelChromeHeight = label.offsetHeight - textarea.offsetHeight;
+    const observer = new ResizeObserver(() => {
+      label.style.minHeight = `${textarea.offsetHeight + labelChromeHeight}px`;
+    });
+    observer.observe(textarea);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <article className="coding-page" aria-label={`编程练习：${exercise.title}`}>
       <header>
@@ -60,24 +81,39 @@ export default function CodingPage({
         <CodeEditor
           value={exercise.code}
           languageName={exercise.languageName}
-          readOnly={ended}
+          readOnly={ended || running}
           onChange={(code) => onChange({ code, stdin: exercise.stdin })}
         />
       </section>
       <section className="coding-output" aria-label="运行结果">
         <header>
           <span>输出</span>
-          <span>{result ? result.status.description : "等待运行"}</span>
+          <span>
+            {running
+              ? "运行中"
+              : result
+                ? result.status.description
+                : "等待运行"}
+          </span>
         </header>
-        <pre>{result ? output || "程序没有产生输出" : "运行代码后，结果会显示在这里"}</pre>
+        <pre>
+          {running
+            ? rerunning
+              ? "正在重新运行…"
+              : "正在运行…"
+            : result
+              ? output || "程序没有产生输出"
+              : "运行代码后，结果会显示在这里"}
+        </pre>
       </section>
-      <label>
+      <label ref={stdinLabelRef}>
         <span>标准输入（可选）</span>
         <textarea
+          ref={stdinRef}
           aria-label="标准输入"
           className="coding-stdin"
           value={exercise.stdin}
-          disabled={ended}
+          disabled={ended || running}
           onChange={(event) =>
             onChange({ code: exercise.code, stdin: event.target.value })
           }
@@ -96,7 +132,8 @@ export default function CodingPage({
           className="coding-run-button"
           disabled={ended || running}
           onClick={() => {
-            setRunning(true);
+            setRerunning(Boolean(result));
+            setLocalResult(null);
             setActionError("");
             void onRun()
               .then((nextResult) => {
@@ -106,8 +143,7 @@ export default function CodingPage({
                 setActionError(
                   error instanceof Error ? error.message : "代码暂时无法运行",
                 );
-              })
-              .finally(() => setRunning(false));
+              });
           }}
         >
           {running ? (

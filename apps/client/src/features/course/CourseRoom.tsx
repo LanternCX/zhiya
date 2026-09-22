@@ -161,6 +161,7 @@ export default function CourseRoom({
     ),
   );
   const [busy, setBusy] = useState(false);
+  const [codeRunning, setCodeRunning] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
@@ -171,6 +172,7 @@ export default function CourseRoom({
     new Set(initialState.presentedPageIds),
   );
   const session = useRef<CourseSession | null>(null);
+  const codeRunSequence = useRef(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
@@ -625,9 +627,13 @@ export default function CourseRoom({
   const previousPage = page - 1;
   const nextPage = page + 1;
   const canGoPrevious =
-    !busy && previousPage >= 0 && presented.has(pages[previousPage]?.id ?? "");
+    !busy &&
+    !codeRunning &&
+    previousPage >= 0 &&
+    presented.has(pages[previousPage]?.id ?? "");
   const canGoNext =
     !busy &&
+    !codeRunning &&
     nextPage < pages.length &&
     presented.has(pages[nextPage]?.id ?? "");
 
@@ -747,26 +753,49 @@ export default function CourseRoom({
               <CodingPage
                 key={current.id}
                 exercise={current}
+                running={codeRunning}
                 onChange={(changes) =>
                   session.current?.updateCodingExercise(current.id, changes)
                 }
                 onRun={async () => {
+                  const activeSession = session.current;
+                  const runId = ++codeRunSequence.current;
+                  setCodeRunning(true);
                   try {
                     setError("");
+                    activeSession?.updateCodingExercise(current.id, {
+                      result: undefined,
+                    });
                     const result = await runCode(
                       current.languageId,
+                      current.languageName,
                       current.code,
                       current.stdin,
                     );
-                    session.current?.updateCodingExercise(current.id, {
+                    if (
+                      codeRunSequence.current !== runId ||
+                      session.current !== activeSession
+                    ) {
+                      throw new Error("运行页面已切换，请重新运行代码");
+                    }
+                    activeSession?.updateCodingExercise(current.id, {
                       result,
                     });
                     return result;
                   } catch (error) {
                     const message =
                       error instanceof Error ? error.message : "代码暂时无法运行";
-                    setError(message);
+                    if (
+                      codeRunSequence.current === runId &&
+                      session.current === activeSession
+                    ) {
+                      setError(message);
+                    }
                     throw new Error(message);
+                  } finally {
+                    if (codeRunSequence.current === runId) {
+                      setCodeRunning(false);
+                    }
                   }
                 }}
                 onEnd={async () => {

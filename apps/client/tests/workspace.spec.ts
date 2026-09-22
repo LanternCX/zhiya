@@ -113,6 +113,20 @@ test("mobile destinations show honest empty states and account pages can open th
   ).toBeVisible();
   await page.getByRole("button", { name: "AI 实验室" }).click();
   await expect(page.getByRole("heading", { name: "实验准备中" })).toBeVisible();
+  const labArt = page.locator(".subject-art.lab");
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "light";
+  });
+  await expect(labArt).toHaveCSS("background-color", "rgb(246, 234, 208)");
+  await expect(labArt).toHaveCSS("color", "rgb(128, 97, 34)");
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "dark";
+  });
+  await expect(labArt).toHaveCSS("background-color", "rgb(106, 87, 69)");
+  await expect(labArt).toHaveCSS("color", "rgb(240, 220, 177)");
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "light";
+  });
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "个人资料", exact: true }).click();
   await page.getByRole("button", { name: "用户菜单" }).click();
@@ -123,6 +137,46 @@ test("mobile destinations show honest empty states and account pages can open th
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "返回学习", exact: true }).click();
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+});
+
+test("course content blends into the workspace canvas", async ({ page }) => {
+  await page.route("**/api/me", (route) =>
+    route.fulfill({
+      json: {
+        id: "student",
+        nickname: "小芽",
+        email: "student@example.com",
+        avatar: "",
+      },
+    }),
+  );
+  await page.route("**/api/learning/model", (route) =>
+    route.fulfill({ json: { available: false } }),
+  );
+  await mockLearning(page, () => ({
+    id: "session",
+    purpose: "onboarding",
+    messages: [],
+    completed: true,
+    memory: "喜欢动手尝试",
+    memoryVersion: 1,
+    messageSequence: 0,
+    revision: 0,
+    status: "idle",
+    leaseUntil: "",
+    question: null,
+  }));
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  await expect(page.locator(".course-conversation")).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
+  await expect(page.locator(".course-thread")).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
 });
 
 test("learning and profile pages share a quiet themed background", async ({
@@ -168,13 +222,13 @@ test("learning and profile pages share a quiet themed background", async ({
     });
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
-  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
+  expect(await background()).toMatchObject({ color: "rgb(246, 246, 244)" });
   expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
-  expect(await background()).toMatchObject({ color: "rgb(248, 250, 228)" });
+  expect(await background()).toMatchObject({ color: "rgb(246, 246, 244)" });
   expect((await background()).image).toBe("none");
 
   await page.getByRole("button", { name: "用户菜单" }).click();
