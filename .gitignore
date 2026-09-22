@@ -9,5 +9,6 @@ test-results/
 playwright-report/
 .env
 /apps/client/config.local.json
+/apps/client/debug.log
 /apps/server/config.local.yaml
 /dev-services.local.env
