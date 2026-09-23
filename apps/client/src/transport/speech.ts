@@ -12,6 +12,9 @@ export class SpeechStream {
   constructor(onEvent: (event: SpeechEvent) => void) { this.onEvent = onEvent; }
 
   async connect(): Promise<void> {
+    const session = await fetch("/api/me", { credentials: "include" });
+    if (session.status === 401) throw new Error("登录已失效，请重新登录");
+    if (!session.ok) throw new Error(`语音服务检查失败（HTTP ${session.status}）`);
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const socket = new WebSocket(`${protocol}//${location.host}/api/speech/stream`);
     socket.onmessage = (message) => {
