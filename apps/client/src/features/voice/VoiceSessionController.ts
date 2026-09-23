@@ -29,8 +29,12 @@ export class VoiceSessionController {
     socket.onmessage = (message) => this.handleMessage(message.data);
     socket.onerror = () => this.dispatch({ type: "error", message: "语音连接失败" });
     await new Promise<void>((resolve, reject) => {
-      socket.onopen = () => resolve();
-      socket.addEventListener("error", () => reject(new Error("语音连接失败")), { once: true });
+      const timeout = window.setTimeout(() => {
+        socket.close();
+        reject(new Error("语音连接超时，请检查后端服务和 ASR API Key"));
+      }, 10_000);
+      socket.onopen = () => { window.clearTimeout(timeout); resolve(); };
+      socket.addEventListener("error", () => { window.clearTimeout(timeout); reject(new Error("语音连接失败，请检查后端服务和 ASR API Key")); }, { once: true });
     });
     this.send({ type: "start-session", sessionId: this.sessionId, turnId: this.turnId });
     this.capture = new MicrophoneCapture({

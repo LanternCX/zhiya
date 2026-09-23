@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/coder/websocket"
@@ -95,12 +97,17 @@ func (s *voiceSession) run() {
 }
 
 func (s *voiceSession) startASR(turnID int64) error {
+	if s.app.config.Speech.ASRAPIKey == "" {
+		return errors.New("ASR API Key 未配置")
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.asr != nil {
 		return nil
 	}
-	conn, _, err := websocket.Dial(s.ctx, s.app.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.ASRAPIKey}}})
+	dialContext, cancel := context.WithTimeout(s.ctx, 8*time.Second)
+	defer cancel()
+	conn, _, err := websocket.Dial(dialContext, s.app.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.ASRAPIKey}}})
 	if err != nil {
 		return err
 	}
@@ -135,7 +142,9 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 		return errInvalidVoiceMessage
 	}
 	s.cancelTTS(turnID)
-	conn, _, err := websocket.Dial(s.ctx, s.app.config.Speech.Endpoint+"?model="+s.app.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
+	dialContext, cancel := context.WithTimeout(s.ctx, 8*time.Second)
+	defer cancel()
+	conn, _, err := websocket.Dial(dialContext, s.app.config.Speech.Endpoint+"?model="+s.app.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
 	if err != nil {
 		return err
 	}
