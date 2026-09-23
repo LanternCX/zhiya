@@ -11,9 +11,14 @@
   box-shadow: none;
 }
 .chat-composer textarea {
+  box-sizing: border-box;
+  min-width: 0;
   min-height: 58px;
   max-height: 58px;
   overflow-y: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   padding: 17px 100px;
   resize: none;
   border: 0;
@@ -119,6 +124,9 @@
 .chat-composer-multiline textarea {
   max-height: 180px;
   overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   padding: 14px 14px 68px;
 }
 .chat-composer-multiline .chat-composer-footer {
