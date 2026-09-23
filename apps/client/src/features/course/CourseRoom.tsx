@@ -757,7 +757,7 @@ export default function CourseRoom({
           speakerOn={voiceSpeakerOn}
           captionsOn={voiceCaptionsOn}
           onMute={() => { const next = !voiceMuted; setVoiceMuted(next); voiceController.current?.setMuted(next); }}
-          onSpeaker={() => setVoiceSpeakerOn((value) => !value)}
+          onSpeaker={() => { const next = !voiceSpeakerOn; setVoiceSpeakerOn(next); voiceController.current?.setSpeaker(next); }}
           onCaptions={() => setVoiceCaptionsOn((value) => !value)}
           onExit={endLiveVoice}
         />}

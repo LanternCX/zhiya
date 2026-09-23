@@ -11,6 +11,10 @@ export class VoiceSessionController {
   private state: VoiceState = initialVoiceState;
   private readonly listeners = new Set<(state: VoiceState) => void>();
   private readonly onTranscript: (text: string, final: boolean) => void;
+  private context: AudioContext | null = null;
+  private nextAudioTime = 0;
+  private sources = new Set<AudioBufferSourceNode>();
+  private speakerEnabled = true;
 
   constructor(onTranscript: (text: string, final: boolean) => void = () => undefined) { this.onTranscript = onTranscript; }
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
@@ -40,8 +44,9 @@ export class VoiceSessionController {
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
-  interrupt() { this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.turnId += 1; this.dispatch({ type: "ready" }); }
-  end() { this.capture?.stop(); this.capture = null; this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
+  setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
+  interrupt() { this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
+  end() { this.capture?.stop(); this.capture = null; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
 
   private handleMessage(raw: unknown) {
     let value: unknown;
@@ -51,10 +56,22 @@ export class VoiceSessionController {
     if (event.sessionId !== this.sessionId || event.turnId < this.turnId) return;
     if (event.type === "session-ready") this.dispatch({ type: "ready" });
     if (event.type === "transcript-delta" || event.type === "transcript-final") { const text = event.text ?? ""; this.dispatch({ type: "transcript", turnId: event.turnId, text, final: event.type === "transcript-final" }); this.onTranscript(text, event.type === "transcript-final"); }
-    if (event.type === "tts-audio") this.dispatch({ type: "speaking" });
+    if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.enqueueAudio(event.data, event.sampleRate ?? 24000); }
     if (event.type === "session-error") this.dispatch({ type: "error", message: event.message ?? "语音会话失败" });
     if (event.type === "session-ended") this.dispatch({ type: "end" });
   }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
+  private enqueueAudio(encoded: string, sampleRate: number) {
+    const context = this.context ??= new AudioContext();
+    const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+    const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
+    const channel = buffer.getChannelData(0); const view = new DataView(bytes.buffer);
+    for (let index = 0; index < channel.length; index += 1) channel[index] = view.getInt16(index * 2, true) / 0x8000;
+    const source = context.createBufferSource(); source.buffer = buffer; source.connect(context.destination); this.sources.add(source);
+    const start = Math.max(context.currentTime, this.nextAudioTime); this.nextAudioTime = start + buffer.duration;
+    source.onended = () => { this.sources.delete(source); if (!this.sources.size) this.nextAudioTime = 0; };
+    source.start(start);
+  }
+  private stopPlayback() { this.sources.forEach((source) => { try { source.stop(); } catch { /* already ended */ } }); this.sources.clear(); this.nextAudioTime = 0; }
 }
