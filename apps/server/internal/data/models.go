@@ -29,6 +29,7 @@ var (
 	ErrConversationBusy              = errors.New("会话正在处理其他操作，请重试")
 	ErrCourseOutlineLimit            = errors.New("course outline section limit reached")
 	ErrOutlineTargetSectionNotFound  = errors.New("outline target section not found")
+	ErrIllustrationNotFound          = errors.New("illustration not found")
 )
 
 type database interface {
@@ -92,16 +93,17 @@ func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- erro
 }
 
 type Models struct {
-	Courses   CourseModel
-	Materials MaterialModel
-	Learning  LearningModel
-	Users     UserModel
-	Tokens    TokenModel
-	pool      *pgxpool.Pool
+	Courses       CourseModel
+	Materials     MaterialModel
+	Learning      LearningModel
+	Users         UserModel
+	Tokens        TokenModel
+	Illustrations IllustrationModel
+	pool          *pgxpool.Pool
 }
 
 func NewModels(pool *pgxpool.Pool, policy config.Account) Models {
-	return Models{Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, pool: pool}
+	return Models{Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, Illustrations: IllustrationModel{db: pool}, pool: pool}
 }
 
 type TransactionMode bool
@@ -124,7 +126,7 @@ func (m Models) Transaction(ctx context.Context, mode TransactionMode, action fu
 			return err
 		}
 	}
-	err = action(Models{Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}})
+	err = action(Models{Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}, Illustrations: IllustrationModel{db: tx}})
 	var failedAttempt failedVerificationAttempt
 	if errors.As(err, &failedAttempt) {
 		// A rejected code must still consume an attempt. Verify before making other changes.

@@ -115,9 +115,18 @@ export type AnimationTools = {
   playback: (pageId: string) => AnimationPlaybackState;
 };
 
+export type IllustrationTools = {
+  start: (request: {
+    pageId: string;
+    title: string;
+    description: string;
+    alt: string;
+  }) => Promise<{ taskId: string; pageId: string; status: "running" }>;
+};
+
 export type AgentTaskSummary = {
   taskId: string;
-  kind: "slides" | "animation" | "outline-classifier";
+  kind: "slides" | "animation" | "illustration" | "outline-classifier";
   status: "running" | "complete" | "failed" | "cancelled";
   pageId?: string;
   sections?: Array<{

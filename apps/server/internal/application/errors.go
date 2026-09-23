@@ -75,6 +75,8 @@ func ErrorDetails(err error) (ErrorCode, string, bool) {
 		return ErrorInvalid, "课程大纲最多包含 100 个小节", true
 	case errors.Is(err, data.ErrOutlineTargetSectionNotFound):
 		return ErrorInvalid, "目标课程小节无效", true
+	case errors.Is(err, data.ErrIllustrationNotFound):
+		return ErrorNotFound, "未找到教学插图", true
 	default:
 		return "", "", false
 	}

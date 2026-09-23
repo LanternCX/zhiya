@@ -14,6 +14,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
 	"github.com/LanternCX/zhiya/apps/server/internal/modelproxy"
@@ -22,17 +23,30 @@ import (
 )
 
 type application struct {
-	logger      *slog.Logger
-	models      data.Models
-	send        func(to, purpose, code string) error
-	config      config.Config
-	learningHub *learningHub
-	runner      codeRunner
-	objects     objectstore.Store
-	accounts    *appservice.AccountService
-	model       *modelproxy.Client
-	courses     *appservice.CourseService
-	learning    *appservice.LearningService
+	logger        *slog.Logger
+	models        data.Models
+	send          func(to, purpose, code string) error
+	config        config.Config
+	learningHub   *learningHub
+	runner        codeRunner
+	objects       objectstore.Store
+	accounts      *appservice.AccountService
+	model         *modelproxy.Client
+	courses       *appservice.CourseService
+	learning      *appservice.LearningService
+	images        imagegen.Generator
+	illustrations *appservice.IllustrationService
+}
+
+func (a *application) illustrationService() *appservice.IllustrationService {
+	if a.illustrations != nil {
+		return a.illustrations
+	}
+	generator := a.images
+	if generator == nil {
+		generator = imagegen.New(a.config.ImageModel.Endpoint, a.config.ImageModel.ID, a.config.ImageModel.APIKey, http.DefaultClient)
+	}
+	return appservice.NewIllustrationService(a.models, a.objects, generator, a.config.ImageModel.ID, a.config.Storage.URLTTLSeconds)
 }
 
 func (a *application) applicationLogger() *slog.Logger {
@@ -157,6 +171,9 @@ func main() {
 				})
 				if cleanupErr != nil {
 					logger.Error("expired material upload cleanup failed", "error", cleanupErr)
+				}
+				if cleanupErr = app.illustrationService().CleanupStale(ctx, time.Now()); cleanupErr != nil {
+					logger.Error("stale illustration cleanup failed", "error", cleanupErr)
 				}
 			}
 		}

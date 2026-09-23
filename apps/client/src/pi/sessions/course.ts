@@ -6,6 +6,7 @@ import type {
   ModelRetryStatus,
   Slide,
   AnimationPage,
+  IllustrationPage,
   LessonPage,
   CodingExercise,
   CourseMessage,
@@ -28,6 +29,11 @@ import type {
   CourseManagement,
 } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
+import {
+  cancelIllustration,
+  createIllustration,
+  getIllustration,
+} from "../../transport/illustrations";
 
 export class CourseSession {
   private teacher: Agent;
@@ -45,6 +51,18 @@ export class CourseSession {
     {
       pageId: string;
       agent: Agent;
+      status: "running" | "complete" | "failed" | "cancelled";
+      error?: string;
+    }
+  >();
+  private illustrationTasks = new Map<
+    string,
+    {
+      courseId: string;
+      generationId: string;
+      pageId: string;
+      title: string;
+      alt: string;
       status: "running" | "complete" | "failed" | "cancelled";
       error?: string;
     }
@@ -156,6 +174,9 @@ export class CourseSession {
           return animationPlayback.control(pageId, command);
         },
         playback: animationPlayback.playback,
+      },
+      illustrations: {
+        start: (request) => this.startIllustration(courseManagement, request),
       },
       tasks: {
         read: () => this.readAgentTasks(),
@@ -294,6 +315,8 @@ export class CourseSession {
     }
     this.cancelSlides();
     for (const taskId of this.animationTasks.keys()) this.cancelAnimation(taskId);
+    for (const taskId of this.illustrationTasks.keys())
+      this.cancelIllustrationTask(taskId);
     this.narrationPlayback?.resolve();
     this.narrationPlayback = null;
     this.onActivity(null);
@@ -468,10 +491,120 @@ export class CourseSession {
     return { taskId, pageId: request.pageId, status: "running" as const };
   }
 
+  private async startIllustration(
+    management: CourseManagement,
+    request: {
+      pageId: string;
+      title: string;
+      description: string;
+      alt: string;
+    },
+  ) {
+    const course = management.course;
+    const conversationId = management.currentConversationId;
+    if (!course || !conversationId)
+      throw new Error("请先创建并进入课程对话");
+    if (
+      this.publishedPages.some((page) => page.id === request.pageId) ||
+      [...this.illustrationTasks.values()].some(
+        (task) => task.pageId === request.pageId,
+      )
+    )
+      throw new Error(`页面 ID 已被使用：${request.pageId}`);
+    const generation = await createIllustration(
+      course.id,
+      conversationId,
+      request,
+    );
+    const taskId = generation.id;
+    this.pageOrder.push(request.pageId);
+    this.illustrationTasks.set(taskId, {
+      courseId: course.id,
+      generationId: generation.id,
+      pageId: request.pageId,
+      title: request.title,
+      alt: request.alt,
+      status: "running",
+    });
+    this.onPages([...this.publishedPages], true);
+    void this.pollIllustration(taskId);
+    return { taskId, pageId: request.pageId, status: "running" as const };
+  }
+
+  private async pollIllustration(taskId: string): Promise<void> {
+    const task = this.illustrationTasks.get(taskId);
+    if (!task || task.status !== "running" || this.stopped) return;
+    try {
+      const generation = await getIllustration(
+        task.courseId,
+        task.generationId,
+      );
+      const current = this.illustrationTasks.get(taskId);
+      if (!current || current.status !== "running" || this.stopped) return;
+      if (generation.status === "running") {
+        window.setTimeout(() => void this.pollIllustration(taskId), 1500);
+        return;
+      }
+      if (generation.status === "complete" && generation.assetId) {
+        const page: IllustrationPage = {
+          kind: "illustration",
+          id: current.pageId,
+          title: current.title,
+          alt: current.alt,
+          assetId: generation.assetId,
+        };
+        this.insertPublishedPage(page);
+        current.status = "complete";
+        this.resolvePageWaiters(page);
+      } else {
+        current.status = generation.status;
+        current.error = generation.error || "教学插图生成失败";
+        this.rejectPageWaiters(current.pageId, new Error(current.error));
+        if (current.status === "failed") this.onError(current.error);
+      }
+      this.notifyTeacherOfTask({
+        taskId,
+        kind: "illustration",
+        status: current.status,
+        pageId: current.pageId,
+        ...(current.error ? { error: current.error } : {}),
+      });
+      this.onPages([...this.publishedPages], this.hasRunningVisualTask());
+    } catch (error) {
+      const current = this.illustrationTasks.get(taskId);
+      if (!current || current.status !== "running" || this.stopped) return;
+      current.status = "failed";
+      current.error =
+        error instanceof Error ? error.message : "教学插图生成失败";
+      this.rejectPageWaiters(current.pageId, new Error(current.error));
+      this.notifyTeacherOfTask({
+        taskId,
+        kind: "illustration",
+        status: "failed",
+        pageId: current.pageId,
+        error: current.error,
+      });
+      this.onPages([...this.publishedPages], this.hasRunningVisualTask());
+      this.onError(current.error);
+    }
+  }
+
+  private cancelIllustrationTask(taskId: string) {
+    const task = this.illustrationTasks.get(taskId);
+    if (!task || task.status !== "running") return;
+    task.status = "cancelled";
+    void cancelIllustration(task.courseId, task.generationId).catch(() => {});
+    this.rejectPageWaiters(task.pageId, new Error("教学插图生成已停止"));
+    this.onPages([...this.publishedPages], this.hasRunningVisualTask());
+  }
+
   private hasRunningVisualTask() {
     return (
       [...this.slideAgents.values()].some((task) => task.status === "running") ||
-      [...this.animationTasks.values()].some((task) => task.status === "running")
+      [...this.animationTasks.values()].some((task) => task.status === "running") ||
+      [...this.illustrationTasks.values()].some(
+        (task) => task.status === "running",
+      )
     );
   }
 
@@ -495,7 +628,10 @@ export class CourseSession {
     const task = [...this.animationTasks.values()].find(
       (candidate) => candidate.pageId === pageId,
     );
-    if (task?.status === "running")
+    const illustration = [...this.illustrationTasks.values()].find(
+      (candidate) => candidate.pageId === pageId,
+    );
+    if (task?.status === "running" || illustration?.status === "running")
       return new Promise((resolve, reject) => {
         const waiters = this.pageWaiters.get(pageId) ?? [];
         waiters.push({ resolve, reject });
@@ -503,6 +639,8 @@ export class CourseSession {
       });
     if (task?.status === "failed")
       throw new Error(task.error || `页面 ${pageId} 生成失败`);
+    if (illustration?.status === "failed")
+      throw new Error(illustration.error || `页面 ${pageId} 生成失败`);
     throw new Error(`找不到课堂页面 ${pageId}`);
   }
 
@@ -637,6 +775,13 @@ export class CourseSession {
         pageId: task.pageId,
         ...(task.error ? { error: task.error } : {}),
       })),
+      ...[...this.illustrationTasks].map(([taskId, task]) => ({
+        taskId,
+        kind: "illustration" as const,
+        status: task.status,
+        pageId: task.pageId,
+        ...(task.error ? { error: task.error } : {}),
+      })),
       ...[...this.outlineTasks].map(([taskId, task]) => ({
         taskId,
         kind: "outline-classifier" as const,
@@ -669,6 +814,17 @@ export class CourseSession {
       };
     }
     const outline = this.outlineTasks.get(taskId);
+    const illustration = this.illustrationTasks.get(taskId);
+    if (illustration) {
+      this.cancelIllustrationTask(taskId);
+      return {
+        taskId,
+        kind: "illustration",
+        status: illustration.status,
+        pageId: illustration.pageId,
+        ...(illustration.error ? { error: illustration.error } : {}),
+      };
+    }
     if (outline) {
       if (outline.status === "running") {
         outline.status = "cancelled";

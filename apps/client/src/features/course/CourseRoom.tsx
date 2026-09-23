@@ -41,6 +41,7 @@ import ChatComposer, {
 import { Spinner } from "../../components/ui/spinner";
 import SlideCanvas from "./SlideCanvas";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
+import IllustrationCanvas from "./IllustrationCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
@@ -341,8 +342,12 @@ export default function CourseRoom({
       setError,
       initial,
       {
-        course: selectedCourse,
-        currentConversationId: boundConversationId.current,
+        get course() {
+          return sessionCourse.current;
+        },
+        get currentConversationId() {
+          return boundConversationId.current;
+        },
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
           boundConversationId.current = null;
@@ -841,7 +846,15 @@ export default function CourseRoom({
             )}
           {current.kind === "animation" ? null : current.kind === "slide" ? (
             <SlideCanvas key={current.id} slide={current} />
-          ) : (
+          ) : current.kind === "illustration" ? (
+            course ? (
+              <IllustrationCanvas
+                courseId={course.id}
+                key={current.id}
+                page={current}
+              />
+            ) : null
+          ) : current.kind === "coding" ? (
             <Suspense
               fallback={
                 <div className="coding-page-loading" role="status">
@@ -907,7 +920,7 @@ export default function CourseRoom({
                 }}
               />
             </Suspense>
-          )}
+          ) : null}
           <footer className="slide-controls">
             <button
               aria-label="上一页"

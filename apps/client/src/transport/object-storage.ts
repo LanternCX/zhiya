@@ -35,6 +35,10 @@ export async function readObjectText(request: ObjectRequest): Promise<string> {
   return chunks.join("");
 }
 
+export async function readObjectBlob(request: ObjectRequest): Promise<Blob> {
+  return (await objectFetch(request)).blob();
+}
+
 async function objectFetch(request: ObjectRequest, init?: RequestInit) {
   let response: Response;
   try {
