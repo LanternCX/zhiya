@@ -17,7 +17,7 @@ func TestDecodeVoiceClientMessage(t *testing.T) {
 		{name: "missing session", raw: `{"type":"commit-turn","turnId":1}`, bad: true},
 		{name: "negative turn", raw: `{"type":"commit-turn","sessionId":"s1","turnId":-1}`, bad: true},
 		{name: "unsupported", raw: `{"type":"explode","sessionId":"s1","turnId":1}`, bad: true},
-		{name: "oversized text", raw: `{"type":"commit-turn","sessionId":"s1","turnId":1,"text":"this text is too long"}`, bad: true},
+		{name: "oversized text", raw: `{"type":"commit-turn","sessionId":"s1","turnId":1,"text":"` + string(make([]byte, 8193)) + `"}`, bad: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

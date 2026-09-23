@@ -16,6 +16,7 @@ type voiceClientMessage struct {
 	Type      string `json:"type"`
 	SessionID string `json:"sessionId"`
 	TurnID    int64  `json:"turnId"`
+	Text      string `json:"text,omitempty"`
 }
 
 type voiceServerEvent struct {
@@ -47,8 +48,11 @@ func decodeVoiceClientMessage(raw []byte) (voiceClientMessage, error) {
 		return voiceClientMessage{}, errInvalidVoiceMessage
 	}
 	switch msg.Type {
-	case "start-session", "audio", "commit-turn", "cancel-tts", "mute", "unmute", "end-session":
+	case "start-session", "audio", "commit-turn", "cancel-tts", "speak-text", "mute", "unmute", "end-session":
 	default:
+		return voiceClientMessage{}, errInvalidVoiceMessage
+	}
+	if len(msg.Text) > 8192 {
 		return voiceClientMessage{}, errInvalidVoiceMessage
 	}
 	return msg, nil

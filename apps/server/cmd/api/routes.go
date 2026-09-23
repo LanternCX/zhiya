@@ -18,6 +18,7 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("POST /api/learning/model", a.modelProxy)
 	api.HandleFunc("POST /api/learning/course/model", a.courseModelProxy)
 	api.HandleFunc("GET /api/speech/stream", a.speechStream)
+	api.HandleFunc("GET /api/voice/session", a.voiceSessionHandler)
 	api.HandleFunc("GET /api/code/languages", a.codeLanguages)
 	api.HandleFunc("POST /api/code/runs", a.runCode)
 	api.HandleFunc("GET /api/courses", a.listCourses)

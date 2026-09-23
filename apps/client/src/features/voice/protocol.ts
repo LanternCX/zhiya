@@ -3,6 +3,7 @@ export type VoiceClientMessageType =
   | "audio"
   | "commit-turn"
   | "cancel-tts"
+  | "speak-text"
   | "mute"
   | "unmute"
   | "end-session";
