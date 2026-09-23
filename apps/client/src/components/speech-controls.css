@@ -37,3 +37,63 @@
   background: var(--text);
   color: var(--surface);
 }
+
+.chat-dictation-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 9px 10px;
+  background: var(--surface);
+}
+.chat-composer-dictating .chat-composer-footer { display: none; }
+.chat-dictation-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  overflow: hidden;
+  color: var(--text);
+}
+.chat-dictation-wave i {
+  display: block;
+  width: 3px;
+  height: 22px;
+  flex: 0 0 3px;
+  border-radius: 99px;
+  background: currentColor;
+  transform: scaleY(var(--dictation-scale, .25));
+  transform-origin: center;
+  opacity: .72;
+}
+.chat-dictation-action,
+.chat-dictation-confirm {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+}
+.chat-dictation-action:hover,
+.chat-dictation-action:focus-visible {
+  background: var(--subtle);
+}
+.chat-dictation-confirm {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.chat-dictation-confirm:disabled {
+  background: var(--subtle);
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-dictation-wave i { transition: none; }
+}

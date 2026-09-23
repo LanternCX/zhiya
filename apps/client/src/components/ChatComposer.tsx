@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type DragEvent } from "react";
-import { AudioWaveformIcon, FileUpIcon, MicIcon, MicOffIcon, PhoneOffIcon, PlusIcon } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type DragEvent } from "react";
+import { ArrowUpIcon, AudioWaveformIcon, FileUpIcon, MicIcon, MicOffIcon, PhoneOffIcon, PlusIcon, SquareIcon, XIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -99,10 +99,13 @@ function ChatComposerInput({
   const controller = usePromptInputController();
   const [dragging, setDragging] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [dictationDraft, setDictationDraft] = useState<string | null>(null);
+  const [audioLevel, setAudioLevel] = useState(0);
   const [multiline, setMultiline] = useState(false);
   const speech = useRef<SpeechStream | null>(null);
-  const voiceText = useRef("");
-  const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode } | null>(null);
+  const dictationBase = useRef("");
+  const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode; analyser: AnalyserNode } | null>(null);
+  const levelFrame = useRef<number | null>(null);
   const dragDepth = useRef(0);
   const canSubmit = Boolean(
     controller.textInput.value.trim() || attachments.files.length,
@@ -122,45 +125,83 @@ function ChatComposerInput({
       element.value.includes("\n") || element.scrollHeight - padding > lineHeight * 1.5,
     );
   };
-  const stopRecording = () => {
+  const cleanupCapture = (closeSpeech = true) => {
+    if (levelFrame.current !== null) cancelAnimationFrame(levelFrame.current);
+    levelFrame.current = null;
     audio.current?.processor.disconnect();
     audio.current?.source.disconnect();
+    audio.current?.analyser.disconnect();
     audio.current?.stream.getTracks().forEach((track) => track.stop());
     void audio.current?.context.close();
     audio.current = null;
     speech.current?.stop();
-    speech.current?.close();
-    speech.current = null;
+    if (closeSpeech) {
+      speech.current?.close();
+      speech.current = null;
+    }
+    setAudioLevel(0);
+    audio.current = null;
+  };
+  const cancelDictation = () => {
+    cleanupCapture();
     setRecording(false);
+    setDictationDraft(null);
+    dictationBase.current = "";
+  };
+  const stopRecording = () => {
+    cleanupCapture(false);
+    setRecording(false);
+    setDictationDraft((value) => value ?? "");
+    window.setTimeout(() => {
+      speech.current?.close();
+      speech.current = null;
+    }, 1500);
+  };
+  const confirmDictation = () => {
+    const draft = dictationDraft ?? "";
+    if (draft) controller.textInput.setInput(`${dictationBase.current}${draft}`);
+    setDictationDraft(null);
+    dictationBase.current = "";
   };
   const startRecording = async () => {
     try {
+      dictationBase.current = controller.textInput.value;
+      setDictationDraft("");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const voice = new SpeechStream((event) => {
         if (event.type === "transcript") {
           onVoiceTranscript?.(event.text, event.final);
-          const current = controller.textInput.value;
-          const base = voiceText.current && current.endsWith(voiceText.current)
-            ? current.slice(0, -voiceText.current.length)
-            : current;
-          voiceText.current = event.text;
-          controller.textInput.setInput(`${base}${event.text}`);
+          setDictationDraft(event.text);
         }
-        if (event.type === "error") { onVoiceError?.(event.message); stopRecording(); }
+        if (event.type === "complete") {
+          speech.current?.close();
+          speech.current = null;
+        }
+        if (event.type === "error") { onVoiceError?.(event.message); cancelDictation(); }
       });
       await voice.startAsr();
       const context = new AudioContext();
       const source = context.createMediaStreamSource(stream);
       const processor = context.createScriptProcessor(4096, 1, 1);
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 256;
+      const levelData = new Uint8Array(analyser.fftSize);
       processor.onaudioprocess = (event) => voice.sendAudio(float32ToPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
-      source.connect(processor); processor.connect(context.destination);
-      speech.current = voice; audio.current = { context, stream, source, processor }; setRecording(true);
+      source.connect(analyser); analyser.connect(processor); processor.connect(context.destination);
+      const updateLevel = () => {
+        analyser.getByteTimeDomainData(levelData);
+        let peak = 0;
+        for (const value of levelData) peak = Math.max(peak, Math.abs(value - 128) / 128);
+        setAudioLevel(Math.min(1, peak * 2.4));
+        levelFrame.current = requestAnimationFrame(updateLevel);
+      };
+      speech.current = voice; audio.current = { context, stream, source, processor, analyser }; setRecording(true); updateLevel();
     } catch (error) {
       onVoiceError?.(error instanceof Error ? error.message : "无法访问麦克风");
-      stopRecording();
+      cancelDictation();
     }
   };
-  useEffect(() => stopRecording, []);
+  useEffect(() => cancelDictation, []);
 
   return (
     <PromptInput
@@ -168,6 +209,7 @@ function ChatComposerInput({
       className={[
         "chat-composer",
         multiline && "chat-composer-multiline",
+        dictationDraft !== null && "chat-composer-dictating",
         className,
       ].filter(Boolean).join(" ")}
       maxFiles={options.maxFiles}
@@ -236,12 +278,24 @@ function ChatComposerInput({
         </PromptInputHeader>
       )}
       <PromptInputBody>
-        <PromptInputTextarea
+        {recording || dictationDraft !== null ? (
+          <div className="chat-dictation-bar" role="status" aria-live="polite">
+            <PromptInputButton aria-label="取消听写" className="chat-dictation-action" disabled={disabled} onClick={cancelDictation} tooltip="取消听写"><XIcon /></PromptInputButton>
+            <div className="chat-dictation-wave" aria-label={recording ? "正在听写" : "听写已暂停"}>
+              {Array.from({ length: 18 }, (_, index) => {
+                const scale = Math.max(0.18, Math.min(1, audioLevel * (0.7 + ((index * 17) % 9) / 10)));
+                return <i key={index} style={{ "--dictation-scale": String(scale) } as CSSProperties} />;
+              })}
+            </div>
+            <PromptInputButton aria-label={recording ? "停止听写" : "继续听写"} className="chat-dictation-action" disabled={disabled || !recording} onClick={stopRecording} tooltip={recording ? "停止听写" : "听写已暂停"}><SquareIcon /></PromptInputButton>
+            <PromptInputButton aria-label="使用听写内容" className="chat-dictation-confirm" disabled={disabled || recording || !dictationDraft} onClick={confirmDictation} tooltip="使用听写内容"><ArrowUpIcon /></PromptInputButton>
+          </div>
+        ) : <PromptInputTextarea
           aria-label={label}
           disabled={disabled}
           onInput={(event) => updateMultiline(event.currentTarget)}
           placeholder="给知芽发消息…"
-        />
+        />}
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">
         <PromptInputTools>

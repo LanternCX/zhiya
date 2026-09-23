@@ -19,7 +19,7 @@ export default defineConfig({
     host: web.hostname.replace(/^\[|\]$/g, ""),
     port: Number(web.port || (web.protocol === "https:" ? 443 : 80)),
     strictPort: true,
-    proxy: { "/api": config.api_origin },
+    proxy: { "/api": { target: config.api_origin, ws: true } },
     fs: {
       deny: [
         "**/apps/server/**",
