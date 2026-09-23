@@ -124,10 +124,11 @@
 .chat-composer-multiline textarea {
   max-height: 180px;
   overflow-y: auto;
+  scroll-padding-bottom: 86px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
-  padding: 14px 14px 68px;
+  padding: 14px 14px 86px;
 }
 .chat-composer-multiline .chat-composer-footer {
   background: var(--surface);
