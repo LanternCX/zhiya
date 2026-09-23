@@ -1,0 +1,9 @@
+.voice-mode-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 18px; background: var(--background); }
+.voice-mode-status { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); }
+.voice-mode-status small { max-width: 45vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted-foreground); }
+.voice-mode-orb { width: 12px; height: 12px; border-radius: 999px; background: var(--primary); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 14%, transparent); }
+.voice-mode-actions { display: flex; gap: 4px; }
+.voice-mode-actions button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--text); }
+.voice-mode-actions button:hover { background: color-mix(in srgb, var(--text) 8%, transparent); }
+.voice-mode-actions .voice-mode-exit { color: var(--destructive); }
+@media (prefers-reduced-motion: reduce) { .voice-mode-orb { box-shadow: none; } }

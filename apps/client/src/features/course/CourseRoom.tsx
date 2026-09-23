@@ -35,6 +35,10 @@ import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
 import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
+import { VoiceSessionController } from "../voice/VoiceSessionController";
+import { VoiceModePanel } from "../voice/VoiceModePanel";
+import { initialVoiceState } from "../voice/voice-reducer";
+import type { VoiceState } from "../voice/types";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -174,6 +178,12 @@ export default function CourseRoom({
   const session = useRef<CourseSession | null>(null);
   const codeRunSequence = useRef(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [liveVoice, setLiveVoice] = useState(false);
+  const [voiceState, setVoiceState] = useState<VoiceState>(initialVoiceState);
+  const [voiceMuted, setVoiceMuted] = useState(false);
+  const [voiceSpeakerOn, setVoiceSpeakerOn] = useState(true);
+  const [voiceCaptionsOn, setVoiceCaptionsOn] = useState(true);
+  const voiceController = useRef<VoiceSessionController | null>(null);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
@@ -193,6 +203,23 @@ export default function CourseRoom({
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
   const pendingInitialMaterials = useRef<File[]>([]);
+  const startLiveVoice = () => {
+    if (voiceController.current) return;
+    const controller = new VoiceSessionController((text, final) => {
+      if (final && text.trim()) void submit({ text, files: [] });
+    });
+    voiceController.current = controller;
+    controller.subscribe(setVoiceState);
+    setLiveVoice(true);
+    void controller.start().catch((reason) => setError(reason instanceof Error ? reason.message : "无法启动语音对话"));
+  };
+  const endLiveVoice = () => {
+    voiceController.current?.end();
+    voiceController.current = null;
+    setLiveVoice(false);
+    setVoiceState(initialVoiceState);
+  };
+  useEffect(() => endLiveVoice, []);
   const flushCourseSave = async (): Promise<boolean> => {
     if (saveInFlight.current) {
       const saved = await saveInFlight.current;
@@ -724,6 +751,16 @@ export default function CourseRoom({
             {error}
           </p>
         )}
+        {liveVoice && <VoiceModePanel
+          state={voiceState}
+          muted={voiceMuted}
+          speakerOn={voiceSpeakerOn}
+          captionsOn={voiceCaptionsOn}
+          onMute={() => { const next = !voiceMuted; setVoiceMuted(next); voiceController.current?.setMuted(next); }}
+          onSpeaker={() => setVoiceSpeakerOn((value) => !value)}
+          onCaptions={() => setVoiceCaptionsOn((value) => !value)}
+          onExit={endLiveVoice}
+        />}
         <ChatComposer
           attachments={courseMaterialAttachments}
           className="course-composer"
@@ -733,6 +770,7 @@ export default function CourseRoom({
           onStop={interrupt}
           onSubmit={submit}
           onToggleVoice={() => setVoiceEnabled((enabled) => !enabled)}
+          onStartVoiceMode={startLiveVoice}
           running={running}
           submitLabel="发送"
         />

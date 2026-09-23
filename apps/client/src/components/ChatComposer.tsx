@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { FileUpIcon, MicIcon, MicOffIcon, PlusIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import { AudioWaveformIcon, FileUpIcon, MicIcon, MicOffIcon, PlusIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -57,6 +57,7 @@ export type ChatComposerProps = {
   onVoiceError?: (message: string) => void;
   voiceEnabled?: boolean;
   onToggleVoice?: () => void;
+  onStartVoiceMode?: () => void;
   running?: boolean;
   submitLabel: string;
 };
@@ -88,6 +89,7 @@ function ChatComposerInput({
   onVoiceError,
   voiceEnabled = true,
   onToggleVoice,
+  onStartVoiceMode,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
   const controller = usePromptInputController();
@@ -260,6 +262,15 @@ function ChatComposerInput({
           )}
         </PromptInputTools>
         <PromptInputTools className="chat-composer-submit-tools">
+          <PromptInputButton
+            aria-label="开始语音对话"
+            className="chat-composer-live-voice"
+            disabled={disabled || running}
+            onClick={onStartVoiceMode}
+            tooltip="开始语音对话"
+          >
+            <AudioWaveformIcon />
+          </PromptInputButton>
           <PromptInputButton
             aria-label={recording ? "停止录音" : "语音输入"}
             className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
