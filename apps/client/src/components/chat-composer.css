@@ -124,13 +124,15 @@
 .chat-composer-multiline textarea {
   max-height: 180px;
   overflow-y: auto;
-  scroll-padding-bottom: 86px;
+  scroll-padding-bottom: 14px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
-  padding: 14px 14px 86px;
+  padding: 14px;
 }
 .chat-composer-multiline .chat-composer-footer {
+  position: relative;
+  inset: auto;
   background: var(--surface);
 }
 .chat-composer-footer [data-slot="input-group-addon"] {
