@@ -536,9 +536,11 @@ export default function CourseRoom({
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
-    for (const sentence of extracted.sentences)
-      void narrationPlayer.current?.speak(sentence);
-  }, [messages, voiceEnabled]);
+    for (const sentence of extracted.sentences) {
+      if (liveVoice) voiceController.current?.speakText(sentence);
+      else void narrationPlayer.current?.speak(sentence);
+    }
+  }, [messages, voiceEnabled, liveVoice]);
 
   useEffect(() => {
     if (voiceEnabled) return;
@@ -547,6 +549,11 @@ export default function CourseRoom({
     if (latest?.role === "assistant" && !latest.streaming)
       session.current?.finishNarration(latest.id);
   }, [voiceEnabled]);
+
+  useEffect(() => {
+    if (liveVoice) return;
+    voiceController.current?.setSpeaker(false);
+  }, [liveVoice]);
 
   useEffect(() => {
     const element = thread.current;

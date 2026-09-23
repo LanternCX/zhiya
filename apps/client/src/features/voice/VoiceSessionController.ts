@@ -43,6 +43,10 @@ export class VoiceSessionController {
   }
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
+  speakText(text: string) {
+    if (!text.trim() || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text });
+  }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
   interrupt() { this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
