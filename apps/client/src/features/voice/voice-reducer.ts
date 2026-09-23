@@ -1,11 +1,12 @@
 import type { VoiceState } from "./types";
 
-export const initialVoiceState: VoiceState = { status: "idle", sessionId: null, turnId: 0, transcript: "", assistantText: "", error: null };
+export const initialVoiceState: VoiceState = { status: "idle", sessionId: null, turnId: 0, transcript: "", assistantText: "", error: null, inputLevel: 0 };
 
 export type VoiceAction =
   | { type: "connect"; sessionId: string }
   | { type: "ready" }
   | { type: "speech-started" }
+  | { type: "level"; value: number }
   | { type: "commit" }
   | { type: "transcript"; turnId: number; text: string; final: boolean }
   | { type: "thinking" }
@@ -20,6 +21,7 @@ export function voiceReducer(state: VoiceState, action: VoiceAction): VoiceState
     case "connect": return { ...initialVoiceState, status: "connecting", sessionId: action.sessionId };
     case "ready": return { ...state, status: "listening", error: null };
     case "speech-started": return { ...state, status: "listening" };
+    case "level": return { ...state, inputLevel: Math.max(0, Math.min(1, action.value)) };
     case "commit": return { ...state, status: "committing", transcript: "" };
     case "transcript":
       if (action.turnId !== state.turnId) return state;

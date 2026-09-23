@@ -36,6 +36,7 @@ export class VoiceSessionController {
     this.capture = new MicrophoneCapture({
       onPcm: (pcm) => socket.readyState === WebSocket.OPEN && socket.send(pcm),
       onVadEvent: (event) => {
+        this.dispatch({ type: "level", value: Math.min(1, event.level * 3) });
         if (event.kind === "speech-start") {
           if (this.state.status === "speaking" || this.state.status === "thinking") this.interrupt();
           this.dispatch({ type: "speech-started" });

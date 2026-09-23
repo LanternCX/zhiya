@@ -7,4 +7,5 @@ export type VoiceState = {
   transcript: string;
   assistantText: string;
   error: string | null;
+  inputLevel: number;
 };

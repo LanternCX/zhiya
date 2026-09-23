@@ -179,10 +179,10 @@ export default function CourseRoom({
   const codeRunSequence = useRef(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [liveVoice, setLiveVoice] = useState(false);
+  const [voiceToolbarOpen, setVoiceToolbarOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>(initialVoiceState);
   const [voiceMuted, setVoiceMuted] = useState(false);
   const [voiceSpeakerOn, setVoiceSpeakerOn] = useState(true);
-  const [voiceCaptionsOn, setVoiceCaptionsOn] = useState(true);
   const voiceController = useRef<VoiceSessionController | null>(null);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
@@ -217,7 +217,16 @@ export default function CourseRoom({
     voiceController.current?.end();
     voiceController.current = null;
     setLiveVoice(false);
+    setVoiceToolbarOpen(false);
     setVoiceState(initialVoiceState);
+  };
+  const toggleVoiceToolbar = () => {
+    if (!voiceController.current) {
+      startLiveVoice();
+      setVoiceToolbarOpen(true);
+      return;
+    }
+    setVoiceToolbarOpen((open) => !open);
   };
   useEffect(() => endLiveVoice, []);
   const flushCourseSave = async (): Promise<boolean> => {
@@ -758,14 +767,12 @@ export default function CourseRoom({
             {error}
           </p>
         )}
-        {liveVoice && <VoiceModePanel
+        {voiceToolbarOpen && <VoiceModePanel
           state={voiceState}
           muted={voiceMuted}
           speakerOn={voiceSpeakerOn}
-          captionsOn={voiceCaptionsOn}
           onMute={() => { const next = !voiceMuted; setVoiceMuted(next); voiceController.current?.setMuted(next); }}
           onSpeaker={() => { const next = !voiceSpeakerOn; setVoiceSpeakerOn(next); voiceController.current?.setSpeaker(next); }}
-          onCaptions={() => setVoiceCaptionsOn((value) => !value)}
           onExit={endLiveVoice}
         />}
         <ChatComposer
@@ -777,7 +784,7 @@ export default function CourseRoom({
           onStop={interrupt}
           onSubmit={submit}
           onToggleVoice={liveVoice ? undefined : () => setVoiceEnabled((enabled) => !enabled)}
-          onStartVoiceMode={startLiveVoice}
+          onStartVoiceMode={toggleVoiceToolbar}
           running={running}
           submitLabel="发送"
         />
