@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { AudioWaveformIcon, FileUpIcon, MicIcon, MicOffIcon, PlusIcon, Volume2Icon, VolumeXIcon } from "lucide-react";
+import { AudioWaveformIcon, FileUpIcon, MicIcon, MicOffIcon, PhoneOffIcon, PlusIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentInfo,
@@ -55,9 +55,11 @@ export type ChatComposerProps = {
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
   onVoiceTranscript?: (text: string, final: boolean) => void;
   onVoiceError?: (message: string) => void;
-  voiceEnabled?: boolean;
-  onToggleVoice?: () => void;
   onStartVoiceMode?: () => void;
+  voiceModeActive?: boolean;
+  voiceMuted?: boolean;
+  onToggleVoiceMute?: () => void;
+  onEndVoiceMode?: () => void;
   running?: boolean;
   submitLabel: string;
 };
@@ -87,9 +89,11 @@ function ChatComposerInput({
   submitLabel,
   onVoiceTranscript,
   onVoiceError,
-  voiceEnabled = true,
-  onToggleVoice,
   onStartVoiceMode,
+  voiceModeActive = false,
+  voiceMuted = false,
+  onToggleVoiceMute,
+  onEndVoiceMode,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
   const controller = usePromptInputController();
@@ -250,44 +254,44 @@ function ChatComposerInput({
           >
             <PlusIcon />
           </PromptInputButton>
-          {onToggleVoice && (
-            <PromptInputButton
-              aria-label={voiceEnabled ? "关闭语音" : "开启语音"}
-              className="chat-composer-voice-toggle"
-              onClick={onToggleVoice}
-              tooltip={voiceEnabled ? "关闭语音" : "开启语音"}
-            >
-              {voiceEnabled ? <Volume2Icon /> : <VolumeXIcon />}
-            </PromptInputButton>
-          )}
         </PromptInputTools>
         <PromptInputTools className="chat-composer-submit-tools">
-          <PromptInputButton
-            aria-label="开始语音对话"
-            className="chat-composer-live-voice"
-            disabled={disabled || running}
-            onClick={onStartVoiceMode}
-            tooltip="开始语音对话"
-          >
-            <AudioWaveformIcon />
-          </PromptInputButton>
-          <PromptInputButton
-            aria-label={recording ? "停止录音" : "语音输入"}
+          {(voiceModeActive || recording || canSubmit) && <PromptInputButton
+            aria-label={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
             className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
             disabled={disabled || running}
-            onClick={() => (recording ? stopRecording() : void startRecording())}
-            tooltip={recording ? "停止录音" : "语音输入"}
+            onClick={() => voiceModeActive ? onToggleVoiceMute?.() : (recording ? stopRecording() : void startRecording())}
+            tooltip={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
           >
-            {recording ? <MicOffIcon /> : <MicIcon />}
-          </PromptInputButton>
-          <PromptInputSubmit
+            {voiceModeActive ? (voiceMuted ? <MicOffIcon /> : <MicIcon />) : (recording ? <MicOffIcon /> : <MicIcon />)}
+          </PromptInputButton>}
+          {!canSubmit && !running && !voiceModeActive && (
+            <PromptInputButton
+              aria-label="开始语音对话"
+              className="chat-composer-submit chat-composer-voice-mode"
+              disabled={disabled}
+              onClick={onStartVoiceMode}
+              tooltip="开始语音对话"
+            >
+              <AudioWaveformIcon />
+            </PromptInputButton>
+          )}
+          {(!voiceModeActive || canSubmit || running) && <PromptInputSubmit
             aria-label={running ? "打断" : submitLabel}
             className="chat-composer-submit"
             disabled={!running && (disabled || !canSubmit)}
             onStop={onStop}
             status={running ? "streaming" : "ready"}
             title={running ? "打断" : submitLabel}
-          />
+          />}
+          {voiceModeActive && !canSubmit && !running && <PromptInputButton
+            aria-label="结束语音对话"
+            className="chat-composer-submit chat-composer-voice-end"
+            onClick={onEndVoiceMode}
+            tooltip="结束语音对话"
+          >
+            <PhoneOffIcon />
+          </PromptInputButton>}
         </PromptInputTools>
       </PromptInputFooter>
     </PromptInput>

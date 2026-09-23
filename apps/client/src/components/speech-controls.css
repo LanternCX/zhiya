@@ -29,3 +29,11 @@
   box-shadow: none;
   color: var(--text);
 }
+.chat-composer .chat-composer-voice-mode {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.chat-composer .chat-composer-voice-end {
+  background: var(--text);
+  color: var(--surface);
+}
