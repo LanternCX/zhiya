@@ -106,6 +106,7 @@ function ChatComposerInput({
   const dictationBase = useRef("");
   const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode; analyser: AnalyserNode } | null>(null);
   const levelFrame = useRef<number | null>(null);
+  const recordingAttempt = useRef(0);
   const dragDepth = useRef(0);
   const canSubmit = Boolean(
     controller.textInput.value.trim() || attachments.files.length,
@@ -143,12 +144,14 @@ function ChatComposerInput({
     audio.current = null;
   };
   const cancelDictation = () => {
+    recordingAttempt.current += 1;
     cleanupCapture();
     setRecording(false);
     setDictationDraft(null);
     dictationBase.current = "";
   };
   const stopRecording = () => {
+    recordingAttempt.current += 1;
     cleanupCapture(false);
     setRecording(false);
     setDictationDraft((value) => value ?? "");
@@ -164,10 +167,16 @@ function ChatComposerInput({
     dictationBase.current = "";
   };
   const startRecording = async () => {
+    const attempt = ++recordingAttempt.current;
+    setRecording(true);
     try {
       dictationBase.current = controller.textInput.value;
       setDictationDraft("");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (attempt !== recordingAttempt.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const voice = new SpeechStream((event) => {
         if (event.type === "transcript") {
           onVoiceTranscript?.(event.text, event.final);
@@ -180,6 +189,11 @@ function ChatComposerInput({
         if (event.type === "error") { onVoiceError?.(event.message); cancelDictation(); }
       });
       await voice.startAsr();
+      if (attempt !== recordingAttempt.current) {
+        voice.close();
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const context = new AudioContext();
       const source = context.createMediaStreamSource(stream);
       const processor = context.createScriptProcessor(4096, 1, 1);
@@ -195,8 +209,9 @@ function ChatComposerInput({
         setAudioLevel(Math.min(1, peak * 2.4));
         levelFrame.current = requestAnimationFrame(updateLevel);
       };
-      speech.current = voice; audio.current = { context, stream, source, processor, analyser }; setRecording(true); updateLevel();
+      speech.current = voice; audio.current = { context, stream, source, processor, analyser }; updateLevel();
     } catch (error) {
+      if (attempt !== recordingAttempt.current) return;
       onVoiceError?.(error instanceof Error ? error.message : "无法访问麦克风");
       cancelDictation();
     }
@@ -311,11 +326,11 @@ function ChatComposerInput({
         </PromptInputTools>
         <PromptInputTools className="chat-composer-submit-tools">
           <PromptInputButton
-            aria-label={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
+            aria-label={voiceModeActive ? (voiceMuted ? "开启语音输入" : "关闭语音输入") : (recording ? "停止录音" : "语音输入")}
             className={recording || (voiceModeActive && voiceMuted) ? "chat-composer-voice recording" : "chat-composer-voice"}
             disabled={disabled || running}
             onClick={() => voiceModeActive ? onToggleVoiceMute?.() : (recording ? stopRecording() : void startRecording())}
-            tooltip={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
+            tooltip={voiceModeActive ? (voiceMuted ? "开启语音输入" : "关闭语音输入") : (recording ? "停止录音" : "语音输入")}
           >
             {voiceModeActive ? (voiceMuted ? <MicOffIcon /> : <MicIcon />) : (recording ? <MicOffIcon /> : <MicIcon />)}
           </PromptInputButton>
