@@ -776,7 +776,7 @@ export default function CourseRoom({
           onError={setError}
           onStop={interrupt}
           onSubmit={submit}
-          onToggleVoice={() => setVoiceEnabled((enabled) => !enabled)}
+          onToggleVoice={liveVoice ? undefined : () => setVoiceEnabled((enabled) => !enabled)}
           onStartVoiceMode={startLiveVoice}
           running={running}
           submitLabel="发送"
