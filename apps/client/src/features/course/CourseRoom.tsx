@@ -207,7 +207,7 @@ export default function CourseRoom({
     if (voiceController.current) return;
     const controller = new VoiceSessionController((text, final) => {
       if (final && text.trim()) void submit({ text, files: [] });
-    });
+    }, () => session.current?.stopCurrent());
     voiceController.current = controller;
     controller.subscribe(setVoiceState);
     setLiveVoice(true);

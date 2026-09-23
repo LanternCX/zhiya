@@ -15,8 +15,9 @@ export class VoiceSessionController {
   private nextAudioTime = 0;
   private sources = new Set<AudioBufferSourceNode>();
   private speakerEnabled = true;
+  private readonly onInterruptAgent: () => void;
 
-  constructor(onTranscript: (text: string, final: boolean) => void = () => undefined) { this.onTranscript = onTranscript; }
+  constructor(onTranscript: (text: string, final: boolean) => void = () => undefined, onInterruptAgent: () => void = () => undefined) { this.onTranscript = onTranscript; this.onInterruptAgent = onInterruptAgent; }
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   getState() { return this.state; }
 
@@ -35,7 +36,10 @@ export class VoiceSessionController {
     this.capture = new MicrophoneCapture({
       onPcm: (pcm) => socket.readyState === WebSocket.OPEN && socket.send(pcm),
       onVadEvent: (event) => {
-        if (event.kind === "speech-start") this.dispatch({ type: "speech-started" });
+        if (event.kind === "speech-start") {
+          if (this.state.status === "speaking" || this.state.status === "thinking") this.interrupt();
+          this.dispatch({ type: "speech-started" });
+        }
         if (event.kind === "speech-end") this.commitTurn();
       },
     });
@@ -49,7 +53,7 @@ export class VoiceSessionController {
   }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
-  interrupt() { this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
+  interrupt() { this.onInterruptAgent(); this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
   end() { this.capture?.stop(); this.capture = null; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
 
   private handleMessage(raw: unknown) {
