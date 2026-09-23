@@ -16,3 +16,33 @@ test("voice events require valid session and turn scope", async ({ page }) => {
   });
   expect(result).toEqual([true, true, true, false, false, false, false]);
 });
+
+test("voice VAD distinguishes speech from silence and ends after quiet frames", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { detectVoiceFrame } = await import("/src/features/voice/vad.ts");
+    const silence = new Float32Array(1600);
+    const speech = new Float32Array(1600).fill(0.2);
+    return {
+      silence: detectVoiceFrame(silence, { threshold: 0.03, minSpeechFrames: 2, endSilenceFrames: 3, speechFrames: 0, silenceFrames: 0 }),
+      speech: detectVoiceFrame(speech, { threshold: 0.03, minSpeechFrames: 2, endSilenceFrames: 3, speechFrames: 0, silenceFrames: 0 }),
+    };
+  });
+  expect(result.silence.kind).toBe("silence");
+  expect(result.speech.kind).toBe("speech");
+});
+
+test("voice reducer ignores stale turns and exits from speaking", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    state = voiceReducer(state, { type: "transcript", turnId: 9, text: "旧轮次", final: true });
+    state = voiceReducer(state, { type: "speaking" });
+    state = voiceReducer(state, { type: "end" });
+    return state;
+  });
+  expect(result.status).toBe("ended");
+  expect(result.transcript).toBe("");
+});
