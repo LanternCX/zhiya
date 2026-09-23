@@ -256,15 +256,15 @@ function ChatComposerInput({
           </PromptInputButton>
         </PromptInputTools>
         <PromptInputTools className="chat-composer-submit-tools">
-          {(voiceModeActive || recording || canSubmit) && <PromptInputButton
+          <PromptInputButton
             aria-label={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
-            className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
+            className={recording || (voiceModeActive && voiceMuted) ? "chat-composer-voice recording" : "chat-composer-voice"}
             disabled={disabled || running}
             onClick={() => voiceModeActive ? onToggleVoiceMute?.() : (recording ? stopRecording() : void startRecording())}
             tooltip={voiceModeActive ? (voiceMuted ? "打开麦克风" : "静音麦克风") : (recording ? "停止录音" : "语音输入")}
           >
             {voiceModeActive ? (voiceMuted ? <MicOffIcon /> : <MicIcon />) : (recording ? <MicOffIcon /> : <MicIcon />)}
-          </PromptInputButton>}
+          </PromptInputButton>
           {!canSubmit && !running && !voiceModeActive && (
             <PromptInputButton
               aria-label="开始语音对话"
