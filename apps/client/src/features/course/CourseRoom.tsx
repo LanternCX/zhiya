@@ -204,12 +204,19 @@ export default function CourseRoom({
     }, () => session.current?.stopCurrent());
     voiceController.current = controller;
     setLiveVoice(true);
-    void controller.start().catch((reason) => setError(reason instanceof Error ? reason.message : "无法启动语音对话"));
+    void controller.start().catch((reason) => {
+      controller.end();
+      if (voiceController.current === controller) voiceController.current = null;
+      setLiveVoice(false);
+      setVoiceMuted(false);
+      setError(reason instanceof Error ? reason.message : "无法启动语音对话");
+    });
   };
   const endLiveVoice = () => {
     voiceController.current?.end();
     voiceController.current = null;
     setLiveVoice(false);
+    setVoiceMuted(false);
   };
   useEffect(() => endLiveVoice, []);
   const flushCourseSave = async (): Promise<boolean> => {

@@ -16,6 +16,9 @@ export class VoiceSessionController {
   private sources = new Set<AudioBufferSourceNode>();
   private speakerEnabled = true;
   private readonly onInterruptAgent: () => void;
+  private sessionReady: Promise<void> | null = null;
+  private resolveSessionReady: (() => void) | null = null;
+  private rejectSessionReady: ((reason: Error) => void) | null = null;
 
   constructor(onTranscript: (text: string, final: boolean) => void = () => undefined, onInterruptAgent: () => void = () => undefined) { this.onTranscript = onTranscript; this.onInterruptAgent = onInterruptAgent; }
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
@@ -36,7 +39,24 @@ export class VoiceSessionController {
       socket.onopen = () => { window.clearTimeout(timeout); resolve(); };
       socket.addEventListener("error", () => { window.clearTimeout(timeout); reject(new Error("语音连接失败，请检查后端服务和 ASR API Key")); }, { once: true });
     });
+    this.sessionReady = new Promise<void>((resolve, reject) => {
+      this.resolveSessionReady = resolve;
+      this.rejectSessionReady = reject;
+    });
     this.send({ type: "start-session", sessionId: this.sessionId, turnId: this.turnId });
+    try {
+      await this.sessionReady;
+    } catch (error) {
+      this.capture?.stop();
+      this.capture = null;
+      this.socket?.close();
+      this.socket = null;
+      throw error;
+    } finally {
+      this.sessionReady = null;
+      this.resolveSessionReady = null;
+      this.rejectSessionReady = null;
+    }
     this.capture = new MicrophoneCapture({
       onPcm: (pcm) => socket.readyState === WebSocket.OPEN && socket.send(pcm),
       onVadEvent: (event) => {
@@ -59,7 +79,7 @@ export class VoiceSessionController {
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
   interrupt() { this.onInterruptAgent(); this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
-  end() { this.capture?.stop(); this.capture = null; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
+  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
 
   private handleMessage(raw: unknown) {
     let value: unknown;
@@ -67,10 +87,10 @@ export class VoiceSessionController {
     if (!isVoiceServerEvent(value)) return;
     const event = value as VoiceServerEvent;
     if (event.sessionId !== this.sessionId || event.turnId < this.turnId) return;
-    if (event.type === "session-ready") this.dispatch({ type: "ready" });
+    if (event.type === "session-ready") { this.resolveSessionReady?.(); this.dispatch({ type: "ready" }); }
     if (event.type === "transcript-delta" || event.type === "transcript-final") { const text = event.text ?? ""; this.dispatch({ type: "transcript", turnId: event.turnId, text, final: event.type === "transcript-final" }); this.onTranscript(text, event.type === "transcript-final"); }
     if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.enqueueAudio(event.data, event.sampleRate ?? 24000); }
-    if (event.type === "session-error") this.dispatch({ type: "error", message: event.message ?? "语音会话失败" });
+    if (event.type === "session-error") { const message = event.message ?? "语音会话失败"; this.rejectSessionReady?.(new Error(message)); this.dispatch({ type: "error", message }); }
     if (event.type === "session-ended") this.dispatch({ type: "end" });
   }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }

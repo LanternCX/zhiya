@@ -29,10 +29,11 @@ export class MicrophoneCapture {
     this.vad = { ...defaultVad, ...this.options.vad };
     this.processor.port.onmessage = ({ data }: MessageEvent<Float32Array>) => {
       const samples = data instanceof Float32Array ? data : new Float32Array(data);
+      if (this.muted) return;
       const event = detectVoiceFrame(samples, this.vad);
       this.vad = { ...this.vad, speechFrames: event.speechFrames, silenceFrames: event.silenceFrames };
       this.options.onVadEvent?.(event);
-      if (!this.muted) this.options.onPcm(float32ToPcm16(samples, this.context?.sampleRate ?? 48000));
+      this.options.onPcm(float32ToPcm16(samples, this.context?.sampleRate ?? 48000));
     };
     this.source.connect(this.processor);
     this.processor.connect(this.context.destination);
