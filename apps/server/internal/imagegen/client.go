@@ -8,8 +8,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"regexp"
 	"strings"
 )
+
+var imageStorageHost = regexp.MustCompile(`^dashscope-[a-z0-9-]+\.oss-(?:accelerate|cn-[a-z0-9-]+)\.aliyuncs\.com$`)
 
 type Generator interface {
 	Generate(context.Context, string) (string, error)
@@ -57,11 +61,25 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 }
 
 func (c *Client) Download(ctx context.Context, rawURL string) (io.ReadCloser, string, error) {
+	imageURL, err := url.Parse(rawURL)
+	providerURL, providerErr := url.Parse(c.endpoint)
+	if err != nil || providerErr != nil || imageURL.User != nil || imageURL.Fragment != "" || imageURL.Opaque != "" {
+		return nil, "", errors.New("image provider returned an untrusted download URL")
+	}
+	providerOrigin := imageURL.Scheme == providerURL.Scheme && strings.EqualFold(imageURL.Host, providerURL.Host)
+	imageStorage := imageURL.Scheme == "https" && imageURL.Port() == "" && imageStorageHost.MatchString(strings.ToLower(imageURL.Hostname()))
+	if !providerOrigin && !imageStorage {
+		return nil, "", errors.New("image provider returned an untrusted download URL")
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, "", err
 	}
-	res, err := c.http.Do(req)
+	downloadClient := *c.http
+	downloadClient.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	res, err := downloadClient.Do(req)
 	if err != nil {
 		return nil, "", err
 	}
