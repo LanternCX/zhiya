@@ -36,9 +36,10 @@ func TestIllustrationGenerationPersistsAndStaysPrivate(t *testing.T) {
 			}
 			input := request["input"].(map[string]any)
 			messages := input["messages"].([]any)
-			prompt := messages[0].(map[string]any)["content"].([]any)[0].(map[string]any)["text"].(string)
-			if !strings.Contains(prompt, "二维") || !strings.Contains(prompt, "水彩绘本") || !strings.Contains(prompt, "手绘示意图") {
-				t.Fatalf("prompt does not offer varied 2D styles: %q", prompt)
+			content := messages[0].(map[string]any)["content"].([]any)
+			prompt := content[1].(map[string]any)["text"].(string)
+			if !strings.Contains(prompt, "仅参考") || !strings.Contains(prompt, "不要复用") || !strings.Contains(prompt, "二维") {
+				t.Fatalf("prompt does not limit the reference to its visual style: %q", prompt)
 			}
 			if !strings.Contains(prompt, "简短中文") || !strings.Contains(prompt, "避免密集文字") || strings.Contains(prompt, "不要出现文字") {
 				t.Fatalf("prompt does not allow restrained Chinese text: %q", prompt)

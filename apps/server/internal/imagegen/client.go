@@ -3,6 +3,8 @@ package imagegen
 import (
 	"bytes"
 	"context"
+	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +16,11 @@ import (
 )
 
 var imageStorageHost = regexp.MustCompile(`^dashscope-[a-z0-9-]+\.oss-(?:accelerate|cn-[a-z0-9-]+)\.aliyuncs\.com$`)
+
+//go:embed style-reference.png
+var styleReferencePNG []byte
+
+var styleReferenceDataURI = "data:image/png;base64," + base64.StdEncoding.EncodeToString(styleReferencePNG)
 
 type Generator interface {
 	Generate(context.Context, string) (string, error)
@@ -37,7 +44,7 @@ func New(endpoint, model, apiKey string, client *http.Client) *Client {
 func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 	body := map[string]any{
 		"model":      c.model,
-		"input":      map[string]any{"messages": []any{map[string]any{"role": "user", "content": []any{map[string]any{"text": prompt}}}}},
+		"input":      map[string]any{"messages": []any{map[string]any{"role": "user", "content": []any{map[string]any{"image": styleReferenceDataURI}, map[string]any{"text": prompt}}}}},
 		"parameters": map[string]any{"size": "1536*864", "n": 1, "prompt_extend": false, "watermark": false},
 	}
 	var response struct {

@@ -55,7 +55,7 @@ func (s *IllustrationService) Create(ctx context.Context, token, claimedUser, co
 	if err != nil {
 		return domain.IllustrationGeneration{}, err
 	}
-	prompt := description + "。面向中小学生，保持清晰的二维平面视觉表达，避免三维建模、塑料质感和夸张立体透视。沿用描述指定的风格；未指定时依据内容选择水彩绘本、彩铅插画、扁平矢量或手绘示意图，漫画只在叙事动作或分镜确有帮助时使用。突出主体、动作或知识关系，构图有层次和适当留白，色彩协调。可用于绘本场景、思维导图、知识示意图、轻文字视觉课件页或课件配图，布局服从教学目的。仅在描述需要时绘制少量简短中文词语或短句，避免密集文字、长段落和大面积文字覆盖；未要求时不自行添加文字。需要逐字准确的标题、公式和较长说明由页面文字呈现。不要水印或Logo。"
+	prompt := description + "。这是一张依据本次描述从头构图的全新画面，不是修改输入图片。请仅参考输入图片的视觉风格：柔和的水彩和水粉笔触、温暖自然的光线与细腻纸张肌理；若本次描述明确指定其他风格，以描述为准。不要复用参考图中的孩子、教室、电脑、白板、灯泡、方框、箭头、道具或构图；除非本次描述需要这些元素，否则彻底舍弃。画面内容由本次描述决定，只加入有助于表达当前知识的元素。面向中小学生和课堂展示，保持清晰的二维平面表达，不使用三维建模质感。根据教学内容安排主体、知识关系和留白，绘本场景、示意图或课件配图可采用不同构图。仅在描述需要时绘制少量简短中文词语或短句，避免密集文字、长段落和大面积文字覆盖；未要求时不自行添加文字。需要逐字准确的标题、公式和较长说明由页面文字呈现。不要水印或Logo。"
 	var result domain.IllustrationGeneration
 	err = s.models.Transaction(ctx, data.StandardTransaction, func(models data.Models) error {
 		var createErr error

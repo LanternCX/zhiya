@@ -1,7 +1,11 @@
 package imagegen
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"image/png"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +17,50 @@ type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(request *http.Request) (*http.Response, error) {
 	return f(request)
+}
+
+func TestGenerateSendsStyleReferenceWithTeachingPrompt(t *testing.T) {
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			Input struct {
+				Messages []struct {
+					Content []map[string]string `json:"content"`
+				} `json:"messages"`
+			} `json:"input"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Fatal(err)
+		}
+		if len(request.Input.Messages) != 1 || len(request.Input.Messages[0].Content) != 2 {
+			t.Fatalf("expected a reference image and a teaching prompt: %+v", request.Input.Messages)
+		}
+		content := request.Input.Messages[0].Content
+		if content[1]["text"] != "画一张水循环教学图" {
+			t.Fatalf("teaching prompt changed: %+v", content[1])
+		}
+		const prefix = "data:image/png;base64,"
+		if !strings.HasPrefix(content[0]["image"], prefix) {
+			t.Fatalf("missing PNG style reference: %+v", content[0])
+		}
+		imageBytes, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(content[0]["image"], prefix))
+		if err != nil {
+			t.Fatal(err)
+		}
+		image, err := png.DecodeConfig(bytes.NewReader(imageBytes))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if image.Width != 1672 || image.Height != 941 {
+			t.Fatalf("unexpected style reference dimensions: %dx%d", image.Width, image.Height)
+		}
+		_, _ = io.WriteString(w, `{"output":{"choices":[{"message":{"content":[{"image":"https://dashscope-result-sh.oss-cn-shanghai.aliyuncs.com/result.png"}]}}]}}`)
+	}))
+	defer provider.Close()
+
+	client := New(provider.URL, "qwen-image-3.0", "test-key", provider.Client())
+	if _, err := client.Generate(context.Background(), "画一张水循环教学图"); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDownloadRejectsUnexpectedDestination(t *testing.T) {
