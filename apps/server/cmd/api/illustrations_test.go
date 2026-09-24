@@ -40,6 +40,9 @@ func TestIllustrationGenerationPersistsAndStaysPrivate(t *testing.T) {
 			if !bytes.Contains([]byte(prompt), []byte("不要出现文字")) {
 				t.Fatalf("prompt does not prohibit visible text: %q", prompt)
 			}
+			if !strings.Contains(prompt, "不要设计成PPT") || !strings.Contains(prompt, "信息图") {
+				t.Fatalf("prompt does not prohibit presentation-style artwork: %q", prompt)
+			}
 			if strings.Contains(prompt, "森林") {
 				<-releaseForest
 			}

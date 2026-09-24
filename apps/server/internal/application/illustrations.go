@@ -55,7 +55,7 @@ func (s *IllustrationService) Create(ctx context.Context, token, claimedUser, co
 	if err != nil {
 		return domain.IllustrationGeneration{}, err
 	}
-	prompt := description + "。面向中小学生的清晰二维教育漫画插图，构图简洁，视觉层级明确，色彩友好。画面中不要出现文字、字母、数字、公式、水印或标识。"
+	prompt := description + "。面向中小学生的清晰二维教育漫画插图，自然完整的场景构图，主体明确，视觉层级清楚，色彩友好。不要设计成PPT、演示文稿、信息图、知识卡片、软件界面或带边框的拼贴版面。画面中不要出现文字、字母、数字、公式、水印或标识。"
 	var result domain.IllustrationGeneration
 	err = s.models.Transaction(ctx, data.StandardTransaction, func(models data.Models) error {
 		var createErr error
