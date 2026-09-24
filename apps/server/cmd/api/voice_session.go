@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,9 +22,9 @@ type voiceSession struct {
 	ctx       context.Context
 	sessionID string
 
-	mu  sync.Mutex
-	asr *websocket.Conn
-	tts *websocket.Conn
+	mu        sync.Mutex
+	asr       *websocket.Conn
+	tts       *websocket.Conn
 	asrTaskID string
 }
 
@@ -152,7 +154,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	s.cancelTTS(turnID)
 	dialContext, cancel := context.WithTimeout(s.ctx, 8*time.Second)
 	defer cancel()
-	conn, _, err := websocket.Dial(dialContext, s.app.config.Speech.Endpoint+"?model="+s.app.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
+	conn, _, err := websocket.Dial(dialContext, realtimeTTSEndpoint(s.app.config.Speech.Endpoint, s.app.config.Speech.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
 	if err != nil {
 		return err
 	}
@@ -169,6 +171,18 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
 	go s.forwardUpstream(conn, "tts", turnID)
 	return nil
+}
+
+func realtimeTTSEndpoint(rawEndpoint, model string) string {
+	parsed, err := url.Parse(rawEndpoint)
+	if err != nil {
+		return rawEndpoint
+	}
+	parsed.Path = strings.TrimSuffix(parsed.Path, "/api-ws/v1/inference") + "/api-ws/v1/realtime"
+	query := parsed.Query()
+	query.Set("model", model)
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
 }
 
 func (s *voiceSession) cancelTTS(_ int64) {
