@@ -37,11 +37,17 @@ func TestIllustrationGenerationPersistsAndStaysPrivate(t *testing.T) {
 			input := request["input"].(map[string]any)
 			messages := input["messages"].([]any)
 			prompt := messages[0].(map[string]any)["content"].([]any)[0].(map[string]any)["text"].(string)
-			if !bytes.Contains([]byte(prompt), []byte("不要出现文字")) {
-				t.Fatalf("prompt does not prohibit visible text: %q", prompt)
+			if !strings.Contains(prompt, "二维") || !strings.Contains(prompt, "水彩绘本") || !strings.Contains(prompt, "手绘示意图") {
+				t.Fatalf("prompt does not offer varied 2D styles: %q", prompt)
 			}
-			if !strings.Contains(prompt, "不要设计成PPT") || !strings.Contains(prompt, "信息图") {
-				t.Fatalf("prompt does not prohibit presentation-style artwork: %q", prompt)
+			if !strings.Contains(prompt, "简短中文") || !strings.Contains(prompt, "避免密集文字") || strings.Contains(prompt, "不要出现文字") {
+				t.Fatalf("prompt does not allow restrained Chinese text: %q", prompt)
+			}
+			if strings.Contains(prompt, "水循环") && !strings.Contains(prompt, "“蒸发”“降雨”") {
+				t.Fatalf("prompt dropped requested Chinese labels: %q", prompt)
+			}
+			if strings.Contains(prompt, "不要设计成PPT") || strings.Contains(prompt, "不要设计成信息图") {
+				t.Fatalf("prompt prohibits useful teaching layouts: %q", prompt)
 			}
 			if strings.Contains(prompt, "森林") {
 				<-releaseForest
@@ -68,7 +74,7 @@ func TestIllustrationGenerationPersistsAndStaysPrivate(t *testing.T) {
 		"conversationId": conversationID,
 		"pageId":         "water-cycle",
 		"title":          "水循环",
-		"description":    "用云、雨和河流解释水循环",
+		"description":    "用云、雨和河流解释水循环，画面只标注“蒸发”“降雨”",
 		"alt":            "云、雨和河流组成的水循环示意图",
 	}, http.StatusAccepted)["generation"].(map[string]any)
 	generationID := created["id"].(string)
