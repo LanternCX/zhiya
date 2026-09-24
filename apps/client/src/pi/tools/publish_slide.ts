@@ -10,7 +10,7 @@ export function publishSlideTool(
     name: "publish_slide",
     label: "发布课件页",
     description:
-      "Publish exactly one completed presentation page so the student can see it immediately.",
+      "Publish exactly one completed presentation page into the unordered lesson-page buffer. This does not add it to the right-side display; the teacher separately decides whether to select it, its position, and when it becomes visible.",
     parameters: Type.Object({
       title: Type.String({
         maxLength: 32,
@@ -37,13 +37,18 @@ export function publishSlideTool(
         Type.Literal("explain"),
         Type.Literal("steps"),
         Type.Literal("compare"),
+        Type.Literal("spotlight"),
+        Type.Literal("cards"),
+        Type.Literal("timeline"),
       ]),
     }),
     executionMode: "sequential",
     execute: async (id, params) => {
       const count = publish(id, params as Omit<Slide, "id" | "kind">);
       return {
-        content: [{ type: "text", text: `Page ${count} is visible.` }],
+        content: [
+          { type: "text", text: `Page ${count} entered the lesson-page buffer.` },
+        ],
         details: { page: count },
       };
     },

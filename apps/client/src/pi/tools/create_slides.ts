@@ -16,7 +16,7 @@ export function createSlidesTool(
     name: "create_slides",
     label: "生成课件",
     description:
-      "Start generating one or more presentation pages in the background and return the task immediately. Generated pages stay hidden until show_next_slide or show_lesson_page presents them. Use this whenever text-led visual teaching pages help.",
+      "Start generating one or more presentation pages in the background and return the task immediately. Completed pages enter only the unordered lesson-page buffer. The teacher must explicitly select pages from the buffer with place_lesson_page before they exist in the right-side display. Use this whenever text-led visual teaching pages help.",
     parameters: Type.Object({
       goal: Type.String(),
       pageCount: Type.Integer({ minimum: 1, maximum: 10 }),

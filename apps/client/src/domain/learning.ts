@@ -20,7 +20,13 @@ export type Slide = {
   kicker?: string;
   body: string;
   bullets: string[];
-  layout: "explain" | "steps" | "compare";
+  layout:
+    | "explain"
+    | "steps"
+    | "compare"
+    | "spotlight"
+    | "cards"
+    | "timeline";
 };
 
 export type AnimationNode = {

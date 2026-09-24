@@ -91,7 +91,6 @@ export type SlideTools = {
   };
   cancel: () => void;
   read: () => { pages: Slide[]; generating: boolean };
-  next: () => Promise<LessonPage>;
 };
 
 export type AnimationTools = {
@@ -100,7 +99,6 @@ export type AnimationTools = {
     pageId: string;
     status: "running";
   };
-  show: (pageId: string) => Promise<LessonPage>;
   read: () => Array<{
     taskId: string;
     pageId: string;
@@ -113,6 +111,29 @@ export type AnimationTools = {
     command: AnimationPlaybackCommand,
   ) => AnimationPlaybackState;
   playback: (pageId: string) => AnimationPlaybackState;
+};
+
+export type LessonPageSummary = {
+  pageId: string;
+  kind: LessonPage["kind"];
+  title: string;
+};
+
+export type LessonPageState = {
+  buffer: LessonPageSummary[];
+  displaySequence: Array<LessonPageSummary & { position: number }>;
+  currentPageId: string;
+};
+
+export type LessonPageTools = {
+  read: () => LessonPageState;
+  place: (
+    pageId: string,
+    position: number,
+  ) => LessonPageState;
+  remove: (pageId: string) => LessonPageState;
+  show: (pageId: string) => Promise<LessonPage>;
+  next: () => Promise<LessonPage>;
 };
 
 export type IllustrationTools = {

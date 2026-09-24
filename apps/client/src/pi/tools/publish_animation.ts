@@ -60,7 +60,7 @@ export function publishAnimationTool(
     name: "publish_animation",
     label: "发布动画页",
     description:
-      "Publish one complete, validated animation scene. Use relationships and layout direction; never supply SVG, code, styles, colors, or pixel coordinates.",
+      "Publish one complete, validated animation scene into the unordered lesson-page buffer without adding it to the right-side display. Use relationships and layout direction; never supply SVG, code, styles, colors, or pixel coordinates.",
     parameters: Type.Object(
       {
         pageId: Type.String({ minLength: 1, maxLength: 64 }),
@@ -129,7 +129,15 @@ export function publishAnimationTool(
       const page = params as AnimationDraft;
       assertSimpleAnimation(page);
       publish(page);
-      return { content: [{ type: "text", text: "Animation page published." }], details: {} };
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Animation page entered the lesson-page buffer.",
+          },
+        ],
+        details: {},
+      };
     },
   };
 }
