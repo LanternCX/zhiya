@@ -763,6 +763,7 @@ export default function CourseRoom({
           disabled={!info?.available || !coursesReady}
           label="告诉知芽你想学什么"
           onError={setError}
+          onVoiceError={setError}
           onStop={interrupt}
           onSubmit={submit}
           onStartVoiceMode={startLiveVoice}

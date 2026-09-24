@@ -8,3 +8,10 @@ test("live voice startup clears the controller when connection fails", async () 
   assert.match(source, /setLiveVoice\(false\)/);
   assert.match(source, /setVoiceMuted\(false\)/);
 });
+
+test("composer surfaces dictation failures instead of hiding them", async () => {
+  const room = await readFile(new URL("../src/features/course/CourseRoom.tsx", import.meta.url), "utf8");
+  const overview = await readFile(new URL("../src/features/course/CourseOverview.tsx", import.meta.url), "utf8");
+  assert.match(room, /onVoiceError=\{setError\}/);
+  assert.match(overview, /onVoiceError=\{setComposerError\}/);
+});

@@ -382,6 +382,7 @@ export default function CourseOverview({
             : "告诉知芽你想开始什么新的学习"
         }
         onError={setComposerError}
+        onVoiceError={setComposerError}
         onSubmit={startLearning}
         submitLabel={historySection ? "开始新一轮学习" : "开始新的学习"}
       />
