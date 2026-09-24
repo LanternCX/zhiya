@@ -118,9 +118,9 @@ func (s *voiceSession) startASR(turnID int64) error {
 	}
 	dialContext, cancel := context.WithTimeout(s.ctx, 8*time.Second)
 	defer cancel()
-	conn, _, err := websocket.Dial(dialContext, s.app.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.ASRAPIKey}}})
+	conn, response, err := websocket.Dial(dialContext, s.app.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.ASRAPIKey}}})
 	if err != nil {
-		return err
+		return wrapSpeechDialError(response, err)
 	}
 	s.asr = conn
 	taskID := data.UUID()
@@ -155,9 +155,9 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	s.cancelTTS(turnID)
 	dialContext, cancel := context.WithTimeout(s.ctx, 8*time.Second)
 	defer cancel()
-	conn, _, err := websocket.Dial(dialContext, realtimeTTSEndpoint(s.app.config.Speech.Endpoint, s.app.config.Speech.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
+	conn, response, err := websocket.Dial(dialContext, realtimeTTSEndpoint(s.app.config.Speech.Endpoint, s.app.config.Speech.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + s.app.config.Speech.TTSAPIKey}}})
 	if err != nil {
-		return err
+		return wrapSpeechDialError(response, err)
 	}
 	s.mu.Lock()
 	s.tts = conn
@@ -172,6 +172,13 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
 	go s.forwardUpstream(conn, "tts", turnID)
 	return nil
+}
+
+func wrapSpeechDialError(response *http.Response, err error) error {
+	if response != nil {
+		return fmt.Errorf("上游 HTTP %s: %w", response.Status, err)
+	}
+	return err
 }
 
 func realtimeTTSEndpoint(rawEndpoint, model string) string {

@@ -111,12 +111,12 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *application) dialSpeech(ctx context.Context, apiKey string) (*websocket.Conn, error) {
-	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
-	return conn, err
+	conn, response, err := websocket.Dial(ctx, a.config.Speech.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
+	return conn, wrapSpeechDialError(response, err)
 }
 func (a *application) dialTTS(ctx context.Context, apiKey string) (*websocket.Conn, error) {
-	conn, _, err := websocket.Dial(ctx, a.config.Speech.Endpoint+"?model="+a.config.Speech.TTSModel, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
-	return conn, err
+	conn, response, err := websocket.Dial(ctx, realtimeTTSEndpoint(a.config.Speech.Endpoint, a.config.Speech.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
+	return conn, wrapSpeechDialError(response, err)
 }
 func (a *application) forwardSpeech(ctx context.Context, upstream, browser *websocket.Conn, mode string) {
 	for {
