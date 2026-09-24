@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -77,7 +78,7 @@ func (s *voiceSession) run() {
 				s.sessionID = msg.SessionID
 			}
 			if err := s.startASR(msg.TurnID); err != nil {
-				message := "无法连接语音识别服务，请检查 ASR Endpoint 和 API Key"
+				message := fmt.Sprintf("无法连接语音识别服务：%v", err)
 				if err.Error() == "ASR API Key 未配置" {
 					message = err.Error()
 				}
@@ -91,7 +92,7 @@ func (s *voiceSession) run() {
 			s.cancelTTS(msg.TurnID)
 		case "speak-text":
 			if err := s.startTTS(msg.TurnID, msg.Text); err != nil {
-				message := "无法连接语音合成服务，请检查 TTS Endpoint 和 API Key"
+				message := fmt.Sprintf("无法连接语音合成服务：%v", err)
 				if err == errInvalidVoiceMessage {
 					message = "TTS API Key 未配置或文本为空"
 				}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -66,7 +67,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			closeUpstream()
 			upstream, err = a.dialSpeech(ctx, a.config.Speech.ASRAPIKey)
 			if err != nil {
-				send(map[string]string{"type": "error", "message": "无法连接语音服务"})
+				send(map[string]string{"type": "error", "message": fmt.Sprintf("无法连接语音服务：%v", err)})
 				continue
 			}
 			taskID = data.UUID()
@@ -86,7 +87,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			}
 			upstream, err = a.dialTTS(ctx, a.config.Speech.TTSAPIKey)
 			if err != nil {
-				send(map[string]string{"type": "error", "message": "无法连接语音服务"})
+				send(map[string]string{"type": "error", "message": fmt.Sprintf("无法连接语音服务：%v", err)})
 				continue
 			}
 			voice := command.Voice
