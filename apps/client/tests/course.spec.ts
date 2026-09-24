@@ -606,6 +606,7 @@ test("animation generation stays in the background until the teacher presents it
     releaseAnimation = resolve;
   });
   let animationModelCalls = 0;
+  let animationPublished = false;
   let teacherSawCompletionNotice = false;
 
   await page.route("**/api/learning/course/model", async (route: Route) => {
@@ -652,6 +653,7 @@ test("animation generation stays in the background until the teacher presents it
       } else {
         await route.fulfill(textResponse(""));
       }
+      animationPublished = true;
       return;
     }
 
@@ -674,7 +676,20 @@ test("animation generation stays in the background until the teacher presents it
       teacherSawCompletionNotice = transcript.includes(
         "Background child-agent task completed",
       );
-      if (!transcript.includes('"name":"show_lesson_page"')) {
+      if (!teacherSawCompletionNotice) {
+        await route.fulfill(textResponse("动画还在生成，完成后我会展示。"));
+      } else if (!transcript.includes('"name":"read_lesson_pages"')) {
+        await route.fulfill(
+          toolResponse("read-water-cycle", "read_lesson_pages", {}),
+        );
+      } else if (!transcript.includes('"name":"place_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("place-water-cycle", "place_lesson_page", {
+            pageId: "water-cycle",
+            position: 1,
+          }),
+        );
+      } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-water-cycle", "show_lesson_page", {
             pageId: "water-cycle",
@@ -718,6 +733,10 @@ test("animation generation stays in the background until the teacher presents it
   await page.getByRole("button", { name: "发送" }).click();
   await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
   releaseAnimation();
+  await expect.poll(() => animationPublished).toBe(true);
+  await page.waitForTimeout(100);
+  await prompt.fill("现在展示");
+  await page.getByRole("button", { name: "发送" }).click();
   const classroom = page.getByRole("region", { name: "课堂页面" });
   await expect(
     classroom.getByRole("img", { name: "动画页面：水循环" }),
@@ -739,6 +758,7 @@ test("the animation agent simplifies a scene that exceeds the element limit", as
 }) => {
   await mockCompletedWorkspace(page);
   let animationModelCalls = 0;
+  let animationPublished = false;
   let receivedValidationError = false;
 
   await page.route("**/api/learning/course/model", async (route: Route) => {
@@ -864,11 +884,23 @@ test("the animation agent simplifies a scene that exceeds the element limit", as
           ],
         }),
       );
+      animationPublished = true;
       return;
     }
 
     if (transcript.includes("Background child-agent task completed")) {
-      if (!transcript.includes('"name":"show_lesson_page"')) {
+      if (!transcript.includes('"name":"read_lesson_pages"')) {
+        await route.fulfill(
+          toolResponse("read-corrected", "read_lesson_pages", {}),
+        );
+      } else if (!transcript.includes('"name":"place_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("place-corrected", "place_lesson_page", {
+            pageId: "corrected-cycle",
+            position: 1,
+          }),
+        );
+      } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-corrected", "show_lesson_page", {
             pageId: "corrected-cycle",
@@ -897,6 +929,13 @@ test("the animation agent simplifies a scene that exceeds the element limit", as
     .fill("画一个简单的水循环动画");
   await page.getByRole("button", { name: "发送" }).click();
 
+  await expect.poll(() => animationPublished).toBe(true);
+  await page.waitForTimeout(100);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("现在展示修正后的动画");
+  await page.getByRole("button", { name: "发送" }).click();
+
   await expect(
     page.getByText("修正后的动画已经展示。", { exact: true }),
   ).toBeVisible();
@@ -912,6 +951,7 @@ test("the animation agent gets one same-context correction when it stops without
 }) => {
   await mockCompletedWorkspace(page);
   let animationModelCalls = 0;
+  let animationPublished = false;
   let correctionKeptFirstTurn = false;
 
   await page.route("**/api/learning/course/model", async (route: Route) => {
@@ -949,11 +989,23 @@ test("the animation agent gets one same-context correction when it stops without
           ],
         }),
       );
+      animationPublished = true;
       return;
     }
 
     if (transcript.includes("Background child-agent task completed")) {
-      if (!transcript.includes('"name":"show_lesson_page"')) {
+      if (!transcript.includes('"name":"read_lesson_pages"')) {
+        await route.fulfill(
+          toolResponse("read-after-correction", "read_lesson_pages", {}),
+        );
+      } else if (!transcript.includes('"name":"place_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("place-after-correction", "place_lesson_page", {
+            pageId: "retry-once",
+            position: 1,
+          }),
+        );
+      } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-after-correction", "show_lesson_page", {
             pageId: "retry-once",
@@ -980,6 +1032,13 @@ test("the animation agent gets one same-context correction when it stops without
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill("画一个需要纠错一次的动画");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect.poll(() => animationPublished).toBe(true);
+  await page.waitForTimeout(100);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("现在展示纠错后的动画");
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect(
@@ -1148,13 +1207,13 @@ test("teacher follows the student's requested slide pace while keeping narration
     /student's explicit request.+pace.+page count.+takes priority/i,
   );
   expect(teacherInstructions).toMatch(
-    /continuous.+do not wait for confirmation.+requested batch is complete/i,
+    /continuous.+without waiting for confirmation.+requested batch is complete/i,
   );
   expect(teacherInstructions).toMatch(
-    /one page at a time.+wait for the student/i,
+    /one-page-at-a-time.+wait after explaining/i,
   );
   expect(teacherInstructions).toMatch(
-    /show one page.+explain that page.+show_next_slide/i,
+    /show one displayed page.+explain that visible page.+advance or jump/i,
   );
 });
 
@@ -1166,6 +1225,7 @@ test("background slide generation does not change the visible page before presen
   const slideReady = new Promise<void>((resolve) => {
     releaseSlide = resolve;
   });
+  let slidePublished = false;
   let teacherReceivedSlideCompletion = false;
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
@@ -1179,6 +1239,7 @@ test("background slide generation does not change the visible page before presen
     if (request.agent === "slides") {
       if (toolResults === 0) {
         await slideReady;
+        slidePublished = true;
         await route.fulfill(
           toolResponse("prepared-slide", "publish_slide", {
             title: "准备完成但尚未展示",
@@ -1193,9 +1254,25 @@ test("background slide generation does not change the visible page before presen
       return;
     }
     if (transcript.includes("现在展示第一页")) {
-      if (!transcript.includes('"name":"show_next_slide"')) {
+      teacherReceivedSlideCompletion = transcript.includes(
+        "Background child-agent task completed",
+      );
+      if (!transcript.includes('"name":"read_lesson_pages"')) {
         await route.fulfill(
-          toolResponse("show-prepared-slide", "show_next_slide", {}),
+          toolResponse("read-prepared-slide", "read_lesson_pages", {}),
+        );
+      } else if (!transcript.includes('"name":"place_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("place-prepared-slide", "place_lesson_page", {
+            pageId: "prepared-slide",
+            position: 1,
+          }),
+        );
+      } else if (!transcript.includes('"name":"show_lesson_page"')) {
+        await route.fulfill(
+          toolResponse("show-prepared-slide", "show_lesson_page", {
+            pageId: "prepared-slide",
+          }),
         );
       } else {
         await route.fulfill(textResponse("现在开始讲解这一页。"));
@@ -1222,7 +1299,9 @@ test("background slide generation does not change the visible page before presen
   await page.getByRole("button", { name: "发送" }).click();
   await expect(page.getByText("页面正在后台准备。", { exact: true })).toBeVisible();
   releaseSlide();
-  await expect.poll(() => teacherReceivedSlideCompletion).toBe(true);
+  await expect.poll(() => slidePublished).toBe(true);
+  await page.waitForTimeout(100);
+  expect(teacherReceivedSlideCompletion).toBe(false);
   await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
 
   await prompt.fill("现在展示第一页");
@@ -1233,6 +1312,7 @@ test("background slide generation does not change the visible page before presen
   await expect(
     page.getByText("现在开始讲解这一页。", { exact: true }),
   ).toBeVisible();
+  expect(teacherReceivedSlideCompletion).toBe(true);
 });
 
 test("a student sees when the model connection is retrying", async ({
@@ -1348,6 +1428,8 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
   const newPage = new Promise<void>((resolve) => {
     releaseNew = resolve;
   });
+  let firstPagePublished = false;
+  let simplePagePublished = false;
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
@@ -1362,9 +1444,15 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
       const simpler = transcript.includes("换成简单一点的例子");
       const createCalls = (transcript.match(/"name":"create_slides"/g) ?? [])
         .length;
-      const showCalls = (transcript.match(/"name":"show_next_slide"/g) ?? [])
-        .length;
       const expectedCreates = simpler ? 2 : 1;
+      const targetPage = simpler ? "page-simple" : "page-first";
+      const targetSuffix = simpler ? "simple" : "first";
+      const pageReady =
+        transcript.includes("Background page entered") &&
+        transcript.includes(targetPage);
+      const readCalls = (
+        transcript.match(/"name":"read_lesson_pages"/g) ?? []
+      ).length;
       if (createCalls < expectedCreates) {
         await route.fulfill(
           toolResponse(
@@ -1377,13 +1465,24 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
             },
           ),
         );
-      } else if (showCalls < createCalls) {
+      } else if (!pageReady) {
+        await route.fulfill(textResponse("课件正在后台准备。"));
+      } else if (readCalls < createCalls) {
         await route.fulfill(
-          toolResponse(
-            simpler ? "show-simple" : "show-first",
-            "show_next_slide",
-            {},
-          ),
+          toolResponse(`read-${targetSuffix}`, "read_lesson_pages", {}),
+        );
+      } else if (!transcript.includes(`"id":"place-${targetSuffix}"`)) {
+        await route.fulfill(
+          toolResponse(`place-${targetSuffix}`, "place_lesson_page", {
+            pageId: targetPage,
+            position: simpler ? 2 : 1,
+          }),
+        );
+      } else if (!transcript.includes(`"id":"show-${targetSuffix}"`)) {
+        await route.fulfill(
+          toolResponse(`show-${targetSuffix}`, "show_lesson_page", {
+            pageId: targetPage,
+          }),
         );
       } else {
         await route.fulfill(
@@ -1409,6 +1508,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
         );
         return;
       }
+      simplePagePublished = true;
       await route.fulfill(
         toolResponse("page-simple", "publish_slide", {
           title: "机器也会认猫吗？",
@@ -1421,6 +1521,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
       return;
     }
     if (toolResults === 0) {
+      firstPagePublished = true;
       await route.fulfill(
         toolResponse("page-first", "publish_slide", {
           title: "人工智能是什么？",
@@ -1462,6 +1563,13 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
     .fill("我想学习人工智能");
   await page.getByRole("button", { name: "发送" }).click();
 
+  await expect.poll(() => firstPagePublished).toBe(true);
+  await page.waitForTimeout(100);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("先展示第一张课件");
+  await page.getByRole("button", { name: "发送" }).click();
+
   const slides = page.getByRole("region", { name: "课堂页面" });
   await expect(
     slides.getByRole("img", { name: "课件页面：人工智能是什么？" }),
@@ -1473,6 +1581,12 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill("换成简单一点的例子");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect.poll(() => simplePagePublished).toBe(true);
+  await page.waitForTimeout(100);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("展示这个简单例子");
   await page.getByRole("button", { name: "发送" }).click();
   await expect(
     slides.getByRole("img", { name: "课件页面：机器也会认猫吗？" }),
@@ -1544,10 +1658,29 @@ test("a failed slide task is reported and a later request can retry", async ({
         );
       } else if (
         successfulSlidePublished &&
-        !transcript.includes('"name":"show_next_slide"')
+        !transcript.includes('"name":"read_lesson_pages"')
       ) {
         await route.fulfill(
-          toolResponse("show-retry-page", "show_next_slide", {}),
+          toolResponse("read-retry-page", "read_lesson_pages", {}),
+        );
+      } else if (
+        successfulSlidePublished &&
+        !transcript.includes('"name":"place_lesson_page"')
+      ) {
+        await route.fulfill(
+          toolResponse("place-retry-page", "place_lesson_page", {
+            pageId: "retry-page",
+            position: 1,
+          }),
+        );
+      } else if (
+        successfulSlidePublished &&
+        !transcript.includes('"name":"show_lesson_page"')
+      ) {
+        await route.fulfill(
+          toolResponse("show-retry-page", "show_lesson_page", {
+            pageId: "retry-page",
+          }),
         );
       } else {
         await route.fulfill(textResponse("我会根据实际生成结果继续。"));
@@ -1816,6 +1949,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     finishPreparingFirstSlide = resolve;
   });
   let firstSlidePublished = false;
+  let secondSlidePublished = false;
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
@@ -1837,6 +1971,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
           }),
         );
       } else if (toolResults === 1) {
+        secondSlidePublished = true;
         await route.fulfill(
           toolResponse("synchronized-page-2", "publish_slide", {
             title: "第二页",
@@ -1860,27 +1995,58 @@ test("the next slide follows its explanation and keeps the conversation anchor",
           replaceCurrent: false,
         }),
       );
+    } else if (!firstSlidePublished) {
+      await route.fulfill(textResponse("课件正在后台生成，我可以继续响应。"));
     } else if (
-      firstSlidePublished &&
-      !transcript.includes('"name":"show_next_slide"')
+      (transcript.match(/"name":"read_lesson_pages"/g) ?? []).length < 1
     ) {
       await route.fulfill(
-        toolResponse("show-synchronized-page-1", "show_next_slide", {}),
+        toolResponse("read-synchronized-page-1", "read_lesson_pages", {}),
+      );
+    } else if (!transcript.includes('"id":"place-synchronized-page-1"')) {
+      await route.fulfill(
+        toolResponse("place-synchronized-page-1", "place_lesson_page", {
+          pageId: "synchronized-page-1",
+          position: 1,
+        }),
+      );
+    } else if (!transcript.includes('"id":"show-synchronized-page-1"')) {
+      await route.fulfill(
+        toolResponse("show-synchronized-page-1", "show_lesson_page", {
+          pageId: "synchronized-page-1",
+        }),
+      );
+    } else if (
+      transcript.includes("Background page entered") &&
+      transcript.includes("synchronized-page-2") &&
+      (transcript.match(/"name":"read_lesson_pages"/g) ?? []).length < 2
+    ) {
+      await route.fulfill(
+        toolResponse("read-synchronized-page-2", "read_lesson_pages", {}),
+      );
+    } else if (
+      transcript.includes("Background page entered") &&
+      transcript.includes("synchronized-page-2") &&
+      !transcript.includes('"id":"place-synchronized-page-2"')
+    ) {
+      await route.fulfill(
+        toolResponse("place-synchronized-page-2", "place_lesson_page", {
+          pageId: "synchronized-page-2",
+          position: 2,
+        }),
       );
     } else if (
       transcript.includes("继续讲这两页") &&
-      (transcript.match(/"name":"show_next_slide"/g) ?? []).length === 1
+      !transcript.includes('"id":"advance-to-page-2"')
     ) {
       await route.fulfill(
         textAndToolResponse(
           "第一页讲解开始。\n\n需要慢慢读完第二行。",
           "advance-to-page-2",
-          "show_next_slide",
+          "show_next_lesson_page",
           {},
         ),
       );
-    } else if (!firstSlidePublished) {
-      await route.fulfill(textResponse("课件正在后台生成，我可以继续响应。"));
     } else if (!transcript.includes("继续讲这两页")) {
       await route.fulfill(textResponse(""));
     } else {
@@ -1898,11 +2064,18 @@ test("the next slide follows its explanation and keeps the conversation anchor",
     page.getByText("课件正在后台生成，我可以继续响应。", { exact: true }),
   ).toBeVisible();
   finishPreparingFirstSlide();
+  await expect.poll(() => secondSlidePublished).toBe(true);
+  await page.waitForTimeout(100);
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("先展示第一页");
+  await page.getByRole("button", { name: "发送" }).click();
 
   const slides = page.getByRole("region", { name: "课堂页面" });
   await expect(
     slides.getByRole("img", { name: "课件页面：第一页" }),
   ).toBeVisible();
+  await expect(slides.getByRole("button", { name: "下一页" })).toBeEnabled();
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill("继续讲这两页");
@@ -2385,7 +2558,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
   ).toBeVisible();
 });
 
-test("classroom pagination follows presentation order across mixed hidden pages", async ({
+test("classroom pagination follows the agent sequence instead of pool order", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2445,7 +2618,7 @@ test("classroom pagination follows presentation order across mixed hidden pages"
   const state = {
     messages: [],
     pages: slides,
-    presentedPageIds: ["shown-first", "shown-second", "shown-third"],
+    presentedPageIds: ["shown-third", "shown-first", "shown-second"],
     currentPageId: "shown-second",
   };
   const conversation = {
@@ -2491,14 +2664,106 @@ test("classroom pagination follows presentation order across mixed hidden pages"
   await expect(
     classroom.getByRole("img", { name: "课件页面：第二张已展示页面" }),
   ).toBeVisible();
-  await expect(classroom.getByText("2 / 3", { exact: true })).toBeVisible();
+  await expect(classroom.getByText("3 / 3", { exact: true })).toBeVisible();
   await expect(classroom.getByRole("button", { name: "上一页" })).toBeEnabled();
   await classroom.getByRole("button", { name: "上一页" }).click();
   await expect(
     classroom.getByRole("img", { name: "课件页面：第一张已展示页面" }),
   ).toBeVisible();
-  await expect(classroom.getByText("1 / 3", { exact: true })).toBeVisible();
+  await expect(classroom.getByText("2 / 3", { exact: true })).toBeVisible();
   await expect(classroom.getByRole("button", { name: "下一页" })).toBeEnabled();
+});
+
+test("additional slide templates render distinct teaching structures", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const pages = [
+    {
+      kind: "slide",
+      id: "spotlight",
+      title: "抓住核心概念",
+      kicker: "重点",
+      body: "用一句话建立清晰记忆。",
+      bullets: ["关键词", "例子"],
+      layout: "spotlight",
+    },
+    {
+      kind: "slide",
+      id: "cards",
+      title: "三个观察角度",
+      body: "把并列信息放进独立卡片。",
+      bullets: ["形状", "颜色", "用途"],
+      layout: "cards",
+    },
+    {
+      kind: "slide",
+      id: "timeline",
+      title: "种子发芽过程",
+      body: "沿时间顺序观察变化。",
+      bullets: ["吸收水分", "长出根", "冒出嫩芽"],
+      layout: "timeline",
+    },
+  ];
+  const state = {
+    messages: [],
+    pages,
+    presentedPageIds: pages.map(({ id }) => id),
+    currentPageId: "spotlight",
+  };
+  const conversation = {
+    id: "template-conversation",
+    sectionId: "template-section",
+    title: "模板课堂",
+    state,
+    createdAt: "2026-09-23T00:00:00Z",
+    updatedAt: "2026-09-23T00:00:00Z",
+  };
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({
+      json: {
+        courses: [
+          {
+            id: "template-course",
+            conversationId: conversation.id,
+            title: "多样课件",
+            topic: "验证课件模板",
+            status: "active",
+            cover: { motif: "geometry", palette: "sprout", label: "LAYOUT" },
+            state,
+            sections: [
+              {
+                id: "template-section",
+                title: "模板",
+                objective: "用不同结构表达内容",
+                position: 0,
+                status: "active",
+                conversations: [conversation],
+              },
+            ],
+            createdAt: "2026-09-23T00:00:00Z",
+            updatedAt: "2026-09-23T00:00:00Z",
+          },
+        ],
+      },
+    }),
+  );
+
+  await page.goto(
+    "/#/courses/template-course/conversations/template-conversation",
+  );
+  const classroom = page.getByRole("region", { name: "课堂页面" });
+  await expect(
+    classroom.getByRole("group", { name: "重点聚焦模板" }),
+  ).toBeVisible();
+  await classroom.getByRole("button", { name: "下一页" }).click();
+  await expect(
+    classroom.getByRole("group", { name: "卡片网格模板" }),
+  ).toBeVisible();
+  await classroom.getByRole("button", { name: "下一页" }).click();
+  await expect(
+    classroom.getByRole("group", { name: "时间线模板" }),
+  ).toBeVisible();
 });
 
 for (const background of [false, true]) {

@@ -20,7 +20,13 @@ export type Slide = {
   kicker?: string;
   body: string;
   bullets: string[];
-  layout: "explain" | "steps" | "compare";
+  layout:
+    | "explain"
+    | "steps"
+    | "compare"
+    | "spotlight"
+    | "cards"
+    | "timeline";
 };
 
 export type AnimationNode = {
@@ -59,6 +65,14 @@ export type AnimationPage = {
   buttons: AnimationButton[];
 };
 
+export type IllustrationPage = {
+  kind: "illustration";
+  id: string;
+  title: string;
+  alt: string;
+  assetId: string;
+};
+
 export type AnimationPlaybackCommand =
   | { action: "play"; buttonId: string }
   | { action: "pause" }
@@ -85,7 +99,8 @@ export type CodingExercise = {
   result?: CodeRunResult;
 };
 
-export type LessonPage = Slide | AnimationPage | CodingExercise;
+export type LessonPage =
+  Slide | AnimationPage | IllustrationPage | CodingExercise;
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {

@@ -41,6 +41,7 @@ import ChatComposer, {
 import { Spinner } from "../../components/ui/spinner";
 import SlideCanvas from "./SlideCanvas";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
+import IllustrationCanvas from "./IllustrationCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
@@ -184,14 +185,13 @@ export default function CourseRoom({
     initialState.messages,
   );
   const [pages, setPages] = useState<LessonPage[]>(initialState.pages);
-  const [presented, setPresented] = useState<Set<string>>(
-    () => new Set(initialState.presentedPageIds),
+  const [presented, setPresented] = useState<string[]>(
+    () => [...initialState.presentedPageIds],
   );
   const [currentPageId, setCurrentPageId] = useState(
     () =>
       initialState.currentPageId ||
       initialState.presentedPageIds.at(-1) ||
-      initialState.pages[0]?.id ||
       "",
   );
   const [busy, setBusy] = useState(false);
@@ -203,9 +203,7 @@ export default function CourseRoom({
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
-  const presentedRef = useRef<Set<string>>(
-    new Set(initialState.presentedPageIds),
-  );
+  const presentedRef = useRef<string[]>([...initialState.presentedPageIds]);
   const session = useRef<CourseSession | null>(null);
   const codeRunSequence = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
@@ -278,12 +276,11 @@ export default function CourseRoom({
     messagesRef.current = initial.messages;
     setPages(initial.pages);
     pagesRef.current = initial.pages;
-    setPresented(new Set(initial.presentedPageIds));
-    presentedRef.current = new Set(initial.presentedPageIds);
+    setPresented([...initial.presentedPageIds]);
+    presentedRef.current = [...initial.presentedPageIds];
     setCurrentPageId(
       initial.currentPageId ||
         initial.presentedPageIds.at(-1) ||
-        initial.pages[0]?.id ||
         "",
     );
     setBusy(false);
@@ -324,25 +321,22 @@ export default function CourseRoom({
         setPages(next);
         setGeneratingPages(generating);
       },
-      (pageId) => {
-        setPresented((existing) => {
-          const next = new Set(existing).add(pageId);
-          presentedRef.current = next;
-          return next;
-        });
-        setPages((existing) => {
-          const index = existing.findIndex((page) => page.id === pageId);
-          if (index >= 0) setCurrentPageId(pageId);
-          return existing;
-        });
+      (sequence, pageId) => {
+        presentedRef.current = sequence;
+        setPresented(sequence);
+        setCurrentPageId(pageId);
       },
       setActivity,
       setModelRetry,
       setError,
       initial,
       {
-        course: selectedCourse,
-        currentConversationId: boundConversationId.current,
+        get course() {
+          return sessionCourse.current;
+        },
+        get currentConversationId() {
+          return boundConversationId.current;
+        },
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
           boundConversationId.current = null;
@@ -391,7 +385,7 @@ export default function CourseRoom({
                 ...sessionCourse.current.state,
                 messages: messagesRef.current,
                 pages: pagesRef.current,
-                presentedPageIds: [...presentedRef.current],
+                presentedPageIds: presentedRef.current,
               },
             };
             if (!(await flushCourseSave()))
@@ -438,8 +432,8 @@ export default function CourseRoom({
           const state: CourseConversationState = {
             messages: messagesRef.current,
             pages: pagesRef.current,
-            presentedPageIds: [...presentedRef.current],
-            currentPageId: pagesRef.current.at(-1)?.id ?? "",
+            presentedPageIds: presentedRef.current,
+            currentPageId: presentedRef.current.at(-1) ?? "",
           };
           boundConversationId.current = conversation.id;
           const updated = {
@@ -533,7 +527,7 @@ export default function CourseRoom({
     const state = {
       messages,
       pages,
-      presentedPageIds: [...presented],
+      presentedPageIds: presented,
       currentPageId,
     };
     const updated = {
@@ -663,7 +657,7 @@ export default function CourseRoom({
     setBusy(false);
   };
   const running = busy;
-  const presentedPages = [...presented]
+  const presentedPages = presented
     .map((id) => pages.find((candidate) => candidate.id === id))
     .filter((candidate): candidate is LessonPage => Boolean(candidate));
   const current =
@@ -820,7 +814,8 @@ export default function CourseRoom({
           {pages
             .filter(
               (candidate) =>
-                candidate.kind === "animation" && presented.has(candidate.id),
+                candidate.kind === "animation" &&
+                presented.includes(candidate.id),
             )
             .map((animation) =>
               animation.kind === "animation" ? (
@@ -841,7 +836,15 @@ export default function CourseRoom({
             )}
           {current.kind === "animation" ? null : current.kind === "slide" ? (
             <SlideCanvas key={current.id} slide={current} />
-          ) : (
+          ) : current.kind === "illustration" ? (
+            course ? (
+              <IllustrationCanvas
+                courseId={course.id}
+                key={current.id}
+                page={current}
+              />
+            ) : null
+          ) : current.kind === "coding" ? (
             <Suspense
               fallback={
                 <div className="coding-page-loading" role="status">
@@ -907,13 +910,15 @@ export default function CourseRoom({
                 }}
               />
             </Suspense>
-          )}
+          ) : null}
           <footer className="slide-controls">
             <button
               aria-label="上一页"
               title="上一页"
               disabled={!canGoPrevious}
-              onClick={() => previousPage && setCurrentPageId(previousPage.id)}
+              onClick={() =>
+                previousPage && session.current?.selectLessonPage(previousPage.id)
+              }
             >
               ←
             </button>
@@ -922,7 +927,9 @@ export default function CourseRoom({
               aria-label="下一页"
               title="下一页"
               disabled={!canGoNext}
-              onClick={() => nextPage && setCurrentPageId(nextPage.id)}
+              onClick={() =>
+                nextPage && session.current?.selectLessonPage(nextPage.id)
+              }
             >
               →
             </button>

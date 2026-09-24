@@ -139,3 +139,21 @@ CREATE TABLE IF NOT EXISTS course_material_uploads (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS course_material_uploads_expiry ON course_material_uploads(expires_at);
+CREATE TABLE IF NOT EXISTS course_illustrations (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ conversation_id uuid NOT NULL REFERENCES course_conversations(id) ON DELETE CASCADE,
+ page_id text NOT NULL,
+ title text NOT NULL,
+ alt text NOT NULL,
+ prompt text NOT NULL,
+ model_id text NOT NULL,
+ status text NOT NULL DEFAULT 'running' CHECK(status IN ('running','complete','failed','cancelled')),
+ object_key text NOT NULL DEFAULT '',
+ error text NOT NULL DEFAULT '',
+ created_at timestamptz NOT NULL DEFAULT now(),
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ UNIQUE(conversation_id,page_id)
+);
+ALTER TABLE course_illustrations DROP COLUMN IF EXISTS provider_task_id;
+CREATE INDEX IF NOT EXISTS course_illustrations_course ON course_illustrations(course_id,created_at DESC);

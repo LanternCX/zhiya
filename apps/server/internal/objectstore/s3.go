@@ -1,7 +1,9 @@
 package objectstore
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -68,6 +70,20 @@ func (s *s3Store) Open(ctx context.Context, key string) (io.ReadCloser, Metadata
 		return nil, Metadata{}, err
 	}
 	return result.Body, Metadata{SizeBytes: aws.ToInt64(result.ContentLength)}, nil
+}
+
+func (s *s3Store) Put(ctx context.Context, key, mediaType string, body io.Reader) error {
+	const maximumSize = 20 << 20
+	content, err := io.ReadAll(io.LimitReader(body, maximumSize+1))
+	if err != nil {
+		return err
+	}
+	if len(content) > maximumSize {
+		return fmt.Errorf("object exceeds %d bytes", maximumSize)
+	}
+	size := int64(len(content))
+	_, err = s.client.PutObject(ctx, &s3.PutObjectInput{Bucket: &s.bucket, Key: &key, ContentType: &mediaType, ContentLength: &size, Body: bytes.NewReader(content)})
+	return err
 }
 
 func (s *s3Store) Copy(ctx context.Context, source, destination string) error {

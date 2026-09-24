@@ -31,6 +31,7 @@ type testApp struct {
 	db      *pgxpool.Pool
 	config  config.Config
 	objects objectstore.Store
+	app     *application
 }
 
 func setupAccountTest(t *testing.T) *testApp {
@@ -74,6 +75,7 @@ func setupAccountTest(t *testing.T) *testApp {
 	t.Cleanup(objects.server.Close)
 	a := &testApp{t: t, mail: make(map[string]string), db: db, config: settings, objects: objects}
 	app := &application{config: settings, models: data.NewModels(db, settings.Account), send: func(to, purpose, code string) error { a.mail[to+":"+purpose] = code; return nil }, learningHub: newLearningHub(), objects: a.objects}
+	a.app = app
 	listenerContext, stopListener := context.WithCancel(context.Background())
 	t.Cleanup(stopListener)
 	if err := app.startLearningEvents(listenerContext); err != nil {
@@ -82,6 +84,21 @@ func setupAccountTest(t *testing.T) *testApp {
 	a.server = httptest.NewServer(app.routes())
 	t.Cleanup(a.server.Close)
 	return a
+}
+
+func (a *testApp) createCourseConversation(c *http.Client) (string, string) {
+	a.t.Helper()
+	created := a.request(c, "POST", "/courses", map[string]any{
+		"title": "自然科学", "topic": "理解自然现象",
+		"cover": map[string]any{"motif": "nature", "palette": "ocean", "label": "SCIENCE"},
+	}, http.StatusCreated)["course"].(map[string]any)
+	courseID := created["id"].(string)
+	outlined := a.request(c, "PUT", "/courses/"+courseID+"/outline", map[string]any{
+		"sections": []any{map[string]any{"title": "第一课", "objective": "理解基本概念"}},
+	}, http.StatusOK)["course"].(map[string]any)
+	sectionID := outlined["sections"].([]any)[0].(map[string]any)["id"].(string)
+	conversation := a.request(c, "POST", "/courses/"+courseID+"/sections/"+sectionID+"/conversations", map[string]any{"title": "课堂"}, http.StatusCreated)["conversation"].(map[string]any)
+	return courseID, conversation["id"].(string)
 }
 
 func (a *testApp) anotherInstance() *testApp {

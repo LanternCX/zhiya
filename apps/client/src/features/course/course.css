@@ -997,6 +997,27 @@
   min-height: 0;
 }
 .animation-page-slot > .animation-page { height: 100%; }
+
+.illustration-page {
+  align-items: center;
+  background: var(--surface);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.illustration-page img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.illustration-loading {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
 .animation-page > header,
 .animation-page > footer,
 .animation-page nav,
@@ -1418,6 +1439,67 @@
   fill: var(--text);
   font-size: 23px;
   font-weight: 500;
+}
+.slide-svg-orbit {
+  fill: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  stroke: color-mix(in srgb, var(--accent) 28%, var(--line));
+  stroke-width: 2;
+}
+.slide-svg-orbit-dot {
+  fill: var(--accent);
+}
+.spotlight-title {
+  font-size: 62px;
+}
+.spotlight-body {
+  fill: var(--text);
+}
+.slide-svg-chip rect {
+  fill: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  stroke: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+.slide-svg-chip text {
+  fill: var(--text);
+  font-size: 19px;
+  font-weight: 650;
+}
+.cards-title,
+.timeline-title {
+  font-size: 48px;
+}
+.slide-svg-card rect {
+  fill: color-mix(in srgb, var(--surface) 92%, var(--accent));
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.slide-svg-card:nth-of-type(3n + 1) rect {
+  fill: color-mix(in srgb, var(--surface) 88%, var(--accent));
+}
+.slide-svg-card-text {
+  fill: var(--text);
+  font-size: 21px;
+  font-weight: 600;
+}
+.slide-svg-timeline-rule {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 50%, var(--line));
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.slide-svg-timeline-item circle {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 8;
+}
+.slide-svg-timeline-item > text {
+  fill: var(--on-accent);
+  font-size: 18px;
+  font-weight: 750;
+}
+.slide-svg-timeline-text {
+  fill: var(--text);
+  font-size: 20px;
+  font-weight: 600;
 }
 .slide-empty {
   display: flex;

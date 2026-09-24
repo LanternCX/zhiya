@@ -20,6 +20,7 @@ import (
 
 type Config struct {
 	Model       Model    `yaml:"model"`
+	ImageModel  Model    `yaml:"image_model"`
 	Runner      Runner   `yaml:"runner"`
 	Logging     Logging  `yaml:"logging"`
 	Development bool     `yaml:"development"`
@@ -227,6 +228,15 @@ func (c Config) Validate() error {
 		}
 		if c.Model.ID == "" {
 			return fmt.Errorf("model.id is required when model.endpoint is configured")
+		}
+	}
+	if c.ImageModel.Endpoint != "" {
+		u, err := url.Parse(c.ImageModel.Endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
+			return fmt.Errorf("image_model.endpoint must be an HTTPS URL (loopback HTTP allowed in development)")
+		}
+		if c.ImageModel.ID == "" {
+			return fmt.Errorf("image_model.id is required when image_model.endpoint is configured")
 		}
 	}
 	runner, err := url.Parse(c.Runner.Endpoint)

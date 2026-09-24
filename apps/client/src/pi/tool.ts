@@ -91,7 +91,6 @@ export type SlideTools = {
   };
   cancel: () => void;
   read: () => { pages: Slide[]; generating: boolean };
-  next: () => Promise<LessonPage>;
 };
 
 export type AnimationTools = {
@@ -100,7 +99,6 @@ export type AnimationTools = {
     pageId: string;
     status: "running";
   };
-  show: (pageId: string) => Promise<LessonPage>;
   read: () => Array<{
     taskId: string;
     pageId: string;
@@ -115,9 +113,41 @@ export type AnimationTools = {
   playback: (pageId: string) => AnimationPlaybackState;
 };
 
+export type LessonPageSummary = {
+  pageId: string;
+  kind: LessonPage["kind"];
+  title: string;
+};
+
+export type LessonPageState = {
+  buffer: LessonPageSummary[];
+  displaySequence: Array<LessonPageSummary & { position: number }>;
+  currentPageId: string;
+};
+
+export type LessonPageTools = {
+  read: () => LessonPageState;
+  place: (
+    pageId: string,
+    position: number,
+  ) => LessonPageState;
+  remove: (pageId: string) => LessonPageState;
+  show: (pageId: string) => Promise<LessonPage>;
+  next: () => Promise<LessonPage>;
+};
+
+export type IllustrationTools = {
+  start: (request: {
+    pageId: string;
+    title: string;
+    description: string;
+    alt: string;
+  }) => Promise<{ taskId: string; pageId: string; status: "running" }>;
+};
+
 export type AgentTaskSummary = {
   taskId: string;
-  kind: "slides" | "animation" | "outline-classifier";
+  kind: "slides" | "animation" | "illustration" | "outline-classifier";
   status: "running" | "complete" | "failed" | "cancelled";
   pageId?: string;
   sections?: Array<{
