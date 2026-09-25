@@ -3,7 +3,7 @@ import { TranscriptAccumulator } from "./TranscriptAccumulator";
 import { PlaybackController } from "./PlaybackController";
 import { isVoiceServerEvent, type VoiceServerEvent } from "./protocol";
 import { initialVoiceState, voiceReducer, type VoiceAction } from "./voice-reducer";
-import type { VoiceState } from "./types";
+import type { VoiceErrorKind, VoiceState } from "./types";
 
 export class VoiceSessionController {
   private socket: WebSocket | null = null;
@@ -33,7 +33,7 @@ export class VoiceSessionController {
     const socket = new WebSocket(`${protocol}//${location.host}/api/voice/session`);
     this.socket = socket;
     socket.onmessage = (message) => this.handleMessage(message.data);
-    socket.onerror = () => this.dispatch({ type: "error", message: "语音连接失败" });
+    socket.onerror = () => this.dispatch({ type: "error", message: "语音连接失败", kind: "connection" });
     await new Promise<void>((resolve, reject) => {
       const timeout = window.setTimeout(() => {
         socket.close();
@@ -72,7 +72,12 @@ export class VoiceSessionController {
         if (event.kind === "speech-end") this.commitTurn();
       },
     });
-    await this.capture.start();
+    try {
+      await this.capture.start();
+    } catch (error) {
+      this.dispatch({ type: "error", message: error instanceof Error ? error.message : "无法访问麦克风", kind: "microphone" });
+      throw error;
+    }
   }
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
@@ -109,7 +114,7 @@ export class VoiceSessionController {
         this.pumpSpeechQueue();
       } else {
         this.rejectSessionReady?.(new Error(message));
-        this.dispatch({ type: "error", message });
+        this.dispatch({ type: "error", message, kind: voiceErrorKind(event.code) });
       }
     }
     if (event.type === "session-ended") this.dispatch({ type: "end" });
@@ -124,4 +129,11 @@ export class VoiceSessionController {
   }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
   private stopPlayback() { this.playback.clear(); }
+}
+
+function voiceErrorKind(code?: string): VoiceErrorKind {
+  if (code?.startsWith("asr_")) return "asr";
+  if (code?.startsWith("tts_")) return "tts";
+  if (code?.startsWith("playback_")) return "playback";
+  return "connection";
 }

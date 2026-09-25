@@ -180,4 +180,5 @@ test("voice reducer keeps the session alive when TTS fails", async ({ page }) =>
   });
   expect(result.status).toBe("listening");
   expect(result.error).toBe("TTS unavailable");
+  expect(result.errorKind).toBe("tts");
 });
