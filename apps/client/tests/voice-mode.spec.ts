@@ -107,3 +107,17 @@ test("response presenter keeps display text and simplifies voice text", async ({
     { display_text: "详情见 https://example.com/docs。", speech_text: "链接我已经放在屏幕上了。" },
   ]);
 });
+
+test("response presenter provides a voice style prompt without replacing the core prompt", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ResponsePresenter } = await import("/src/conversation/ResponsePresenter.ts");
+    return {
+      text: ResponsePresenter.modePrompt("text"),
+      speech: ResponsePresenter.modePrompt("speech"),
+    };
+  });
+  expect(result.text).toBe("");
+  expect(result.speech).toContain("自然、简洁、口语化");
+  expect(result.speech).toContain("不要逐字朗读代码");
+});

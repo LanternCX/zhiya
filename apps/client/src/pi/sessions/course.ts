@@ -16,6 +16,7 @@ import type {
   UserMessage,
 } from "../../domain/learning";
 import { ConversationManager } from "../../conversation/ConversationManager";
+import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
@@ -223,9 +224,12 @@ export class CourseSession {
       id: ++this.messageSequence,
       ...message,
     });
-    const agentText = materials.length
-      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materials)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
-      : text;
+    const materialPrompt = materials.length
+      ? `The student attached these files as course materials for this request: ${JSON.stringify(materials)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
+      : "";
+    const agentText = [text, materialPrompt, ResponsePresenter.modePrompt(message.input_mode)]
+      .filter(Boolean)
+      .join("\n\n");
     try {
       await this.teacher.prompt(agentText);
       await this.waitForNarrationPlayback();
