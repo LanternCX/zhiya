@@ -1,6 +1,7 @@
 import { MicrophoneCapture } from "./MicrophoneCapture";
 import { TranscriptAccumulator } from "./TranscriptAccumulator";
 import { PlaybackController } from "./PlaybackController";
+import { VoiceMetrics } from "./VoiceMetrics";
 import { isVoiceServerEvent, type VoiceServerEvent } from "./protocol";
 import { initialVoiceState, voiceReducer, type VoiceAction } from "./voice-reducer";
 import type { VoiceErrorKind, VoiceState } from "./types";
@@ -18,6 +19,7 @@ export class VoiceSessionController {
   private speechQueue: string[] = [];
   private speechInFlight = false;
   private readonly transcript = new TranscriptAccumulator();
+  private readonly metrics = new VoiceMetrics();
   private readonly onInterruptAgent: () => void;
   private sessionReady: Promise<void> | null = null;
   private resolveSessionReady: (() => void) | null = null;
@@ -26,6 +28,7 @@ export class VoiceSessionController {
   constructor(onTranscript: (text: string, final: boolean) => void = () => undefined, onInterruptAgent: () => void = () => undefined) { this.onTranscript = onTranscript; this.onInterruptAgent = onInterruptAgent; }
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   getState() { return this.state; }
+  getMetrics() { return this.metrics.snapshot(); }
 
   async start() {
     this.dispatch({ type: "connect", sessionId: this.sessionId });
@@ -89,7 +92,7 @@ export class VoiceSessionController {
   }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
-  interrupt() { this.onInterruptAgent(); this.speechQueue = []; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
+  interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
   end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
 
   private handleMessage(raw: unknown) {
@@ -98,13 +101,14 @@ export class VoiceSessionController {
     if (!isVoiceServerEvent(value)) return;
     const event = value as VoiceServerEvent;
     if (event.sessionId !== this.sessionId || event.turnId < this.turnId) return;
-    if (event.type === "session-ready") { this.resolveSessionReady?.(); this.dispatch({ type: "ready" }); }
+    if (event.type === "session-ready") { this.metrics.mark("connection"); this.resolveSessionReady?.(); this.dispatch({ type: "ready" }); }
     if (event.type === "transcript-delta" || event.type === "transcript-final") {
       const accepted = this.transcript.accept(event.text ?? "", event.type === "transcript-final");
       this.dispatch({ type: "transcript", turnId: event.turnId, text: accepted.text, final: accepted.final });
+      if (accepted.submit) this.metrics.mark("asr_final");
       if (!accepted.final || accepted.submit) this.onTranscript(accepted.text, accepted.final);
     }
-    if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
+    if (event.type === "tts-audio") { this.metrics.mark("first_tts_audio"); this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
     if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
     if (event.type === "session-error") {
       const message = event.message ?? "语音会话失败";

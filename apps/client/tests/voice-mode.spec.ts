@@ -182,3 +182,16 @@ test("voice reducer keeps the session alive when TTS fails", async ({ page }) =>
   expect(result.error).toBe("TTS unavailable");
   expect(result.errorKind).toBe("tts");
 });
+
+test("voice metrics record each latency milestone once", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceMetrics } = await import("/src/features/voice/VoiceMetrics.ts");
+    const metrics = new VoiceMetrics(() => 1000);
+    metrics.mark("connection");
+    metrics.mark("connection");
+    metrics.mark("asr_final");
+    return metrics.snapshot();
+  });
+  expect(result).toEqual({ connection: 0, asr_final: 0 });
+});
