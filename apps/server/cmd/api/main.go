@@ -18,12 +18,13 @@ import (
 )
 
 type application struct {
-	models      data.Models
-	send        func(to, purpose, code string) error
-	config      config.Config
-	learningHub *learningHub
-	runner      codeRunner
-	objects     objectstore.Store
+	models        data.Models
+	send          func(to, purpose, code string) error
+	config        config.Config
+	learningHub   *learningHub
+	runner        codeRunner
+	objects       objectstore.Store
+	voiceSessions voiceSessionRegistry
 }
 
 func main() {

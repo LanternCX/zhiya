@@ -71,3 +71,17 @@ func TestVoiceSessionIgnoresStaleTTSEvents(t *testing.T) {
 		t.Fatal("current TTS generation was rejected")
 	}
 }
+
+func TestVoiceSessionRegistryRejectsConcurrentUserSession(t *testing.T) {
+	registry := voiceSessionRegistry{}
+	if !registry.acquire("user-1") {
+		t.Fatal("first session was rejected")
+	}
+	if registry.acquire("user-1") {
+		t.Fatal("concurrent session was accepted")
+	}
+	registry.release("user-1")
+	if !registry.acquire("user-1") {
+		t.Fatal("session was not released")
+	}
+}

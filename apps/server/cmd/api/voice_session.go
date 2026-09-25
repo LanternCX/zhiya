@@ -32,10 +32,19 @@ type voiceSession struct {
 }
 
 func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request) {
-	if err := a.withUser(r, data.StandardTransaction, func(_ data.Models, _ data.User) error { return nil }); err != nil {
+	var userID string
+	if err := a.withUser(r, data.StandardTransaction, func(_ data.Models, user data.User) error {
+		userID = user.ID
+		return nil
+	}); err != nil {
 		a.respondError(w, err)
 		return
 	}
+	if !a.voiceSessions.acquire(userID) {
+		a.respondError(w, failure{http.StatusConflict, "当前用户已有语音会话"})
+		return
+	}
+	defer a.voiceSessions.release(userID)
 	if a.config.Speech.Endpoint == "" || (a.config.Speech.ASRAPIKey == "" && a.config.Speech.TTSAPIKey == "") {
 		a.respondError(w, failure{503, "语音服务尚未配置"})
 		return
@@ -47,6 +56,30 @@ func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request
 	defer browser.CloseNow()
 	session := &voiceSession{app: a, browser: browser, ctx: r.Context()}
 	session.run()
+}
+
+type voiceSessionRegistry struct {
+	mu     sync.Mutex
+	active map[string]struct{}
+}
+
+func (r *voiceSessionRegistry) acquire(userID string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.active == nil {
+		r.active = make(map[string]struct{})
+	}
+	if _, exists := r.active[userID]; exists {
+		return false
+	}
+	r.active[userID] = struct{}{}
+	return true
+}
+
+func (r *voiceSessionRegistry) release(userID string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.active, userID)
 }
 
 func (s *voiceSession) run() {
