@@ -168,3 +168,16 @@ test("playback controller owns one audio queue and clears it on stop", async ({ 
   });
   expect(result).toEqual({ wasPlaying: true, isPlaying: false, idle: 1 });
 });
+
+test("voice reducer keeps the session alive when TTS fails", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    state = voiceReducer(state, { type: "tts-error", message: "TTS unavailable" });
+    return state;
+  });
+  expect(result.status).toBe("listening");
+  expect(result.error).toBe("TTS unavailable");
+});

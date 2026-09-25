@@ -101,7 +101,17 @@ export class VoiceSessionController {
     }
     if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
     if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
-    if (event.type === "session-error") { const message = event.message ?? "语音会话失败"; this.rejectSessionReady?.(new Error(message)); this.dispatch({ type: "error", message }); }
+    if (event.type === "session-error") {
+      const message = event.message ?? "语音会话失败";
+      if (event.code === "tts_unavailable") {
+        this.speechInFlight = false;
+        this.dispatch({ type: "tts-error", message });
+        this.pumpSpeechQueue();
+      } else {
+        this.rejectSessionReady?.(new Error(message));
+        this.dispatch({ type: "error", message });
+      }
+    }
     if (event.type === "session-ended") this.dispatch({ type: "end" });
   }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
