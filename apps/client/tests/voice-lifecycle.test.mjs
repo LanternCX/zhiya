@@ -7,6 +7,8 @@ test("live voice startup clears the controller when connection fails", async () 
   assert.match(source, /controller\.end\(\)/);
   assert.match(source, /setLiveVoice\(false\)/);
   assert.match(source, /setVoiceMuted\(false\)/);
+  assert.match(source, /voiceController\.current\?\.end\(\)/);
+  assert.match(source, /narrationPlayer\.current\?\.dispose\(\)/);
 });
 
 test("composer surfaces dictation failures instead of hiding them", async () => {

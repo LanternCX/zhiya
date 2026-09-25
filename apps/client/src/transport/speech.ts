@@ -75,6 +75,11 @@ export class NarrationPlayer {
     this.queue = []; this.busy = false;
     this.playback.clear();
   }
+  dispose() {
+    this.stream?.stopTts(); this.stream?.close(); this.stream = null;
+    this.queue = []; this.busy = false;
+    this.playback.dispose();
+  }
   private async pump() {
     if (this.busy || !this.queue.length || !this.stream) return;
     this.busy = true; this.stream.startTts(this.queue.shift()!);

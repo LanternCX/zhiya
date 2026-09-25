@@ -459,7 +459,7 @@ export default function CourseRoom({
     });
     return () => {
       current.stop();
-      narrationPlayer.current?.stop();
+      narrationPlayer.current?.dispose();
       narrationPlayer.current = null;
       if (session.current === current) session.current = null;
     };
