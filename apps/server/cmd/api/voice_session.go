@@ -31,6 +31,12 @@ type voiceSession struct {
 	asrTurnID     int64
 }
 
+const voiceSessionTimeout = 30 * time.Minute
+
+func voiceSessionContext(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(parent, timeout)
+}
+
 func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request) {
 	var userID string
 	if err := a.withUser(r, data.StandardTransaction, func(_ data.Models, user data.User) error {
@@ -54,7 +60,9 @@ func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	defer browser.CloseNow()
-	session := &voiceSession{app: a, browser: browser, ctx: r.Context()}
+	sessionContext, cancel := voiceSessionContext(r.Context(), voiceSessionTimeout)
+	defer cancel()
+	session := &voiceSession{app: a, browser: browser, ctx: sessionContext}
 	session.run()
 }
 

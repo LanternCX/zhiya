@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"context"
+	"testing"
+	"time"
+)
 
 import "github.com/coder/websocket"
 
@@ -94,5 +98,15 @@ func TestLongLivedAPIPathsSkipRequestTimeout(t *testing.T) {
 	}
 	if isLongLivedAPIPath("/api/courses") {
 		t.Fatal("ordinary API path was marked long-lived")
+	}
+}
+
+func TestVoiceSessionContextExpires(t *testing.T) {
+	ctx, cancel := voiceSessionContext(context.Background(), time.Millisecond)
+	defer cancel()
+	select {
+	case <-ctx.Done():
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("voice session context did not expire")
 	}
 }
