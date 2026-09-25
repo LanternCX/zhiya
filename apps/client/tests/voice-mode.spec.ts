@@ -222,3 +222,14 @@ test("playback controller reports malformed audio without throwing", async ({ pa
   });
   expect(result).toEqual({ errors: 1, isPlaying: false });
 });
+
+test("voice session ends when the page becomes hidden", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    controller.handleVisibilityChange(true);
+    return controller.getState().status;
+  });
+  expect(result).toBe("ended");
+});

@@ -223,6 +223,17 @@ export default function CourseRoom({
     setVoiceMuted(false);
   };
   useEffect(() => endLiveVoice, []);
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== "hidden") return;
+      voiceController.current?.handleVisibilityChange(true);
+      voiceController.current = null;
+      setLiveVoice(false);
+      setVoiceMuted(false);
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
   const flushCourseSave = async (): Promise<boolean> => {
     if (saveInFlight.current) {
       const saved = await saveInFlight.current;
