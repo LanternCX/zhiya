@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/coder/websocket"
 )
@@ -127,36 +128,45 @@ func (a *application) forwardSpeech(ctx context.Context, upstream, browser *webs
 		if typ == websocket.MessageBinary {
 			continue
 		}
-		var event map[string]any
-		if json.Unmarshal(raw, &event) != nil {
-			continue
-		}
 		if mode == "tts" {
-			if delta, ok := event["delta"].(string); ok && event["type"] == "response.audio.delta" {
-				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "audio", "data": delta, "sampleRate": 24000}))
+			event, err := providers.ParseTTSEvent(raw)
+			if err != nil {
 				continue
 			}
-			if event["type"] == "response.audio.done" {
+			if event.Kind == "audio" {
+				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "audio", "data": event.Data, "sampleRate": 24000}))
+				continue
+			}
+			if event.Kind == "done" {
 				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "complete"}))
 				return
 			}
 		}
 		if mode == "asr" {
-			if output, ok := event["payload"].(map[string]any); ok {
-				if outputBody, ok := output["output"].(map[string]any); ok {
-					if sentence, ok := outputBody["sentence"].(map[string]any); ok {
-						if text, ok := sentence["text"].(string); ok {
-							_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "transcript", "text": text, "final": sentence["sentence_end"] == true}))
-							continue
-						}
-					}
-				}
+			event, err := providers.ParseASREvent(raw)
+			if err != nil {
+				continue
 			}
-			if event["header"] != nil {
-				if header, ok := event["header"].(map[string]any); ok && header["event"] == "task-finished" {
-					_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "complete"}))
-					return
-				}
+			if event.Kind == "transcript" {
+				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "transcript", "text": event.Text, "final": event.Final}))
+				continue
+			}
+			var header struct {
+				Event string `json:"event"`
+			}
+			var envelope struct {
+				Header *struct {
+					Event string `json:"event"`
+				} `json:"header"`
+			}
+			if json.Unmarshal(raw, &envelope) == nil && envelope.Header != nil {
+				header = struct {
+					Event string `json:"event"`
+				}(*envelope.Header)
+			}
+			if header.Event == "task-finished" {
+				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "complete"}))
+				return
 			}
 		}
 	}

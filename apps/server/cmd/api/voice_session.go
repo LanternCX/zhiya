@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/coder/websocket"
 )
@@ -220,37 +220,33 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 		if typ == websocket.MessageBinary {
 			continue
 		}
-		var event map[string]any
-		if json.Unmarshal(raw, &event) != nil {
-			continue
-		}
 		if mode == "tts" {
 			if !s.ttsEventCurrent(conn, generation) {
 				return
 			}
-			if delta, ok := event["delta"].(string); ok && event["type"] == "response.audio.delta" {
-				s.send(newVoiceServerEvent("tts-audio", s.sessionID, turnID, &voiceServerEvent{Data: delta, SampleRate: 24000}))
+			event, err := providers.ParseTTSEvent(raw)
+			if err != nil {
+				continue
 			}
-			if event["type"] == "response.audio.done" {
+			if event.Kind == "audio" {
+				s.send(newVoiceServerEvent("tts-audio", s.sessionID, turnID, &voiceServerEvent{Data: event.Data, SampleRate: 24000}))
+			}
+			if event.Kind == "done" {
 				s.send(newVoiceServerEvent("tts-complete", s.sessionID, turnID, nil))
 				return
 			}
 		}
 		if mode == "asr" {
 			turnID = s.currentASRTurn()
-			if output, ok := event["payload"].(map[string]any); ok {
-				if outputBody, ok := output["output"].(map[string]any); ok {
-					if sentence, ok := outputBody["sentence"].(map[string]any); ok {
-						if text, ok := sentence["text"].(string); ok {
-							typeName := "transcript-delta"
-							if sentence["sentence_end"] == true {
-								typeName = "transcript-final"
-							}
-							s.send(newVoiceServerEvent(typeName, s.sessionID, turnID, &voiceServerEvent{Text: text}))
-						}
-					}
-				}
+			event, err := providers.ParseASREvent(raw)
+			if err != nil || event.Kind != "transcript" {
+				continue
 			}
+			typeName := "transcript-delta"
+			if event.Final {
+				typeName = "transcript-final"
+			}
+			s.send(newVoiceServerEvent(typeName, s.sessionID, turnID, &voiceServerEvent{Text: event.Text}))
 		}
 	}
 }
