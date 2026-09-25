@@ -242,3 +242,14 @@ test("voice reconnect policy allows only two bounded retries", async ({ page }) 
   });
   expect(result).toEqual([250, 1000, null]);
 });
+
+test("voice session reports an unexpected socket close", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    controller.handleConnectionClosed();
+    return { status: controller.getState().status, errorKind: controller.getState().errorKind };
+  });
+  expect(result).toEqual({ status: "ended", errorKind: "connection" });
+});
