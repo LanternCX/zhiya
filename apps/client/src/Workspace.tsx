@@ -113,6 +113,8 @@ export default function Workspace({
     id: number;
     text: string;
     materialNames: string[];
+    handoff?: boolean;
+    conversationId?: string;
   } | null>(null);
   const [courseError, setCourseError] = useState("");
   const routeError =
@@ -623,6 +625,23 @@ export default function Workspace({
                         courseLevel === "conversation"
                       )
                         locateSession(course);
+                    }}
+                    onSwitchConversation={(course, conversation, handoff) => {
+                      setCourses((all) =>
+                        all.map((item) =>
+                          item.id === course.id ? course : item,
+                        ),
+                      );
+                      setCourseEntryRequest({
+                        id: Date.now(),
+                        text: handoff,
+                        materialNames: [],
+                        handoff: true,
+                        conversationId: conversation.id,
+                      });
+                      void routeNavigate(
+                        conversationPath(course.id, conversation.id),
+                      );
                     }}
                   />
                 )}

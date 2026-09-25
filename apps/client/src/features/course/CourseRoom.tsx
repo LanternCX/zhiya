@@ -19,6 +19,7 @@ import type {
   ModelInfo,
   ModelRetryStatus,
   CourseConversationState,
+  StoredCourseConversation,
   StoredCourse,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
@@ -149,6 +150,7 @@ export default function CourseRoom({
   onDeleteCourse,
   onCourseCreated,
   onCourseUpdated,
+  onSwitchConversation,
 }: {
   info: ModelInfo | null;
   memory: string;
@@ -156,7 +158,13 @@ export default function CourseRoom({
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
   newSession: boolean;
-  entryRequest: { id: number; text: string; materialNames: string[] } | null;
+  entryRequest: {
+    id: number;
+    text: string;
+    materialNames: string[];
+    handoff?: boolean;
+    conversationId?: string;
+  } | null;
   libraryError: string;
   onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
@@ -164,6 +172,11 @@ export default function CourseRoom({
   onDeleteCourse: (course: StoredCourse) => Promise<boolean>;
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
+  onSwitchConversation: (
+    course: StoredCourse,
+    conversation: StoredCourseConversation,
+    handoff: string,
+  ) => void;
 }) {
   // Long-running sessions must notify the current page, not the route that
   // happened to be visible when generation started.
@@ -204,6 +217,7 @@ export default function CourseRoom({
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
   const presentedRef = useRef<string[]>([...initialState.presentedPageIds]);
+  const currentPageIdRef = useRef(initialState.currentPageId);
   const session = useRef<CourseSession | null>(null);
   const codeRunSequence = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
@@ -278,6 +292,7 @@ export default function CourseRoom({
     pagesRef.current = initial.pages;
     setPresented([...initial.presentedPageIds]);
     presentedRef.current = [...initial.presentedPageIds];
+    currentPageIdRef.current = initial.currentPageId;
     setCurrentPageId(
       initial.currentPageId ||
         initial.presentedPageIds.at(-1) ||
@@ -323,6 +338,7 @@ export default function CourseRoom({
       },
       (sequence, pageId) => {
         presentedRef.current = sequence;
+        currentPageIdRef.current = pageId;
         setPresented(sequence);
         setCurrentPageId(pageId);
       },
@@ -457,6 +473,46 @@ export default function CourseRoom({
           courseCallbacks.current?.onCourseUpdated(updated);
           return conversation;
         },
+        switchSection: async (sectionId, title) => {
+          const currentCourse = sessionCourse.current;
+          if (!currentCourse || !boundConversationId.current)
+            throw new Error("当前没有可切换的学习对话");
+          const section = currentCourse.sections?.find(
+            (candidate) => candidate.id === sectionId,
+          );
+          if (!section) throw new Error(`课程小节 ${sectionId} 不存在`);
+          pendingSave.current = {
+            course: currentCourse,
+            state: {
+              messages: messagesRef.current,
+              pages: pagesRef.current,
+              presentedPageIds: presentedRef.current,
+              currentPageId: currentPageIdRef.current,
+            },
+          };
+          if (!(await flushCourseSave()))
+            throw new Error("保存当前学习对话后才能切换小节");
+          const conversation = await createStoredCourseConversation(
+            currentCourse.id,
+            sectionId,
+            title,
+          );
+          const updated = {
+            ...sessionCourse.current!,
+            sections: sessionCourse.current!.sections?.map((candidate) =>
+              candidate.id === sectionId
+                ? {
+                    ...candidate,
+                    conversations: [...candidate.conversations, conversation],
+                  }
+                : candidate,
+            ),
+          };
+          sessionCourse.current = updated;
+          setCourse(updated);
+          courseCallbacks.current?.onCourseUpdated(updated);
+          return conversation;
+        },
         listConversations: async () =>
           sessionCourse.current?.sections?.flatMap(
             (section) => section.conversations,
@@ -507,6 +563,27 @@ export default function CourseRoom({
           return { pageId, status: "idle", step: 0 };
         },
       },
+      async (conversation, handoff, isCurrent) => {
+        const currentCourse = sessionCourse.current;
+        if (!currentCourse) throw new Error("课程尚未建立");
+        pendingSave.current = {
+          course: currentCourse,
+          state: {
+            messages: messagesRef.current,
+            pages: pagesRef.current,
+            presentedPageIds: presentedRef.current,
+            currentPageId: currentPageIdRef.current,
+          },
+        };
+        if (!(await flushCourseSave()))
+          throw new Error("保存当前学习对话后才能切换小节");
+        if (!isCurrent()) return;
+        onSwitchConversation(currentCourse, conversation, handoff);
+      },
+      entryRequest?.handoff &&
+      entryRequest.conversationId === selectedCourse?.conversationId
+        ? entryRequest.text
+        : undefined,
     );
     session.current = current;
     return () => {
@@ -604,14 +681,28 @@ export default function CourseRoom({
     await session.current.prompt(value, materialNames);
     setBusy(false);
   };
+  const runHandoff = async () => {
+    if (busy || !session.current) return;
+    setError("");
+    setActivity({ kind: "thinking", text: "", active: true });
+    setBusy(true);
+    await session.current.beginFromHandoff();
+    setBusy(false);
+  };
   useEffect(() => {
     if (!entryRequest) return;
     const timer = window.setTimeout(() => {
       if (!session.current || startedEntryRequest.current === entryRequest.id)
         return;
+      if (
+        entryRequest.handoff &&
+        boundConversationId.current !== entryRequest.conversationId
+      )
+        return;
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
-      void runPrompt(entryRequest.text, entryRequest.materialNames);
+      if (entryRequest.handoff) void runHandoff();
+      else void runPrompt(entryRequest.text, entryRequest.materialNames);
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);

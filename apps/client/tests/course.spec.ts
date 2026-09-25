@@ -3880,6 +3880,146 @@ test("the course agent can start another section without completing the current 
   await expect(page.getByRole("banner")).not.toContainText("对话");
 });
 
+test("the course agent hands an existing conversation to a new section conversation", async ({
+  page,
+}) => {
+  await mockCompletedWorkspace(page);
+  const emptyState = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const previousState = {
+    ...emptyState,
+    messages: [{ id: 1, role: "assistant", text: "变量的学习到这里。" }],
+  };
+  const previous = {
+    id: "variables-chat",
+    sectionId: "variables",
+    title: "认识变量",
+    state: previousState,
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const course = {
+    id: "handoff-course",
+    conversationId: previous.id,
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active",
+    cover: { motif: "code", palette: "sprout", label: "PYTHON" },
+    state: previousState,
+    sections: [
+      {
+        id: "variables",
+        title: "变量与类型",
+        objective: "理解变量和常见类型",
+        position: 0,
+        status: "complete",
+        conversations: [previous],
+      },
+      {
+        id: "loops",
+        title: "循环",
+        objective: "使用循环解决重复任务",
+        position: 1,
+        status: "planned",
+        conversations: [],
+      },
+    ],
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const saved: Array<{ conversationId: string; state: typeof emptyState }> = [];
+  let createdAfterSave = false;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [course] } }),
+  );
+  await page.route("**/api/courses/handoff-course/conversation", async (route) => {
+    saved.push(route.request().postDataJSON() as (typeof saved)[number]);
+    await route.fulfill({ json: { ok: true } });
+  });
+  await page.route(
+    "**/api/courses/handoff-course/sections/loops/conversations",
+    (route) => {
+      createdAfterSave = saved.some(
+        (item) => item.conversationId === "variables-chat",
+      );
+      return route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "loops-chat",
+            sectionId: "loops",
+            title: "开始学习循环",
+            state: emptyState,
+            createdAt: "2026-09-10T10:00:00Z",
+            updatedAt: "2026-09-10T10:00:00Z",
+          },
+        },
+      });
+    },
+  );
+  await page.route("**/api/learning/course/model", (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    return route.fulfill(
+      transcript.includes("先用画星星解释循环")
+        ? textResponse("我们先用画星星来认识循环。")
+        : toolResponse("switch-loops", "switch_course_section", {
+            sectionId: "loops",
+            title: "开始学习循环",
+            handoff: "先用画星星解释循环",
+          }),
+    );
+  });
+
+  await page.goto("/#/courses/handoff-course/conversations/variables-chat");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("这一节学完了，进入下一节");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page).toHaveURL(/\/courses\/handoff-course\/conversations\/loops-chat$/);
+  await expect(page.getByText("我们先用画星星来认识循环。")).toBeVisible();
+  await expect(page.getByText("这一节学完了，进入下一节")).toHaveCount(0);
+  await expect(page.getByText("先用画星星解释循环")).toHaveCount(0);
+  expect(createdAfterSave).toBe(true);
+  expect(
+    saved.some(
+      (item) =>
+        item.conversationId === "variables-chat" &&
+        item.state.messages.some(
+          (message) => message.text === "这一节学完了，进入下一节",
+        ),
+    ),
+  ).toBe(true);
+  expect(
+    saved
+      .filter((item) => item.conversationId === "variables-chat")
+      .every((item) =>
+        item.state.messages.every(
+          (message) => message.text !== "我们先用画星星来认识循环。",
+        ),
+      ),
+  ).toBe(true);
+  await expect
+    .poll(() => saved.some((item) => item.conversationId === "loops-chat"))
+    .toBe(true);
+  expect(
+    saved
+      .filter((item) => item.conversationId === "loops-chat")
+      .every((item) =>
+        item.state.messages.every(
+          (message) => message.text !== "先用画星星解释循环",
+        ),
+      ),
+  ).toBe(true);
+});
+
 test("the course agent reclassifies session content before publishing a revised outline", async ({
   page,
 }) => {

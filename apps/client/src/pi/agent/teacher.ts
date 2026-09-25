@@ -88,6 +88,10 @@ import {
   activityLabel as createCourseConversationLabel,
 } from "../tools/create_course_conversation";
 import {
+  switchCourseSectionTool,
+  activityLabel as switchCourseSectionLabel,
+} from "../tools/switch_course_section";
+import {
   listCourseConversationsTool,
   activityLabel as listCourseConversationsLabel,
 } from "../tools/list_course_conversations";
@@ -100,6 +104,7 @@ function teacherPrompt(
   courseManagement: CourseManagement,
   messages: CourseMessage[],
   memory: string,
+  handoff?: string,
 ) {
   const course = courseManagement.course;
   const activeSection = course?.sections?.find((section) =>
@@ -132,7 +137,7 @@ function teacherPrompt(
     : null;
   let sessionRule = activeCourse
     ? courseManagement.currentConversationId
-      ? "The student explicitly opened this historical conversation. Continue inside it and never call create_course_conversation to switch sessions."
+      ? "The student explicitly opened this conversation. Continue inside it. Use switch_course_section to start a new conversation in another outline section when the learning plan calls for it. Never call create_course_conversation to switch an existing session."
       : "This is a new, unbound session. Use list_course_conversations and read_course_conversation when history would help, choose the appropriate outline section, then call create_course_conversation exactly once before teaching. Reading history never reopens or modifies it."
     : "Before teaching, you MUST call create_course exactly once using the student's first learning request, then call set_course_outline, then call create_course_conversation for the first section. Only teach after that conversation exists. Create a concise course title, stable topic, editorial cover direction, and an ordered initial outline without asking for confirmation.";
   sessionRule += [
@@ -159,6 +164,9 @@ function teacherPrompt(
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
     `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text }) => ({ role, text })))}`,
     `Student learning memory:\n${memory || "No saved preferences yet."}`,
+    ...(handoff
+      ? [`Teaching handoff from the previous conversation (application context, not a new student message): ${handoff}`]
+      : []),
   ].join(" ");
 }
 
@@ -175,6 +183,8 @@ export function createTeacherAgent(options: {
   tasks: AgentTaskTools;
   coding: CodingTools;
   onRetry: ModelRetryListener;
+  handoff?: string;
+  shouldStopAfterTurn?: () => boolean;
 }) {
   const initial = options.management.course;
   const context: TeachingToolContext = {
@@ -193,6 +203,7 @@ export function createTeacherAgent(options: {
       renameCourseTool(context),
       setCourseOutlineTool(context),
       createCourseConversationTool(context),
+      switchCourseSectionTool(context),
       listCourseConversationsTool(context),
       readCourseConversationTool(context),
       listCourseMaterialsTool(context),
@@ -220,7 +231,9 @@ export function createTeacherAgent(options: {
       options.management,
       options.messages,
       options.memory,
+      options.handoff,
     ),
+    shouldStopAfterTurn: options.shouldStopAfterTurn,
     request: (payload, signal) => {
       return options.gateway.course(
         "teacher",
@@ -239,6 +252,7 @@ export function teacherToolLabel(name: string) {
       rename_course: renameCourseLabel,
       set_course_outline: setCourseOutlineLabel,
       create_course_conversation: createCourseConversationLabel,
+      switch_course_section: switchCourseSectionLabel,
       list_course_conversations: listCourseConversationsLabel,
       read_course_conversation: readCourseConversationLabel,
       list_course_materials: listCourseMaterialsLabel,

@@ -74,6 +74,11 @@ export type CourseManagement = {
     sectionId: string,
     title: string,
   ) => Promise<StoredCourseConversation>;
+  switchSection: (
+    sectionId: string,
+    title: string,
+    handoff: string,
+  ) => Promise<StoredCourseConversation>;
   listConversations: () => Promise<StoredCourseConversation[]>;
   readConversation: (
     conversationId: string,
