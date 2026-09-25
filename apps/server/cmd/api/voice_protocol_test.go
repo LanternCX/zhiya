@@ -2,6 +2,8 @@ package main
 
 import "testing"
 
+import "github.com/coder/websocket"
+
 func TestDecodeVoiceClientMessage(t *testing.T) {
 	tests := []struct {
 		name string
@@ -55,5 +57,17 @@ func TestVoiceSessionUsesCurrentASRTurn(t *testing.T) {
 	voice.mu.Unlock()
 	if got := voice.currentASRTurn(); got != 3 {
 		t.Fatalf("updated ASR turn = %d, want 3", got)
+	}
+}
+
+func TestVoiceSessionIgnoresStaleTTSEvents(t *testing.T) {
+	oldConn := &websocket.Conn{}
+	newConn := &websocket.Conn{}
+	current := &voiceSession{tts: newConn, ttsGeneration: 2}
+	if current.ttsEventCurrent(oldConn, 2) {
+		t.Fatal("stale TTS generation was accepted")
+	}
+	if !current.ttsEventCurrent(newConn, 2) {
+		t.Fatal("current TTS generation was rejected")
 	}
 }

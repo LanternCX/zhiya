@@ -23,11 +23,12 @@ type voiceSession struct {
 	ctx       context.Context
 	sessionID string
 
-	mu        sync.Mutex
-	asr       *websocket.Conn
-	tts       *websocket.Conn
-	asrTaskID string
-	asrTurnID int64
+	mu            sync.Mutex
+	asr           *websocket.Conn
+	tts           *websocket.Conn
+	ttsGeneration uint64
+	asrTaskID     string
+	asrTurnID     int64
 }
 
 func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +134,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 		s.asr = nil
 		return err
 	}
-	go s.forwardUpstream(conn, "asr", turnID)
+	go s.forwardUpstream(conn, "asr", turnID, 0)
 	return nil
 }
 
@@ -164,6 +165,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	}
 	s.mu.Lock()
 	s.tts = conn
+	generation := s.ttsGeneration
 	s.mu.Unlock()
 	voice := s.app.config.Speech.TTSVoice
 	setup := map[string]any{"type": "session.update", "session": map[string]any{"voice": voice, "response_format": "pcm", "sample_rate": 24000, "mode": "server_commit"}}
@@ -173,7 +175,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	}
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]any{"type": "input_text_buffer.append", "text": text}))
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
-	go s.forwardUpstream(conn, "tts", turnID)
+	go s.forwardUpstream(conn, "tts", turnID, generation)
 	return nil
 }
 
@@ -202,13 +204,14 @@ func realtimeTTSEndpoint(rawEndpoint, model string) string {
 func (s *voiceSession) cancelTTS(_ int64) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.ttsGeneration++
 	if s.tts != nil {
 		_ = s.tts.Close(websocket.StatusNormalClosure, "cancelled")
 		s.tts = nil
 	}
 }
 
-func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64) {
+func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64, generation uint64) {
 	for {
 		typ, raw, err := conn.Read(s.ctx)
 		if err != nil {
@@ -222,6 +225,9 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			continue
 		}
 		if mode == "tts" {
+			if !s.ttsEventCurrent(conn, generation) {
+				return
+			}
 			if delta, ok := event["delta"].(string); ok && event["type"] == "response.audio.delta" {
 				s.send(newVoiceServerEvent("tts-audio", s.sessionID, turnID, &voiceServerEvent{Data: delta, SampleRate: 24000}))
 			}
@@ -247,6 +253,12 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			}
 		}
 	}
+}
+
+func (s *voiceSession) ttsEventCurrent(conn *websocket.Conn, generation uint64) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.tts == conn && s.ttsGeneration == generation
 }
 
 func (s *voiceSession) currentASRTurn() int64 {
