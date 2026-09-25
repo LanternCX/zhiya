@@ -333,7 +333,10 @@ export default function CourseRoom({
       },
       setActivity,
       setModelRetry,
-      setError,
+      (message) => {
+        setError(message);
+        voiceController.current?.reportAgentError(message);
+      },
       initial,
       {
         course: selectedCourse,

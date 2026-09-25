@@ -10,6 +10,7 @@ export type VoiceAction =
   | { type: "commit" }
   | { type: "transcript"; turnId: number; text: string; final: boolean }
   | { type: "thinking" }
+  | { type: "agent-error"; message: string }
   | { type: "speaking" }
   | { type: "tts-error"; message: string; kind?: "tts" | "playback" }
   | { type: "mute" }
@@ -28,6 +29,7 @@ export function voiceReducer(state: VoiceState, action: VoiceAction): VoiceState
       if (action.turnId !== state.turnId) return state;
       return { ...state, transcript: action.text, status: action.final ? "thinking" : "committing" };
     case "thinking": return { ...state, status: "thinking" };
+    case "agent-error": return { ...state, status: "listening", error: action.message, errorKind: "agent" };
     case "speaking": return { ...state, status: "speaking" };
     case "tts-error": return { ...state, status: state.status === "speaking" ? "listening" : state.status, error: action.message, errorKind: action.kind ?? "tts" };
     case "mute": return { ...state, status: "muted" };

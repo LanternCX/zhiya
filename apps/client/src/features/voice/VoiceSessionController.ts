@@ -35,6 +35,7 @@ export class VoiceSessionController {
   getState() { return this.state; }
   getMetrics() { return this.metrics.snapshot(); }
   recordAgentText(text: string) { if (text.trim()) this.metrics.mark("agent_first_token"); }
+  reportAgentError(message: string) { this.dispatch({ type: "agent-error", message }); }
 
   async start() {
     this.dispatch({ type: "connect", sessionId: this.sessionId });

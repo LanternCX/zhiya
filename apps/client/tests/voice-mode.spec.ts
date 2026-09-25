@@ -253,3 +253,17 @@ test("voice session reports an unexpected socket close", async ({ page }) => {
   });
   expect(result).toEqual({ status: "ended", errorKind: "connection" });
 });
+
+test("voice reducer classifies an agent failure without ending the session", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    state = voiceReducer(state, { type: "thinking" });
+    return voiceReducer(state, { type: "agent-error", message: "模型暂时不可用" });
+  });
+  expect(result.status).toBe("listening");
+  expect(result.errorKind).toBe("agent");
+  expect(result.error).toBe("模型暂时不可用");
+});
