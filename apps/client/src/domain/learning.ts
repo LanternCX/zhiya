@@ -50,10 +50,20 @@ export type CodeRunResult = {
   memory: number;
 };
 
+export type InputMode = "text" | "speech";
+
+export type UserMessage = {
+  role: "user";
+  text: string;
+  input_mode: InputMode;
+  materials?: string[];
+};
+
 export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  input_mode?: InputMode;
   materials?: string[];
   streaming?: boolean;
   pageId?: string;

@@ -46,3 +46,27 @@ test("voice reducer ignores stale turns and exits from speaking", async ({ page 
   expect(result.status).toBe("ended");
   expect(result.transcript).toBe("");
 });
+
+test("conversation manager creates unified text and speech user messages", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ConversationManager } = await import("/src/conversation/ConversationManager.ts");
+    return [
+      ConversationManager.userMessage("  打字问题  ", "text"),
+      ConversationManager.userMessage("  语音问题  ", "speech", ["notes.md"]),
+    ];
+  });
+  expect(result).toEqual([
+    { role: "user", text: "打字问题", input_mode: "text" },
+    { role: "user", text: "语音问题", input_mode: "speech", materials: ["notes.md"] },
+  ]);
+});
+
+test("legacy course user messages default to text input mode", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ConversationManager } = await import("/src/conversation/ConversationManager.ts");
+    return ConversationManager.normalizeUserMessage({ role: "user", text: "历史消息" });
+  });
+  expect(result).toEqual({ role: "user", text: "历史消息", input_mode: "text" });
+});

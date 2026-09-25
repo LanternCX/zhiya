@@ -36,6 +36,7 @@ import ConnectionRetry from "../../components/ConnectionRetry";
 import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
+import type { InputMode } from "../../domain/learning";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -200,7 +201,7 @@ export default function CourseRoom({
   const startLiveVoice = () => {
     if (voiceController.current) return;
     const controller = new VoiceSessionController((text, final) => {
-      if (final && text.trim()) void submit({ text, files: [] });
+      if (final && text.trim()) void submit({ text, files: [] }, "speech");
     }, () => session.current?.stopCurrent());
     voiceController.current = controller;
     setLiveVoice(true);
@@ -569,12 +570,13 @@ export default function CourseRoom({
     value: string,
     materialNames: string[] = [],
     clearError = true,
+    inputMode: InputMode = "text",
   ) => {
     if (!value || busy || !session.current) return;
     if (clearError) setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
-    await session.current.prompt(value, materialNames);
+    await session.current.prompt(value, materialNames, inputMode);
     setBusy(false);
   };
   useEffect(() => {
@@ -591,7 +593,7 @@ export default function CourseRoom({
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
-  const submit = async ({ text: input, files }: ChatComposerMessage) => {
+  const submit = async ({ text: input, files }: ChatComposerMessage, inputMode: InputMode = "text") => {
     if (busy) throw new Error("The course session is busy");
     setError("");
     const requested = input.trim();
@@ -600,6 +602,8 @@ export default function CourseRoom({
       void runPrompt(
         requested || "请根据我附带的教学材料创建课程并开始教学。",
         files.map((file) => file.name),
+        true,
+        inputMode,
       );
       return;
     }
@@ -625,6 +629,7 @@ export default function CourseRoom({
       requested || "请根据我附带的教学材料继续教学。",
       uploadedNames,
       failed === 0,
+      inputMode,
     );
   };
   const interrupt = () => {

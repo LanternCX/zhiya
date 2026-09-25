@@ -12,7 +12,10 @@ import type {
   CourseConversationState,
   OutlineReorganization,
   StoredCourseConversation,
+  InputMode,
+  UserMessage,
 } from "../../domain/learning";
+import { ConversationManager } from "../../conversation/ConversationManager";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
@@ -203,7 +206,7 @@ export class CourseSession {
     return this.teacher.state.isStreaming;
   }
 
-  async prompt(text: string, materialNames: string[] = []) {
+  async prompt(input: UserMessage | string, materialNames: string[] = [], inputMode: InputMode = "text") {
     if (this.stopped || this.busy) return;
     if (!(await this.outlineRecovery)) {
       this.outlineRecovery = this.recoverOutline();
@@ -211,14 +214,17 @@ export class CourseSession {
     }
     if (this.stopped) return;
     const operation = this.cancellation;
+    const message = typeof input === "string"
+      ? ConversationManager.userMessage(input, inputMode, materialNames)
+      : ConversationManager.normalizeUserMessage(input);
+    const text = message.text;
+    const materials = message.materials ?? [];
     this.onMessage({
       id: ++this.messageSequence,
-      role: "user",
-      text,
-      ...(materialNames.length ? { materials: materialNames } : {}),
+      ...message,
     });
-    const agentText = materialNames.length
-      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
+    const agentText = materials.length
+      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materials)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
       : text;
     try {
       await this.teacher.prompt(agentText);
