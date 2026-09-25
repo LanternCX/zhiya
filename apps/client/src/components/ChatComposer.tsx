@@ -195,18 +195,24 @@ function ChatComposerInput({
         return;
       }
       const context = new AudioContext();
+      await context.resume();
       const source = context.createMediaStreamSource(stream);
       const processor = context.createScriptProcessor(4096, 1, 1);
       const analyser = context.createAnalyser();
       analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.78;
       const levelData = new Uint8Array(analyser.fftSize);
       processor.onaudioprocess = (event) => voice.sendAudio(float32ToPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
       source.connect(analyser); analyser.connect(processor); processor.connect(context.destination);
       const updateLevel = () => {
         analyser.getByteTimeDomainData(levelData);
-        let peak = 0;
-        for (const value of levelData) peak = Math.max(peak, Math.abs(value - 128) / 128);
-        setAudioLevel(Math.min(1, peak * 2.4));
+        let energy = 0;
+        for (const value of levelData) {
+          const sample = (value - 128) / 128;
+          energy += sample * sample;
+        }
+        const rms = Math.sqrt(energy / levelData.length);
+        setAudioLevel(Math.min(1, rms * 5.5));
         levelFrame.current = requestAnimationFrame(updateLevel);
       };
       speech.current = voice; audio.current = { context, stream, source, processor, analyser }; updateLevel();

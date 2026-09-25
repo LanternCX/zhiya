@@ -68,6 +68,7 @@
   transform: scaleY(var(--dictation-scale, .25));
   transform-origin: center;
   opacity: .72;
+  transition: transform 90ms ease-out, opacity 120ms ease-out;
 }
 .chat-dictation-action,
 .chat-dictation-confirm {

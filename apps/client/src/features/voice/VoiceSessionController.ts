@@ -15,6 +15,8 @@ export class VoiceSessionController {
   private nextAudioTime = 0;
   private sources = new Set<AudioBufferSourceNode>();
   private speakerEnabled = true;
+  private speechQueue: string[] = [];
+  private speechInFlight = false;
   private readonly onInterruptAgent: () => void;
   private sessionReady: Promise<void> | null = null;
   private resolveSessionReady: (() => void) | null = null;
@@ -73,13 +75,15 @@ export class VoiceSessionController {
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
   speakText(text: string) {
-    if (!text.trim() || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
-    this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text });
+    const normalized = text.trim();
+    if (!normalized || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    this.speechQueue.push(normalized);
+    this.pumpSpeechQueue();
   }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
-  interrupt() { this.onInterruptAgent(); this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
-  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
+  interrupt() { this.onInterruptAgent(); this.speechQueue = []; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
+  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
 
   private handleMessage(raw: unknown) {
     let value: unknown;
@@ -90,10 +94,18 @@ export class VoiceSessionController {
     if (event.type === "session-ready") { this.resolveSessionReady?.(); this.dispatch({ type: "ready" }); }
     if (event.type === "transcript-delta" || event.type === "transcript-final") { const text = event.text ?? ""; this.dispatch({ type: "transcript", turnId: event.turnId, text, final: event.type === "transcript-final" }); this.onTranscript(text, event.type === "transcript-final"); }
     if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.enqueueAudio(event.data, event.sampleRate ?? 24000); }
+    if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
     if (event.type === "session-error") { const message = event.message ?? "语音会话失败"; this.rejectSessionReady?.(new Error(message)); this.dispatch({ type: "error", message }); }
     if (event.type === "session-ended") this.dispatch({ type: "end" });
   }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
+  private pumpSpeechQueue() {
+    if (this.speechInFlight || !this.speechQueue.length || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    const text = this.speechQueue.shift();
+    if (!text) return;
+    this.speechInFlight = true;
+    this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text });
+  }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
   private enqueueAudio(encoded: string, sampleRate: number) {
     const context = this.context ??= new AudioContext();

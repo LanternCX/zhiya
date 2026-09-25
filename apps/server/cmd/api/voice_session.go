@@ -175,6 +175,9 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 }
 
 func wrapSpeechDialError(response *http.Response, err error) error {
+	if err == nil {
+		return nil
+	}
 	if response != nil {
 		return fmt.Errorf("上游 HTTP %s: %w", response.Status, err)
 	}
