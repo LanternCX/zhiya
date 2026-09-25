@@ -33,6 +33,7 @@ export class VoiceSessionController {
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   getState() { return this.state; }
   getMetrics() { return this.metrics.snapshot(); }
+  recordAgentText(text: string) { if (text.trim()) this.metrics.mark("agent_first_token"); }
 
   async start() {
     this.dispatch({ type: "connect", sessionId: this.sessionId });

@@ -292,14 +292,18 @@ export default function CourseRoom({
     const current = createCourseSession(
       info,
       memory,
-      (message, replaceLast) =>
+      (message, replaceLast) => {
+        if (message.role === "assistant" && message.streaming) {
+          voiceController.current?.recordAgentText(message.text);
+        }
         setMessages((all) => {
           const next = !replaceLast
             ? [...all, message]
             : [...all.slice(0, -1), message];
           messagesRef.current = next;
           return next;
-        }),
+        });
+      },
       (next) => {
         pagesRef.current = next;
         setPages(next);

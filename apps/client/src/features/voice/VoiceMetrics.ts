@@ -1,4 +1,4 @@
-export type VoiceMetricName = "connection" | "asr_final" | "first_tts_audio" | "interruption";
+export type VoiceMetricName = "connection" | "asr_final" | "agent_first_token" | "first_tts_audio" | "interruption";
 
 export class VoiceMetrics {
   private readonly startedAt: number;

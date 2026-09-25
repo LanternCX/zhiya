@@ -196,6 +196,21 @@ test("voice metrics record each latency milestone once", async ({ page }) => {
   expect(result).toEqual({ connection: 0, asr_final: 0 });
 });
 
+test("voice metrics mark the first agent text only after visible output", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    controller.recordAgentText("  ");
+    const before = controller.getMetrics();
+    controller.recordAgentText("你好");
+    const first = controller.getMetrics().agent_first_token;
+    controller.recordAgentText("你好，欢迎回来");
+    return { before, firstRecorded: typeof first === "number", sameFirst: controller.getMetrics().agent_first_token === first };
+  });
+  expect(result).toEqual({ before: {}, firstRecorded: true, sameFirst: true });
+});
+
 test("playback controller reports malformed audio without throwing", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
