@@ -1,6 +1,7 @@
 import { MicrophoneCapture } from "./MicrophoneCapture";
 import { TranscriptAccumulator } from "./TranscriptAccumulator";
 import { PlaybackController } from "./PlaybackController";
+import { nextVoiceReconnectDelay } from "./ReconnectPolicy";
 import { VoiceMetrics } from "./VoiceMetrics";
 import { isVoiceServerEvent, type VoiceServerEvent } from "./protocol";
 import { initialVoiceState, voiceReducer, type VoiceAction } from "./voice-reducer";
@@ -38,18 +39,23 @@ export class VoiceSessionController {
   async start() {
     this.dispatch({ type: "connect", sessionId: this.sessionId });
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-    const socket = new WebSocket(`${protocol}//${location.host}/api/voice/session`);
+    const url = `${protocol}//${location.host}/api/voice/session`;
+    let socket: WebSocket;
+    let lastError: unknown;
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        socket = await this.openSocket(url);
+        break;
+      } catch (error) {
+        lastError = error;
+        const delay = nextVoiceReconnectDelay(attempt);
+        if (delay === null) throw lastError;
+        await new Promise((resolve) => window.setTimeout(resolve, delay));
+      }
+    }
     this.socket = socket;
     socket.onmessage = (message) => this.handleMessage(message.data);
     socket.onerror = () => this.dispatch({ type: "error", message: "语音连接失败", kind: "connection" });
-    await new Promise<void>((resolve, reject) => {
-      const timeout = window.setTimeout(() => {
-        socket.close();
-        reject(new Error("语音连接超时，请检查后端服务和 ASR API Key"));
-      }, 10_000);
-      socket.onopen = () => { window.clearTimeout(timeout); resolve(); };
-      socket.addEventListener("error", () => { window.clearTimeout(timeout); reject(new Error("语音连接失败，请检查后端服务和 ASR API Key")); }, { once: true });
-    });
     this.sessionReady = new Promise<void>((resolve, reject) => {
       this.resolveSessionReady = resolve;
       this.rejectSessionReady = reject;
@@ -100,6 +106,21 @@ export class VoiceSessionController {
   interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "ready" }); }
   end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
   handleVisibilityChange(hidden: boolean) { if (hidden) this.end(); }
+
+  private openSocket(url: string) {
+    return new Promise<WebSocket>((resolve, reject) => {
+      const socket = new WebSocket(url);
+      const timeout = window.setTimeout(() => {
+        socket.close();
+        reject(new Error("语音连接超时，请检查后端服务和 ASR API Key"));
+      }, 10_000);
+      socket.onopen = () => { window.clearTimeout(timeout); resolve(socket); };
+      socket.addEventListener("error", () => {
+        window.clearTimeout(timeout);
+        reject(new Error("语音连接失败，请检查后端服务和 ASR API Key"));
+      }, { once: true });
+    });
+  }
 
   private handleMessage(raw: unknown) {
     let value: unknown;

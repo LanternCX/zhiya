@@ -233,3 +233,12 @@ test("voice session ends when the page becomes hidden", async ({ page }) => {
   });
   expect(result).toBe("ended");
 });
+
+test("voice reconnect policy allows only two bounded retries", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { nextVoiceReconnectDelay } = await import("/src/features/voice/ReconnectPolicy.ts");
+    return [nextVoiceReconnectDelay(0), nextVoiceReconnectDelay(1), nextVoiceReconnectDelay(2)];
+  });
+  expect(result).toEqual([250, 1000, null]);
+});
