@@ -85,3 +85,14 @@ func TestVoiceSessionRegistryRejectsConcurrentUserSession(t *testing.T) {
 		t.Fatal("session was not released")
 	}
 }
+
+func TestLongLivedAPIPathsSkipRequestTimeout(t *testing.T) {
+	for _, path := range []string{"/api/learning/socket", "/api/speech/stream", "/api/voice/session", "/api/learning/model"} {
+		if !isLongLivedAPIPath(path) {
+			t.Fatalf("%s was not marked long-lived", path)
+		}
+	}
+	if isLongLivedAPIPath("/api/courses") {
+		t.Fatal("ordinary API path was marked long-lived")
+	}
+}

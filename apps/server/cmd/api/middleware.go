@@ -16,8 +16,7 @@ func (a *application) protect(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		if strings.HasPrefix(r.URL.Path, "/api/") {
-			modelStream := r.URL.Path == "/api/learning/model" || r.URL.Path == "/api/learning/course/model"
-			if modelStream {
+			if isLongLivedAPIPath(r.URL.Path) {
 				_ = http.NewResponseController(w).SetWriteDeadline(time.Time{})
 			} else {
 				ctx, cancel := context.WithTimeout(r.Context(), config.Seconds(a.config.Server.RequestTimeoutSeconds))
@@ -57,6 +56,16 @@ func (a *application) protect(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func isLongLivedAPIPath(path string) bool {
+	switch path {
+	case "/api/learning/socket", "/api/learning/model", "/api/learning/course/model", "/api/speech/stream", "/api/voice/session":
+		return true
+	default:
+		return false
+	}
+}
+
 func sessionToken(r *http.Request) string {
 	c, err := r.Cookie("zhiya_session")
 	if err != nil {
