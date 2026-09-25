@@ -133,6 +133,10 @@ func (a *application) forwardSpeech(ctx context.Context, upstream, browser *webs
 			if err != nil {
 				continue
 			}
+			if event.Kind == "error" {
+				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "error", "message": event.Data}))
+				return
+			}
 			if event.Kind == "audio" {
 				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "audio", "data": event.Data, "sampleRate": 24000}))
 				continue
@@ -150,6 +154,10 @@ func (a *application) forwardSpeech(ctx context.Context, upstream, browser *webs
 			if event.Kind == "transcript" {
 				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "transcript", "text": event.Text, "final": event.Final}))
 				continue
+			}
+			if event.Kind == "error" {
+				_ = browser.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "error", "message": event.Data}))
+				return
 			}
 			var header struct {
 				Event string `json:"event"`

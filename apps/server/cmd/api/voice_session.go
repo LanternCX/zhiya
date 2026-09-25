@@ -228,6 +228,10 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			if err != nil {
 				continue
 			}
+			if event.Kind == "error" {
+				s.send(newVoiceServerEvent("session-error", s.sessionID, turnID, &voiceServerEvent{Code: "tts_upstream", Message: event.Data}))
+				return
+			}
 			if event.Kind == "audio" {
 				s.send(newVoiceServerEvent("tts-audio", s.sessionID, turnID, &voiceServerEvent{Data: event.Data, SampleRate: 24000}))
 			}
@@ -240,6 +244,9 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			turnID = s.currentASRTurn()
 			event, err := providers.ParseASREvent(raw)
 			if err != nil || event.Kind != "transcript" {
+				if err == nil && event.Kind == "error" {
+					s.send(newVoiceServerEvent("session-error", s.sessionID, turnID, &voiceServerEvent{Code: "asr_upstream", Message: event.Data}))
+				}
 				continue
 			}
 			typeName := "transcript-delta"

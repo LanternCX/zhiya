@@ -11,6 +11,7 @@ func TestParseTTSEvent(t *testing.T) {
 	}{
 		{name: "audio delta", raw: `{"type":"response.audio.delta","delta":"AQI="}`, kind: "audio", data: "AQI="},
 		{name: "audio done", raw: `{"type":"response.audio.done"}`, kind: "done"},
+		{name: "provider error", raw: `{"type":"error","error":{"message":"quota exceeded"}}`, kind: "error", data: "quota exceeded"},
 		{name: "unknown event", raw: `{"type":"response.created"}`},
 	}
 	for _, tt := range tests {
@@ -38,6 +39,16 @@ func TestParseASREventReadsSentence(t *testing.T) {
 		t.Fatalf("parse failed: %v", err)
 	}
 	if event.Kind != "transcript" || event.Text != "你好" || !event.Final {
+		t.Fatalf("event = %#v", event)
+	}
+}
+
+func TestParseASREventReadsProviderError(t *testing.T) {
+	event, err := ParseASREvent([]byte(`{"header":{"event":"task-failed","status_message":"upstream failed"}}`))
+	if err != nil {
+		t.Fatalf("parse failed: %v", err)
+	}
+	if event.Kind != "error" || event.Data != "upstream failed" {
 		t.Fatalf("event = %#v", event)
 	}
 }

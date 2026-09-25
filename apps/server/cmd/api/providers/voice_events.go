@@ -14,6 +14,9 @@ func ParseTTSEvent(raw []byte) (VoiceEvent, error) {
 	var payload struct {
 		Type  string `json:"type"`
 		Delta string `json:"delta"`
+		Error *struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}
 	if err := json.Unmarshal(raw, &payload); err != nil {
 		return VoiceEvent{}, err
@@ -26,6 +29,11 @@ func ParseTTSEvent(raw []byte) (VoiceEvent, error) {
 		return VoiceEvent{Kind: "audio", Data: payload.Delta}, nil
 	case "response.audio.done":
 		return VoiceEvent{Kind: "done"}, nil
+	case "error":
+		if payload.Error != nil {
+			return VoiceEvent{Kind: "error", Data: payload.Error.Message}, nil
+		}
+		return VoiceEvent{Kind: "error"}, nil
 	default:
 		return VoiceEvent{}, nil
 	}
@@ -33,6 +41,10 @@ func ParseTTSEvent(raw []byte) (VoiceEvent, error) {
 
 func ParseASREvent(raw []byte) (VoiceEvent, error) {
 	var payload struct {
+		Header *struct {
+			Event         string `json:"event"`
+			StatusMessage string `json:"status_message"`
+		} `json:"header"`
 		Payload struct {
 			Output struct {
 				Sentence struct {
@@ -44,6 +56,9 @@ func ParseASREvent(raw []byte) (VoiceEvent, error) {
 	}
 	if err := json.Unmarshal(raw, &payload); err != nil {
 		return VoiceEvent{}, err
+	}
+	if payload.Header != nil && payload.Header.Event == "task-failed" {
+		return VoiceEvent{Kind: "error", Data: payload.Header.StatusMessage}, nil
 	}
 	sentence := payload.Payload.Output.Sentence
 	if sentence.Text == "" {
