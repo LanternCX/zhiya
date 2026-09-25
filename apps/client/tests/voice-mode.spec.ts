@@ -90,3 +90,20 @@ test("streaming transcript submits only the first final result", async ({ page }
     { text: "我觉得这个项目应该先重构后端。", final: true, submit: false },
   ]);
 });
+
+test("response presenter keeps display text and simplifies voice text", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ResponsePresenter } = await import("/src/conversation/ResponsePresenter.ts");
+    return [
+      ResponsePresenter.present("结论在这里。", "text"),
+      ResponsePresenter.present("代码如下：\n```ts\nconst answer = 42;\n```", "speech"),
+      ResponsePresenter.present("详情见 https://example.com/docs。", "speech"),
+    ];
+  });
+  expect(result).toEqual([
+    { display_text: "结论在这里。", speech_text: "结论在这里。" },
+    { display_text: "代码如下：\n```ts\nconst answer = 42;\n```", speech_text: "代码我已经放在屏幕上了。" },
+    { display_text: "详情见 https://example.com/docs。", speech_text: "链接我已经放在屏幕上了。" },
+  ]);
+});

@@ -37,6 +37,7 @@ import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech"
 import { courseMaterialAttachments } from "./course-composer";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
 import type { InputMode } from "../../domain/learning";
+import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -537,7 +538,7 @@ export default function CourseRoom({
       return;
     }
     for (const sentence of extracted.sentences) {
-      if (liveVoice) voiceController.current?.speakText(sentence);
+      if (liveVoice) voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
       else void narrationPlayer.current?.speak(sentence);
     }
   }, [messages, voiceEnabled, liveVoice]);
