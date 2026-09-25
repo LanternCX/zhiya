@@ -121,3 +121,21 @@ test("response presenter provides a voice style prompt without replacing the cor
   expect(result.speech).toContain("自然、简洁、口语化");
   expect(result.speech).toContain("不要逐字朗读代码");
 });
+
+test("text chunker emits complete sentences and flushes a bounded remainder", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { TextChunker } = await import("/src/features/voice/TextChunker.ts");
+    const chunker = new TextChunker({ minChars: 3, maxChars: 20 });
+    return [
+      chunker.push("好。", false),
+      chunker.push("这个回答已经足够长了。", false),
+      chunker.push("最后一段", true),
+    ];
+  });
+  expect(result).toEqual([
+    [],
+    ["好。这个回答已经足够长了。"],
+    ["最后一段"],
+  ]);
+});
