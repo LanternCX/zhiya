@@ -59,6 +59,21 @@ npm run dev:desktop
 
 未配置模型时，账号服务仍可使用，学习页面会提示暂时无法交流。自动化测试使用模拟模型响应，不消耗真实模型额度，也不能代表真实模型的教学质量。
 
+## 语音模式
+
+实时语音和可编辑听写都由服务端代理语音供应商。ASR 和 TTS 使用独立凭据，浏览器不会接触任何供应商 API Key。可以在服务端本地配置中填写，或使用环境变量覆盖：
+
+| 配置 | 环境变量 | 用途 |
+| --- | --- | --- |
+| `speech.endpoint` | `ZHIYA_SERVER_SPEECH_ENDPOINT` | DashScope WebSocket 地址 |
+| `speech.asr_api_key` | `ZHIYA_SERVER_SPEECH_ASR_API_KEY` | 语音识别凭据 |
+| `speech.tts_api_key` | `ZHIYA_SERVER_SPEECH_TTS_API_KEY` | 语音合成凭据 |
+| `speech.asr_model` | `ZHIYA_SERVER_SPEECH_ASR_MODEL` | ASR 模型 ID |
+| `speech.tts_model` | `ZHIYA_SERVER_SPEECH_TTS_MODEL` | TTS 模型 ID |
+| `speech.tts_voice` | `ZHIYA_SERVER_SPEECH_TTS_VOICE` | TTS 音色 |
+
+实时 Voice Mode 需要浏览器允许麦克风访问。开发环境的 `localhost` 和 `127.0.0.1` 属于浏览器允许的安全上下文；部署到其他域名时应使用 HTTPS。拒绝麦克风权限不会影响文字聊天和可编辑听写以外的文字输入。语音连接、ASR 和 TTS 出错时，客户端会保留文字聊天能力。
+
 ## 配置
 
 客户端公开配置位于 [`apps/client/config.json`](../apps/client/config.json)：
