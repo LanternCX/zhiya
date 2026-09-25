@@ -103,8 +103,8 @@ test("response presenter keeps display text and simplifies voice text", async ({
   });
   expect(result).toEqual([
     { display_text: "结论在这里。", speech_text: "结论在这里。" },
-    { display_text: "代码如下：\n```ts\nconst answer = 42;\n```", speech_text: "代码我已经放在屏幕上了。" },
-    { display_text: "详情见 https://example.com/docs。", speech_text: "链接我已经放在屏幕上了。" },
+    { display_text: "代码我已经放在屏幕上了。", speech_text: "代码我已经放在屏幕上了。" },
+    { display_text: "链接我已经放在屏幕上了。", speech_text: "链接我已经放在屏幕上了。" },
   ]);
 });
 

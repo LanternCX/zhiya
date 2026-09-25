@@ -13,7 +13,8 @@ export class ResponsePresenter {
 
   static present(text: string, inputMode: InputMode): PresentedResponse {
     if (inputMode === "text") return { display_text: text, speech_text: text };
-    return { display_text: text, speech_text: this.toSpeechText(text) };
+    const speechText = this.toSpeechText(text);
+    return { display_text: speechText, speech_text: speechText };
   }
 
   private static toSpeechText(text: string) {

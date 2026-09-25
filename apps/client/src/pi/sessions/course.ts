@@ -38,6 +38,7 @@ export class CourseSession {
   private streamingTeacherMessage = false;
   private messageSequence = 0;
   private teacherMessageId = 0;
+  private currentInputMode: InputMode = "text";
   private narrationPlayback: {
     id: number;
     promise: Promise<void>;
@@ -175,22 +176,23 @@ export class CourseSession {
         .filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("");
-      if (reasoning || (event.type === "message_update" && !text)) {
+      const presented = ResponsePresenter.present(text, this.currentInputMode);
+      if (reasoning || (event.type === "message_update" && !presented.display_text)) {
         this.onActivity({
           kind: "thinking",
           text: reasoning,
           active: event.type === "message_update",
         });
-      } else if (text) {
+      } else if (presented.display_text) {
         this.onActivity(null);
       }
-      if (text.trim()) {
+      if (presented.display_text.trim()) {
         this.ensureNarrationPlayback(this.teacherMessageId);
         this.onMessage(
           {
             id: this.teacherMessageId,
             role: "assistant",
-            text,
+            text: presented.display_text,
             streaming: event.type === "message_update",
             pageId: this.currentPageId || undefined,
           },
@@ -218,6 +220,7 @@ export class CourseSession {
     const message = typeof input === "string"
       ? ConversationManager.userMessage(input, inputMode, materialNames)
       : ConversationManager.normalizeUserMessage(input);
+    this.currentInputMode = message.input_mode;
     const text = message.text;
     const materials = message.materials ?? [];
     this.onMessage({
