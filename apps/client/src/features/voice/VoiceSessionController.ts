@@ -1,4 +1,5 @@
 import { MicrophoneCapture } from "./MicrophoneCapture";
+import { TranscriptAccumulator } from "./TranscriptAccumulator";
 import { isVoiceServerEvent, type VoiceServerEvent } from "./protocol";
 import { initialVoiceState, voiceReducer, type VoiceAction } from "./voice-reducer";
 import type { VoiceState } from "./types";
@@ -17,6 +18,7 @@ export class VoiceSessionController {
   private speakerEnabled = true;
   private speechQueue: string[] = [];
   private speechInFlight = false;
+  private readonly transcript = new TranscriptAccumulator();
   private readonly onInterruptAgent: () => void;
   private sessionReady: Promise<void> | null = null;
   private resolveSessionReady: (() => void) | null = null;
@@ -64,6 +66,7 @@ export class VoiceSessionController {
       onVadEvent: (event) => {
         this.dispatch({ type: "level", value: Math.min(1, event.level * 3) });
         if (event.kind === "speech-start") {
+          this.transcript.reset();
           if (this.state.status === "speaking" || this.state.status === "thinking") this.interrupt();
           this.dispatch({ type: "speech-started" });
         }
@@ -92,7 +95,11 @@ export class VoiceSessionController {
     const event = value as VoiceServerEvent;
     if (event.sessionId !== this.sessionId || event.turnId < this.turnId) return;
     if (event.type === "session-ready") { this.resolveSessionReady?.(); this.dispatch({ type: "ready" }); }
-    if (event.type === "transcript-delta" || event.type === "transcript-final") { const text = event.text ?? ""; this.dispatch({ type: "transcript", turnId: event.turnId, text, final: event.type === "transcript-final" }); this.onTranscript(text, event.type === "transcript-final"); }
+    if (event.type === "transcript-delta" || event.type === "transcript-final") {
+      const accepted = this.transcript.accept(event.text ?? "", event.type === "transcript-final");
+      this.dispatch({ type: "transcript", turnId: event.turnId, text: accepted.text, final: accepted.final });
+      if (!accepted.final || accepted.submit) this.onTranscript(accepted.text, accepted.final);
+    }
     if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.enqueueAudio(event.data, event.sampleRate ?? 24000); }
     if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
     if (event.type === "session-error") { const message = event.message ?? "语音会话失败"; this.rejectSessionReady?.(new Error(message)); this.dispatch({ type: "error", message }); }

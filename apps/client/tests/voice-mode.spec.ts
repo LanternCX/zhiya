@@ -70,3 +70,23 @@ test("legacy course user messages default to text input mode", async ({ page }) 
   });
   expect(result).toEqual({ role: "user", text: "历史消息", input_mode: "text" });
 });
+
+test("streaming transcript submits only the first final result", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { TranscriptAccumulator } = await import("/src/features/voice/TranscriptAccumulator.ts");
+    const transcript = new TranscriptAccumulator();
+    return [
+      transcript.accept("我觉得这个", false),
+      transcript.accept("我觉得这个项目", false),
+      transcript.accept("我觉得这个项目应该先重构后端。", true),
+      transcript.accept("我觉得这个项目应该先重构后端。", true),
+    ];
+  });
+  expect(result).toEqual([
+    { text: "我觉得这个", final: false, submit: false },
+    { text: "我觉得这个项目", final: false, submit: false },
+    { text: "我觉得这个项目应该先重构后端。", final: true, submit: true },
+    { text: "我觉得这个项目应该先重构后端。", final: true, submit: false },
+  ]);
+});
