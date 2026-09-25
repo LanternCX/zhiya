@@ -195,3 +195,15 @@ test("voice metrics record each latency milestone once", async ({ page }) => {
   });
   expect(result).toEqual({ connection: 0, asr_final: 0 });
 });
+
+test("playback controller reports malformed audio without throwing", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let errors = 0;
+    const playback = new PlaybackController(() => undefined, () => errors++);
+    playback.enqueue("not-base64", 24000);
+    return { errors, isPlaying: playback.isPlaying };
+  });
+  expect(result).toEqual({ errors: 1, isPlaying: false });
+});

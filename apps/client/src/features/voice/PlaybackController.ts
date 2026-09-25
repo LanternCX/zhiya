@@ -3,9 +3,11 @@ export class PlaybackController {
   private nextAudioTime = 0;
   private readonly sources = new Set<AudioBufferSourceNode>();
   private readonly onIdle: () => void;
+  private readonly onError: (error: Error) => void;
 
-  constructor(onIdle: () => void = () => undefined) {
+  constructor(onIdle: () => void = () => undefined, onError: (error: Error) => void = () => undefined) {
     this.onIdle = onIdle;
+    this.onError = onError;
   }
 
   get isPlaying() {
@@ -13,28 +15,32 @@ export class PlaybackController {
   }
 
   enqueue(encoded: string, sampleRate: number) {
-    const context = this.context ??= new AudioContext();
-    const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
-    const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
-    const channel = buffer.getChannelData(0);
-    const view = new DataView(bytes.buffer);
-    for (let index = 0; index < channel.length; index += 1) {
-      channel[index] = view.getInt16(index * 2, true) / 0x8000;
-    }
-    const source = context.createBufferSource();
-    source.buffer = buffer;
-    source.connect(context.destination);
-    this.sources.add(source);
-    const start = Math.max(context.currentTime, this.nextAudioTime);
-    this.nextAudioTime = start + buffer.duration;
-    source.onended = () => {
-      this.sources.delete(source);
-      if (!this.sources.size) {
-        this.nextAudioTime = 0;
-        this.onIdle();
+    try {
+      const context = this.context ??= new AudioContext();
+      const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+      const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
+      const channel = buffer.getChannelData(0);
+      const view = new DataView(bytes.buffer);
+      for (let index = 0; index < channel.length; index += 1) {
+        channel[index] = view.getInt16(index * 2, true) / 0x8000;
       }
-    };
-    source.start(start);
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(context.destination);
+      this.sources.add(source);
+      const start = Math.max(context.currentTime, this.nextAudioTime);
+      this.nextAudioTime = start + buffer.duration;
+      source.onended = () => {
+        this.sources.delete(source);
+        if (!this.sources.size) {
+          this.nextAudioTime = 0;
+          this.onIdle();
+        }
+      };
+      source.start(start);
+    } catch (error) {
+      this.onError(error instanceof Error ? error : new Error("播放音频失败"));
+    }
   }
 
   stop() {

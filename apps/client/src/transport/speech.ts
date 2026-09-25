@@ -58,7 +58,7 @@ export class NarrationPlayer {
   private queue: string[] = [];
   private busy = false;
 
-  constructor(onIdle: () => void) { this.playback = new PlaybackController(onIdle); }
+  constructor(onIdle: () => void) { this.playback = new PlaybackController(onIdle, () => onIdle()); }
   async speak(text: string) {
     if (!text.trim()) return;
     if (!this.stream) {

@@ -14,7 +14,7 @@ export class VoiceSessionController {
   private state: VoiceState = initialVoiceState;
   private readonly listeners = new Set<(state: VoiceState) => void>();
   private readonly onTranscript: (text: string, final: boolean) => void;
-  private readonly playback = new PlaybackController();
+  private readonly playback: PlaybackController;
   private speakerEnabled = true;
   private speechQueue: string[] = [];
   private speechInFlight = false;
@@ -25,7 +25,11 @@ export class VoiceSessionController {
   private resolveSessionReady: (() => void) | null = null;
   private rejectSessionReady: ((reason: Error) => void) | null = null;
 
-  constructor(onTranscript: (text: string, final: boolean) => void = () => undefined, onInterruptAgent: () => void = () => undefined) { this.onTranscript = onTranscript; this.onInterruptAgent = onInterruptAgent; }
+  constructor(onTranscript: (text: string, final: boolean) => void = () => undefined, onInterruptAgent: () => void = () => undefined) {
+    this.onTranscript = onTranscript;
+    this.onInterruptAgent = onInterruptAgent;
+    this.playback = new PlaybackController(undefined, (error) => this.dispatch({ type: "tts-error", message: error.message, kind: "playback" }));
+  }
   subscribe(listener: (state: VoiceState) => void) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   getState() { return this.state; }
   getMetrics() { return this.metrics.snapshot(); }
