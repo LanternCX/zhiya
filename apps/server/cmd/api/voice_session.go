@@ -175,7 +175,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 		s.asr = nil
 		return err
 	}
-	go s.forwardUpstream(conn, "asr", turnID, 0)
+	go s.forwardUpstream(conn, "asr", turnID, 0, providers.QwenASR{})
 	return nil
 }
 
@@ -216,7 +216,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	}
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]any{"type": "input_text_buffer.append", "text": text}))
 	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
-	go s.forwardUpstream(conn, "tts", turnID, generation)
+	go s.forwardUpstream(conn, "tts", turnID, generation, providers.QwenTTS{})
 	return nil
 }
 
@@ -252,7 +252,9 @@ func (s *voiceSession) cancelTTS(_ int64) {
 	}
 }
 
-func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64, generation uint64) {
+func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64, generation uint64, provider interface {
+	Parse([]byte) (providers.VoiceEvent, error)
+}) {
 	for {
 		typ, raw, err := conn.Read(s.ctx)
 		if err != nil {
@@ -265,7 +267,7 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			if !s.ttsEventCurrent(conn, generation) {
 				return
 			}
-			event, err := providers.ParseTTSEvent(raw)
+			event, err := provider.Parse(raw)
 			if err != nil {
 				continue
 			}
@@ -283,7 +285,7 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 		}
 		if mode == "asr" {
 			turnID = s.currentASRTurn()
-			event, err := providers.ParseASREvent(raw)
+			event, err := provider.Parse(raw)
 			if err != nil || event.Kind != "transcript" {
 				if err == nil && event.Kind == "error" {
 					s.send(newVoiceServerEvent("session-error", s.sessionID, turnID, &voiceServerEvent{Code: "asr_upstream", Message: event.Data}))
