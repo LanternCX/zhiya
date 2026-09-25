@@ -44,3 +44,16 @@ func TestVoiceServerEventScope(t *testing.T) {
 		t.Fatalf("unexpected event: %#v", event)
 	}
 }
+
+func TestVoiceSessionUsesCurrentASRTurn(t *testing.T) {
+	voice := &voiceSession{asrTurnID: 2}
+	if got := voice.currentASRTurn(); got != 2 {
+		t.Fatalf("initial ASR turn = %d, want 2", got)
+	}
+	voice.mu.Lock()
+	voice.asrTurnID = 3
+	voice.mu.Unlock()
+	if got := voice.currentASRTurn(); got != 3 {
+		t.Fatalf("updated ASR turn = %d, want 3", got)
+	}
+}

@@ -27,6 +27,7 @@ type voiceSession struct {
 	asr       *websocket.Conn
 	tts       *websocket.Conn
 	asrTaskID string
+	asrTurnID int64
 }
 
 func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request) {
@@ -125,6 +126,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 	s.asr = conn
 	taskID := data.UUID()
 	s.asrTaskID = taskID
+	s.asrTurnID = turnID
 	task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": s.app.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
 	if err := conn.Write(s.ctx, websocket.MessageText, mustJSON(task)); err != nil {
 		conn.CloseNow()
@@ -138,6 +140,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 func (s *voiceSession) commitASR(turnID int64) {
 	s.mu.Lock()
 	conn := s.asr
+	s.asrTurnID = turnID
 	s.mu.Unlock()
 	if conn == nil {
 		return
@@ -228,6 +231,7 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			}
 		}
 		if mode == "asr" {
+			turnID = s.currentASRTurn()
 			if output, ok := event["payload"].(map[string]any); ok {
 				if outputBody, ok := output["output"].(map[string]any); ok {
 					if sentence, ok := outputBody["sentence"].(map[string]any); ok {
@@ -243,6 +247,12 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 			}
 		}
 	}
+}
+
+func (s *voiceSession) currentASRTurn() int64 {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.asrTurnID
 }
 
 func (s *voiceSession) send(event voiceServerEvent) error {
