@@ -1,3 +1,5 @@
+import { PlaybackController } from "../features/voice/PlaybackController";
+
 export type SpeechEvent =
   | { type: "ready" }
   | { type: "transcript"; text: string; final: boolean }
@@ -52,19 +54,16 @@ export function float32ToPcm16(input: Float32Array, sourceRate: number, targetRa
 
 export class NarrationPlayer {
   private stream: SpeechStream | null = null;
-  private context: AudioContext | null = null;
-  private nextTime = 0;
-  private sources = new Set<AudioBufferSourceNode>();
-  private readonly onIdle: () => void;
+  private readonly playback: PlaybackController;
   private queue: string[] = [];
   private busy = false;
 
-  constructor(onIdle: () => void) { this.onIdle = onIdle; }
+  constructor(onIdle: () => void) { this.playback = new PlaybackController(onIdle); }
   async speak(text: string) {
     if (!text.trim()) return;
     if (!this.stream) {
       this.stream = new SpeechStream((event) => {
-        if (event.type === "audio") this.enqueue(event.data, event.sampleRate);
+        if (event.type === "audio") this.playback.enqueue(event.data, event.sampleRate);
         if (event.type === "complete") { this.busy = false; void this.pump(); }
       });
       await this.stream.connect();
@@ -74,24 +73,11 @@ export class NarrationPlayer {
   stop() {
     this.stream?.stopTts(); this.stream?.close(); this.stream = null;
     this.queue = []; this.busy = false;
-    for (const source of this.sources) source.stop();
-    this.sources.clear(); this.nextTime = 0;
-    this.onIdle();
+    this.playback.clear();
   }
   private async pump() {
-    if (this.busy || !this.queue.length || !this.stream) { if (!this.busy && !this.queue.length && !this.sources.size) this.onIdle(); return; }
+    if (this.busy || !this.queue.length || !this.stream) return;
     this.busy = true; this.stream.startTts(this.queue.shift()!);
-  }
-  private enqueue(encoded: string, sampleRate: number) {
-    const context = this.context ??= new AudioContext();
-    const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
-    const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
-    const channel = buffer.getChannelData(0); const view = new DataView(bytes.buffer);
-    for (let index = 0; index < channel.length; index++) channel[index] = view.getInt16(index * 2, true) / 0x8000;
-    const source = context.createBufferSource(); source.buffer = buffer; source.connect(context.destination);
-    this.sources.add(source); const start = Math.max(context.currentTime, this.nextTime); this.nextTime = start + buffer.duration;
-    source.onended = () => { this.sources.delete(source); if (!this.sources.size) { this.nextTime = 0; this.onIdle(); } };
-    source.start(start);
   }
 }
 

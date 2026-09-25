@@ -139,3 +139,32 @@ test("text chunker emits complete sentences and flushes a bounded remainder", as
     ["最后一段"],
   ]);
 });
+
+test("playback controller owns one audio queue and clears it on stop", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    class FakeSource {
+      onended: (() => void) | null = null;
+      buffer: unknown = null;
+      stopped = false;
+      connect() {}
+      start() {}
+      stop() { this.stopped = true; }
+    }
+    class FakeContext {
+      currentTime = 0;
+      destination = {};
+      createBuffer() { return { duration: 0.1, getChannelData: () => new Float32Array(2) }; }
+      createBufferSource() { return new FakeSource(); }
+    }
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = FakeContext;
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let idle = 0;
+    const playback = new PlaybackController(() => idle++);
+    playback.enqueue("AAAAAA==", 24000);
+    const wasPlaying = playback.isPlaying;
+    playback.clear();
+    return { wasPlaying, isPlaying: playback.isPlaying, idle };
+  });
+  expect(result).toEqual({ wasPlaying: true, isPlaying: false, idle: 1 });
+});

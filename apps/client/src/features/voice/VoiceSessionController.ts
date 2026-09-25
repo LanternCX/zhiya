@@ -1,5 +1,6 @@
 import { MicrophoneCapture } from "./MicrophoneCapture";
 import { TranscriptAccumulator } from "./TranscriptAccumulator";
+import { PlaybackController } from "./PlaybackController";
 import { isVoiceServerEvent, type VoiceServerEvent } from "./protocol";
 import { initialVoiceState, voiceReducer, type VoiceAction } from "./voice-reducer";
 import type { VoiceState } from "./types";
@@ -12,9 +13,7 @@ export class VoiceSessionController {
   private state: VoiceState = initialVoiceState;
   private readonly listeners = new Set<(state: VoiceState) => void>();
   private readonly onTranscript: (text: string, final: boolean) => void;
-  private context: AudioContext | null = null;
-  private nextAudioTime = 0;
-  private sources = new Set<AudioBufferSourceNode>();
+  private readonly playback = new PlaybackController();
   private speakerEnabled = true;
   private speechQueue: string[] = [];
   private speechInFlight = false;
@@ -100,7 +99,7 @@ export class VoiceSessionController {
       this.dispatch({ type: "transcript", turnId: event.turnId, text: accepted.text, final: accepted.final });
       if (!accepted.final || accepted.submit) this.onTranscript(accepted.text, accepted.final);
     }
-    if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.enqueueAudio(event.data, event.sampleRate ?? 24000); }
+    if (event.type === "tts-audio") { this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
     if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
     if (event.type === "session-error") { const message = event.message ?? "语音会话失败"; this.rejectSessionReady?.(new Error(message)); this.dispatch({ type: "error", message }); }
     if (event.type === "session-ended") this.dispatch({ type: "end" });
@@ -114,16 +113,5 @@ export class VoiceSessionController {
     this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text });
   }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
-  private enqueueAudio(encoded: string, sampleRate: number) {
-    const context = this.context ??= new AudioContext();
-    const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
-    const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
-    const channel = buffer.getChannelData(0); const view = new DataView(bytes.buffer);
-    for (let index = 0; index < channel.length; index += 1) channel[index] = view.getInt16(index * 2, true) / 0x8000;
-    const source = context.createBufferSource(); source.buffer = buffer; source.connect(context.destination); this.sources.add(source);
-    const start = Math.max(context.currentTime, this.nextAudioTime); this.nextAudioTime = start + buffer.duration;
-    source.onended = () => { this.sources.delete(source); if (!this.sources.size) this.nextAudioTime = 0; };
-    source.start(start);
-  }
-  private stopPlayback() { this.sources.forEach((source) => { try { source.stop(); } catch { /* already ended */ } }); this.sources.clear(); this.nextAudioTime = 0; }
+  private stopPlayback() { this.playback.clear(); }
 }
