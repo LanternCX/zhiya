@@ -22,4 +22,6 @@ test("composer exposes the live dictation transcript", async () => {
   const composer = await readFile(new URL("../src/components/ChatComposer.tsx", import.meta.url), "utf8");
   assert.match(composer, /chat-dictation-text/);
   assert.match(composer, /dictationDraft/);
+  assert.match(composer, /dictationCommitted/);
+  assert.match(composer, /event\.final/);
 });

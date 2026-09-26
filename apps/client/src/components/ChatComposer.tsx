@@ -102,6 +102,7 @@ function ChatComposerInput({
   const [multiline, setMultiline] = useState(false);
   const speech = useRef<SpeechStream | null>(null);
   const dictationBase = useRef("");
+  const dictationCommitted = useRef("");
   const audio = useRef<{ context: AudioContext; stream: MediaStream; source: MediaStreamAudioSourceNode; processor: ScriptProcessorNode; analyser: AnalyserNode } | null>(null);
   const levelFrame = useRef<number | null>(null);
   const recordingAttempt = useRef(0);
@@ -147,6 +148,7 @@ function ChatComposerInput({
     setRecording(false);
     setDictationDraft(null);
     dictationBase.current = "";
+    dictationCommitted.current = "";
   };
   const stopRecording = () => {
     recordingAttempt.current += 1;
@@ -163,12 +165,14 @@ function ChatComposerInput({
     if (draft) controller.textInput.setInput(`${dictationBase.current}${draft}`);
     setDictationDraft(null);
     dictationBase.current = "";
+    dictationCommitted.current = "";
   };
   const startRecording = async () => {
     const attempt = ++recordingAttempt.current;
     setRecording(true);
     try {
       dictationBase.current = controller.textInput.value;
+      dictationCommitted.current = "";
       setDictationDraft("");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (attempt !== recordingAttempt.current) {
@@ -177,8 +181,18 @@ function ChatComposerInput({
       }
       const voice = new SpeechStream((event) => {
         if (event.type === "transcript") {
-          onVoiceTranscript?.(event.text, event.final);
-          setDictationDraft(event.text);
+          const text = event.text.trim();
+          if (!text) return;
+          let next = dictationCommitted.current;
+          if (event.final) {
+            if (text.startsWith(next)) next = text;
+            else if (!next.endsWith(text)) next = `${next}${text}`;
+            dictationCommitted.current = next;
+          } else {
+            next = `${dictationCommitted.current}${text}`;
+          }
+          onVoiceTranscript?.(next, event.final);
+          setDictationDraft(next);
         }
         if (event.type === "complete") {
           speech.current?.close();
