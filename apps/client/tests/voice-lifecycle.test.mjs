@@ -25,3 +25,9 @@ test("composer exposes the live dictation transcript", async () => {
   assert.match(composer, /dictationCommitted/);
   assert.match(composer, /event\.final/);
 });
+
+test("course narration is gated by the explicit voice mode", async () => {
+  const room = await readFile(new URL("../src/features/course/CourseRoom.tsx", import.meta.url), "utf8");
+  assert.match(room, /if \(!liveVoice\)/);
+  assert.match(room, /voiceController\.current\?\.speakText/);
+});

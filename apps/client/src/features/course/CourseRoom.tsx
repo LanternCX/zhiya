@@ -177,7 +177,6 @@ export default function CourseRoom({
   );
   const session = useRef<CourseSession | null>(null);
   const codeRunSequence = useRef(0);
-  const voiceEnabled = true;
   const [liveVoice, setLiveVoice] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const voiceController = useRef<VoiceSessionController | null>(null);
@@ -206,6 +205,7 @@ export default function CourseRoom({
     const controller = new VoiceSessionController((text) => {
       if (text.trim()) setVoiceTranscript(text);
     }, () => session.current?.stopCurrent());
+    controller.setSpeaker(true);
     voiceController.current = controller;
     setVoiceTranscript("");
     setLiveVoice(true);
@@ -549,7 +549,7 @@ export default function CourseRoom({
     const delta = latest.text.slice(narrationConsumed.current);
     narrationConsumed.current = latest.text.length;
     const sentences = narrationChunker.current?.push(delta, !latest.streaming) ?? [];
-    if (!voiceEnabled) {
+    if (!liveVoice) {
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
@@ -557,19 +557,14 @@ export default function CourseRoom({
       if (liveVoice) voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
       else void narrationPlayer.current?.speak(sentence);
     }
-  }, [messages, voiceEnabled, liveVoice]);
+  }, [messages, liveVoice]);
 
   useEffect(() => {
-    if (voiceEnabled) return;
+    if (liveVoice) return;
     narrationPlayer.current?.stop();
     const latest = messagesRef.current.at(-1);
     if (latest?.role === "assistant" && !latest.streaming)
       session.current?.finishNarration(latest.id);
-  }, [voiceEnabled]);
-
-  useEffect(() => {
-    if (liveVoice) return;
-    voiceController.current?.setSpeaker(false);
   }, [liveVoice]);
 
   useEffect(() => {
