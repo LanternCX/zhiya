@@ -304,6 +304,9 @@ function ChatComposerInput({
         {recording || dictationDraft !== null ? (
           <div className="chat-dictation-bar" role="status" aria-live="polite">
             <PromptInputButton aria-label="取消听写" className="chat-dictation-action" disabled={disabled} onClick={cancelDictation} tooltip="取消听写"><XIcon /></PromptInputButton>
+            <div className="chat-dictation-text" aria-label="实时听写内容">
+              {dictationDraft?.trim() || (recording ? "正在听取…" : "暂无听写内容")}
+            </div>
             <div className="chat-dictation-wave" aria-label={recording ? "正在听写" : "听写已暂停"}>
               {Array.from({ length: 18 }, (_, index) => {
                 const scale = Math.max(0.18, Math.min(1, audioLevel * (0.7 + ((index * 17) % 9) / 10)));

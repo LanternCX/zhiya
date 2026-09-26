@@ -17,3 +17,9 @@ test("composer surfaces dictation failures instead of hiding them", async () => 
   assert.match(room, /onVoiceError=\{setError\}/);
   assert.match(overview, /onVoiceError=\{setComposerError\}/);
 });
+
+test("composer exposes the live dictation transcript", async () => {
+  const composer = await readFile(new URL("../src/components/ChatComposer.tsx", import.meta.url), "utf8");
+  assert.match(composer, /chat-dictation-text/);
+  assert.match(composer, /dictationDraft/);
+});

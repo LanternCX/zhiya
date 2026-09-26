@@ -47,13 +47,24 @@
   background: var(--surface);
 }
 .chat-composer-dictating .chat-composer-footer { display: none; }
+.chat-dictation-text {
+  flex: 1;
+  min-width: 0;
+  max-height: 3.2em;
+  overflow-y: auto;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .chat-dictation-wave {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 112px;
+  width: 112px;
   height: 40px;
   overflow: hidden;
   color: var(--text);
@@ -97,4 +108,10 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .chat-dictation-wave i { transition: none; }
+}
+@media (max-width: 560px) {
+  .chat-dictation-wave {
+    flex-basis: 72px;
+    width: 72px;
+  }
 }
