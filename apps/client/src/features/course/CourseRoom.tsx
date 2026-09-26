@@ -206,6 +206,9 @@ export default function CourseRoom({
       if (text.trim()) setVoiceTranscript(text);
     }, () => session.current?.stopCurrent());
     controller.setSpeaker(true);
+    controller.subscribe((state) => {
+      if (state.error) setError(state.error);
+    });
     voiceController.current = controller;
     setVoiceTranscript("");
     setLiveVoice(true);

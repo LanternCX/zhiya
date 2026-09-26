@@ -58,3 +58,11 @@ test("conversation and composer scrolling stay usable without visible scrollbars
   assert.match(courseCss, /\.course-thread[\s\S]*scrollbar-width: none/);
   assert.match(composerCss, /\.chat-composer-multiline textarea[\s\S]*scrollbar-width: none/);
 });
+
+test("voice TTS waits for the session to become ready and reports failures", async () => {
+  const controller = await readFile(new URL("../src/features/voice/VoiceSessionController.ts", import.meta.url), "utf8");
+  const room = await readFile(new URL("../src/features/course/CourseRoom.tsx", import.meta.url), "utf8");
+  assert.match(controller, /this\.speechQueue\.push\(normalized\)/);
+  assert.match(controller, /this\.pumpSpeechQueue\(\)/);
+  assert.match(room, /controller\.subscribe/);
+});

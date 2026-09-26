@@ -78,6 +78,7 @@ export class VoiceSessionController {
       this.resolveSessionReady = null;
       this.rejectSessionReady = null;
     }
+    this.pumpSpeechQueue();
     if (!capture) return;
     this.capture = new MicrophoneCapture({
       onPcm: (pcm) => socket.readyState === WebSocket.OPEN && socket.send(pcm),
@@ -102,7 +103,7 @@ export class VoiceSessionController {
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
   speakText(text: string) {
     const normalized = text.trim();
-    if (!normalized || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    if (!normalized) return;
     this.speechQueue.push(normalized);
     this.pumpSpeechQueue();
   }
