@@ -592,6 +592,8 @@ test("teacher follows the student's requested slide pace while keeping narration
   expect(teacherInstructions).toMatch(
     /show one page.+explain that page.+show_next_slide/i,
   );
+  expect(teacherInstructions).toContain("Always write the product and character name exactly as “知芽”");
+  expect(teacherInstructions).toContain("Never replace it with homophones or variants such as “智芽” or “智雅”");
 });
 
 test("a student sees when the model connection is retrying", async ({
