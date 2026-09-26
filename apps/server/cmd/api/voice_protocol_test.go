@@ -77,6 +77,17 @@ func TestVoiceSessionIgnoresStaleTTSEvents(t *testing.T) {
 	}
 }
 
+func TestTTSEventsCarryUniqueEventIDs(t *testing.T) {
+	first := ttsClientEvent("session.update", map[string]any{"session": map[string]any{}})
+	second := ttsClientEvent("input_text_buffer.commit", nil)
+	if first["event_id"] == nil || second["event_id"] == nil {
+		t.Fatal("TTS events must include event_id")
+	}
+	if first["event_id"] == second["event_id"] {
+		t.Fatal("TTS event IDs must be unique")
+	}
+}
+
 func TestVoiceSessionRegistryRejectsConcurrentUserSession(t *testing.T) {
 	registry := voiceSessionRegistry{}
 	if !registry.acquire("user-1") {

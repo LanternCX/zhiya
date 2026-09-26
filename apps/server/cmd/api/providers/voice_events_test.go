@@ -11,6 +11,7 @@ func TestParseTTSEvent(t *testing.T) {
 	}{
 		{name: "audio delta", raw: `{"type":"response.audio.delta","delta":"AQI="}`, kind: "audio", data: "AQI="},
 		{name: "audio done", raw: `{"type":"response.audio.done"}`, kind: "done"},
+		{name: "response done", raw: `{"type":"response.done"}`, kind: "done"},
 		{name: "provider error", raw: `{"type":"error","error":{"message":"quota exceeded"}}`, kind: "error", data: "quota exceeded"},
 		{name: "unknown event", raw: `{"type":"response.created"}`},
 	}

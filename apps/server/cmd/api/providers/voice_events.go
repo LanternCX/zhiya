@@ -27,7 +27,7 @@ func ParseTTSEvent(raw []byte) (VoiceEvent, error) {
 			return VoiceEvent{}, nil
 		}
 		return VoiceEvent{Kind: "audio", Data: payload.Delta}, nil
-	case "response.audio.done":
+	case "response.audio.done", "response.done":
 		return VoiceEvent{Kind: "done"}, nil
 	case "error":
 		if payload.Error != nil {

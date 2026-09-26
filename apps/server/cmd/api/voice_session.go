@@ -211,15 +211,23 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 	generation := s.ttsGeneration
 	s.mu.Unlock()
 	voice := s.app.config.Speech.TTSVoice
-	setup := map[string]any{"type": "session.update", "session": map[string]any{"voice": voice, "response_format": "pcm", "sample_rate": 24000, "mode": "server_commit"}}
+	setup := ttsClientEvent("session.update", map[string]any{"session": map[string]any{"voice": voice, "response_format": "pcm", "sample_rate": 24000, "mode": "server_commit"}})
 	if err := conn.Write(s.ctx, websocket.MessageText, mustJSON(setup)); err != nil {
 		conn.CloseNow()
 		return err
 	}
-	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]any{"type": "input_text_buffer.append", "text": text}))
-	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
+	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.append", map[string]any{"text": text})))
+	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.commit", nil)))
 	go s.forwardUpstream(conn, "tts", turnID, generation, providers.QwenTTS{})
 	return nil
+}
+
+func ttsClientEvent(eventType string, fields map[string]any) map[string]any {
+	event := map[string]any{"event_id": data.UUID(), "type": eventType}
+	for key, value := range fields {
+		event[key] = value
+	}
+	return event
 }
 
 func wrapSpeechDialError(response *http.Response, err error) error {
