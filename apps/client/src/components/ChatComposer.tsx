@@ -58,8 +58,6 @@ export type ChatComposerProps = {
   onVoiceError?: (message: string) => void;
   onStartVoiceMode?: () => void;
   voiceModeActive?: boolean;
-  voiceMuted?: boolean;
-  onToggleVoiceMute?: () => void;
   onEndVoiceMode?: () => void;
   running?: boolean;
   submitLabel: string;
@@ -93,8 +91,6 @@ function ChatComposerInput({
   onVoiceError,
   onStartVoiceMode,
   voiceModeActive = false,
-  voiceMuted = false,
-  onToggleVoiceMute,
   onEndVoiceMode,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
@@ -338,13 +334,13 @@ function ChatComposerInput({
         </PromptInputTools>
         <PromptInputTools className="chat-composer-submit-tools">
           <PromptInputButton
-            aria-label={voiceModeActive ? (voiceMuted ? "开启语音输入" : "关闭语音输入") : (recording ? "停止录音" : "语音输入")}
-            className={recording || (voiceModeActive && voiceMuted) ? "chat-composer-voice recording" : "chat-composer-voice"}
-            disabled={disabled || running}
-            onClick={() => voiceModeActive ? onToggleVoiceMute?.() : (recording ? stopRecording() : void startRecording())}
-            tooltip={voiceModeActive ? (voiceMuted ? "开启语音输入" : "关闭语音输入") : (recording ? "停止录音" : "语音输入")}
+            aria-label={recording ? "停止语音输入" : "开始语音输入"}
+            className={recording ? "chat-composer-voice recording" : "chat-composer-voice"}
+            disabled={disabled || (running && !voiceModeActive)}
+            onClick={() => recording ? stopRecording() : void startRecording()}
+            tooltip={recording ? "停止语音输入" : "开始语音输入"}
           >
-            {voiceModeActive ? (voiceMuted ? <MicOffIcon /> : <MicIcon />) : (recording ? <MicOffIcon /> : <MicIcon />)}
+            {recording ? <MicOffIcon /> : <MicIcon />}
           </PromptInputButton>
           {!canSubmit && !running && !voiceModeActive && (
             <PromptInputButton

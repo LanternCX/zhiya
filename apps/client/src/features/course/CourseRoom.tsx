@@ -179,7 +179,6 @@ export default function CourseRoom({
   const codeRunSequence = useRef(0);
   const voiceEnabled = true;
   const [liveVoice, setLiveVoice] = useState(false);
-  const [voiceMuted, setVoiceMuted] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const voiceController = useRef<VoiceSessionController | null>(null);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
@@ -210,11 +209,10 @@ export default function CourseRoom({
     voiceController.current = controller;
     setVoiceTranscript("");
     setLiveVoice(true);
-    void controller.start().catch((reason) => {
+    void controller.start({ capture: false }).catch((reason) => {
       controller.end();
       if (voiceController.current === controller) voiceController.current = null;
       setLiveVoice(false);
-      setVoiceMuted(false);
       setError(reason instanceof Error ? reason.message : "无法启动语音对话");
     });
   };
@@ -222,7 +220,6 @@ export default function CourseRoom({
     voiceController.current?.end();
     voiceController.current = null;
     setLiveVoice(false);
-    setVoiceMuted(false);
   };
   useEffect(() => endLiveVoice, []);
   useEffect(() => {
@@ -231,7 +228,6 @@ export default function CourseRoom({
       voiceController.current?.handleVisibilityChange(true);
       voiceController.current = null;
       setLiveVoice(false);
-      setVoiceMuted(false);
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
@@ -796,8 +792,6 @@ export default function CourseRoom({
           voiceTranscript={voiceTranscript}
           onStartVoiceMode={startLiveVoice}
           voiceModeActive={liveVoice}
-          voiceMuted={voiceMuted}
-          onToggleVoiceMute={() => { const next = !voiceMuted; setVoiceMuted(next); voiceController.current?.setMuted(next); }}
           onEndVoiceMode={endLiveVoice}
           running={running}
           submitLabel="发送"

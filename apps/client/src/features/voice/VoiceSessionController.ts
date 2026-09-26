@@ -37,7 +37,8 @@ export class VoiceSessionController {
   recordAgentText(text: string) { if (text.trim()) this.metrics.mark("agent_first_token"); }
   reportAgentError(message: string) { this.dispatch({ type: "agent-error", message }); }
 
-  async start() {
+  async start(options: { capture?: boolean } = {}) {
+    const capture = options.capture ?? true;
     this.dispatch({ type: "connect", sessionId: this.sessionId });
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const url = `${protocol}//${location.host}/api/voice/session`;
@@ -62,7 +63,7 @@ export class VoiceSessionController {
       this.resolveSessionReady = resolve;
       this.rejectSessionReady = reject;
     });
-    this.send({ type: "start-session", sessionId: this.sessionId, turnId: this.turnId });
+    this.send({ type: "start-session", sessionId: this.sessionId, turnId: this.turnId, capture });
     try {
       await this.sessionReady;
     } catch (error) {
@@ -76,6 +77,7 @@ export class VoiceSessionController {
       this.resolveSessionReady = null;
       this.rejectSessionReady = null;
     }
+    if (!capture) return;
     this.capture = new MicrophoneCapture({
       onPcm: (pcm) => socket.readyState === WebSocket.OPEN && socket.send(pcm),
       onVadEvent: (event) => {

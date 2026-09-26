@@ -16,6 +16,7 @@ func TestDecodeVoiceClientMessage(t *testing.T) {
 		bad  bool
 	}{
 		{name: "start", raw: `{"type":"start-session","sessionId":"s1","turnId":0}`, want: "start-session"},
+		{name: "output only start", raw: `{"type":"start-session","sessionId":"s1","turnId":0,"capture":false}`, want: "start-session"},
 		{name: "audio", raw: `{"type":"audio","sessionId":"s1","turnId":1}`, want: "audio"},
 		{name: "commit", raw: `{"type":"commit-turn","sessionId":"s1","turnId":1}`, want: "commit-turn"},
 		{name: "cancel", raw: `{"type":"cancel-tts","sessionId":"s1","turnId":2}`, want: "cancel-tts"},

@@ -16,6 +16,7 @@ type voiceClientMessage struct {
 	Type      string `json:"type"`
 	SessionID string `json:"sessionId"`
 	TurnID    int64  `json:"turnId"`
+	Capture   bool   `json:"capture,omitempty"`
 	Text      string `json:"text,omitempty"`
 }
 

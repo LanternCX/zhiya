@@ -6,7 +6,7 @@ test("live voice startup clears the controller when connection fails", async () 
   const source = await readFile(new URL("../src/features/course/CourseRoom.tsx", import.meta.url), "utf8");
   assert.match(source, /controller\.end\(\)/);
   assert.match(source, /setLiveVoice\(false\)/);
-  assert.match(source, /setVoiceMuted\(false\)/);
+  assert.match(source, /controller\.start\(\{ capture: false \}\)/);
   assert.match(source, /voiceController\.current\?\.end\(\)/);
   assert.match(source, /narrationPlayer\.current\?\.dispose\(\)/);
 });

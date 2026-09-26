@@ -120,13 +120,15 @@ func (s *voiceSession) run() {
 			if s.sessionID == "" {
 				s.sessionID = msg.SessionID
 			}
-			if err := s.startASR(msg.TurnID); err != nil {
-				message := fmt.Sprintf("无法连接语音识别服务：%v", err)
-				if err.Error() == "ASR API Key 未配置" {
-					message = err.Error()
+			if msg.Capture {
+				if err := s.startASR(msg.TurnID); err != nil {
+					message := fmt.Sprintf("无法连接语音识别服务：%v", err)
+					if err.Error() == "ASR API Key 未配置" {
+						message = err.Error()
+					}
+					s.send(newVoiceServerEvent("session-error", s.sessionID, msg.TurnID, &voiceServerEvent{Code: "asr_unavailable", Message: message}))
+					continue
 				}
-				s.send(newVoiceServerEvent("session-error", s.sessionID, msg.TurnID, &voiceServerEvent{Code: "asr_unavailable", Message: message}))
-				continue
 			}
 			s.send(newVoiceServerEvent("session-ready", s.sessionID, msg.TurnID, nil))
 		case "commit-turn":
