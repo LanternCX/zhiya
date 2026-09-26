@@ -39,6 +39,7 @@ export class VoiceSessionController {
 
   async start(options: { capture?: boolean } = {}) {
     const capture = options.capture ?? true;
+    this.playback.resume();
     this.dispatch({ type: "connect", sessionId: this.sessionId });
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const url = `${protocol}//${location.host}/api/voice/session`;

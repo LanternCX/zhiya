@@ -38,3 +38,10 @@ test("composer resizes after text is inserted programmatically", async () => {
   assert.match(composer, /controller\.textInput\.value/);
   assert.match(composer, /ref=\{textareaRef\}/);
 });
+
+test("voice mode unlocks audio playback from the explicit start action", async () => {
+  const controller = await readFile(new URL("../src/features/voice/VoiceSessionController.ts", import.meta.url), "utf8");
+  const playback = await readFile(new URL("../src/features/voice/PlaybackController.ts", import.meta.url), "utf8");
+  assert.match(controller, /this\.playback\.resume\(\)/);
+  assert.match(playback, /resume\(\)/);
+});

@@ -14,6 +14,17 @@ export class PlaybackController {
     return this.sources.size > 0;
   }
 
+  resume() {
+    try {
+      const context = this.context ??= new AudioContext();
+      if (typeof context.resume === "function") void context.resume().catch((error) => {
+        this.onError(error instanceof Error ? error : new Error("无法启用音频播放"));
+      });
+    } catch (error) {
+      this.onError(error instanceof Error ? error : new Error("无法启用音频播放"));
+    }
+  }
+
   enqueue(encoded: string, sampleRate: number) {
     try {
       const context = this.context ??= new AudioContext();
