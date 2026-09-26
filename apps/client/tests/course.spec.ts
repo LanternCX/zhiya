@@ -3980,12 +3980,12 @@ test("the course agent hands an existing conversation to a new section conversat
   await page.goto("/#/courses/handoff-course/conversations/variables-chat");
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("这一节学完了，进入下一节");
+    .fill("变量部分已经学完，请接着安排循环内容");
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect(page).toHaveURL(/\/courses\/handoff-course\/conversations\/loops-chat$/);
   await expect(page.getByText("我们先用画星星来认识循环。")).toBeVisible();
-  await expect(page.getByText("这一节学完了，进入下一节")).toHaveCount(0);
+  await expect(page.getByText("变量部分已经学完，请接着安排循环内容")).toHaveCount(0);
   await expect(page.getByText("先用画星星解释循环")).toHaveCount(0);
   expect(createdAfterSave).toBe(true);
   expect(
@@ -3993,7 +3993,7 @@ test("the course agent hands an existing conversation to a new section conversat
       (item) =>
         item.conversationId === "variables-chat" &&
         item.state.messages.some(
-          (message) => message.text === "这一节学完了，进入下一节",
+          (message) => message.text === "变量部分已经学完，请接着安排循环内容",
         ),
     ),
   ).toBe(true);
@@ -4429,6 +4429,14 @@ test("a student can move from a lesson to the next section", async ({ page }) =>
   expect(requests.indexOf("created next conversation")).toBeGreaterThan(
     requests.indexOf("saved current conversation"),
   );
+
+  await page.goto("/#/courses/next-section-course/conversations/variables-chat");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("我想学下一小节了。这一小节我之前学过了。");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page).toHaveURL(/\/conversations\/loops-chat$/);
 });
 
 test("the next-section shortcut resumes the latest conversation", async ({ page }) => {
@@ -4514,9 +4522,13 @@ test("the next-section shortcut resumes the latest conversation", async ({ page 
       return route.fulfill({ status: 500 });
     },
   );
-  await page.route("**/api/learning/course/model", (route) =>
-    route.fulfill(textResponse("接着上次的进度，继续练习 for 循环。")),
-  );
+  let modelRequests = 0;
+  await page.route("**/api/learning/course/model", (route) => {
+    modelRequests++;
+    return route.fulfill(
+      textResponse(`第 ${modelRequests} 次继续练习 for 循环。`),
+    );
+  });
 
   await page.goto("/#/courses/resume-next-course/conversations/first-chat");
   await page.getByRole("button", { name: "进入下一小节：循环" }).click();
@@ -4524,7 +4536,28 @@ test("the next-section shortcut resumes the latest conversation", async ({ page 
   await expect(page).toHaveURL(/\/conversations\/latest-chat$/);
   await expect(page.getByText("上次学到 for 循环。", { exact: true })).toBeVisible();
   await expect(
-    page.getByText("接着上次的进度，继续练习 for 循环。", { exact: true }),
+    page.getByText("第 1 次继续练习 for 循环。", { exact: true }),
+  ).toBeVisible();
+  expect(created).toBe(false);
+
+  await page.goto("/#/courses/resume-next-course/conversations/first-chat");
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("我不想学下一小节，先复习这里");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(
+    page.getByText("第 2 次继续练习 for 循环。", { exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/conversations\/first-chat$/);
+
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("我想学下一小节了。这一小节我之前学过了。");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page).toHaveURL(/\/conversations\/latest-chat$/);
+  await expect(
+    page.getByText("第 3 次继续练习 for 循环。", { exact: true }),
   ).toBeVisible();
   expect(created).toBe(false);
 });

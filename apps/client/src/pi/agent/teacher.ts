@@ -137,7 +137,7 @@ function teacherPrompt(
     : null;
   let sessionRule = activeCourse
     ? courseManagement.currentConversationId
-      ? "The student explicitly opened this conversation. Continue inside it. Use switch_course_section to start a new conversation in another outline section when the learning plan calls for it. Never call create_course_conversation to switch an existing session."
+      ? "The student explicitly opened this conversation. Continue inside it. When the student explicitly asks to study a different outline section, call switch_course_section; do not merely announce the move or teach that section in this conversation. Use the same tool when your teaching plan moves to another section. Never call create_course_conversation to switch an existing session."
       : "This is a new, unbound session. Use list_course_conversations and read_course_conversation when history would help, choose the appropriate outline section, then call create_course_conversation exactly once before teaching. Reading history never reopens or modifies it."
     : "Before teaching, you MUST call create_course exactly once using the student's first learning request, then call set_course_outline, then call create_course_conversation for the first section. Only teach after that conversation exists. Create a concise course title, stable topic, editorial cover direction, and an ordered initial outline without asking for confirmation.";
   sessionRule += [

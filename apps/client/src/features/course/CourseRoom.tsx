@@ -179,7 +179,7 @@ export default function CourseRoom({
     conversation: StoredCourseConversation,
     handoff: string,
   ) => void;
-  onEnterNextSection: (section: CourseSection) => Promise<void>;
+  onEnterNextSection: (section: CourseSection, request?: string) => Promise<void>;
 }) {
   // Long-running sessions must notify the current page, not the route that
   // happened to be visible when generation started.
@@ -693,6 +693,49 @@ export default function CourseRoom({
     await session.current.beginFromHandoff();
     setBusy(false);
   };
+  const orderedSections = [...(course?.sections ?? [])].sort(
+    (left, right) => left.position - right.position,
+  );
+  const currentSectionIndex = orderedSections.findIndex((section) =>
+    section.conversations.some(
+      (conversation) => conversation.id === boundConversationId.current,
+    ),
+  );
+  const nextSection =
+    currentSectionIndex < 0
+      ? undefined
+      : orderedSections
+          .slice(currentSectionIndex + 1)
+          .find((section) => section.status !== "archived");
+  const enterNextSection = async (request?: string) => {
+    const currentCourse = sessionCourse.current;
+    if (
+      !nextSection ||
+      !currentCourse ||
+      !boundConversationId.current ||
+      busy ||
+      switchingSection
+    )
+      return;
+    setSwitchingSection(true);
+    pendingSave.current = {
+      course: currentCourse,
+      state: {
+        messages: messagesRef.current,
+        pages: pagesRef.current,
+        presentedPageIds: presentedRef.current,
+        currentPageId: currentPageIdRef.current,
+      },
+    };
+    try {
+      if (await flushCourseSave())
+        await onEnterNextSection(nextSection, request);
+    } catch {
+      setError("暂时无法进入下一小节，请重试");
+    } finally {
+      setSwitchingSection(false);
+    }
+  };
   useEffect(() => {
     if (!entryRequest) return;
     const timer = window.setTimeout(() => {
@@ -740,6 +783,19 @@ export default function CourseRoom({
       (uploads.length > 0 && uploadedNames.length === 0)
     )
       throw new Error("No course material was uploaded");
+    if (
+      files.length === 0 &&
+      nextSection &&
+      /(?:想学|要学|进入|开始|学习|学|跳到|跳转到|去|切换到)\s*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      ) &&
+      !/(?:不想|不要|别|不打算|暂时不|无需|不必)[^。！？]*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      )
+    ) {
+      await enterNextSection(requested);
+      return;
+    }
     void runPrompt(
       requested || "请根据我附带的教学材料继续教学。",
       uploadedNames,
@@ -788,48 +844,6 @@ export default function CourseRoom({
   const nextPage = presentedPages[presentedPage + 1];
   const canGoPrevious = !busy && !codeRunning && Boolean(previousPage);
   const canGoNext = !busy && !codeRunning && Boolean(nextPage);
-  const orderedSections = [...(course?.sections ?? [])].sort(
-    (left, right) => left.position - right.position,
-  );
-  const currentSectionIndex = orderedSections.findIndex((section) =>
-    section.conversations.some(
-      (conversation) => conversation.id === boundConversationId.current,
-    ),
-  );
-  const nextSection =
-    currentSectionIndex < 0
-      ? undefined
-      : orderedSections
-          .slice(currentSectionIndex + 1)
-          .find((section) => section.status !== "archived");
-  const enterNextSection = async () => {
-    const currentCourse = sessionCourse.current;
-    if (
-      !nextSection ||
-      !currentCourse ||
-      !boundConversationId.current ||
-      busy ||
-      switchingSection
-    )
-      return;
-    setSwitchingSection(true);
-    pendingSave.current = {
-      course: currentCourse,
-      state: {
-        messages: messagesRef.current,
-        pages: pagesRef.current,
-        presentedPageIds: presentedRef.current,
-        currentPageId: currentPageIdRef.current,
-      },
-    };
-    try {
-      if (await flushCourseSave()) await onEnterNextSection(nextSection);
-    } catch {
-      setError("暂时无法进入下一小节，请重试");
-    } finally {
-      setSwitchingSection(false);
-    }
-  };
 
   return (
     <section

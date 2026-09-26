@@ -644,7 +644,7 @@ export default function Workspace({
                         conversationPath(course.id, conversation.id),
                       );
                     }}
-                    onEnterNextSection={async (section) => {
+                    onEnterNextSection={async (section, request) => {
                       const latest = [...section.conversations].sort((a, b) =>
                         b.updatedAt.localeCompare(a.updatedAt),
                       )[0];
@@ -652,14 +652,15 @@ export default function Workspace({
                         openConversation(latest);
                         setCourseEntryRequest({
                           id: Date.now(),
-                          text: `请从上次进度继续${section.title}的学习。`,
+                          text:
+                            request ?? `请从上次进度继续${section.title}的学习。`,
                           materialNames: [],
                           conversationId: latest.id,
                         });
                       } else
                         await createSectionConversation(
                           section,
-                          `请开始${section.title}的学习。`,
+                          request ?? `请开始${section.title}的学习。`,
                         );
                     }}
                   />
