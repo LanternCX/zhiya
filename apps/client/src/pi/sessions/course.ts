@@ -87,6 +87,11 @@ export class CourseSession {
   >();
   private pendingTaskNotices: string[] = [];
   private pendingActiveNotices: string[] = [];
+  private pendingHandoff: {
+    conversation: StoredCourseConversation;
+    text: string;
+  } | null = null;
+  private switchingSection = false;
   private outlineTasks = new Map<
     string,
     {
@@ -112,6 +117,12 @@ export class CourseSession {
     courseManagement: CourseManagement,
     codingLanguages: CodingTools["languages"],
     animationPlayback: Pick<AnimationTools, "control" | "playback">,
+    private onHandoff: (
+      conversation: StoredCourseConversation,
+      text: string,
+      isCurrent: () => boolean,
+    ) => Promise<void>,
+    initialHandoff?: string,
   ) {
     this.pageStore = [...initial.pages];
     this.pageSequence = [...initial.presentedPageIds];
@@ -126,6 +137,31 @@ export class CourseSession {
         this.startOutlineTask(info, (classify) =>
           courseManagement.setOutline(sections, classify),
         ),
+      switchSection: async (sectionId, title, handoff) => {
+        if (this.switchingSection || this.pendingHandoff)
+          throw new Error("学习小节正在切换");
+        if (
+          [...this.outlineTasks.values()].some(
+            (task) => task.status === "running" && !task.recovery,
+          )
+        )
+          throw new Error("请等待课程大纲更新完成后再切换小节");
+        this.switchingSection = true;
+        const operation = this.cancellation;
+        try {
+          const conversation = await courseManagement.switchSection(
+            sectionId,
+            title,
+            handoff,
+          );
+          if (this.stopped || operation !== this.cancellation)
+            throw new Error("学习小节切换已停止");
+          this.pendingHandoff = { conversation, text: handoff };
+          return conversation;
+        } finally {
+          this.switchingSection = false;
+        }
+      },
     };
     this.teacher = createTeacherAgent({
       model: info,
@@ -183,6 +219,8 @@ export class CourseSession {
         end: () => this.endCodingExercise(),
       },
       onRetry: (status) => this.updateModelRetry("teacher", status),
+      handoff: initialHandoff,
+      shouldStopAfterTurn: () => this.pendingHandoff !== null,
     });
     this.teacher.subscribe((event) => {
       if (this.stopped) return;
@@ -292,6 +330,7 @@ export class CourseSession {
     const operation = this.cancellation;
     try {
       await this.teacher.prompt(agentText);
+      if (await this.finishHandoff()) return;
       this.flushPendingActiveNotices();
       await this.waitForNarrationPlayback();
       if (this.teacher.state.errorMessage)
@@ -304,8 +343,39 @@ export class CourseSession {
     }
   }
 
+  private async finishHandoff() {
+    const handoff = this.pendingHandoff;
+    if (!handoff) return false;
+    this.pendingHandoff = null;
+    const operation = this.cancellation;
+    await this.onHandoff(
+      handoff.conversation,
+      handoff.text,
+      () => !this.stopped && operation === this.cancellation,
+    );
+    return true;
+  }
+
+  async beginFromHandoff() {
+    if (this.stopped) return;
+    const operation = this.cancellation;
+    try {
+      await this.teacher.prompt(
+        "Begin teaching in this conversation using the application handoff context.",
+      );
+      if (await this.finishHandoff()) return;
+      await this.waitForNarrationPlayback();
+      if (this.teacher.state.errorMessage)
+        throw new Error(this.teacher.state.errorMessage);
+    } catch (error) {
+      if (!this.stopped && operation === this.cancellation)
+        this.onError(error instanceof Error ? error.message : "暂时无法继续教学");
+    }
+  }
+
   stopCurrent() {
     this.cancellation++;
+    this.pendingHandoff = null;
     this.teacher.abort();
     for (const [taskId, task] of this.outlineTasks) {
       if (task.status === "running") this.cancelAgentTask(taskId);

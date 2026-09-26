@@ -19,7 +19,9 @@ import type {
   ModelInfo,
   ModelRetryStatus,
   CourseConversationState,
+  StoredCourseConversation,
   StoredCourse,
+  CourseSection,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
 import {
@@ -149,6 +151,8 @@ export default function CourseRoom({
   onDeleteCourse,
   onCourseCreated,
   onCourseUpdated,
+  onSwitchConversation,
+  onEnterNextSection,
 }: {
   info: ModelInfo | null;
   memory: string;
@@ -156,7 +160,13 @@ export default function CourseRoom({
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
   newSession: boolean;
-  entryRequest: { id: number; text: string; materialNames: string[] } | null;
+  entryRequest: {
+    id: number;
+    text: string;
+    materialNames: string[];
+    handoff?: boolean;
+    conversationId?: string;
+  } | null;
   libraryError: string;
   onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
@@ -164,6 +174,12 @@ export default function CourseRoom({
   onDeleteCourse: (course: StoredCourse) => Promise<boolean>;
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
+  onSwitchConversation: (
+    course: StoredCourse,
+    conversation: StoredCourseConversation,
+    handoff: string,
+  ) => void;
+  onEnterNextSection: (section: CourseSection, request?: string) => Promise<void>;
 }) {
   // Long-running sessions must notify the current page, not the route that
   // happened to be visible when generation started.
@@ -200,10 +216,12 @@ export default function CourseRoom({
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [generatingPages, setGeneratingPages] = useState(false);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
+  const [switchingSection, setSwitchingSection] = useState(false);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
   const presentedRef = useRef<string[]>([...initialState.presentedPageIds]);
+  const currentPageIdRef = useRef(initialState.currentPageId);
   const session = useRef<CourseSession | null>(null);
   const codeRunSequence = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
@@ -278,6 +296,7 @@ export default function CourseRoom({
     pagesRef.current = initial.pages;
     setPresented([...initial.presentedPageIds]);
     presentedRef.current = [...initial.presentedPageIds];
+    currentPageIdRef.current = initial.currentPageId;
     setCurrentPageId(
       initial.currentPageId ||
         initial.presentedPageIds.at(-1) ||
@@ -323,6 +342,7 @@ export default function CourseRoom({
       },
       (sequence, pageId) => {
         presentedRef.current = sequence;
+        currentPageIdRef.current = pageId;
         setPresented(sequence);
         setCurrentPageId(pageId);
       },
@@ -457,6 +477,46 @@ export default function CourseRoom({
           courseCallbacks.current?.onCourseUpdated(updated);
           return conversation;
         },
+        switchSection: async (sectionId, title) => {
+          const currentCourse = sessionCourse.current;
+          if (!currentCourse || !boundConversationId.current)
+            throw new Error("当前没有可切换的学习对话");
+          const section = currentCourse.sections?.find(
+            (candidate) => candidate.id === sectionId,
+          );
+          if (!section) throw new Error(`课程小节 ${sectionId} 不存在`);
+          pendingSave.current = {
+            course: currentCourse,
+            state: {
+              messages: messagesRef.current,
+              pages: pagesRef.current,
+              presentedPageIds: presentedRef.current,
+              currentPageId: currentPageIdRef.current,
+            },
+          };
+          if (!(await flushCourseSave()))
+            throw new Error("保存当前学习对话后才能切换小节");
+          const conversation = await createStoredCourseConversation(
+            currentCourse.id,
+            sectionId,
+            title,
+          );
+          const updated = {
+            ...sessionCourse.current!,
+            sections: sessionCourse.current!.sections?.map((candidate) =>
+              candidate.id === sectionId
+                ? {
+                    ...candidate,
+                    conversations: [...candidate.conversations, conversation],
+                  }
+                : candidate,
+            ),
+          };
+          sessionCourse.current = updated;
+          setCourse(updated);
+          courseCallbacks.current?.onCourseUpdated(updated);
+          return conversation;
+        },
         listConversations: async () =>
           sessionCourse.current?.sections?.flatMap(
             (section) => section.conversations,
@@ -507,6 +567,27 @@ export default function CourseRoom({
           return { pageId, status: "idle", step: 0 };
         },
       },
+      async (conversation, handoff, isCurrent) => {
+        const currentCourse = sessionCourse.current;
+        if (!currentCourse) throw new Error("课程尚未建立");
+        pendingSave.current = {
+          course: currentCourse,
+          state: {
+            messages: messagesRef.current,
+            pages: pagesRef.current,
+            presentedPageIds: presentedRef.current,
+            currentPageId: currentPageIdRef.current,
+          },
+        };
+        if (!(await flushCourseSave()))
+          throw new Error("保存当前学习对话后才能切换小节");
+        if (!isCurrent()) return;
+        onSwitchConversation(currentCourse, conversation, handoff);
+      },
+      entryRequest?.handoff &&
+      entryRequest.conversationId === selectedCourse?.conversationId
+        ? entryRequest.text
+        : undefined,
     );
     session.current = current;
     return () => {
@@ -604,14 +685,71 @@ export default function CourseRoom({
     await session.current.prompt(value, materialNames);
     setBusy(false);
   };
+  const runHandoff = async () => {
+    if (busy || !session.current) return;
+    setError("");
+    setActivity({ kind: "thinking", text: "", active: true });
+    setBusy(true);
+    await session.current.beginFromHandoff();
+    setBusy(false);
+  };
+  const orderedSections = [...(course?.sections ?? [])].sort(
+    (left, right) => left.position - right.position,
+  );
+  const currentSectionIndex = orderedSections.findIndex((section) =>
+    section.conversations.some(
+      (conversation) => conversation.id === boundConversationId.current,
+    ),
+  );
+  const nextSection =
+    currentSectionIndex < 0
+      ? undefined
+      : orderedSections
+          .slice(currentSectionIndex + 1)
+          .find((section) => section.status !== "archived");
+  const enterNextSection = async (request?: string) => {
+    const currentCourse = sessionCourse.current;
+    if (
+      !nextSection ||
+      !currentCourse ||
+      !boundConversationId.current ||
+      busy ||
+      switchingSection
+    )
+      return;
+    setSwitchingSection(true);
+    pendingSave.current = {
+      course: currentCourse,
+      state: {
+        messages: messagesRef.current,
+        pages: pagesRef.current,
+        presentedPageIds: presentedRef.current,
+        currentPageId: currentPageIdRef.current,
+      },
+    };
+    try {
+      if (await flushCourseSave())
+        await onEnterNextSection(nextSection, request);
+    } catch {
+      setError("暂时无法进入下一小节，请重试");
+    } finally {
+      setSwitchingSection(false);
+    }
+  };
   useEffect(() => {
     if (!entryRequest) return;
     const timer = window.setTimeout(() => {
       if (!session.current || startedEntryRequest.current === entryRequest.id)
         return;
+      if (
+        entryRequest.conversationId &&
+        boundConversationId.current !== entryRequest.conversationId
+      )
+        return;
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
-      void runPrompt(entryRequest.text, entryRequest.materialNames);
+      if (entryRequest.handoff) void runHandoff();
+      else void runPrompt(entryRequest.text, entryRequest.materialNames);
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
@@ -645,6 +783,19 @@ export default function CourseRoom({
       (uploads.length > 0 && uploadedNames.length === 0)
     )
       throw new Error("No course material was uploaded");
+    if (
+      files.length === 0 &&
+      nextSection &&
+      /(?:想学|要学|进入|开始|学习|学|跳到|跳转到|去|切换到)\s*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      ) &&
+      !/(?:不想|不要|别|不打算|暂时不|无需|不必)[^。！？]*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      )
+    ) {
+      await enterNextSection(requested);
+      return;
+    }
     void runPrompt(
       requested || "请根据我附带的教学材料继续教学。",
       uploadedNames,
@@ -795,6 +946,26 @@ export default function CourseRoom({
           <p className="feedback error" role="alert">
             {error}
           </p>
+        )}
+        {nextSection && (
+          <div className="course-next-section">
+            <button
+              aria-label={`进入下一小节：${nextSection.title}`}
+              disabled={
+                !info?.available ||
+                !coursesReady ||
+                busy ||
+                codeRunning ||
+                switchingSection
+              }
+              onClick={() => void enterNextSection()}
+              type="button"
+            >
+              <span>下一小节</span>
+              <strong>{nextSection.title}</strong>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         )}
         <ChatComposer
           attachments={courseMaterialAttachments}
