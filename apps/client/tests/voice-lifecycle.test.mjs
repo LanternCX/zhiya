@@ -31,3 +31,10 @@ test("course narration is gated by the explicit voice mode", async () => {
   assert.match(room, /if \(!liveVoice\)/);
   assert.match(room, /voiceController\.current\?\.speakText/);
 });
+
+test("composer resizes after text is inserted programmatically", async () => {
+  const composer = await readFile(new URL("../src/components/ChatComposer.tsx", import.meta.url), "utf8");
+  assert.match(composer, /refreshInputLayout/);
+  assert.match(composer, /controller\.textInput\.value/);
+  assert.match(composer, /ref=\{textareaRef\}/);
+});

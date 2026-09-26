@@ -100,6 +100,7 @@ function ChatComposerInput({
   const [dictationDraft, setDictationDraft] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [multiline, setMultiline] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const speech = useRef<SpeechStream | null>(null);
   const dictationBase = useRef("");
   const dictationCommitted = useRef("");
@@ -124,6 +125,12 @@ function ChatComposerInput({
     setMultiline(
       element.value.includes("\n") || element.scrollHeight - padding > lineHeight * 1.5,
     );
+  };
+  const refreshInputLayout = () => {
+    const element = textareaRef.current;
+    if (!element) return;
+    updateMultiline(element);
+    if (multiline) element.scrollTop = element.scrollHeight;
   };
   const cleanupCapture = (closeSpeech = true) => {
     if (levelFrame.current !== null) cancelAnimationFrame(levelFrame.current);
@@ -236,6 +243,10 @@ function ChatComposerInput({
   };
   useEffect(() => cancelDictation, []);
   useEffect(() => {
+    const frame = window.requestAnimationFrame(refreshInputLayout);
+    return () => window.cancelAnimationFrame(frame);
+  }, [controller.textInput.value, dictationDraft, multiline]);
+  useEffect(() => {
     if (!voiceModeActive || !voiceTranscript.trim()) return;
     controller.textInput.setInput(voiceTranscript);
   }, [controller, voiceModeActive, voiceTranscript]);
@@ -335,6 +346,7 @@ function ChatComposerInput({
           disabled={disabled}
           onInput={(event) => updateMultiline(event.currentTarget)}
           placeholder="给知芽发消息…"
+          ref={textareaRef}
         />}
       </PromptInputBody>
       <PromptInputFooter className="chat-composer-footer">

@@ -122,7 +122,7 @@
   pointer-events: none;
 }
 .chat-composer-multiline textarea {
-  max-height: 180px;
+  max-height: 240px;
   overflow-y: auto;
   scroll-padding-bottom: 14px;
   white-space: pre-wrap;
