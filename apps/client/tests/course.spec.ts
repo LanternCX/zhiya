@@ -4336,6 +4336,199 @@ test("a student enters a section directly whether resuming or starting", async (
   expect(newConversationRequests).toBe(1);
 });
 
+test("a student can move from a lesson to the next section", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  const emptyState = {
+    messages: [],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const currentState = {
+    ...emptyState,
+    messages: [{ id: 1, role: "assistant" as const, text: "变量可以保存数据。" }],
+  };
+  const currentConversation = {
+    id: "variables-chat",
+    sectionId: "variables",
+    title: "认识变量",
+    state: currentState,
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const course = {
+    id: "next-section-course",
+    conversationId: currentConversation.id,
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active" as const,
+    cover: {
+      motif: "code" as const,
+      palette: "sprout" as const,
+      label: "PYTHON",
+    },
+    state: currentState,
+    sections: [
+      {
+        id: "variables",
+        title: "变量",
+        objective: "理解变量",
+        position: 0,
+        status: "active" as const,
+        conversations: [currentConversation],
+      },
+      {
+        id: "loops",
+        title: "循环",
+        objective: "理解重复执行",
+        position: 1,
+        status: "planned" as const,
+        conversations: [],
+      },
+    ],
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T09:00:00Z",
+  };
+  const requests: string[] = [];
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [course] } }),
+  );
+  await page.route("**/api/courses/next-section-course/conversation", (route) => {
+    requests.push("saved current conversation");
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.route(
+    "**/api/courses/next-section-course/sections/loops/conversations",
+    (route) => {
+      requests.push("created next conversation");
+      return route.fulfill({
+        status: 201,
+        json: {
+          conversation: {
+            id: "loops-chat",
+            sectionId: "loops",
+            title: "第一次学习",
+            state: emptyState,
+            createdAt: "2026-09-10T10:00:00Z",
+            updatedAt: "2026-09-10T10:00:00Z",
+          },
+        },
+      });
+    },
+  );
+  await page.route("**/api/learning/course/model", (route) =>
+    route.fulfill(textResponse("现在开始学习循环。")),
+  );
+
+  await page.goto("/#/courses/next-section-course/conversations/variables-chat");
+  await page.getByRole("button", { name: "进入下一小节：循环" }).click();
+
+  await expect(page).toHaveURL(/\/conversations\/loops-chat$/);
+  await expect(page.getByText("现在开始学习循环。", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /进入下一小节/ })).toHaveCount(0);
+  expect(requests.indexOf("created next conversation")).toBeGreaterThan(
+    requests.indexOf("saved current conversation"),
+  );
+});
+
+test("the next-section shortcut resumes the latest conversation", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  const firstState = {
+    messages: [{ id: 1, role: "assistant" as const, text: "先学变量。" }],
+    pages: [],
+    presentedPageIds: [],
+    currentPageId: "",
+  };
+  const olderState = {
+    ...firstState,
+    messages: [{ id: 1, role: "assistant" as const, text: "以前学过循环。" }],
+  };
+  const latestState = {
+    ...firstState,
+    messages: [{ id: 1, role: "assistant" as const, text: "上次学到 for 循环。" }],
+  };
+  const course = {
+    id: "resume-next-course",
+    conversationId: "first-chat",
+    title: "Python 入门",
+    topic: "系统学习 Python",
+    status: "active",
+    cover: { motif: "code", palette: "sprout", label: "PYTHON" },
+    state: firstState,
+    sections: [
+      {
+        id: "first",
+        title: "变量",
+        objective: "理解变量",
+        position: 0,
+        status: "active",
+        conversations: [{
+          id: "first-chat",
+          sectionId: "first",
+          title: "认识变量",
+          state: firstState,
+          createdAt: "2026-09-10T08:00:00Z",
+          updatedAt: "2026-09-10T09:00:00Z",
+        }],
+      },
+      {
+        id: "next",
+        title: "循环",
+        objective: "理解循环",
+        position: 1,
+        status: "active",
+        conversations: [
+          {
+            id: "older-chat",
+            sectionId: "next",
+            title: "循环入门",
+            state: olderState,
+            createdAt: "2026-09-10T09:00:00Z",
+            updatedAt: "2026-09-10T09:30:00Z",
+          },
+          {
+            id: "latest-chat",
+            sectionId: "next",
+            title: "练习循环",
+            state: latestState,
+            createdAt: "2026-09-10T10:00:00Z",
+            updatedAt: "2026-09-10T11:00:00Z",
+          },
+        ],
+      },
+    ],
+    createdAt: "2026-09-10T08:00:00Z",
+    updatedAt: "2026-09-10T11:00:00Z",
+  };
+  let created = false;
+  await page.route("**/api/courses", (route) =>
+    route.fulfill({ json: { courses: [course] } }),
+  );
+  await page.route("**/api/courses/resume-next-course/conversation", (route) =>
+    route.fulfill({ json: { ok: true } }),
+  );
+  await page.route(
+    "**/api/courses/resume-next-course/sections/next/conversations",
+    (route) => {
+      created = true;
+      return route.fulfill({ status: 500 });
+    },
+  );
+  await page.route("**/api/learning/course/model", (route) =>
+    route.fulfill(textResponse("接着上次的进度，继续练习 for 循环。")),
+  );
+
+  await page.goto("/#/courses/resume-next-course/conversations/first-chat");
+  await page.getByRole("button", { name: "进入下一小节：循环" }).click();
+
+  await expect(page).toHaveURL(/\/conversations\/latest-chat$/);
+  await expect(page.getByText("上次学到 for 循环。", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("接着上次的进度，继续练习 for 循环。", { exact: true }),
+  ).toBeVisible();
+  expect(created).toBe(false);
+});
+
 test("a course outline opens lessons directly and manages history on demand", async ({
   page,
 }) => {

@@ -300,6 +300,7 @@ export default function Workspace({
           id: Date.now(),
           text: request,
           materialNames,
+          conversationId: conversation.id,
         });
     } catch {
       setCourseError("暂时无法开始新的学习");
@@ -642,6 +643,24 @@ export default function Workspace({
                       void routeNavigate(
                         conversationPath(course.id, conversation.id),
                       );
+                    }}
+                    onEnterNextSection={async (section) => {
+                      const latest = [...section.conversations].sort((a, b) =>
+                        b.updatedAt.localeCompare(a.updatedAt),
+                      )[0];
+                      if (latest) {
+                        openConversation(latest);
+                        setCourseEntryRequest({
+                          id: Date.now(),
+                          text: `请从上次进度继续${section.title}的学习。`,
+                          materialNames: [],
+                          conversationId: latest.id,
+                        });
+                      } else
+                        await createSectionConversation(
+                          section,
+                          `请开始${section.title}的学习。`,
+                        );
                     }}
                   />
                 )}

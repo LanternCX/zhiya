@@ -21,6 +21,7 @@ import type {
   CourseConversationState,
   StoredCourseConversation,
   StoredCourse,
+  CourseSection,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
 import {
@@ -151,6 +152,7 @@ export default function CourseRoom({
   onCourseCreated,
   onCourseUpdated,
   onSwitchConversation,
+  onEnterNextSection,
 }: {
   info: ModelInfo | null;
   memory: string;
@@ -177,6 +179,7 @@ export default function CourseRoom({
     conversation: StoredCourseConversation,
     handoff: string,
   ) => void;
+  onEnterNextSection: (section: CourseSection) => Promise<void>;
 }) {
   // Long-running sessions must notify the current page, not the route that
   // happened to be visible when generation started.
@@ -213,6 +216,7 @@ export default function CourseRoom({
   const [activity, setActivity] = useState<CourseActivity | null>(null);
   const [generatingPages, setGeneratingPages] = useState(false);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
+  const [switchingSection, setSwitchingSection] = useState(false);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
@@ -695,7 +699,7 @@ export default function CourseRoom({
       if (!session.current || startedEntryRequest.current === entryRequest.id)
         return;
       if (
-        entryRequest.handoff &&
+        entryRequest.conversationId &&
         boundConversationId.current !== entryRequest.conversationId
       )
         return;
@@ -784,6 +788,48 @@ export default function CourseRoom({
   const nextPage = presentedPages[presentedPage + 1];
   const canGoPrevious = !busy && !codeRunning && Boolean(previousPage);
   const canGoNext = !busy && !codeRunning && Boolean(nextPage);
+  const orderedSections = [...(course?.sections ?? [])].sort(
+    (left, right) => left.position - right.position,
+  );
+  const currentSectionIndex = orderedSections.findIndex((section) =>
+    section.conversations.some(
+      (conversation) => conversation.id === boundConversationId.current,
+    ),
+  );
+  const nextSection =
+    currentSectionIndex < 0
+      ? undefined
+      : orderedSections
+          .slice(currentSectionIndex + 1)
+          .find((section) => section.status !== "archived");
+  const enterNextSection = async () => {
+    const currentCourse = sessionCourse.current;
+    if (
+      !nextSection ||
+      !currentCourse ||
+      !boundConversationId.current ||
+      busy ||
+      switchingSection
+    )
+      return;
+    setSwitchingSection(true);
+    pendingSave.current = {
+      course: currentCourse,
+      state: {
+        messages: messagesRef.current,
+        pages: pagesRef.current,
+        presentedPageIds: presentedRef.current,
+        currentPageId: currentPageIdRef.current,
+      },
+    };
+    try {
+      if (await flushCourseSave()) await onEnterNextSection(nextSection);
+    } catch {
+      setError("暂时无法进入下一小节，请重试");
+    } finally {
+      setSwitchingSection(false);
+    }
+  };
 
   return (
     <section
@@ -886,6 +932,26 @@ export default function CourseRoom({
           <p className="feedback error" role="alert">
             {error}
           </p>
+        )}
+        {nextSection && (
+          <div className="course-next-section">
+            <button
+              aria-label={`进入下一小节：${nextSection.title}`}
+              disabled={
+                !info?.available ||
+                !coursesReady ||
+                busy ||
+                codeRunning ||
+                switchingSection
+              }
+              onClick={() => void enterNextSection()}
+              type="button"
+            >
+              <span>下一小节</span>
+              <strong>{nextSection.title}</strong>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         )}
         <ChatComposer
           attachments={courseMaterialAttachments}
