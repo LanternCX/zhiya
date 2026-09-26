@@ -6,6 +6,7 @@ export class PlaybackController {
   private readonly onError: (error: Error) => void;
   private pendingComplete: (() => void) | null = null;
   private lastSource: AudioBufferSourceNode | null = null;
+  private readonly chunkTimers = new Set<number>();
 
   constructor(onIdle: () => void = () => undefined, onError: (error: Error) => void = () => undefined) {
     this.onIdle = onIdle;
@@ -27,7 +28,7 @@ export class PlaybackController {
     }
   }
 
-  enqueue(encoded: string, sampleRate: number) {
+  enqueue(encoded: string, sampleRate: number, onChunk: (duration: number) => void = () => undefined) {
     try {
       const context = this.context ??= new AudioContext();
       if (context.state === "suspended" && typeof context.resume === "function") {
@@ -49,6 +50,16 @@ export class PlaybackController {
       this.lastSource = source;
       const start = Math.max(context.currentTime, this.nextAudioTime);
       this.nextAudioTime = start + buffer.duration;
+      const delay = Math.max(0, (start - context.currentTime) * 1000);
+      if (delay === 0) {
+        onChunk(buffer.duration);
+      } else {
+        const timer = window.setTimeout(() => {
+          this.chunkTimers.delete(timer);
+          onChunk(buffer.duration);
+        }, delay);
+        this.chunkTimers.add(timer);
+      }
       source.onended = () => {
         this.sources.delete(source);
         if (this.lastSource === source) this.lastSource = null;
@@ -69,6 +80,8 @@ export class PlaybackController {
   stop() {
     this.pendingComplete = null;
     this.lastSource = null;
+    for (const timer of this.chunkTimers) window.clearTimeout(timer);
+    this.chunkTimers.clear();
     for (const source of this.sources) {
       try { source.stop(); } catch { /* source may have already ended */ }
     }

@@ -17,9 +17,12 @@ export class VoiceSessionController {
   private readonly onTranscript: (text: string, final: boolean) => void;
   private readonly playback: PlaybackController;
   private speakerEnabled = true;
-  private speechQueue: Array<{ text: string; onPlayed: () => void }> = [];
+  private speechQueue: Array<{ text: string; onProgress: (text: string) => void; onPlayed: () => void }> = [];
   private speechInFlight = false;
   private speechPlaybackComplete: (() => void) | null = null;
+  private speechProgress: ((text: string) => void) | null = null;
+  private speechText = "";
+  private speechAudioSeconds = 0;
   private readonly transcript = new TranscriptAccumulator();
   private readonly metrics = new VoiceMetrics();
   private readonly onInterruptAgent: () => void;
@@ -102,15 +105,15 @@ export class VoiceSessionController {
   }
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
-  speakText(text: string, onPlayed: () => void = () => undefined) {
+  speakText(text: string, onPlayed: () => void = () => undefined, onProgress: (text: string) => void = () => undefined) {
     const normalized = text.trim();
     if (!normalized) return;
-    this.speechQueue.push({ text: normalized, onPlayed });
+    this.speechQueue.push({ text: normalized, onProgress, onPlayed });
     this.pumpSpeechQueue();
   }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
-  interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "interrupted" }); }
+  interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechProgress = null; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "interrupted" }); }
   end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
   handleVisibilityChange(hidden: boolean) { if (hidden) this.end(); }
   handleConnectionClosed() {
@@ -154,7 +157,17 @@ export class VoiceSessionController {
       if (accepted.submit) this.metrics.mark("asr_final");
       if (!accepted.final || accepted.submit) this.onTranscript(accepted.text, accepted.final);
     }
-    if (event.type === "tts-audio") { this.metrics.mark("first_tts_audio"); this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
+    if (event.type === "tts-audio") {
+      this.metrics.mark("first_tts_audio");
+      this.dispatch({ type: "speaking" });
+      if (this.speakerEnabled && event.data) {
+        this.playback.enqueue(event.data, event.sampleRate ?? 24000, (duration) => {
+          this.speechAudioSeconds += duration;
+          const visibleLength = Math.min(this.speechText.length, Math.ceil(this.speechAudioSeconds / 0.18) + 2);
+          this.speechProgress?.(this.speechText.slice(0, visibleLength));
+        });
+      }
+    }
     if (event.type === "tts-complete") {
       const complete = this.speechPlaybackComplete;
       this.speechPlaybackComplete = null;
@@ -190,10 +203,13 @@ export class VoiceSessionController {
     if (!item) return;
     this.speechInFlight = true;
     this.speechPlaybackComplete = item.onPlayed;
+    this.speechProgress = item.onProgress;
+    this.speechText = item.text;
+    this.speechAudioSeconds = 0;
     this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text: item.text });
   }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
-  private stopPlayback() { this.playback.clear(); }
+  private stopPlayback() { this.playback.clear(); this.speechProgress = null; this.speechText = ""; this.speechAudioSeconds = 0; }
 }
 
 function voiceErrorKind(code?: string): VoiceErrorKind {

@@ -36,7 +36,7 @@ import ConnectionRetry from "../../components/ConnectionRetry";
 import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
-import { appendVoicePlaybackText } from "../voice/VoicePlaybackText";
+import { replaceVoicePlaybackText } from "../voice/VoicePlaybackText";
 import type { InputMode } from "../../domain/learning";
 import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import {
@@ -184,6 +184,7 @@ export default function CourseRoom({
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
+  const voiceScheduledText = useRef<Record<number, string>>({});
   const promptSequence = useRef(0);
   const promptRunning = useRef(false);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
@@ -550,6 +551,7 @@ export default function CourseRoom({
       narrationMessage.current = latest.id;
       narrationConsumed.current = 0;
       if (liveVoice) {
+        voiceScheduledText.current[latest.id] = "";
         setVoicePlaybackText((current) =>
           Object.prototype.hasOwnProperty.call(current, latest.id)
             ? current
@@ -572,11 +574,14 @@ export default function CourseRoom({
     for (const sentence of extracted.sentences) {
       const speechText = ResponsePresenter.present(sentence, "speech").speech_text;
       const messageId = latest.id;
-      voiceController.current?.speakText(speechText, () => {
+      const baseText = voiceScheduledText.current[messageId] ?? "";
+      voiceScheduledText.current[messageId] = `${baseText}${speechText}`;
+      const updateVisibleText = (visibleSentence: string) => {
         setVoicePlaybackText((current) =>
-          appendVoicePlaybackText(current, messageId, speechText),
+          replaceVoicePlaybackText(current, messageId, `${baseText}${visibleSentence}`),
         );
-      });
+      };
+      voiceController.current?.speakText(speechText, () => updateVisibleText(speechText), updateVisibleText);
     }
     if (!latest.streaming) session.current?.finishNarration(latest.id);
   }, [messages, liveVoice]);

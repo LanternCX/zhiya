@@ -10,3 +10,11 @@ export function appendVoicePlaybackText(
     [messageId]: `${current[messageId] ?? ""}${text}`,
   };
 }
+
+export function replaceVoicePlaybackText(
+  current: VoicePlaybackText,
+  messageId: number,
+  text: string,
+): VoicePlaybackText {
+  return { ...current, [messageId]: text };
+}
