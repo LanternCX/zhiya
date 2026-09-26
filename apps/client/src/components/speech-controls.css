@@ -50,7 +50,8 @@
 .chat-dictation-text {
   flex: 1;
   min-width: 0;
-  max-height: 3.2em;
+  min-height: 24px;
+  max-height: 96px;
   overflow-y: auto;
   color: var(--text);
   font-size: 14px;

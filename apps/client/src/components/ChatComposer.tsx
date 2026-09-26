@@ -101,6 +101,7 @@ function ChatComposerInput({
   const [audioLevel, setAudioLevel] = useState(0);
   const [multiline, setMultiline] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const dictationTextRef = useRef<HTMLDivElement | null>(null);
   const speech = useRef<SpeechStream | null>(null);
   const dictationBase = useRef("");
   const dictationCommitted = useRef("");
@@ -247,6 +248,10 @@ function ChatComposerInput({
     return () => window.cancelAnimationFrame(frame);
   }, [controller.textInput.value, dictationDraft, multiline]);
   useEffect(() => {
+    const element = dictationTextRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, [dictationDraft]);
+  useEffect(() => {
     if (!voiceModeActive || !voiceTranscript.trim()) return;
     controller.textInput.setInput(voiceTranscript);
   }, [controller, voiceModeActive, voiceTranscript]);
@@ -329,7 +334,7 @@ function ChatComposerInput({
         {recording || dictationDraft !== null ? (
           <div className="chat-dictation-bar" role="status" aria-live="polite">
             <PromptInputButton aria-label="取消听写" className="chat-dictation-action" disabled={disabled} onClick={cancelDictation} tooltip="取消听写"><XIcon /></PromptInputButton>
-            <div className="chat-dictation-text" aria-label="实时听写内容">
+            <div ref={dictationTextRef} className="chat-dictation-text" aria-label="实时听写内容">
               {dictationDraft?.trim() || (recording ? "正在听取…" : "暂无听写内容")}
             </div>
             <div className="chat-dictation-wave" aria-label={recording ? "正在听写" : "听写已暂停"}>

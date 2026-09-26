@@ -45,3 +45,9 @@ test("voice mode unlocks audio playback from the explicit start action", async (
   assert.match(controller, /this\.playback\.resume\(\)/);
   assert.match(playback, /resume\(\)/);
 });
+
+test("live dictation keeps the newest transcript visible", async () => {
+  const composer = await readFile(new URL("../src/components/ChatComposer.tsx", import.meta.url), "utf8");
+  assert.match(composer, /dictationTextRef/);
+  assert.match(composer, /scrollTop = .*scrollHeight/);
+});
