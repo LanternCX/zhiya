@@ -388,12 +388,12 @@ function ChatComposerInput({
             </PromptInputButton>
           )}
           {(canSubmit || running) && <PromptInputSubmit
-            aria-label={running ? "打断" : submitLabel}
+            aria-label={running && !canSubmit ? "打断" : submitLabel}
             className="chat-composer-submit"
-            disabled={!running && (disabled || !canSubmit)}
+            disabled={disabled || (!running && !canSubmit)}
             onStop={onStop}
-            status={running ? "streaming" : "ready"}
-            title={running ? "打断" : submitLabel}
+            status={running && !canSubmit ? "streaming" : "ready"}
+            title={running && !canSubmit ? "打断" : submitLabel}
           />}
           {voiceModeActive && !canSubmit && !running && <PromptInputButton
             aria-label="结束语音对话"

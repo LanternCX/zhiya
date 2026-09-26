@@ -182,6 +182,8 @@ export default function CourseRoom({
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
+  const promptSequence = useRef(0);
+  const promptRunning = useRef(false);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const boundConversationId = useRef<string | null>(
     activeCourse && !newSession ? activeCourse.conversationId : null,
@@ -583,12 +585,17 @@ export default function CourseRoom({
     clearError = true,
     inputMode: InputMode = "text",
   ) => {
-    if (!value || busy || !session.current) return;
+    if (!value || promptRunning.current || !session.current) return;
+    const sequence = ++promptSequence.current;
+    promptRunning.current = true;
     if (clearError) setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
     await session.current.prompt(value, materialNames, inputMode);
-    setBusy(false);
+    if (promptSequence.current === sequence) {
+      promptRunning.current = false;
+      setBusy(false);
+    }
   };
   useEffect(() => {
     if (!entryRequest) return;
@@ -605,7 +612,7 @@ export default function CourseRoom({
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
   const submit = async ({ text: input, files }: ChatComposerMessage, inputMode: InputMode = "text") => {
-    if (busy) throw new Error("The course session is busy");
+    if (promptRunning.current) interrupt();
     setError("");
     const requested = input.trim();
     if (!course) {
@@ -644,6 +651,8 @@ export default function CourseRoom({
     );
   };
   const interrupt = () => {
+    promptSequence.current += 1;
+    promptRunning.current = false;
     if (voiceController.current) voiceController.current.interrupt();
     else session.current?.stopCurrent();
     setActivity(null);

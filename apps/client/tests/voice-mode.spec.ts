@@ -70,6 +70,7 @@ test("voice TTS pipeline sends text and schedules returned PCM audio", async ({ 
   expect(result).toEqual({ start: true, speak: true, started: 1, status: "speaking" });
 });
 
+
 test("voice VAD distinguishes speech from silence and ends after quiet frames", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
@@ -334,4 +335,37 @@ test("voice interrupt stops the current turn and advances its turn id", async ({
     return { interrupted, status: controller.getState().status, turnId: controller.getState().turnId };
   });
   expect(result).toEqual({ interrupted: 1, status: "listening", turnId: 1 });
+});
+
+test("voice interrupt cancels an in-flight TTS turn before the next message", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const sent: Array<Record<string, unknown>> = [];
+    class FakeSocket {
+      static OPEN = 1;
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      constructor() { setTimeout(() => { this.readyState = 1; this.onopen?.(); }, 0); }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.(); }
+      send(raw: string) {
+        const message = JSON.parse(raw) as Record<string, unknown>;
+        sent.push(message);
+        if (message.type === "start-session") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "session-ready", sessionId: message.sessionId, turnId: message.turnId }) }), 0);
+        }
+      }
+    }
+    (window as unknown as { WebSocket: typeof FakeSocket }).WebSocket = FakeSocket;
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    await controller.start({ capture: false });
+    controller.speakText("旧回答");
+    controller.interrupt();
+    return sent.map((message) => message.type);
+  });
+  expect(result).toEqual(["start-session", "speak-text", "cancel-tts"]);
 });
