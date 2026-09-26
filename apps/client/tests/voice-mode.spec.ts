@@ -185,7 +185,8 @@ test("response presenter provides a voice style prompt without replacing the cor
       speech: ResponsePresenter.modePrompt("speech"),
     };
   });
-  expect(result.text).toBe("");
+  expect(result.text).toContain("普通文字模式");
+  expect(result.text).toContain("不要因为历史语音对话而刻意口语化");
   expect(result.speech).toContain("自然、简洁、口语化");
   expect(result.speech).toContain("不要逐字朗读代码");
   expect(result.speech).toContain("不要输出英文");

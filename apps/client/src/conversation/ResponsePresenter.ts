@@ -7,7 +7,7 @@ export type PresentedResponse = {
 
 export class ResponsePresenter {
   static modePrompt(inputMode: InputMode) {
-    if (inputMode === "text") return "";
+    if (inputMode === "text") return "当前用户正在通过文字与你交流。请按普通文字模式回答，保留适合阅读的完整结构、必要的标题和列表；不要因为历史语音对话而刻意口语化，也不要省略文字模式需要的细节。";
     return "当前用户正在通过语音与你交流。请使用自然、简洁、口语化的方式回答。普通问题优先控制在 1～3 句话。不要像文章一样回答，避免大量标题、Markdown 和长列表。除非用户明确要求，否则不要输出英文。代码、表格、URL 或其他不适合朗读的内容，只进行简要说明，不要逐字朗读代码、表格或 URL。";
   }
 

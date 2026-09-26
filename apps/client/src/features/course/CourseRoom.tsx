@@ -225,6 +225,7 @@ export default function CourseRoom({
   const endLiveVoice = () => {
     voiceController.current?.end();
     voiceController.current = null;
+    session.current?.setInputMode("text");
     setLiveVoice(false);
   };
   useEffect(() => endLiveVoice, []);

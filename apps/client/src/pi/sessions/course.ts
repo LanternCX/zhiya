@@ -209,6 +209,10 @@ export class CourseSession {
     return this.teacher.state.isStreaming;
   }
 
+  setInputMode(inputMode: InputMode) {
+    this.currentInputMode = inputMode;
+  }
+
   async prompt(input: UserMessage | string, materialNames: string[] = [], inputMode: InputMode = "text") {
     if (this.stopped || this.busy) return;
     if (!(await this.outlineRecovery)) {
