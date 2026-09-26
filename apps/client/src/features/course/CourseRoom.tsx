@@ -554,8 +554,7 @@ export default function CourseRoom({
       return;
     }
     for (const sentence of sentences) {
-      if (liveVoice) voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
-      else void narrationPlayer.current?.speak(sentence);
+      voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
     }
   }, [messages, liveVoice]);
 
