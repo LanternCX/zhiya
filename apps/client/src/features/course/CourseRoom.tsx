@@ -654,7 +654,8 @@ export default function CourseRoom({
     );
   };
   const interrupt = () => {
-    session.current?.stopCurrent();
+    if (voiceController.current) voiceController.current.interrupt();
+    else session.current?.stopCurrent();
     setActivity(null);
     setBusy(false);
   };

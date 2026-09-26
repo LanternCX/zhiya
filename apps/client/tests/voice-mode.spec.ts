@@ -270,3 +270,15 @@ test("voice reducer classifies an agent failure without ending the session", asy
   expect(result.errorKind).toBe("agent");
   expect(result.error).toBe("模型暂时不可用");
 });
+
+test("voice interrupt stops the current turn and advances its turn id", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    let interrupted = 0;
+    const controller = new VoiceSessionController(() => undefined, () => interrupted++);
+    controller.interrupt();
+    return { interrupted, status: controller.getState().status, turnId: controller.getState().turnId };
+  });
+  expect(result).toEqual({ interrupted: 1, status: "listening", turnId: 1 });
+});

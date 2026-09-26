@@ -12,6 +12,7 @@ export type VoiceAction =
   | { type: "thinking" }
   | { type: "agent-error"; message: string }
   | { type: "speaking" }
+  | { type: "interrupted" }
   | { type: "tts-error"; message: string; kind?: "tts" | "playback" }
   | { type: "mute" }
   | { type: "unmute" }
@@ -31,6 +32,7 @@ export function voiceReducer(state: VoiceState, action: VoiceAction): VoiceState
     case "thinking": return { ...state, status: "thinking" };
     case "agent-error": return { ...state, status: "listening", error: action.message, errorKind: "agent" };
     case "speaking": return { ...state, status: "speaking" };
+    case "interrupted": return { ...state, status: "listening", turnId: state.turnId + 1, transcript: "", error: null, errorKind: null };
     case "tts-error": return { ...state, status: state.status === "speaking" ? "listening" : state.status, error: action.message, errorKind: action.kind ?? "tts" };
     case "mute": return { ...state, status: "muted" };
     case "unmute": return { ...state, status: "listening" };
