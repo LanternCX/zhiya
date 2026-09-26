@@ -600,11 +600,11 @@ export default function CourseRoom({
     if (!element) return;
     element.scrollTo({
       top: element.scrollHeight,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      behavior: liveVoice || window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
     });
-  }, [messages, activity]);
+  }, [messages, activity, voicePlaybackText, liveVoice]);
 
   const runPrompt = async (
     value: string,
