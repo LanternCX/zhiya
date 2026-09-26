@@ -216,8 +216,14 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 		conn.CloseNow()
 		return err
 	}
-	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.append", map[string]any{"text": text})))
-	_ = conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.commit", nil)))
+	if err := conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.append", map[string]any{"text": text}))); err != nil {
+		conn.CloseNow()
+		return err
+	}
+	if err := conn.Write(s.ctx, websocket.MessageText, mustJSON(ttsClientEvent("input_text_buffer.commit", nil))); err != nil {
+		conn.CloseNow()
+		return err
+	}
 	go s.forwardUpstream(conn, "tts", turnID, generation, providers.QwenTTS{})
 	return nil
 }
@@ -268,6 +274,9 @@ func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID
 	for {
 		typ, raw, err := conn.Read(s.ctx)
 		if err != nil {
+			if mode == "tts" && s.ttsEventCurrent(conn, generation) && s.ctx.Err() == nil {
+				s.send(newVoiceServerEvent("session-error", s.sessionID, turnID, &voiceServerEvent{Code: "tts_upstream", Message: fmt.Sprintf("TTS 上游连接已断开：%v", err)}))
+			}
 			return
 		}
 		if typ == websocket.MessageBinary {
