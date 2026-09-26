@@ -17,6 +17,59 @@ test("voice events require valid session and turn scope", async ({ page }) => {
   expect(result).toEqual([true, true, true, false, false, false, false]);
 });
 
+test("voice TTS pipeline sends text and schedules returned PCM audio", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const sent: Array<Record<string, unknown>> = [];
+    let started = 0;
+    class FakeSource {
+      onended: (() => void) | null = null;
+      connect() {}
+      start() { started += 1; }
+      stop() {}
+    }
+    class FakeContext {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      createBuffer(_channels: number, length: number) { return { duration: length / 24000, getChannelData: () => new Float32Array(length) }; }
+      createBufferSource() { return new FakeSource(); }
+    }
+    class FakeSocket {
+      static OPEN = 1;
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      constructor() { setTimeout(() => { this.readyState = 1; this.onopen?.(); }, 0); }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.(); }
+      send(raw: string) {
+        const message = JSON.parse(raw) as Record<string, unknown>;
+        sent.push(message);
+        if (message.type === "start-session") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "session-ready", sessionId: message.sessionId, turnId: message.turnId }) }), 0);
+        }
+        if (message.type === "speak-text") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "tts-audio", sessionId: message.sessionId, turnId: message.turnId, data: "AAAAAA==", sampleRate: 24000 }) }), 0);
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "tts-complete", sessionId: message.sessionId, turnId: message.turnId }) }), 1);
+        }
+      }
+    }
+    (window as unknown as { WebSocket: typeof FakeSocket; AudioContext: typeof FakeContext }).WebSocket = FakeSocket;
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = FakeContext;
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    await controller.start({ capture: false });
+    controller.speakText("测试语音输出");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    return { start: sent.some((message) => message.type === "start-session"), speak: sent.some((message) => message.type === "speak-text"), started, status: controller.getState().status };
+  });
+  expect(result).toEqual({ start: true, speak: true, started: 1, status: "speaking" });
+});
+
 test("voice VAD distinguishes speech from silence and ends after quiet frames", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
