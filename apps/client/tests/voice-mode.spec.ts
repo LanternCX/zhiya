@@ -99,12 +99,14 @@ test("response presenter keeps display text and simplifies voice text", async ({
       ResponsePresenter.present("结论在这里。", "text"),
       ResponsePresenter.present("代码如下：\n```ts\nconst answer = 42;\n```", "speech"),
       ResponsePresenter.present("详情见 https://example.com/docs。", "speech"),
+      ResponsePresenter.present("请运行 `npm install`，然后查看 **结果**。", "speech"),
     ];
   });
   expect(result).toEqual([
     { display_text: "结论在这里。", speech_text: "结论在这里。" },
     { display_text: "代码我已经放在屏幕上了。", speech_text: "代码我已经放在屏幕上了。" },
     { display_text: "链接我已经放在屏幕上了。", speech_text: "链接我已经放在屏幕上了。" },
+    { display_text: "请运行 ，然后查看 结果。", speech_text: "请运行 ，然后查看 结果。" },
   ]);
 });
 
@@ -120,6 +122,7 @@ test("response presenter provides a voice style prompt without replacing the cor
   expect(result.text).toBe("");
   expect(result.speech).toContain("自然、简洁、口语化");
   expect(result.speech).toContain("不要逐字朗读代码");
+  expect(result.speech).toContain("不要输出英文");
 });
 
 test("text chunker emits complete sentences and flushes a bounded remainder", async ({ page }) => {

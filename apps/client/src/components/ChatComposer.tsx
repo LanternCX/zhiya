@@ -54,6 +54,7 @@ export type ChatComposerProps = {
   onStop?: () => void;
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
   onVoiceTranscript?: (text: string, final: boolean) => void;
+  voiceTranscript?: string;
   onVoiceError?: (message: string) => void;
   onStartVoiceMode?: () => void;
   voiceModeActive?: boolean;
@@ -88,6 +89,7 @@ function ChatComposerInput({
   running = false,
   submitLabel,
   onVoiceTranscript,
+  voiceTranscript = "",
   onVoiceError,
   onStartVoiceMode,
   voiceModeActive = false,
@@ -223,6 +225,10 @@ function ChatComposerInput({
     }
   };
   useEffect(() => cancelDictation, []);
+  useEffect(() => {
+    if (!voiceModeActive || !voiceTranscript.trim()) return;
+    controller.textInput.setInput(voiceTranscript);
+  }, [controller, voiceModeActive, voiceTranscript]);
 
   return (
     <PromptInput

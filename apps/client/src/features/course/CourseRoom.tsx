@@ -180,6 +180,7 @@ export default function CourseRoom({
   const voiceEnabled = true;
   const [liveVoice, setLiveVoice] = useState(false);
   const [voiceMuted, setVoiceMuted] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
   const voiceController = useRef<VoiceSessionController | null>(null);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
@@ -203,10 +204,11 @@ export default function CourseRoom({
   const pendingInitialMaterials = useRef<File[]>([]);
   const startLiveVoice = () => {
     if (voiceController.current) return;
-    const controller = new VoiceSessionController((text, final) => {
-      if (final && text.trim()) void submit({ text, files: [] }, "speech");
+    const controller = new VoiceSessionController((text) => {
+      if (text.trim()) setVoiceTranscript(text);
     }, () => session.current?.stopCurrent());
     voiceController.current = controller;
+    setVoiceTranscript("");
     setLiveVoice(true);
     void controller.start().catch((reason) => {
       controller.end();
@@ -789,7 +791,8 @@ export default function CourseRoom({
           onError={setError}
           onVoiceError={setError}
           onStop={interrupt}
-          onSubmit={submit}
+          onSubmit={(message) => submit(message, liveVoice ? "speech" : "text")}
+          voiceTranscript={voiceTranscript}
           onStartVoiceMode={startLiveVoice}
           voiceModeActive={liveVoice}
           voiceMuted={voiceMuted}
