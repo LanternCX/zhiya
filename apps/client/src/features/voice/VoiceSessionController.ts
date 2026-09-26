@@ -17,8 +17,9 @@ export class VoiceSessionController {
   private readonly onTranscript: (text: string, final: boolean) => void;
   private readonly playback: PlaybackController;
   private speakerEnabled = true;
-  private speechQueue: string[] = [];
+  private speechQueue: Array<{ text: string; onPlayed: () => void }> = [];
   private speechInFlight = false;
+  private speechPlaybackComplete: (() => void) | null = null;
   private readonly transcript = new TranscriptAccumulator();
   private readonly metrics = new VoiceMetrics();
   private readonly onInterruptAgent: () => void;
@@ -101,16 +102,16 @@ export class VoiceSessionController {
   }
 
   commitTurn() { this.dispatch({ type: "commit" }); this.send({ type: "commit-turn", sessionId: this.sessionId, turnId: this.turnId }); }
-  speakText(text: string) {
+  speakText(text: string, onPlayed: () => void = () => undefined) {
     const normalized = text.trim();
     if (!normalized) return;
-    this.speechQueue.push(normalized);
+    this.speechQueue.push({ text: normalized, onPlayed });
     this.pumpSpeechQueue();
   }
   setMuted(muted: boolean) { muted ? this.capture?.mute() : this.capture?.unmute(); this.send({ type: muted ? "mute" : "unmute", sessionId: this.sessionId, turnId: this.turnId }); this.dispatch({ type: muted ? "mute" : "unmute" }); }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
-  interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "interrupted" }); }
-  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
+  interrupt() { this.metrics.mark("interruption"); this.onInterruptAgent(); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "interrupted" }); }
+  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.capture?.stop(); this.capture = null; this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
   handleVisibilityChange(hidden: boolean) { if (hidden) this.end(); }
   handleConnectionClosed() {
     if (this.state.status === "ended") return;
@@ -118,6 +119,7 @@ export class VoiceSessionController {
     this.capture?.stop();
     this.capture = null;
     this.speechQueue = [];
+    this.speechPlaybackComplete = null;
     this.speechInFlight = false;
     this.stopPlayback();
     this.socket = null;
@@ -153,7 +155,21 @@ export class VoiceSessionController {
       if (!accepted.final || accepted.submit) this.onTranscript(accepted.text, accepted.final);
     }
     if (event.type === "tts-audio") { this.metrics.mark("first_tts_audio"); this.dispatch({ type: "speaking" }); if (this.speakerEnabled && event.data) this.playback.enqueue(event.data, event.sampleRate ?? 24000); }
-    if (event.type === "tts-complete") { this.speechInFlight = false; this.pumpSpeechQueue(); }
+    if (event.type === "tts-complete") {
+      const complete = this.speechPlaybackComplete;
+      this.speechPlaybackComplete = null;
+      if (!this.speakerEnabled) {
+        this.speechInFlight = false;
+        complete?.();
+        this.pumpSpeechQueue();
+      } else {
+        this.playback.onCurrentAudioComplete(() => {
+          this.speechInFlight = false;
+          complete?.();
+          this.pumpSpeechQueue();
+        });
+      }
+    }
     if (event.type === "session-error") {
       const message = event.message ?? "语音会话失败";
       if (event.code === "tts_unavailable") {
@@ -170,10 +186,11 @@ export class VoiceSessionController {
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
   private pumpSpeechQueue() {
     if (this.speechInFlight || !this.speechQueue.length || !this.socket || this.socket.readyState !== WebSocket.OPEN) return;
-    const text = this.speechQueue.shift();
-    if (!text) return;
+    const item = this.speechQueue.shift();
+    if (!item) return;
     this.speechInFlight = true;
-    this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text });
+    this.speechPlaybackComplete = item.onPlayed;
+    this.send({ type: "speak-text", sessionId: this.sessionId, turnId: this.turnId, text: item.text });
   }
   private dispatch(action: VoiceAction) { this.state = voiceReducer(this.state, action); this.listeners.forEach((listener) => listener(this.state)); }
   private stopPlayback() { this.playback.clear(); }

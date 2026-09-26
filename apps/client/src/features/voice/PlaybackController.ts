@@ -4,6 +4,8 @@ export class PlaybackController {
   private readonly sources = new Set<AudioBufferSourceNode>();
   private readonly onIdle: () => void;
   private readonly onError: (error: Error) => void;
+  private pendingComplete: (() => void) | null = null;
+  private lastSource: AudioBufferSourceNode | null = null;
 
   constructor(onIdle: () => void = () => undefined, onError: (error: Error) => void = () => undefined) {
     this.onIdle = onIdle;
@@ -44,10 +46,15 @@ export class PlaybackController {
       source.buffer = buffer;
       source.connect(context.destination);
       this.sources.add(source);
+      this.lastSource = source;
       const start = Math.max(context.currentTime, this.nextAudioTime);
       this.nextAudioTime = start + buffer.duration;
       source.onended = () => {
         this.sources.delete(source);
+        if (this.lastSource === source) this.lastSource = null;
+        const complete = this.pendingComplete && !this.sources.size ? this.pendingComplete : null;
+        if (complete) this.pendingComplete = null;
+        complete?.();
         if (!this.sources.size) {
           this.nextAudioTime = 0;
           this.onIdle();
@@ -60,6 +67,8 @@ export class PlaybackController {
   }
 
   stop() {
+    this.pendingComplete = null;
+    this.lastSource = null;
     for (const source of this.sources) {
       try { source.stop(); } catch { /* source may have already ended */ }
     }
@@ -70,6 +79,14 @@ export class PlaybackController {
 
   clear() {
     this.stop();
+  }
+
+  onCurrentAudioComplete(callback: () => void) {
+    if (!this.sources.size) {
+      callback();
+      return;
+    }
+    this.pendingComplete = callback;
   }
 
   dispose() {

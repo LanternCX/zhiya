@@ -226,6 +226,38 @@ test("playback controller owns one audio queue and clears it on stop", async ({ 
   expect(result).toEqual({ wasPlaying: true, isPlaying: false, idle: 1 });
 });
 
+test("playback controller completes a sentence only after its audio ends", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    class FakeSource {
+      onended: (() => void) | null = null;
+      connect() {}
+      start() {}
+      stop() { this.onended?.(); }
+    }
+    class FakeContext {
+      currentTime = 0;
+      destination = {};
+      source = new FakeSource();
+      createBuffer() { return { duration: 0.1, getChannelData: () => new Float32Array(2) }; }
+      createBufferSource() { return this.source; }
+    }
+    const context = new FakeContext();
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = class extends FakeContext {
+      constructor() { super(); return context; }
+    } as typeof FakeContext;
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let completed = 0;
+    const playback = new PlaybackController();
+    playback.enqueue("AAAAAA==", 24000);
+    playback.onCurrentAudioComplete(() => completed++);
+    const beforeEnd = completed;
+    context.source.onended?.();
+    return { beforeEnd, afterEnd: completed };
+  });
+  expect(result).toEqual({ beforeEnd: 0, afterEnd: 1 });
+});
+
 test("voice reducer keeps the session alive when TTS fails", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
