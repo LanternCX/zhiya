@@ -33,8 +33,7 @@ import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
-import { NarrationPlayer } from "../../transport/speech";
-import { TextChunker } from "../voice/TextChunker";
+import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
 import type { InputMode } from "../../domain/learning";
@@ -183,7 +182,6 @@ export default function CourseRoom({
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
-  const narrationChunker = useRef<TextChunker | null>(null);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const boundConversationId = useRef<string | null>(
     activeCourse && !newSession ? activeCourse.conversationId : null,
@@ -547,16 +545,14 @@ export default function CourseRoom({
     if (latest.id !== narrationMessage.current) {
       narrationMessage.current = latest.id;
       narrationConsumed.current = 0;
-      narrationChunker.current = new TextChunker();
     }
-    const delta = latest.text.slice(narrationConsumed.current);
-    narrationConsumed.current = latest.text.length;
-    const sentences = narrationChunker.current?.push(delta, !latest.streaming) ?? [];
+    const extracted = takeCompletedSentences(latest.text, narrationConsumed.current, !latest.streaming);
+    narrationConsumed.current = extracted.consumed;
     if (!liveVoice) {
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
-    for (const sentence of sentences) {
+    for (const sentence of extracted.sentences) {
       voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
     }
     if (!latest.streaming) session.current?.finishNarration(latest.id);
