@@ -21,7 +21,7 @@ export function createAnimationTool(start: AnimationTools["start"]): AgentTool {
         content: [
           {
             type: "text",
-            text: `Animation task started: ${JSON.stringify(task)}. Continue teaching without waiting for it.`,
+            text: `Animation task started: ${JSON.stringify(task)}. You can do independent teaching now, or call show_lesson_page to wait for and teach this page. Completion alone never presents it.`,
           },
         ],
         details: task,

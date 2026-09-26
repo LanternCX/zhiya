@@ -52,6 +52,7 @@ export type ChatComposerProps = {
   onStop?: () => void;
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
   running?: boolean;
+  allowSubmitWhileRunning?: boolean;
   submitLabel: string;
 };
 
@@ -77,6 +78,7 @@ function ChatComposerInput({
   onStop,
   onSubmit,
   running = false,
+  allowSubmitWhileRunning = false,
   submitLabel,
 }: ChatComposerProps) {
   const attachments = usePromptInputAttachments();
@@ -86,6 +88,8 @@ function ChatComposerInput({
   const canSubmit = Boolean(
     controller.textInput.value.trim() || attachments.files.length,
   );
+  const showSendWhileRunning = running && allowSubmitWhileRunning && canSubmit;
+  const showStop = running && !showSendWhileRunning;
   const hasFiles = (event: DragEvent<HTMLFormElement>) =>
     event.dataTransfer.types.includes("Files");
 
@@ -176,13 +180,21 @@ function ChatComposerInput({
             <PaperclipIcon />
           </PromptInputButton>
         </PromptInputTools>
+        {showSendWhileRunning && (
+          <PromptInputSubmit
+            aria-label="打断"
+            title="打断"
+            onStop={onStop}
+            status="streaming"
+          />
+        )}
         <PromptInputSubmit
-          aria-label={running ? "打断" : submitLabel}
+          aria-label={showStop ? "打断" : submitLabel}
           className="chat-composer-submit"
-          disabled={!running && (disabled || !canSubmit)}
+          disabled={!showStop && (disabled || !canSubmit)}
           onStop={onStop}
-          status={running ? "streaming" : "ready"}
-          title={running ? "打断" : submitLabel}
+          status={showStop ? "streaming" : "ready"}
+          title={showStop ? "打断" : submitLabel}
         />
       </PromptInputFooter>
     </PromptInput>

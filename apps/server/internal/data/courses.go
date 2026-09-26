@@ -19,7 +19,7 @@ type OutlineReorganization = domain.OutlineReorganization
 
 type CourseModel struct{ db database }
 
-var emptyCourseState = json.RawMessage(`{"messages":[],"pages":[],"presentedPageIds":[],"currentPageId":""}`)
+var emptyCourseState = json.RawMessage(`{"messages":[],"pages":[],"presentations":[],"currentPresentationId":""}`)
 
 func scanCourse(row pgx.Row) (Course, error) {
 	var course Course

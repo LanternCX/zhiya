@@ -9,7 +9,7 @@ export function readSlidesTool(read: SlideTools["read"]): AgentTool {
     name: "read_slides",
     label: "读取当前课件",
     description:
-      "Read all completed slide assets and whether more slides are still being generated. Use read_lesson_pages to distinguish the unselected buffer from the ordered display sequence.",
+      "Read completed slide assets and whether more are generating. Use read_lesson_pages for pending page IDs and presentation history; show_lesson_page waits for a pending page without polling.",
     parameters: Type.Object({}),
     execute: async () => {
       const state = read();

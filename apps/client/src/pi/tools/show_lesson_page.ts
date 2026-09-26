@@ -7,11 +7,17 @@ export function showLessonPageTool(show: LessonPageTools["show"]): AgentTool {
     name: "show_lesson_page",
     label: "展示课堂页面",
     description:
-      "Jump directly to a page by its stable ID. The page must already have been moved out of the buffer and into the right-side display sequence. This never waits for generation, selects buffered content, or changes display order.",
-    parameters: Type.Object({ pageId: Type.String({ minLength: 1, maxLength: 64 }) }),
+      "Teach a page by stable page ID. Wait if this page is still generating, then append a new presentation to the lecture history and make it visible. Reusing a page preserves its content and coding state but creates a new teaching occurrence. Explain it only after this tool succeeds. A student interruption cancels the pending presentation; reconsider their message before continuing.",
+    parameters: Type.Object({
+      pageId: Type.String({ minLength: 1, maxLength: 64 }),
+    }),
     executionMode: "sequential",
-    execute: async (_id, params) => {
-      const page = await show((params as { pageId: string }).pageId);
+    execute: async (id, params, signal) => {
+      const page = await show(
+        id,
+        (params as { pageId: string }).pageId,
+        signal,
+      );
       return {
         content: [{ type: "text", text: `The page is now visible: ${JSON.stringify(page)}` }],
         details: { pageId: page.id },

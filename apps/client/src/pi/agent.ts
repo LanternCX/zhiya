@@ -19,6 +19,7 @@ type AgentSetup = {
   ) => Promise<Response>;
   shouldStopAfterTurn?: AgentOptions["shouldStopAfterTurn"];
   toolExecution?: AgentOptions["toolExecution"];
+  beforeToolCall?: AgentOptions["beforeToolCall"];
 };
 
 /** Shared model and streaming policy; each scenario supplies its prompt, tools and request. */
@@ -53,6 +54,7 @@ export function createAgent(setup: AgentSetup) {
     },
     toolExecution: setup.toolExecution ?? "sequential",
     shouldStopAfterTurn: setup.shouldStopAfterTurn,
+    beforeToolCall: setup.beforeToolCall,
     streamFn: (_model, context, options) =>
       streamSimple(
         model,

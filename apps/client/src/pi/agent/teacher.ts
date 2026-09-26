@@ -3,6 +3,7 @@ import type {
   ModelRetryListener,
   CourseMessage,
 } from "../../domain/learning";
+import type { AgentOptions } from "@earendil-works/pi-agent-core";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import type {
@@ -56,13 +57,7 @@ import { controlAnimationTool } from "../tools/control_animation";
 import { readAnimationTool } from "../tools/read_animation";
 import { readAgentTasksTool } from "../tools/read_agent_tasks";
 import { cancelAgentTaskTool } from "../tools/cancel_agent_task";
-import {
-  showNextLessonPageTool,
-  activityLabel as showNextLessonPageLabel,
-} from "../tools/show_next_lesson_page";
 import { readLessonPagesTool } from "../tools/read_lesson_pages";
-import { placeLessonPageTool } from "../tools/place_lesson_page";
-import { removeLessonPageTool } from "../tools/remove_lesson_page";
 import {
   readSlidesTool,
   activityLabel as readSlidesLabel,
@@ -155,14 +150,14 @@ function teacherPrompt(
     "Decide each section's teaching-progress status from the actual learning context. Sections are not mutually exclusive: starting or continuing one section never requires completing or archiving another, and multiple sections may be active at once. A broad request to continue is not evidence that any section is complete. Use archived only when intentionally retaining a section and its history outside the current learning flow. When replacing an outline, omit obsolete categories after their conversations are reclassified; never use archival as replacement cleanup. Update the full outline with set_course_outline when actual teaching progress or active sections change.",
     "Start teaching immediately after the current session has been persisted. Course materials are shared references: use list_course_materials and read_course_material when relevant, and only reorganize the outline around a material when the student explicitly asks.",
     "The student's explicit request for lesson pace, medium, and page count takes priority. Generate exactly the requested count. When no count is given, choose an appropriate amount from the request and learning memory.",
-    "Every generated slide, illustration, and animation first enters only an unordered buffer. The buffer and the ordered right-side display sequence are disjoint states. Task creation order and completion order never determine the display sequence. Background completion never inserts a page into the display sequence and never changes the visible page.",
-    "When a page enters the buffer, call read_lesson_pages to inspect the buffer and displaySequence. Do not move every buffered page into display merely because it finished. Select only the pages you want to teach with, and call place_lesson_page with an explicit 1-based display position for each selected page. The selected page leaves the buffer. Call remove_lesson_page to return a displayed page to the buffer. Only displayed pages can be reached by show_lesson_page, show_next_lesson_page, or student next/previous controls. Page tools return immediately when an asset is not ready; never wait on an unfinished page.",
-    "Use create_slides for structured text, comparisons, summaries, or exact notation. Use create_animation only for one simple interactive relationship or changing process within its hard limits. Use create_illustration for story scenes, visual explanations, diagrams, mind maps, lightly labeled visual slides, or artwork accompanying a text slide. Choose the visual form that best serves the lesson and continue teaching while background tasks run.",
+    "Pages are reusable assets; presentations are the append-only history of actual teaching. Each successful show_lesson_page appends a presentation and focuses it, even for a previously taught page. Reuse the same page ID to preserve interactive state. Never reorder or remove past presentations. The student's previous/next controls only revisit this history. Generation order and completion order have no presentation meaning; background completion never changes the visible page.",
+    "create_slides normally waits for the first ready page and returns its content and stable IDs for all requested pages. Teach the first page with show_lesson_page, then teach the remaining requested pages in the intended order using their IDs. show_lesson_page waits for pending generation; do not end a continuous lesson just because the next page is still generating. Use background=true only for optional advance preparation. If a wait is interrupted, handle the student's new message first and explicitly request presentation again only if still relevant. Failed or cancelled generation must be handled honestly; do not repeatedly retry the same unavailable page.",
+    "Use read_lesson_pages to inspect available assets, pending tasks, presentation history, and the student's current position. Select the next asset for its teaching purpose, not merely because it finished. Use create_slides for structured text, comparisons, summaries, or exact notation. Use create_animation for a simple interactive process, and create_illustration for visual explanations and artwork. Independent preparation may continue while teaching or while the student practices.",
     "The student and you share animation controls: use read_animation before narrating playback state and control_animation to play, pause, or reset; never assume an action succeeded.",
-    "When a programming exercise helps, call list_coding_languages and then show_coding_exercise. The student controls editing, running, skipping, and asking for help. Do not read current code during practice unless asked. When the student ends an exercise, call end_coding_exercise and review the final code.",
-    "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe a buffered page as visible.",
+    "When a new programming exercise helps, call list_coding_languages and then show_coding_exercise. To continue an existing exercise after explanation, call show_lesson_page with that exercise's page ID before asking the student to write code. Never create a duplicate exercise to resume it. The student controls editing, running, skipping, and asking for help. Do not read current code during practice unless asked. When the student ends an exercise, call end_coding_exercise and review the final code.",
+    "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe an unpresented asset as visible.",
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
-    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text }) => ({ role, text })))}`,
+    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text, pageId, presentationId }) => ({ role, text, pageId, presentationId })))}`,
     `Student learning memory:\n${memory || "No saved preferences yet."}`,
     ...(handoff
       ? [`Teaching handoff from the previous conversation (application context, not a new student message): ${handoff}`]
@@ -185,6 +180,7 @@ export function createTeacherAgent(options: {
   onRetry: ModelRetryListener;
   handoff?: string;
   shouldStopAfterTurn?: () => boolean;
+  beforeToolCall?: AgentOptions["beforeToolCall"];
 }) {
   const initial = options.management.course;
   const context: TeachingToolContext = {
@@ -214,10 +210,7 @@ export function createTeacherAgent(options: {
       createAnimationTool(options.animations.start),
       createIllustrationTool(options.illustrations.start),
       readLessonPagesTool(options.pages.read),
-      placeLessonPageTool(options.pages.place),
-      removeLessonPageTool(options.pages.remove),
       showLessonPageTool(options.pages.show),
-      showNextLessonPageTool(options.pages.next),
       readAnimationTool(options.animations.playback),
       controlAnimationTool(options.animations.control),
       readAgentTasksTool(options.tasks.read),
@@ -227,13 +220,16 @@ export function createTeacherAgent(options: {
       readCodingExerciseTool(options.coding.read),
       endCodingExerciseTool(options.coding.end),
     ],
-    systemPrompt: teacherPrompt(
-      options.management,
-      options.messages,
-      options.memory,
-      options.handoff,
-    ),
+    systemPrompt: () =>
+      teacherPrompt(
+        options.management,
+        options.messages,
+        options.memory,
+        options.handoff,
+      ) +
+      `\nCurrent lesson state (authoritative, including student navigation): ${JSON.stringify(options.pages.read())}`,
     shouldStopAfterTurn: options.shouldStopAfterTurn,
+    beforeToolCall: options.beforeToolCall,
     request: (payload, signal) => {
       return options.gateway.course(
         "teacher",
@@ -260,15 +256,12 @@ export function teacherToolLabel(name: string) {
       create_slides: createSlidesLabel,
       create_animation: createAnimationLabel,
       create_illustration: createIllustrationLabel,
-      read_lesson_pages: "查看课堂缓冲池",
-      place_lesson_page: "编排课堂页面",
-      remove_lesson_page: "移出课堂序列",
+      read_lesson_pages: "查看课堂进度与素材",
       show_lesson_page: "展示课堂页面",
       read_animation: "查看动画状态",
       control_animation: "控制动画",
       read_agent_tasks: "查看后台任务",
       cancel_agent_task: "停止后台任务",
-      show_next_lesson_page: showNextLessonPageLabel,
       read_slides: readSlidesLabel,
       cancel_slides: cancelSlidesLabel,
       list_coding_languages: listCodingLanguagesLabel,
