@@ -2674,7 +2674,7 @@ test("classroom pagination follows the agent sequence instead of pool order", as
   await expect(classroom.getByRole("button", { name: "下一页" })).toBeEnabled();
 });
 
-test("additional slide templates render distinct teaching structures", async ({
+test("existing slide pages remain readable without presentation templates", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2754,16 +2754,22 @@ test("additional slide templates render distinct teaching structures", async ({
   );
   const classroom = page.getByRole("region", { name: "课堂页面" });
   await expect(
-    classroom.getByRole("group", { name: "重点聚焦模板" }),
+    classroom.getByRole("img", { name: "课件页面：抓住核心概念" }),
   ).toBeVisible();
+  await expect(classroom.getByText("用一句话建立清晰记忆。")).toBeVisible();
+  await expect(classroom.getByText("关键词")).toBeVisible();
+  await expect(classroom.getByRole("group", { name: /模板/ })).toHaveCount(0);
   await classroom.getByRole("button", { name: "下一页" }).click();
   await expect(
-    classroom.getByRole("group", { name: "卡片网格模板" }),
+    classroom.getByRole("img", { name: "课件页面：三个观察角度" }),
   ).toBeVisible();
+  await expect(classroom.getByText("把并列信息放进独立卡片。")).toBeVisible();
   await classroom.getByRole("button", { name: "下一页" }).click();
   await expect(
-    classroom.getByRole("group", { name: "时间线模板" }),
+    classroom.getByRole("img", { name: "课件页面：种子发芽过程" }),
   ).toBeVisible();
+  await expect(classroom.getByText("冒出嫩芽")).toBeVisible();
+  await expect(classroom.getByRole("group", { name: /模板/ })).toHaveCount(0);
 });
 
 for (const background of [false, true]) {

@@ -33,14 +33,6 @@ export function publishSlideTool(
         }),
         { maxItems: 6 },
       ),
-      layout: Type.Union([
-        Type.Literal("explain"),
-        Type.Literal("steps"),
-        Type.Literal("compare"),
-        Type.Literal("spotlight"),
-        Type.Literal("cards"),
-        Type.Literal("timeline"),
-      ]),
     }),
     executionMode: "sequential",
     execute: async (id, params) => {
