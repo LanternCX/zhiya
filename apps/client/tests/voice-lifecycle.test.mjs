@@ -65,4 +65,5 @@ test("voice TTS waits for the session to become ready and reports failures", asy
   assert.match(controller, /this\.speechQueue\.push\(normalized\)/);
   assert.match(controller, /this\.pumpSpeechQueue\(\)/);
   assert.match(room, /controller\.subscribe/);
+  assert.match(await readFile(new URL("../src/features/voice/PlaybackController.ts", import.meta.url), "utf8"), /context\.state === "suspended"/);
 });

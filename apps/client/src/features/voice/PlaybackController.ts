@@ -28,6 +28,11 @@ export class PlaybackController {
   enqueue(encoded: string, sampleRate: number) {
     try {
       const context = this.context ??= new AudioContext();
+      if (context.state === "suspended" && typeof context.resume === "function") {
+        void context.resume().catch((error) => {
+          this.onError(error instanceof Error ? error : new Error("无法恢复音频播放"));
+        });
+      }
       const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
       const buffer = context.createBuffer(1, Math.floor(bytes.byteLength / 2), sampleRate);
       const channel = buffer.getChannelData(0);
