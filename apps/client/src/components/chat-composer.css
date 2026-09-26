@@ -124,11 +124,16 @@
 .chat-composer-multiline textarea {
   max-height: 240px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   scroll-padding-bottom: 14px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
   padding: 14px;
+}
+.chat-composer-multiline textarea::-webkit-scrollbar {
+  display: none;
 }
 .chat-composer-multiline .chat-composer-footer {
   position: relative;

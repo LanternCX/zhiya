@@ -51,3 +51,10 @@ test("live dictation keeps the newest transcript visible", async () => {
   assert.match(composer, /dictationTextRef/);
   assert.match(composer, /scrollTop = .*scrollHeight/);
 });
+
+test("conversation and composer scrolling stay usable without visible scrollbars", async () => {
+  const courseCss = await readFile(new URL("../src/features/course/course.css", import.meta.url), "utf8");
+  const composerCss = await readFile(new URL("../src/components/chat-composer.css", import.meta.url), "utf8");
+  assert.match(courseCss, /\.course-thread[\s\S]*scrollbar-width: none/);
+  assert.match(composerCss, /\.chat-composer-multiline textarea[\s\S]*scrollbar-width: none/);
+});

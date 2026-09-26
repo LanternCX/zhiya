@@ -53,11 +53,16 @@
   min-height: 24px;
   max-height: 96px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   color: var(--text);
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.chat-dictation-text::-webkit-scrollbar {
+  display: none;
 }
 .chat-dictation-wave {
   display: flex;
