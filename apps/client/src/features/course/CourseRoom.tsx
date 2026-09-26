@@ -559,6 +559,7 @@ export default function CourseRoom({
     for (const sentence of sentences) {
       voiceController.current?.speakText(ResponsePresenter.present(sentence, "speech").speech_text);
     }
+    if (!latest.streaming) session.current?.finishNarration(latest.id);
   }, [messages, liveVoice]);
 
   useEffect(() => {

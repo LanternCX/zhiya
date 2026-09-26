@@ -67,3 +67,8 @@ test("voice TTS waits for the session to become ready and reports failures", asy
   assert.match(room, /controller\.subscribe/);
   assert.match(await readFile(new URL("../src/features/voice/PlaybackController.ts", import.meta.url), "utf8"), /context\.state === "suspended"/);
 });
+
+test("voice responses release the course running state after text streaming ends", async () => {
+  const room = await readFile(new URL("../src/features/course/CourseRoom.tsx", import.meta.url), "utf8");
+  assert.match(room, /if \(!latest\.streaming\).*finishNarration/s);
+});
