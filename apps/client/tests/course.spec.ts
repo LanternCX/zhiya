@@ -37,28 +37,22 @@ const textResponse = (text: string) => ({
     "data: [DONE]\n\n",
 });
 
-const textAndToolResponse = (
-  text: string,
-  id: string,
-  name: string,
-  args: object,
-) => ({
-  contentType: "text/event-stream",
-  body:
-    chunk({ role: "assistant", content: text }) +
-    chunk({
-      tool_calls: [
-        {
-          index: 0,
-          id,
-          type: "function",
-          function: { name, arguments: JSON.stringify(args) },
-        },
-      ],
-    }) +
-    chunk({}, "tool_calls") +
-    "data: [DONE]\n\n",
-});
+function latestSlidePageIds(
+  messages: Array<{ role: string; content: unknown }>,
+): string[] {
+  for (const message of [...messages].reverse()) {
+    if (message.role !== "tool" || typeof message.content !== "string")
+      continue;
+    try {
+      const result = JSON.parse(message.content);
+      if (Array.isArray(result.pageIds)) return result.pageIds;
+    } catch {
+      /* Other tool results may be prose. */
+    }
+  }
+  throw new Error("The model has not received slide page IDs");
+}
+
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/courses", (route) =>
@@ -443,8 +437,11 @@ test("a failed rerun removes the previously saved coding result", async ({
   const savedState = {
     messages: [],
     pages: [overviewPage, codingPage],
-    presentedPageIds: [overviewPage.id, codingPage.id],
-    currentPageId: codingPage.id,
+    presentations: [overviewPage.id, codingPage.id].map((pageId) => ({
+      id: pageId,
+      pageId,
+    })),
+    currentPresentationId: codingPage.id,
   };
   const saved = {
     id: "saved-code-course",
@@ -702,13 +699,6 @@ test("animation generation stays in the background until the teacher presents it
         await route.fulfill(
           toolResponse("read-water-cycle", "read_lesson_pages", {}),
         );
-      } else if (!transcript.includes('"name":"place_lesson_page"')) {
-        await route.fulfill(
-          toolResponse("place-water-cycle", "place_lesson_page", {
-            pageId: "water-cycle",
-            position: 1,
-          }),
-        );
       } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-water-cycle", "show_lesson_page", {
@@ -913,13 +903,6 @@ test("the animation agent simplifies a scene that exceeds the element limit", as
         await route.fulfill(
           toolResponse("read-corrected", "read_lesson_pages", {}),
         );
-      } else if (!transcript.includes('"name":"place_lesson_page"')) {
-        await route.fulfill(
-          toolResponse("place-corrected", "place_lesson_page", {
-            pageId: "corrected-cycle",
-            position: 1,
-          }),
-        );
       } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-corrected", "show_lesson_page", {
@@ -1017,13 +1000,6 @@ test("the animation agent gets one same-context correction when it stops without
       if (!transcript.includes('"name":"read_lesson_pages"')) {
         await route.fulfill(
           toolResponse("read-after-correction", "read_lesson_pages", {}),
-        );
-      } else if (!transcript.includes('"name":"place_lesson_page"')) {
-        await route.fulfill(
-          toolResponse("place-after-correction", "place_lesson_page", {
-            pageId: "retry-once",
-            position: 1,
-          }),
         );
       } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
@@ -1279,17 +1255,10 @@ test("background slide generation does not change the visible page before presen
         await route.fulfill(
           toolResponse("read-prepared-slide", "read_lesson_pages", {}),
         );
-      } else if (!transcript.includes('"name":"place_lesson_page"')) {
-        await route.fulfill(
-          toolResponse("place-prepared-slide", "place_lesson_page", {
-            pageId: "prepared-slide",
-            position: 1,
-          }),
-        );
       } else if (!transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(
           toolResponse("show-prepared-slide", "show_lesson_page", {
-            pageId: "prepared-slide",
+            pageId: latestSlidePageIds(request.payload.messages)[0],
           }),
         );
       } else {
@@ -1304,6 +1273,7 @@ test("background slide generation does not change the visible page before presen
           goal: "生成一页但先不要展示",
           pageCount: 1,
           replaceCurrent: false,
+          background: true,
         }),
       );
     } else {
@@ -1406,212 +1376,6 @@ test("a student sees when the model connection is retrying", async ({
   ).toHaveCount(0);
 });
 
-test("a student keeps talking while slides arrive and replaces unfinished pages", async ({
-  page,
-}) => {
-  await page.route("**/api/me", (route) =>
-    route.fulfill({
-      json: {
-        id: "student",
-        nickname: "小芽",
-        email: "student@example.com",
-        avatar: "",
-      },
-    }),
-  );
-  const state = {
-    id: "completed-session",
-    purpose: "onboarding",
-    messages: [],
-    completed: true,
-    correctionEnded: false,
-    memory: "喜欢先看例子，再逐步理解。",
-    memoryVersion: 1,
-    messageSequence: 0,
-    revision: 0,
-    status: "idle",
-    leaseUntil: "",
-    question: null,
-  };
-  await mockLearning(page, () => state);
-  await page.route("**/api/learning/model", (route) =>
-    route.fulfill({ json: { id: "test-model", available: true } }),
-  );
-
-  let releaseOld: () => void = () => {};
-  const oldPage = new Promise<void>((resolve) => {
-    releaseOld = resolve;
-  });
-  let releaseNew: () => void = () => {};
-  const newPage = new Promise<void>((resolve) => {
-    releaseNew = resolve;
-  });
-  let firstPagePublished = false;
-  let simplePagePublished = false;
-  await page.route("**/api/learning/course/model", async (route: Route) => {
-    const request = route.request().postDataJSON() as {
-      agent: "teacher" | "slides";
-      payload: { messages: Array<{ role: string; content: unknown }> };
-    };
-    const transcript = JSON.stringify(request.payload.messages);
-    const toolResults = request.payload.messages.filter(
-      (message) => message.role === "tool",
-    ).length;
-
-    if (request.agent === "teacher") {
-      const simpler = transcript.includes("换成简单一点的例子");
-      const createCalls = (transcript.match(/"name":"create_slides"/g) ?? [])
-        .length;
-      const expectedCreates = simpler ? 2 : 1;
-      const targetPage = simpler ? "page-simple" : "page-first";
-      const targetSuffix = simpler ? "simple" : "first";
-      const pageReady =
-        transcript.includes("Background page entered") &&
-        transcript.includes(targetPage);
-      const readCalls = (
-        transcript.match(/"name":"read_lesson_pages"/g) ?? []
-      ).length;
-      if (createCalls < expectedCreates) {
-        await route.fulfill(
-          toolResponse(
-            simpler ? "slides-simple" : "slides-first",
-            "create_slides",
-            {
-              goal: simpler ? "用简单的生活例子解释人工智能" : "介绍人工智能",
-              pageCount: 2,
-              replaceCurrent: simpler,
-            },
-          ),
-        );
-      } else if (!pageReady) {
-        await route.fulfill(textResponse("课件正在后台准备。"));
-      } else if (readCalls < createCalls) {
-        await route.fulfill(
-          toolResponse(`read-${targetSuffix}`, "read_lesson_pages", {}),
-        );
-      } else if (!transcript.includes(`"id":"place-${targetSuffix}"`)) {
-        await route.fulfill(
-          toolResponse(`place-${targetSuffix}`, "place_lesson_page", {
-            pageId: targetPage,
-            position: simpler ? 2 : 1,
-          }),
-        );
-      } else if (!transcript.includes(`"id":"show-${targetSuffix}"`)) {
-        await route.fulfill(
-          toolResponse(`show-${targetSuffix}`, "show_lesson_page", {
-            pageId: targetPage,
-          }),
-        );
-      } else {
-        await route.fulfill(
-          textResponse(
-            simpler ? "好，我们换成更直观的例子。" : "我们边看课件边聊。",
-          ),
-        );
-      }
-      return;
-    }
-
-    const simpler = transcript.includes("简单的生活例子");
-    if (simpler) {
-      if (toolResults > 0) {
-        await newPage;
-        await route.fulfill(
-          toolResponse("page-new-stale", "publish_slide", {
-            title: "停止后不应出现",
-            markdown: "# 停止后不应出现\n\n这也是未完成页面。",
-          }),
-        );
-        return;
-      }
-      simplePagePublished = true;
-      await route.fulfill(
-        toolResponse("page-simple", "publish_slide", {
-          title: "机器也会认猫吗？",
-          markdown: "# 机器也会认猫吗？\n\n人工智能会从许多例子里寻找共同特点。\n\n1. 看很多猫的图片\n2. 找到耳朵、胡须等特点\n3. 判断新图片",
-        }),
-      );
-      return;
-    }
-    if (toolResults === 0) {
-      firstPagePublished = true;
-      await route.fulfill(
-        toolResponse("page-first", "publish_slide", {
-          title: "人工智能是什么？",
-          markdown: "# 人工智能是什么？\n\n人工智能让机器能够完成一些需要人类智慧的任务。\n\n- 识别图片\n- 理解语言\n- 发现规律",
-        }),
-      );
-      return;
-    }
-    await oldPage;
-    await route.fulfill(
-      toolResponse("page-stale", "publish_slide", {
-        title: "不会出现的旧页面",
-        markdown: "# 不会出现的旧页面\n\n旧任务完成得太晚。",
-      }),
-    );
-  });
-
-  await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "今天想学什么？" }),
-  ).toBeVisible();
-  await expect(page.getByText("初次交流已完成", { exact: true })).toHaveCount(
-    0,
-  );
-  await expect(page.getByRole("region", { name: "课程记录" })).toHaveCount(0);
-  await expect(page.locator(".course-conversation > header")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
-  await expect(page.locator(".workspace-sidebar")).toHaveCSS(
-    "border-right-width",
-    "1px",
-  );
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("我想学习人工智能");
-  await page.getByRole("button", { name: "发送" }).click();
-
-  await expect.poll(() => firstPagePublished).toBe(true);
-  await page.waitForTimeout(100);
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("先展示第一张课件");
-  await page.getByRole("button", { name: "发送" }).click();
-
-  const slides = page.getByRole("region", { name: "课堂页面" });
-  await expect(
-    slides.getByRole("img", { name: "课件页面：人工智能是什么？" }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("我们边看课件边聊。", { exact: true }),
-  ).toBeVisible();
-
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("换成简单一点的例子");
-  await page.getByRole("button", { name: "发送" }).click();
-  await expect.poll(() => simplePagePublished).toBe(true);
-  await page.waitForTimeout(100);
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("展示这个简单例子");
-  await page.getByRole("button", { name: "发送" }).click();
-  await expect(
-    slides.getByRole("img", { name: "课件页面：机器也会认猫吗？" }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("好，我们换成更直观的例子。", { exact: true }),
-  ).toBeVisible();
-
-  releaseNew();
-  releaseOld();
-  await expect(slides.getByText("不会出现的旧页面")).toHaveCount(0);
-  await expect(slides.getByText("停止后不应出现")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "发送" })).toBeVisible();
-  await expect(slides.getByRole("button", { name: "上一页" })).toBeVisible();
-  await expect(slides.getByRole("button", { name: "下一页" })).toBeVisible();
-});
-
 test("a failed slide task is reported and a later request can retry", async ({
   page,
 }) => {
@@ -1673,21 +1437,11 @@ test("a failed slide task is reported and a later request can retry", async ({
         );
       } else if (
         successfulSlidePublished &&
-        !transcript.includes('"name":"place_lesson_page"')
-      ) {
-        await route.fulfill(
-          toolResponse("place-retry-page", "place_lesson_page", {
-            pageId: "retry-page",
-            position: 1,
-          }),
-        );
-      } else if (
-        successfulSlidePublished &&
         !transcript.includes('"name":"show_lesson_page"')
       ) {
         await route.fulfill(
           toolResponse("show-retry-page", "show_lesson_page", {
-            pageId: "retry-page",
+            pageId: latestSlidePageIds(request.payload.messages)[0],
           }),
         );
       } else {
@@ -1919,220 +1673,6 @@ test("teacher markdown renders before the model stream finishes", async ({
   await expect(page.getByRole("button", { name: "发送" })).toBeVisible();
 });
 
-test("the next slide follows its explanation and keeps the conversation anchor", async ({
-  page,
-}) => {
-  await page.route("**/api/me", (route) =>
-    route.fulfill({
-      json: {
-        id: "student",
-        nickname: "小芽",
-        email: "student@example.com",
-        avatar: "",
-      },
-    }),
-  );
-  await mockLearning(page, () => ({
-    id: "completed-session",
-    purpose: "onboarding",
-    messages: [],
-    completed: true,
-    correctionEnded: false,
-    memory: "",
-    memoryVersion: 0,
-    messageSequence: 0,
-    revision: 0,
-    status: "idle",
-    leaseUntil: "",
-    question: null,
-  }));
-  await page.route("**/api/learning/model", (route) =>
-    route.fulfill({ json: { id: "test-model", available: true } }),
-  );
-
-  let finishPreparingFirstSlide: () => void = () => {};
-  const firstSlide = new Promise<void>((resolve) => {
-    finishPreparingFirstSlide = resolve;
-  });
-  let firstSlidePublished = false;
-  let secondSlidePublished = false;
-  await page.route("**/api/learning/course/model", async (route: Route) => {
-    const request = route.request().postDataJSON() as {
-      agent: "teacher" | "slides";
-      payload: { messages: Array<{ role: string; content: unknown }> };
-    };
-    const toolResults = request.payload.messages.filter(
-      (message) => message.role === "tool",
-    ).length;
-    if (request.agent === "slides") {
-      if (toolResults === 0) {
-        await firstSlide;
-        firstSlidePublished = true;
-        await route.fulfill(
-          toolResponse("synchronized-page-1", "publish_slide", {
-            title: "第一页",
-            markdown: "# 第一页\n\n第一页内容",
-          }),
-        );
-      } else if (toolResults === 1) {
-        secondSlidePublished = true;
-        await route.fulfill(
-          toolResponse("synchronized-page-2", "publish_slide", {
-            title: "第二页",
-            markdown: "# 第二页\n\n第二页内容",
-          }),
-        );
-      } else {
-        await route.fulfill(textResponse(""));
-      }
-      return;
-    }
-
-    const transcript = JSON.stringify(request.payload.messages);
-    if (toolResults === 0) {
-      await route.fulfill(
-        toolResponse("synchronized-slides", "create_slides", {
-          goal: "两页同步课程",
-          pageCount: 2,
-          replaceCurrent: false,
-        }),
-      );
-    } else if (!firstSlidePublished) {
-      await route.fulfill(textResponse("课件正在后台生成，我可以继续响应。"));
-    } else if (
-      (transcript.match(/"name":"read_lesson_pages"/g) ?? []).length < 1
-    ) {
-      await route.fulfill(
-        toolResponse("read-synchronized-page-1", "read_lesson_pages", {}),
-      );
-    } else if (!transcript.includes('"id":"place-synchronized-page-1"')) {
-      await route.fulfill(
-        toolResponse("place-synchronized-page-1", "place_lesson_page", {
-          pageId: "synchronized-page-1",
-          position: 1,
-        }),
-      );
-    } else if (!transcript.includes('"id":"show-synchronized-page-1"')) {
-      await route.fulfill(
-        toolResponse("show-synchronized-page-1", "show_lesson_page", {
-          pageId: "synchronized-page-1",
-        }),
-      );
-    } else if (
-      transcript.includes("Background page entered") &&
-      transcript.includes("synchronized-page-2") &&
-      (transcript.match(/"name":"read_lesson_pages"/g) ?? []).length < 2
-    ) {
-      await route.fulfill(
-        toolResponse("read-synchronized-page-2", "read_lesson_pages", {}),
-      );
-    } else if (
-      transcript.includes("Background page entered") &&
-      transcript.includes("synchronized-page-2") &&
-      !transcript.includes('"id":"place-synchronized-page-2"')
-    ) {
-      await route.fulfill(
-        toolResponse("place-synchronized-page-2", "place_lesson_page", {
-          pageId: "synchronized-page-2",
-          position: 2,
-        }),
-      );
-    } else if (
-      transcript.includes("继续讲这两页") &&
-      !transcript.includes('"id":"advance-to-page-2"')
-    ) {
-      await route.fulfill(
-        textAndToolResponse(
-          "第一页讲解开始。\n\n需要慢慢读完第二行。",
-          "advance-to-page-2",
-          "show_next_lesson_page",
-          {},
-        ),
-      );
-    } else if (!transcript.includes("继续讲这两页")) {
-      await route.fulfill(textResponse(""));
-    } else {
-      await route.fulfill(textResponse("现在讲解第二页。"));
-    }
-  });
-
-  await page.goto("/");
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill(`开始两页课程。${"这是一段很长的学习背景。".repeat(120)}`);
-  await page.getByRole("button", { name: "发送" }).click();
-  await expect(page.getByText(/正在准备课件 · \d+ 秒/)).toBeVisible();
-  await expect(
-    page.getByText("课件正在后台生成，我可以继续响应。", { exact: true }),
-  ).toBeVisible();
-  finishPreparingFirstSlide();
-  await expect.poll(() => secondSlidePublished).toBe(true);
-  await page.waitForTimeout(100);
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("先展示第一页");
-  await page.getByRole("button", { name: "发送" }).click();
-
-  const slides = page.getByRole("region", { name: "课堂页面" });
-  await expect(
-    slides.getByRole("img", { name: "课件页面：第一页" }),
-  ).toBeVisible();
-  await expect(slides.getByRole("button", { name: "下一页" })).toBeEnabled();
-  await page
-    .getByRole("textbox", { name: "告诉知芽你想学什么" })
-    .fill("继续讲这两页");
-  await page.getByRole("button", { name: "发送" }).click();
-  await expect(page.getByText("第一页讲解开始。", { exact: true })).toBeVisible(
-    { timeout: 500 },
-  );
-  const layout = await page.locator(".course-room").evaluate((room) => {
-    const thread = room.querySelector<HTMLElement>(".course-thread");
-    return {
-      bottom: room.getBoundingClientRect().bottom,
-      viewport: window.innerHeight,
-      threadClientHeight: thread?.clientHeight ?? 0,
-      threadScrollHeight: thread?.scrollHeight ?? 0,
-    };
-  });
-  expect(layout.bottom).toBeLessThanOrEqual(layout.viewport);
-  expect(layout.threadScrollHeight).toBeGreaterThan(layout.threadClientHeight);
-  await expect(
-    page.getByText("需要慢慢读完第二行。", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    slides.getByRole("img", { name: "课件页面：第二页" }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("现在讲解第二页。", { exact: true }),
-  ).toBeVisible();
-
-  const thread = page.locator(".course-thread");
-  await thread.evaluate((element) => element.scrollTo({ top: 0 }));
-  await slides.getByRole("button", { name: "上一页" }).click();
-  await expect(
-    slides.getByRole("img", { name: "课件页面：第一页" }),
-  ).toBeVisible();
-  const firstPageAnchor = page.locator(
-    '.course-message[data-page-id="synchronized-page-1"]',
-  ).filter({ hasText: "第一页讲解开始。" });
-  await expect(firstPageAnchor).toBeVisible();
-  await expect(firstPageAnchor).toHaveAttribute("aria-current", "step");
-  await expect
-    .poll(() =>
-      firstPageAnchor.evaluate((anchor) => {
-        const thread = anchor.closest<HTMLElement>(".course-thread");
-        if (!thread) return false;
-        const anchorRect = anchor.getBoundingClientRect();
-        const threadRect = thread.getBoundingClientRect();
-        return (
-          anchorRect.top >= threadRect.top &&
-          anchorRect.bottom <= threadRect.bottom
-        );
-      }),
-    )
-    .toBe(true);
-});
-
 test("a saved course starts a new agent-routed session and supports rename and delete", async ({
   page,
 }) => {
@@ -2166,8 +1706,8 @@ test("a saved course starts a new agent-routed session and supports rename and d
           markdown: "# 太阳系\n\n八颗行星围绕太阳运行。\n\n- 太阳位于中心\n- 行星沿轨道运行",
         },
       ],
-      presentedPageIds: ["solar-slide"],
-      currentPageId: "solar-slide",
+      presentations: ["solar-slide"].map((pageId) => ({ id: pageId, pageId })),
+      currentPresentationId: "solar-slide",
     },
     sections: [
       {
@@ -2199,8 +1739,11 @@ test("a saved course starts a new agent-routed session and supports rename and d
                   markdown: "# 太阳系\n\n八颗行星围绕太阳运行。\n\n- 太阳位于中心\n- 行星沿轨道运行",
                 },
               ],
-              presentedPageIds: ["solar-slide"],
-              currentPageId: "solar-slide",
+              presentations: ["solar-slide"].map((pageId) => ({
+                id: pageId,
+                pageId,
+              })),
+              currentPresentationId: "solar-slide",
             },
             createdAt: "2026-09-10T08:00:00Z",
             updatedAt: "2026-09-10T08:00:00Z",
@@ -2284,8 +1827,8 @@ test("a saved course starts a new agent-routed session and supports rename and d
             state: {
               messages: [],
               pages: [],
-              presentedPageIds: [],
-              currentPageId: "",
+              presentations: [],
+              currentPresentationId: "",
             },
             createdAt: "2026-09-10T10:00:00Z",
             updatedAt: "2026-09-10T10:00:00Z",
@@ -2608,8 +2151,10 @@ test("classroom pagination follows the agent sequence instead of pool order", as
   const state = {
     messages: [],
     pages: slides,
-    presentedPageIds: ["shown-third", "shown-first", "shown-second"],
-    currentPageId: "shown-second",
+    presentations: ["shown-third", "shown-first", "shown-second"].map(
+      (pageId) => ({ id: pageId, pageId }),
+    ),
+    currentPresentationId: "shown-second",
   };
   const conversation = {
     id: "mixed-conversation",
@@ -2697,8 +2242,10 @@ test("Marp pages render Markdown and follow the classroom page order", async ({
   const state = {
     messages: [],
     pages,
-    presentedPageIds: pages.map(({ id }) => id),
-    currentPageId: "spotlight",
+    presentations: pages
+      .map(({ id }) => id)
+      .map((pageId) => ({ id: pageId, pageId })),
+    currentPresentationId: "spotlight",
   };
   const conversation = {
     id: "template-conversation",
@@ -2796,8 +2343,8 @@ test(`the teacher agent creates and persists a course from the first request${ba
     state: {
       messages: [],
       pages: [],
-      presentedPageIds: [],
-      currentPageId: "",
+      presentations: [],
+      currentPresentationId: "",
     },
     sections: [],
     createdAt: "2026-09-10T08:00:00Z",
@@ -2863,8 +2410,8 @@ test(`the teacher agent creates and persists a course from the first request${ba
             state: {
               messages: [],
               pages: [],
-              presentedPageIds: [],
-              currentPageId: "",
+              presentations: [],
+              currentPresentationId: "",
             },
             createdAt: "2026-09-10T08:00:00Z",
             updatedAt: "2026-09-10T08:00:00Z",
@@ -2984,8 +2531,8 @@ test("a student creates a course with teaching materials attached to the first r
   const state = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const created = {
     id: "course-with-material",
@@ -3325,8 +2872,8 @@ test("a student attaches new teaching material inside an existing course convers
   const state = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const saved = {
     id: "existing-attachment",
@@ -3467,8 +3014,8 @@ test("a failed conversation attachment remains available to retry", async ({
   const state = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const saved = {
     id: "attachment-retry",
@@ -3551,8 +3098,8 @@ test("a student starts a course conversation with teaching material from the cou
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const saved = {
     id: "overview-attachment",
@@ -3730,8 +3277,8 @@ test("the course agent can start another section without completing the current 
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const variablesState = {
     ...emptyState,
@@ -3898,8 +3445,8 @@ test("the course agent hands an existing conversation to a new section conversat
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const previousState = {
     ...emptyState,
@@ -4049,8 +3596,8 @@ test("the course agent reclassifies session content before publishing a revised 
       },
     ],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const conversation = {
     id: "game-session",
@@ -4236,8 +3783,8 @@ test("a student enters a section directly whether resuming or starting", async (
       },
     ],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const saved = {
     id: "resume-course",
@@ -4304,8 +3851,8 @@ test("a student enters a section directly whether resuming or starting", async (
             state: {
               messages: [],
               pages: [],
-              presentedPageIds: [],
-              currentPageId: "",
+              presentations: [],
+              currentPresentationId: "",
             },
             createdAt: "2026-09-14T10:00:00Z",
             updatedAt: "2026-09-14T10:00:00Z",
@@ -4352,8 +3899,8 @@ test("a student can move from a lesson to the next section", async ({ page }) =>
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const currentState = {
     ...emptyState,
@@ -4455,8 +4002,8 @@ test("the next-section shortcut resumes the latest conversation", async ({ page 
   const firstState = {
     messages: [{ id: 1, role: "assistant" as const, text: "先学变量。" }],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const olderState = {
     ...firstState,
@@ -4580,8 +4127,8 @@ test("a course outline opens lessons directly and manages history on demand", as
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const variablesState = {
     ...emptyState,
@@ -4820,8 +4367,8 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   const state = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const saved = {
     id: "material-course",
@@ -4878,7 +4425,10 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
     "**/api/courses/material-course/material-uploads",
     async (route) => {
       uploadRequests += 1;
-      const input = route.request().postDataJSON() as { name: string; sizeBytes: number };
+      const input = route.request().postDataJSON() as {
+        name: string;
+        sizeBytes: number;
+      };
       expect(input).toEqual({ name: "notes.md", sizeBytes: 30 });
       await route.fulfill({
         status: 201,

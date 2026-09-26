@@ -8,6 +8,7 @@ import type {
   AnimationPage,
   IllustrationPage,
   LessonPage,
+  LessonPresentation,
   CodingExercise,
   CourseMessage,
   CourseActivity,
@@ -42,6 +43,8 @@ export class CourseSession {
     {
       agent: Agent;
       status: "running" | "complete" | "failed" | "cancelled";
+      pageIds: string[];
+      error?: string;
     }
   >();
   private animationSequence = 0;
@@ -68,11 +71,9 @@ export class CourseSession {
     }
   >();
   private pageStore: LessonPage[] = [];
-  private pageSequence: string[] = [];
-  private slideTask = 0;
+  private presentations: LessonPresentation[] = [];
   private cancellation = 0;
   private stopped = false;
-  private streamingTeacherMessage = false;
   private messageSequence = 0;
   private teacherMessageId = 0;
   private narrationPlayback: {
@@ -80,12 +81,22 @@ export class CourseSession {
     promise: Promise<void>;
     resolve: () => void;
   } | null = null;
-  private currentPageId = "";
+  private currentPresentationId = "";
+  private teacherPresentationId = "";
+
+  private get currentPageId() {
+    return (
+      this.presentations.find((item) => item.id === this.currentPresentationId)
+        ?.pageId ?? ""
+    );
+  }
   private modelRetries = new Map<
     "teacher" | "slides" | "animation" | "outline-classifier",
     ModelRetryStatus
   >();
   private pendingTaskNotices: string[] = [];
+  private pageWaiters = new Set<() => void>();
+  private teachingInterrupted = false;
   private pendingActiveNotices: string[] = [];
   private pendingHandoff: {
     conversation: StoredCourseConversation;
@@ -107,9 +118,12 @@ export class CourseSession {
     private gateway: ModelGateway,
     info: ModelInfo,
     memory: string,
-    private onMessage: (message: CourseMessage, replaceLast?: boolean) => void,
+    private onMessage: (message: CourseMessage) => void,
     private onPages: (pages: LessonPage[], generating: boolean) => void,
-    private onSequence: (sequence: string[], currentPageId: string) => void,
+    private onSequence: (
+      sequence: LessonPresentation[],
+      currentPresentationId: string,
+    ) => void,
     private onActivity: (activity: CourseActivity | null) => void,
     private onRetry: ModelRetryListener,
     private onError: (message: string) => void,
@@ -125,8 +139,9 @@ export class CourseSession {
     initialHandoff?: string,
   ) {
     this.pageStore = [...initial.pages];
-    this.pageSequence = [...initial.presentedPageIds];
-    this.currentPageId = initial.currentPageId;
+    this.presentations = [...initial.presentations];
+    this.currentPresentationId = initial.currentPresentationId;
+    this.teacherPresentationId = initial.presentations.at(-1)?.id ?? "";
     this.messageSequence = initial.messages.reduce(
       (largest, message) => Math.max(largest, message.id),
       0,
@@ -170,7 +185,8 @@ export class CourseSession {
       messages: initial.messages,
       management: teachingManagement,
       slides: {
-        start: (request) => this.startSlides(info, memory, request),
+        start: (id, request, signal) =>
+          this.startSlides(info, memory, id, request, signal),
         cancel: () => this.cancelSlides(),
         read: () => ({
           pages: this.pageStore.filter(
@@ -203,10 +219,7 @@ export class CourseSession {
       },
       pages: {
         read: () => this.readLessonPages(),
-        place: (pageId, position) => this.placeLessonPage(pageId, position),
-        remove: (pageId) => this.removeLessonPage(pageId),
-        show: (pageId) => this.showPage(pageId),
-        next: () => this.presentNextPage(),
+        show: (id, pageId, signal) => this.showPage(id, pageId, signal),
       },
       tasks: {
         read: () => this.readAgentTasks(),
@@ -221,6 +234,14 @@ export class CourseSession {
       onRetry: (status) => this.updateModelRetry("teacher", status),
       handoff: initialHandoff,
       shouldStopAfterTurn: () => this.pendingHandoff !== null,
+      beforeToolCall: async () =>
+        this.teachingInterrupted
+          ? {
+              block: true,
+              reason:
+                "The student interrupted this teaching step. Process their new message before using more tools.",
+            }
+          : undefined,
     });
     this.teacher.subscribe((event) => {
       if (this.stopped) return;
@@ -250,7 +271,8 @@ export class CourseSession {
         return;
       if (event.message.role !== "assistant") return;
       if (event.type === "message_start") {
-        this.streamingTeacherMessage = false;
+        this.teachingInterrupted = false;
+        this.teacherPresentationId = this.currentPresentationId;
         this.teacherMessageId = ++this.messageSequence;
         this.onActivity({ kind: "thinking", text: "", active: true });
         return;
@@ -275,19 +297,16 @@ export class CourseSession {
       }
       if (text.trim()) {
         this.ensureNarrationPlayback(this.teacherMessageId);
-        this.onMessage(
-          {
-            id: this.teacherMessageId,
-            role: "assistant",
-            text,
-            streaming: event.type === "message_update",
-            pageId: this.currentPageId || undefined,
-          },
-          this.streamingTeacherMessage,
-        );
-        this.streamingTeacherMessage = event.type === "message_update";
-      } else if (event.type === "message_end") {
-        this.streamingTeacherMessage = false;
+        this.onMessage({
+          id: this.teacherMessageId,
+          role: "assistant",
+          text,
+          streaming: event.type === "message_update",
+          pageId: this.presentations.find(
+            (item) => item.id === this.teacherPresentationId,
+          )?.pageId,
+          presentationId: this.teacherPresentationId || undefined,
+        });
       }
     });
     this.startOutlineTask(
@@ -298,10 +317,11 @@ export class CourseSession {
   }
 
   get busy() {
-    return this.teacher.state.isStreaming;
+    return this.teacher.state.isStreaming && !this.teacher.signal?.aborted;
   }
 
   async prompt(text: string, materialNames: string[] = []) {
+    if (this.teacher.signal?.aborted) await this.teacher.waitForIdle();
     if (this.stopped) return;
     this.onMessage({
       id: ++this.messageSequence,
@@ -325,6 +345,10 @@ export class CourseSession {
         content: agentText,
         timestamp: Date.now(),
       });
+      this.teachingInterrupted = true;
+      this.wakePageWaiters();
+      this.narrationPlayback?.resolve();
+      await this.teacher.waitForIdle();
       return;
     }
     const operation = this.cancellation;
@@ -337,9 +361,7 @@ export class CourseSession {
         throw new Error(this.teacher.state.errorMessage);
     } catch (error) {
       if (!this.stopped && operation === this.cancellation)
-        this.onError(
-          error instanceof Error ? error.message : "暂时无法继续教学",
-        );
+        this.onError(error instanceof Error ? error.message : "暂时无法继续教学");
     }
   }
 
@@ -369,7 +391,9 @@ export class CourseSession {
         throw new Error(this.teacher.state.errorMessage);
     } catch (error) {
       if (!this.stopped && operation === this.cancellation)
-        this.onError(error instanceof Error ? error.message : "暂时无法继续教学");
+        this.onError(
+          error instanceof Error ? error.message : "暂时无法继续教学",
+        );
     }
   }
 
@@ -398,12 +422,13 @@ export class CourseSession {
   }
 
   private cancelSlides() {
-    this.slideTask++;
     for (const task of this.slideAgents.values()) {
       if (task.status !== "running") continue;
       task.status = "cancelled";
       task.agent.abort();
     }
+    this.wakePageWaiters();
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
   }
 
   private validateAnimation(page: AnimationPage) {
@@ -650,6 +675,7 @@ export class CourseSession {
     const task = this.illustrationTasks.get(taskId);
     if (!task || task.status !== "running") return;
     task.status = "cancelled";
+    this.wakePageWaiters();
     void cancelIllustration(task.courseId, task.generationId).catch(() => {});
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
   }
@@ -670,76 +696,108 @@ export class CourseSession {
   }
 
   private readLessonPages() {
-    const displayed = new Set(this.pageSequence);
     const summarize = (page: LessonPage) => ({
       pageId: page.id,
       kind: page.kind,
       title: page.title,
     });
     return {
-      buffer: this.pageStore
-        .filter((page) => !displayed.has(page.id))
-        .map(summarize),
-      displaySequence: this.pageSequence.map((pageId, index) => {
-        const page = this.pageStore.find(
-          (candidate) => candidate.id === pageId,
-        );
-        if (!page) throw new Error(`展示序列引用了不存在的页面 ${pageId}`);
-        return { position: index + 1, ...summarize(page) };
-      }),
+      pages: this.pageStore.map(summarize),
+      presentations: this.presentations.map((item, index) => ({
+        ...item,
+        position: index + 1,
+      })),
+      currentPresentationId: this.currentPresentationId,
       currentPageId: this.currentPageId,
+      tasks: this.readAgentTasks(),
     };
   }
 
-  private placeLessonPage(pageId: string, position: number) {
-    if (!this.pageStore.some((page) => page.id === pageId))
-      throw new Error(`课堂页面 ${pageId} 尚未进入缓冲池`);
-    const next = this.pageSequence.filter((id) => id !== pageId);
-    if (!Number.isInteger(position) || position < 1 || position > next.length + 1)
-      throw new Error(`页面位置必须在 1 到 ${next.length + 1} 之间`);
-    next.splice(position - 1, 0, pageId);
-    this.pageSequence = next;
-    this.onSequence([...next], this.currentPageId);
-    return this.readLessonPages();
-  }
-
-  private removeLessonPage(pageId: string) {
-    const index = this.pageSequence.indexOf(pageId);
-    if (index < 0) throw new Error(`课堂页面 ${pageId} 不在展示序列中`);
-    this.pageSequence.splice(index, 1);
-    if (this.currentPageId === pageId) {
-      this.currentPageId =
-        this.pageSequence[index] ?? this.pageSequence[index - 1] ?? "";
-    }
-    this.onSequence([...this.pageSequence], this.currentPageId);
-    return this.readLessonPages();
-  }
-
-  private async showPage(pageId: string): Promise<LessonPage> {
+  private async showPage(
+    id: string,
+    pageId: string,
+    signal?: AbortSignal,
+  ): Promise<LessonPage> {
+    const operation = this.cancellation;
+    const page = await this.waitForPage(pageId, signal);
     await this.waitForNarrationPlayback();
-    const page = this.pageStore.find((candidate) => candidate.id === pageId);
-    if (page && !this.pageSequence.includes(pageId))
-      throw new Error(`请先把课堂页面 ${pageId} 放入展示序列`);
-    if (page) return this.present(page);
-    const task = [...this.animationTasks.values()].find(
-      (candidate) => candidate.pageId === pageId,
-    );
-    const illustration = [...this.illustrationTasks.values()].find(
-      (candidate) => candidate.pageId === pageId,
-    );
-    if (task?.status === "running" || illustration?.status === "running")
-      throw new Error(`课堂页面 ${pageId} 仍在生成，尚未进入缓冲池`);
-    if (task?.status === "failed")
-      throw new Error(task.error || `页面 ${pageId} 生成失败`);
-    if (illustration?.status === "failed")
-      throw new Error(illustration.error || `页面 ${pageId} 生成失败`);
-    throw new Error(`找不到课堂页面 ${pageId}`);
+    if (
+      operation !== this.cancellation ||
+      signal?.aborted ||
+      this.teachingInterrupted ||
+      this.stopped
+    )
+      throw new Error("当前教学步骤已中断");
+    return this.present(id, page);
+  }
+
+  private wakePageWaiters() {
+    for (const check of [...this.pageWaiters]) check();
+  }
+
+  private waitForPage(
+    pageId: string,
+    signal?: AbortSignal,
+  ): Promise<LessonPage> {
+    const operation = this.cancellation;
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        this.pageWaiters.delete(check);
+        signal?.removeEventListener("abort", check);
+      };
+      const check = () => {
+        if (
+          this.stopped ||
+          signal?.aborted ||
+          operation !== this.cancellation ||
+          this.teachingInterrupted
+        ) {
+          cleanup();
+          reject(
+            new Error(
+              "页面等待已中断，请先处理学生的新消息；继续教学时重新请求展示。",
+            ),
+          );
+          return;
+        }
+        const page = this.pageStore.find(
+          (candidate) => candidate.id === pageId,
+        );
+        if (page) {
+          cleanup();
+          resolve(page);
+          return;
+        }
+        const task =
+          [...this.slideAgents.values()].find((candidate) =>
+            candidate.pageIds.includes(pageId),
+          ) ??
+          [
+            ...this.animationTasks.values(),
+            ...this.illustrationTasks.values(),
+          ].find((candidate) => candidate.pageId === pageId);
+        if (task?.status === "running") return;
+        cleanup();
+        reject(
+          new Error(
+            task?.error ||
+              (task?.status === "cancelled"
+                ? `页面 ${pageId} 的生成已取消`
+                : `页面 ${pageId} 不可用或生成失败`),
+          ),
+        );
+      };
+      this.pageWaiters.add(check);
+      signal?.addEventListener("abort", check, { once: true });
+      check();
+    });
   }
 
   private cancelAnimation(taskId: string) {
     const task = this.animationTasks.get(taskId);
     if (!task || task.status !== "running") return;
     task.status = "cancelled";
+    this.wakePageWaiters();
     task.agent.abort();
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
   }
@@ -844,6 +902,8 @@ export class CourseSession {
         taskId,
         kind: "slides" as const,
         status: task.status,
+        pageIds: task.pageIds,
+        ...(task.error ? { error: task.error } : {}),
       })),
       ...[...this.animationTasks].map(([taskId, task]) => ({
         taskId,
@@ -874,6 +934,7 @@ export class CourseSession {
     if (slide) {
       if (slide.status === "running") {
         slide.status = "cancelled";
+        this.wakePageWaiters();
         slide.agent.abort();
         this.onPages([...this.pageStore], this.hasRunningVisualTask());
       }
@@ -920,6 +981,7 @@ export class CourseSession {
   }
 
   private notifyTeacherOfTask(task: AgentTaskSummary) {
+    this.wakePageWaiters();
     if (this.stopped) return;
     const outlineRule =
       task.kind === "outline-classifier" && task.status === "complete"
@@ -935,9 +997,10 @@ export class CourseSession {
   }
 
   private notifyTeacherOfPage(page: LessonPage) {
+    this.wakePageWaiters();
     if (this.stopped) return;
     this.pendingTaskNotices.push(
-      `Background page entered the unordered lesson-page buffer: ${JSON.stringify({ pageId: page.id, kind: page.kind, title: page.title })}. Treat this as internal state, not as a student request. Read the buffer before deciding whether to move this page into the display sequence. Do not change the display sequence, visible page, or user-visible narration solely because this page arrived.`,
+      `Background page became available: ${JSON.stringify({ pageId: page.id, kind: page.kind, title: page.title })}. Treat this as internal state, not a student request. Select it only when it serves the lesson; completion alone never appends a presentation or changes focus.`,
     );
   }
 
@@ -1023,40 +1086,52 @@ export class CourseSession {
     await this.prompt("我结束这次编程练习了，请审查我的最终代码并给出建议。");
   }
 
-  private present(page: LessonPage) {
-    if (!this.pageSequence.includes(page.id))
-      throw new Error(`课堂页面 ${page.id} 不在展示序列中`);
-    this.currentPageId = page.id;
-    this.onSequence([...this.pageSequence], page.id);
+  private present(id: string, page: LessonPage) {
+    const existing = this.presentations.find((item) => item.id === id);
+    if (existing && existing.pageId !== page.id)
+      throw new Error("展示记录不能改为其他页面");
+    if (existing) return page;
+    this.presentations.push({ id, pageId: page.id });
+    this.currentPresentationId = id;
+    this.teacherPresentationId = id;
+    this.onSequence([...this.presentations], id);
     return page;
   }
 
-  selectLessonPage(pageId: string) {
-    const page = this.pageStore.find((candidate) => candidate.id === pageId);
-    if (!page) throw new Error(`找不到课堂页面 ${pageId}`);
-    return this.present(page);
+  selectPresentation(id: string) {
+    if (!this.presentations.some((item) => item.id === id))
+      throw new Error(`找不到展示记录 ${id}`);
+    this.currentPresentationId = id;
+    this.onSequence([...this.presentations], id);
   }
 
-  private async presentNextPage(): Promise<LessonPage> {
-    const operation = this.cancellation;
-    await this.waitForNarrationPlayback();
-    if (operation !== this.cancellation) throw new Error("教学播放已停止");
-    const current = this.pageSequence.indexOf(this.currentPageId);
-    const nextId = this.pageSequence[current + 1];
-    if (!nextId) throw new Error("展示序列中没有下一页");
-    const next = this.pageStore.find((page) => page.id === nextId);
-    if (!next) throw new Error(`展示序列引用了不存在的页面 ${nextId}`);
-    return this.present(next);
-  }
-
-  private startSlides(
+  private async startSlides(
     info: ModelInfo,
     memory: string,
+    id: string,
     request: SlideRequest,
+    signal?: AbortSignal,
   ) {
+    const taskId = `slides-${id}`;
+    const existing = this.slideAgents.get(taskId);
+    if (existing) {
+      const page = request.background
+        ? undefined
+        : ((await this.waitForPage(existing.pageIds[0], signal)) as Slide);
+      return {
+        taskId,
+        status: existing.status,
+        pageIds: existing.pageIds,
+        ...(page ? { page } : {}),
+      };
+    }
     if (request.replaceCurrent) this.cancelSlides();
-    const taskId = `slides-${++this.slideTask}`;
+    const pageIds = Array.from(
+      { length: request.pageCount },
+      () => `slide-${crypto.randomUUID()}`,
+    );
     const slides: Slide[] = [];
+    const publishedCalls = new Set<string>();
     const agent = createSlidesAgent({
       model: info,
       gateway: this.gateway,
@@ -1066,19 +1141,28 @@ export class CourseSession {
         const task = this.slideAgents.get(taskId);
         if (!task || task.status !== "running" || this.stopped)
           throw new Error("This slide task is no longer current.");
-        if (this.pageStore.some((candidate) => candidate.id === id))
-          throw new Error(`页面 ID 已被使用：${id}`);
-        const slide: Slide = { kind: "slide", id, ...page };
+        if (publishedCalls.has(id)) return slides.length;
+        if (slides.length === pageIds.length)
+          throw new Error("请求的课件页数已全部生成");
+        publishedCalls.add(id);
+        const slide: Slide = {
+          kind: "slide",
+          id: pageIds[slides.length],
+          ...page,
+        };
         slides.push(slide);
         this.addToPageStore(slide);
-        this.onPages(
-          [...this.pageStore],
-          slides.length < request.pageCount,
-        );
+        this.onPages([...this.pageStore], this.hasRunningVisualTask());
         return slides.length;
       },
     });
-    this.slideAgents.set(taskId, { agent, status: "running" });
+    const task = {
+      agent,
+      status: "running" as AgentTaskSummary["status"],
+      pageIds,
+      error: undefined as string | undefined,
+    };
+    this.slideAgents.set(taskId, task);
     this.onPages([...this.pageStore], true);
     void agent
       .prompt(
@@ -1097,6 +1181,7 @@ export class CourseSession {
               )
             : null;
         task.status = failure ? "failed" : "complete";
+        task.error = failure?.message;
         this.notifyTeacherOfTask({
           taskId,
           kind: "slides",
@@ -1113,6 +1198,7 @@ export class CourseSession {
         this.onPages([...this.pageStore], this.hasRunningVisualTask());
         const failure =
           error instanceof Error ? error : new Error("课件生成失败");
+        task.error = failure.message;
         this.notifyTeacherOfTask({
           taskId,
           kind: "slides",
@@ -1121,16 +1207,26 @@ export class CourseSession {
         });
         this.onError(failure.message);
       });
-    return { taskId, status: "running" as const };
+    const page = request.background
+      ? undefined
+      : ((await this.waitForPage(pageIds[0], signal)) as Slide);
+    return { taskId, status: task.status, pageIds, ...(page ? { page } : {}) };
   }
 
-  private showCodingExercise(
+  private async showCodingExercise(
     id: string,
     draft: Pick<
       CodingExercise,
       "title" | "instructions" | "languageId" | "languageName" | "starterCode"
     >,
   ) {
+    const existing = this.pageStore.find((page) => page.id === id);
+    if (existing) {
+      if (existing.kind !== "coding")
+        throw new Error("页面 ID 已用于其他教学内容");
+      await this.showPage(id, id, this.teacher.signal);
+      return existing;
+    }
     const exercise: CodingExercise = {
       kind: "coding",
       id,
@@ -1140,21 +1236,16 @@ export class CourseSession {
       status: "active",
     };
     this.pageStore.push(exercise);
-    const current = this.pageSequence.indexOf(this.currentPageId);
-    this.pageSequence.splice(
-      current < 0 ? this.pageSequence.length : current + 1,
-      0,
-      id,
-    );
-    this.onPages(
-      [...this.pageStore],
-      this.hasRunningVisualTask(),
-    );
-    this.present(exercise);
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
+    await this.showPage(id, id, this.teacher.signal);
     return exercise;
   }
 
   private currentCodingExercise() {
+    const visible = this.pageStore.find(
+      (page) => page.id === this.currentPageId,
+    );
+    if (visible?.kind === "coding") return visible;
     const exercise = [...this.pageStore]
       .reverse()
       .find(

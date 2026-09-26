@@ -111,6 +111,7 @@ export type CourseMessage = {
   materials?: string[];
   streaming?: boolean;
   pageId?: string;
+  presentationId?: string;
 };
 
 export type CourseActivity =
@@ -122,11 +123,13 @@ export type CourseActivity =
       status: "running" | "complete" | "error";
     };
 
+export type LessonPresentation = { id: string; pageId: string };
+
 export type CourseConversationState = {
   messages: CourseMessage[];
   pages: LessonPage[];
-  presentedPageIds: string[];
-  currentPageId: string;
+  presentations: LessonPresentation[];
+  currentPresentationId: string;
 };
 
 export type StoredCourseConversation = {
