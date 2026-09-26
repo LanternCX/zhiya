@@ -41,7 +41,6 @@ import ChatComposer, {
   type ChatComposerMessage,
 } from "../../components/ChatComposer";
 import { Spinner } from "../../components/ui/spinner";
-import SlideCanvas from "./SlideCanvas";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
 import IllustrationCanvas from "./IllustrationCanvas";
 import { listCodeLanguages, runCode } from "./code";
@@ -66,6 +65,7 @@ import {
 type RenderedCourseMessage = CourseMessage;
 
 const CodingPage = lazy(() => import("./CodingPage"));
+const SlideCanvas = lazy(() => import("./SlideCanvas"));
 
 const conversationControls = {
   code: { copy: true, download: false },
@@ -1006,7 +1006,9 @@ export default function CourseRoom({
               ) : null,
             )}
           {current.kind === "animation" ? null : current.kind === "slide" ? (
-            <SlideCanvas key={current.id} slide={current} />
+            <Suspense fallback={<div className="lesson-slide" role="status">正在排版课件…</div>}>
+              <SlideCanvas key={current.id} slide={current} />
+            </Suspense>
           ) : current.kind === "illustration" ? (
             course ? (
               <IllustrationCanvas

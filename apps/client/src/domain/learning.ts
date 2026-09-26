@@ -17,9 +17,7 @@ export type Slide = {
   kind: "slide";
   id: string;
   title: string;
-  kicker?: string;
-  body: string;
-  bullets: string[];
+  markdown: string;
 };
 
 export type AnimationNode = {
