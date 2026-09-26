@@ -36,6 +36,7 @@ import ConnectionRetry from "../../components/ConnectionRetry";
 import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
+import { appendVoicePlaybackText } from "../voice/VoicePlaybackText";
 import type { InputMode } from "../../domain/learning";
 import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import {
@@ -178,10 +179,7 @@ export default function CourseRoom({
   const codeRunSequence = useRef(0);
   const [liveVoice, setLiveVoice] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
-  const [voicePlaybackText, setVoicePlaybackText] = useState("");
-  const [voicePlaybackMessageId, setVoicePlaybackMessageId] = useState<number | null>(null);
-  const voicePendingSentences = useRef(0);
-  const voiceFinalMessage = useRef<number | null>(null);
+  const [voicePlaybackText, setVoicePlaybackText] = useState<Record<number, string>>({});
   const voiceController = useRef<VoiceSessionController | null>(null);
   const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
@@ -215,8 +213,6 @@ export default function CourseRoom({
     });
     voiceController.current = controller;
     setVoiceTranscript("");
-    setVoicePlaybackText("");
-    setVoicePlaybackMessageId(null);
     setLiveVoice(true);
     void controller.start({ capture: false }).catch((reason) => {
       controller.end();
@@ -553,10 +549,19 @@ export default function CourseRoom({
     if (latest.id !== narrationMessage.current) {
       narrationMessage.current = latest.id;
       narrationConsumed.current = 0;
-      setVoicePlaybackText("");
-      setVoicePlaybackMessageId(liveVoice && latest.streaming ? latest.id : null);
-      voicePendingSentences.current = 0;
-      voiceFinalMessage.current = null;
+      if (liveVoice) {
+        setVoicePlaybackText((current) =>
+          Object.prototype.hasOwnProperty.call(current, latest.id)
+            ? current
+            : { ...current, [latest.id]: "" },
+        );
+      }
+    }
+    if (
+      liveVoice &&
+      !Object.prototype.hasOwnProperty.call(voicePlaybackText, latest.id)
+    ) {
+      setVoicePlaybackText((current) => ({ ...current, [latest.id]: "" }));
     }
     const extracted = takeCompletedSentences(latest.text, narrationConsumed.current, !latest.streaming);
     narrationConsumed.current = extracted.consumed;
@@ -564,18 +569,13 @@ export default function CourseRoom({
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
-    if (!latest.streaming) voiceFinalMessage.current = latest.id;
     for (const sentence of extracted.sentences) {
       const speechText = ResponsePresenter.present(sentence, "speech").speech_text;
       const messageId = latest.id;
-      voicePendingSentences.current += 1;
-      setVoicePlaybackMessageId(messageId);
       voiceController.current?.speakText(speechText, () => {
-        setVoicePlaybackText((current) => current + speechText);
-        voicePendingSentences.current -= 1;
-        if (voiceFinalMessage.current === messageId && voicePendingSentences.current === 0) {
-          setVoicePlaybackMessageId(null);
-        }
+        setVoicePlaybackText((current) =>
+          appendVoicePlaybackText(current, messageId, speechText),
+        );
       });
     }
     if (!latest.streaming) session.current?.finishNarration(latest.id);
@@ -762,8 +762,8 @@ export default function CourseRoom({
                     controls={conversationControls}
                     isAnimating={message.streaming}
                   >
-                    {liveVoice && message.id === voicePlaybackMessageId
-                      ? voicePlaybackText
+                    {liveVoice && Object.prototype.hasOwnProperty.call(voicePlaybackText, message.id)
+                      ? voicePlaybackText[message.id]
                       : message.text}
                   </MessageResponse>
                 ) : (

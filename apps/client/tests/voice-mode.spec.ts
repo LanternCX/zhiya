@@ -17,6 +17,18 @@ test("voice events require valid session and turn scope", async ({ page }) => {
   expect(result).toEqual([true, true, true, false, false, false, false]);
 });
 
+test("voice playback text stays isolated per assistant message", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { appendVoicePlaybackText } = await import("/src/features/voice/VoicePlaybackText.ts");
+    let text = appendVoicePlaybackText({}, 1, "第一条。");
+    text = appendVoicePlaybackText(text, 2, "第二条。");
+    text = appendVoicePlaybackText(text, 1, "继续。");
+    return text;
+  });
+  expect(result).toEqual({ 1: "第一条。继续。", 2: "第二条。" });
+});
+
 test("voice TTS pipeline sends text and schedules returned PCM audio", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
