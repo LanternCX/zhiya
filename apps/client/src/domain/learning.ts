@@ -17,16 +17,7 @@ export type Slide = {
   kind: "slide";
   id: string;
   title: string;
-  kicker?: string;
-  body: string;
-  bullets: string[];
-  layout:
-    | "explain"
-    | "steps"
-    | "compare"
-    | "spotlight"
-    | "cards"
-    | "timeline";
+  markdown: string;
 };
 
 export type AnimationNode = {

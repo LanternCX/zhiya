@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { mockLearning } from "./mock-learning";
+import { publishSlideTool } from "../src/pi/tools/publish_slide";
 
 const chunk = (delta: object, finishReason: string | null = null) =>
   `data: ${JSON.stringify({
@@ -63,6 +64,27 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [] } }),
   );
+});
+
+test("slide publication rejects content that would crowd or control the renderer", async () => {
+  const accepted: string[] = [];
+  const tool = publishSlideTool((_id, slide) => {
+    accepted.push(slide.markdown);
+    return accepted.length;
+  });
+  await expect(
+    tool.execute("page-1", {
+      title: "Python 输出",
+      markdown: "# Python 输出\n\n```python\nprint(1)\n```\n\n```text\n1\n```",
+    }),
+  ).rejects.toThrow(/one complete language-tagged code block/i);
+  await expect(
+    tool.execute("page-2", {
+      title: "Python 输出",
+      markdown: "# Python 输出\n\n<!-- _backgroundColor: red -->\n\n内容",
+    }),
+  ).rejects.toThrow(/HTML, Marp directives/);
+  expect(accepted).toHaveLength(0);
 });
 
 test("a student runs a model-created coding page and receives a review only when ending it", async ({
@@ -416,9 +438,7 @@ test("a failed rerun removes the previously saved coding result", async ({
     kind: "slide" as const,
     id: "saved-overview",
     title: "开始",
-    body: "先看示例。",
-    bullets: [],
-    layout: "explain" as const,
+    markdown: "# 开始\n\n先看示例。",
   };
   const savedState = {
     messages: [],
@@ -1243,9 +1263,7 @@ test("background slide generation does not change the visible page before presen
         await route.fulfill(
           toolResponse("prepared-slide", "publish_slide", {
             title: "准备完成但尚未展示",
-            body: "只有 Teacher 显式展示后学生才能看到。",
-            bullets: [],
-            layout: "explain",
+            markdown: "# 准备完成但尚未展示\n\n只有 Teacher 显式展示后学生才能看到。",
           }),
         );
       } else {
@@ -1501,9 +1519,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
         await route.fulfill(
           toolResponse("page-new-stale", "publish_slide", {
             title: "停止后不应出现",
-            body: "这也是未完成页面。",
-            bullets: [],
-            layout: "explain",
+            markdown: "# 停止后不应出现\n\n这也是未完成页面。",
           }),
         );
         return;
@@ -1512,10 +1528,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
       await route.fulfill(
         toolResponse("page-simple", "publish_slide", {
           title: "机器也会认猫吗？",
-          kicker: "从生活中的分类开始",
-          body: "人工智能会从许多例子里寻找共同特点。",
-          bullets: ["看很多猫的图片", "找到耳朵、胡须等特点", "判断新图片"],
-          layout: "steps",
+          markdown: "# 机器也会认猫吗？\n\n人工智能会从许多例子里寻找共同特点。\n\n1. 看很多猫的图片\n2. 找到耳朵、胡须等特点\n3. 判断新图片",
         }),
       );
       return;
@@ -1525,10 +1538,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
       await route.fulfill(
         toolResponse("page-first", "publish_slide", {
           title: "人工智能是什么？",
-          kicker: "第一步",
-          body: "人工智能让机器能够完成一些需要人类智慧的任务。",
-          bullets: ["识别图片", "理解语言", "发现规律"],
-          layout: "explain",
+          markdown: "# 人工智能是什么？\n\n人工智能让机器能够完成一些需要人类智慧的任务。\n\n- 识别图片\n- 理解语言\n- 发现规律",
         }),
       );
       return;
@@ -1537,9 +1547,7 @@ test("a student keeps talking while slides arrive and replaces unfinished pages"
     await route.fulfill(
       toolResponse("page-stale", "publish_slide", {
         title: "不会出现的旧页面",
-        body: "旧任务完成得太晚。",
-        bullets: [],
-        layout: "explain",
+        markdown: "# 不会出现的旧页面\n\n旧任务完成得太晚。",
       }),
     );
   });
@@ -1700,9 +1708,7 @@ test("a failed slide task is reported and a later request can retry", async ({
     await route.fulfill(
       toolResponse("retry-page", "publish_slide", {
         title: "机器怎样从例子中学习？",
-        body: "机器学习会从多个例子中寻找规律。",
-        bullets: ["观察例子", "寻找规律", "尝试判断"],
-        layout: "steps",
+        markdown: "# 机器怎样从例子中学习？\n\n机器学习会从多个例子中寻找规律。\n\n1. 观察例子\n2. 寻找规律\n3. 尝试判断",
       }),
     );
   });
@@ -1965,9 +1971,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
         await route.fulfill(
           toolResponse("synchronized-page-1", "publish_slide", {
             title: "第一页",
-            body: "第一页内容",
-            bullets: [],
-            layout: "explain",
+            markdown: "# 第一页\n\n第一页内容",
           }),
         );
       } else if (toolResults === 1) {
@@ -1975,9 +1979,7 @@ test("the next slide follows its explanation and keeps the conversation anchor",
         await route.fulfill(
           toolResponse("synchronized-page-2", "publish_slide", {
             title: "第二页",
-            body: "第二页内容",
-            bullets: [],
-            layout: "explain",
+            markdown: "# 第二页\n\n第二页内容",
           }),
         );
       } else {
@@ -2161,10 +2163,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
           kind: "slide" as const,
           id: "solar-slide",
           title: "太阳系",
-          kicker: "我们的宇宙邻居",
-          body: "八颗行星围绕太阳运行。",
-          bullets: ["太阳位于中心", "行星沿轨道运行"],
-          layout: "explain" as const,
+          markdown: "# 太阳系\n\n八颗行星围绕太阳运行。\n\n- 太阳位于中心\n- 行星沿轨道运行",
         },
       ],
       presentedPageIds: ["solar-slide"],
@@ -2197,10 +2196,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
                   kind: "slide" as const,
                   id: "solar-slide",
                   title: "太阳系",
-                  kicker: "我们的宇宙邻居",
-                  body: "八颗行星围绕太阳运行。",
-                  bullets: ["太阳位于中心", "行星沿轨道运行"],
-                  layout: "explain" as const,
+                  markdown: "# 太阳系\n\n八颗行星围绕太阳运行。\n\n- 太阳位于中心\n- 行星沿轨道运行",
                 },
               ],
               presentedPageIds: ["solar-slide"],
@@ -2567,9 +2563,7 @@ test("classroom pagination follows the agent sequence instead of pool order", as
       kind: "slide" as const,
       id: "shown-first",
       title: "第一张已展示页面",
-      body: "第一页",
-      bullets: [],
-      layout: "explain" as const,
+      markdown: "# 第一张已展示页面\n\n第一页",
     },
     {
       kind: "animation" as const,
@@ -2602,17 +2596,13 @@ test("classroom pagination follows the agent sequence instead of pool order", as
       kind: "slide" as const,
       id: "shown-second",
       title: "第二张已展示页面",
-      body: "第二页",
-      bullets: [],
-      layout: "explain" as const,
+      markdown: "# 第二张已展示页面\n\n第二页",
     },
     {
       kind: "slide" as const,
       id: "shown-third",
       title: "第三张已展示页面",
-      body: "第三页",
-      bullets: [],
-      layout: "explain" as const,
+      markdown: "# 第三张已展示页面\n\n第三页",
     },
   ];
   const state = {
@@ -2674,7 +2664,7 @@ test("classroom pagination follows the agent sequence instead of pool order", as
   await expect(classroom.getByRole("button", { name: "下一页" })).toBeEnabled();
 });
 
-test("additional slide templates render distinct teaching structures", async ({
+test("Marp pages render Markdown and follow the classroom page order", async ({
   page,
 }) => {
   await mockCompletedWorkspace(page);
@@ -2683,26 +2673,25 @@ test("additional slide templates render distinct teaching structures", async ({
       kind: "slide",
       id: "spotlight",
       title: "抓住核心概念",
-      kicker: "重点",
-      body: "用一句话建立清晰记忆。",
-      bullets: ["关键词", "例子"],
-      layout: "spotlight",
+      markdown: "# 抓住核心概念\n\n用一句话建立**清晰记忆**。\n\n- 关键词\n- 例子",
     },
     {
       kind: "slide",
       id: "cards",
       title: "三个观察角度",
-      body: "把并列信息放进独立卡片。",
-      bullets: ["形状", "颜色", "用途"],
-      layout: "cards",
+      markdown: "# 三个观察角度\n\n| 形状 | 颜色 | 用途 |\n| --- | --- | --- |\n| 圆形 | 红色 | 分类 |",
     },
     {
       kind: "slide",
       id: "timeline",
       title: "种子发芽过程",
-      body: "沿时间顺序观察变化。",
-      bullets: ["吸收水分", "长出根", "冒出嫩芽"],
-      layout: "timeline",
+      markdown: "# 种子发芽过程\n\n1. 吸收水分\n2. 长出根\n3. 冒出嫩芽",
+    },
+    {
+      kind: "slide",
+      id: "code",
+      title: "Python 的第一行代码",
+      markdown: "# Python 的第一行代码\n\n```python\nname = '小明'\nage = 12\nprint(name)\nprint(age)\nprint('你好，', name)\n```\n\n- `print` 把文字显示出来\n- 变量先赋值再使用",
     },
   ];
   const state = {
@@ -2753,17 +2742,39 @@ test("additional slide templates render distinct teaching structures", async ({
     "/#/courses/template-course/conversations/template-conversation",
   );
   const classroom = page.getByRole("region", { name: "课堂页面" });
-  await expect(
-    classroom.getByRole("group", { name: "重点聚焦模板" }),
-  ).toBeVisible();
+  const first = classroom.frameLocator('iframe[title="课件页面：抓住核心概念"]');
+  await expect(first.getByRole("heading", { name: "抓住核心概念" })).toBeVisible();
+  await expect(first.locator("section")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(first.locator("section")).toHaveCSS("border-top-width", "0px");
+  await expect(first.locator("strong")).toHaveText("清晰记忆");
+  await expect(first.locator("li", { hasText: "关键词" })).toBeVisible();
   await classroom.getByRole("button", { name: "下一页" }).click();
-  await expect(
-    classroom.getByRole("group", { name: "卡片网格模板" }),
-  ).toBeVisible();
+  const second = classroom.frameLocator('iframe[title="课件页面：三个观察角度"]');
+  await expect(second.getByRole("table")).toBeVisible();
+  await expect(second.getByRole("cell", { name: "分类" })).toBeVisible();
   await classroom.getByRole("button", { name: "下一页" }).click();
+  const third = classroom.frameLocator('iframe[title="课件页面：种子发芽过程"]');
+  await expect(third.locator("li", { hasText: "冒出嫩芽" })).toBeVisible();
+  await classroom.getByRole("button", { name: "下一页" }).click();
+  const fourth = classroom.frameLocator('iframe[title="课件页面：Python 的第一行代码"]');
+  await expect(fourth.locator("code.language-python")).toBeVisible();
   await expect(
-    classroom.getByRole("group", { name: "时间线模板" }),
-  ).toBeVisible();
+    fourth.locator(".marp-shiki code .line span").filter({ hasText: "print" }).first(),
+  ).toHaveText("print");
+  await expect(classroom.getByText("4 / 4", { exact: true })).toBeVisible();
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "dark";
+  });
+  await expect(fourth.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(fourth.locator("section")).toHaveCSS(
+    "background-color",
+    "rgb(38, 38, 38)",
+  );
+  const codeFits = await fourth.locator("section").evaluate((section) => {
+    const code = section.querySelector("pre");
+    return Boolean(code && code.getBoundingClientRect().bottom < section.getBoundingClientRect().bottom);
+  });
+  expect(codeFits).toBe(true);
 });
 
 for (const background of [false, true]) {

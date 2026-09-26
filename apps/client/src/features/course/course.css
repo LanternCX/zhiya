@@ -1020,7 +1020,8 @@
 }
 .lesson-slide {
   display: block;
-  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  border: 0;
+  background: var(--surface);
 }
 .animation-page {
   display: grid;
@@ -1440,106 +1441,6 @@
   color: var(--error);
   font-size: 13px;
   line-height: 1.5;
-}
-.slide-svg-background {
-  fill: var(--surface);
-}
-.slide-svg-rule,
-.slide-svg-point path {
-  fill: none;
-  stroke: var(--line);
-  stroke-width: 2;
-}
-.slide-svg-index {
-  fill: var(--accent);
-}
-.slide-svg-index-text {
-  fill: var(--on-accent);
-  font-size: 16px;
-  font-weight: 700;
-}
-.slide-svg-kicker,
-.slide-svg-number {
-  fill: var(--accent);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 2px;
-}
-.slide-svg-title {
-  fill: var(--text);
-  font-size: 56px;
-  font-weight: 700;
-  letter-spacing: -2px;
-}
-.slide-svg-body {
-  fill: var(--muted);
-  font-size: 26px;
-}
-.slide-svg-point-text {
-  fill: var(--text);
-  font-size: 23px;
-  font-weight: 500;
-}
-.slide-svg-orbit {
-  fill: color-mix(in srgb, var(--accent) 8%, var(--surface));
-  stroke: color-mix(in srgb, var(--accent) 28%, var(--line));
-  stroke-width: 2;
-}
-.slide-svg-orbit-dot {
-  fill: var(--accent);
-}
-.spotlight-title {
-  font-size: 62px;
-}
-.spotlight-body {
-  fill: var(--text);
-}
-.slide-svg-chip rect {
-  fill: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  stroke: color-mix(in srgb, var(--accent) 35%, var(--line));
-}
-.slide-svg-chip text {
-  fill: var(--text);
-  font-size: 19px;
-  font-weight: 650;
-}
-.cards-title,
-.timeline-title {
-  font-size: 48px;
-}
-.slide-svg-card rect {
-  fill: color-mix(in srgb, var(--surface) 92%, var(--accent));
-  stroke: var(--line);
-  stroke-width: 2;
-}
-.slide-svg-card:nth-of-type(3n + 1) rect {
-  fill: color-mix(in srgb, var(--surface) 88%, var(--accent));
-}
-.slide-svg-card-text {
-  fill: var(--text);
-  font-size: 21px;
-  font-weight: 600;
-}
-.slide-svg-timeline-rule {
-  fill: none;
-  stroke: color-mix(in srgb, var(--accent) 50%, var(--line));
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-.slide-svg-timeline-item circle {
-  fill: var(--accent);
-  stroke: var(--surface);
-  stroke-width: 8;
-}
-.slide-svg-timeline-item > text {
-  fill: var(--on-accent);
-  font-size: 18px;
-  font-weight: 750;
-}
-.slide-svg-timeline-text {
-  fill: var(--text);
-  font-size: 20px;
-  font-weight: 600;
 }
 .slide-empty {
   display: flex;
