@@ -342,13 +342,13 @@ function ChatComposerInput({
           >
             {recording ? <MicOffIcon /> : <MicIcon />}
           </PromptInputButton>
-          {!canSubmit && !running && !voiceModeActive && (
+          {!running && !voiceModeActive && (
             <PromptInputButton
-              aria-label="开始语音对话"
+              aria-label="开启语音模式"
               className="chat-composer-submit chat-composer-voice-mode"
               disabled={disabled}
               onClick={onStartVoiceMode}
-              tooltip="开始语音对话"
+              tooltip="开启语音模式"
             >
               <AudioWaveformIcon />
             </PromptInputButton>
