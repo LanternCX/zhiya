@@ -1,32 +1,14 @@
-export type VoiceClientMessageType =
-  | "start-session"
-  | "audio"
-  | "commit-turn"
-  | "cancel-tts"
-  | "speak-text"
-  | "mute"
-  | "unmute"
-  | "end-session";
-
-export type VoiceClientMessage = {
-  type: VoiceClientMessageType;
-  sessionId: string;
-  turnId: number;
-};
+import { api } from "../api";
 
 export type VoiceServerEvent = {
   type:
     | "session-ready"
-    | "speech-started"
-    | "transcript-delta"
-    | "transcript-final"
     | "tts-audio"
     | "tts-complete"
     | "session-error"
     | "session-ended";
   sessionId: string;
   turnId: number;
-  text?: string;
   data?: string;
   code?: string;
   message?: string;
@@ -35,9 +17,6 @@ export type VoiceServerEvent = {
 
 const serverEventTypes = new Set<VoiceServerEvent["type"]>([
   "session-ready",
-  "speech-started",
-  "transcript-delta",
-  "transcript-final",
   "tts-audio",
   "tts-complete",
   "session-error",
@@ -56,8 +35,32 @@ export function isVoiceServerEvent(value: unknown): value is VoiceServerEvent {
     typeof turnId === "number" &&
     Number.isSafeInteger(turnId) &&
     turnId >= 0 &&
-    (event.text === undefined || typeof event.text === "string") &&
     (event.data === undefined || typeof event.data === "string") &&
     (event.sampleRate === undefined || (Number.isInteger(event.sampleRate) && event.sampleRate > 0))
   );
+}
+
+export async function speechSocketURL(path: "/api/voice/session" | "/api/speech/stream"): Promise<URL> {
+  const { ticket } = await api<{ ticket: string }>("/socket-ticket", "POST", {});
+  const url = new URL(__ZHIYA_CLIENT_CONFIG__.apiOrigin);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = path;
+  url.searchParams.set("ticket", ticket);
+  return url;
+}
+
+export async function connectVoiceSession(): Promise<WebSocket> {
+  const url = await speechSocketURL("/api/voice/session");
+  return new Promise((resolve, reject) => {
+    const socket = new WebSocket(url);
+    const timeout = window.setTimeout(() => {
+      socket.close();
+      reject(new Error("语音连接超时，请检查后端服务和 TTS API Key"));
+    }, 10_000);
+    socket.onopen = () => { window.clearTimeout(timeout); resolve(socket); };
+    socket.addEventListener("error", () => {
+      window.clearTimeout(timeout);
+      reject(new Error("语音连接失败，请检查后端服务和 TTS API Key"));
+    }, { once: true });
+  });
 }

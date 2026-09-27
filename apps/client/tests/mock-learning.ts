@@ -21,7 +21,7 @@ export async function mockLearning(
   }),
 ) {
   let socket: WebSocketRoute | undefined;
-  await router.route("**/api/learning/socket-ticket", (route) =>
+  await router.route("**/api/socket-ticket", (route) =>
     route.fulfill({ json: { ticket: "test-ticket" } }),
   );
   await router.routeWebSocket("**/api/learning/socket*", (ws) => {

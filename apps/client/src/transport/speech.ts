@@ -1,7 +1,8 @@
+import { speechSocketURL } from "./voice";
+
 export type SpeechEvent =
   | { type: "ready" }
   | { type: "transcript"; text: string; final: boolean }
-  | { type: "audio"; data: string; sampleRate: number }
   | { type: "complete" }
   | { type: "error"; message: string };
 
@@ -12,11 +13,8 @@ export class SpeechStream {
   constructor(onEvent: (event: SpeechEvent) => void) { this.onEvent = onEvent; }
 
   async connect(): Promise<void> {
-    const session = await fetch("/api/me", { credentials: "include" });
-    if (session.status === 401) throw new Error("登录已失效，请重新登录");
-    if (!session.ok) throw new Error(`语音服务检查失败（HTTP ${session.status}）`);
-    const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-    const socket = new WebSocket(`${protocol}//${location.host}/api/speech/stream`);
+    const url = await speechSocketURL("/api/speech/stream");
+    const socket = new WebSocket(url);
     socket.onmessage = (message) => {
       try { this.onEvent(JSON.parse(message.data) as SpeechEvent); }
       catch { this.onEvent({ type: "error", message: "语音服务返回了无效消息" }); }
@@ -30,10 +28,8 @@ export class SpeechStream {
   }
 
   async startAsr() { await this.connect(); this.send({ type: "start" }); }
-  startTts(text: string) { this.send({ type: "tts-start", text }); }
   sendAudio(audio: ArrayBuffer) { this.socket?.send(audio); }
   stop() { this.send({ type: "stop" }); }
-  stopTts() { this.send({ type: "tts-stop" }); }
   close() { this.socket?.close(); this.socket = null; }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
 }
