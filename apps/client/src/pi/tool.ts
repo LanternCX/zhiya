@@ -153,7 +153,7 @@ export type QuestionTools = {
   show: (
     id: string,
     draft: Pick<QuestionPage, "title" | "text" | "questionKind" | "options">,
-  ) => QuestionPage;
+  ) => Promise<QuestionPage>;
   read: (pageId: string) => QuestionPage;
 };
 

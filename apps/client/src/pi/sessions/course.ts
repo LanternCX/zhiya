@@ -1307,7 +1307,7 @@ export class CourseSession {
     return exercise;
   }
 
-  private showQuestion(
+  private async showQuestion(
     id: string,
     draft: Pick<QuestionPage, "title" | "text" | "questionKind" | "options">,
   ) {
@@ -1322,10 +1322,8 @@ export class CourseSession {
       status: "active",
     };
     this.pageStore.push(page);
-    const current = this.pageSequence.indexOf(this.currentPageId);
-    this.pageSequence.splice(current < 0 ? this.pageSequence.length : current + 1, 0, id);
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
-    this.present(page);
+    await this.showPage(id, id, this.teacher.signal);
     return page;
   }
 

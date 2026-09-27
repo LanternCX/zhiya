@@ -38,7 +38,7 @@ export function showQuestionTool(show: QuestionTools["show"]): AgentTool {
           return choice.length >= 4 && stem.includes(choice);
         })) throw new Error("题干不能重复列出选项；请只在 options 中提供选项");
       }
-      const page = show(id, { title: draft.title, text: draft.text, questionKind: draft.kind, options });
+      const page = await show(id, { title: draft.title, text: draft.text, questionKind: draft.kind, options });
       return {
         content: [{ type: "text", text: `The question page is now visible: ${JSON.stringify({ id: page.id, title: page.title })}. The student may answer now, ask for help, or defer it and answer later. Do not review until a response is submitted.` }],
         details: { pageId: page.id },
