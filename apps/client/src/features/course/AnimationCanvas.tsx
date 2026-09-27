@@ -10,6 +10,43 @@ import type {
 const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 
+const edgeLabel = (text: string) => ({
+  position: { distance: 0.75, offset: 12 },
+  attrs: {
+    label: { text, fill: "var(--muted)", fontSize: 13, fontFamily: "inherit" },
+    body: { fill: "var(--surface)", stroke: "none", rx: 4, ry: 4 },
+  },
+});
+
+function flowPositions(page: AnimationPage) {
+  if (page.nodes.some(node => node.shape === "group")) return new Map<string, { x: number; y: number }>();
+  const nodes = page.nodes.filter(node => node.shape !== "group" && !node.groupId);
+  const ranks = new Map<string, number>();
+  const remaining = new Set(nodes.map(node => node.id));
+  const edges = page.edges.filter(edge => remaining.has(edge.source) && remaining.has(edge.target));
+  // Longest-path layers keep both branches beside each other and joins after
+  // their predecessors. Cyclic diagrams retain the explicit layout order.
+  while (remaining.size) {
+    const ready = [...remaining].filter(id => !edges.some(edge => edge.target === id && remaining.has(edge.source)));
+    if (!ready.length) return new Map<string, { x: number; y: number }>();
+    for (const id of ready) {
+      ranks.set(id, Math.max(0, ...edges.filter(edge => edge.target === id).map(edge => (ranks.get(edge.source) ?? 0) + 1)));
+      remaining.delete(id);
+    }
+  }
+  const positions = new Map<string, { x: number; y: number }>();
+  if (page.layout === "grid" || !edges.length) return positions;
+  for (const node of nodes) {
+    const rank = ranks.get(node.id)!;
+    const peers = nodes.filter(candidate => ranks.get(candidate.id) === rank);
+    const cross = (peers.indexOf(node) - (peers.length - 1) / 2) * 260;
+    positions.set(node.id, page.layout === "vertical"
+      ? { x: cross, y: rank * 180 }
+      : { x: rank * 280, y: cross });
+  }
+  return positions;
+}
+
 function nodePosition(
   index: number,
   count: number,
@@ -60,12 +97,13 @@ export default function AnimationCanvas({
       width: Math.max(element.clientWidth, 1),
       height: Math.max(element.clientHeight, 1),
       background: { color: "transparent" },
-      grid: { visible: true, size: 16, type: "dot", args: { color: "#a8b39f", thickness: 1 } },
+      grid: false,
       interacting: false,
       panning: true,
       mousewheel: { enabled: true, modifiers: ["ctrl", "meta"], minScale: 0.35, maxScale: 2.5 },
     });
     graph.current = instance;
+    const positions = flowPositions(page);
 
     const groups = page.nodes.filter((node) => node.shape === "group");
     const groupPositions = new Map<string, { x: number; y: number }>();
@@ -82,8 +120,8 @@ export default function AnimationCanvas({
         zIndex: 0,
         label: node.label,
         attrs: {
-          body: { rx: 18, ry: 18, fill: "#eef2df", stroke: "#879775", strokeDasharray: "6 5" },
-          label: { fill: "#59664f", fontSize: 13, refY: 16, textAnchor: "middle" },
+          body: { rx: 12, ry: 12, fill: "var(--subtle)", stroke: "var(--line)", strokeDasharray: "6 5" },
+          label: { fill: "var(--muted)", fontSize: 13, refY: 16, textAnchor: "middle", fontFamily: "inherit" },
         },
       });
     }
@@ -102,15 +140,15 @@ export default function AnimationCanvas({
             x: groupPosition.x - 12 + (childIndex % 2) * 92,
             y: groupPosition.y + 6 + Math.floor(childIndex / 2) * 52,
           }
-        : nodePosition(index, contentNodes.length, page.layout);
+        : positions.get(node.id) ?? nodePosition(index, contentNodes.length, page.layout);
       const shape = node.shape === "circle" ? "ellipse" : node.shape === "diamond" ? "polygon" : "rect";
       const cell = instance.addNode({
         id: node.id,
         shape,
         x: position.x,
         y: position.y,
-        width: groupPosition ? 82 : node.shape === "text" ? 170 : 142,
-        height: groupPosition ? 42 : node.shape === "text" ? 48 : 82,
+        width: groupPosition ? 82 : 190,
+        height: groupPosition ? 42 : node.shape === "diamond" ? 120 : 82,
         zIndex: 2,
         label: node.label,
         attrs: {
@@ -118,47 +156,65 @@ export default function AnimationCanvas({
             ...(shape === "polygon"
               ? { refPoints: "0,10 10,0 20,10 10,20" }
               : {}),
-            fill: node.shape === "text" ? "transparent" : "#fffdf2",
-            stroke: node.shape === "text" ? "transparent" : "#334534",
-            strokeWidth: 2,
-            rx: 14,
-            ry: 14,
+            fill: node.shape === "text" ? "transparent" : "var(--subtle)",
+            stroke: node.shape === "text" ? "transparent" : "var(--muted)",
+            strokeWidth: 1.5,
+            rx: 10,
+            ry: 10,
           },
-          label: { fill: "#243429", fontSize: 16, fontWeight: 650, textWrap: { width: -20, height: -16, ellipsis: true } },
+          label: { fill: "var(--text)", fontSize: 16, fontWeight: 500, fontFamily: "inherit", textWrap: { width: node.shape === "diamond" ? "55%" : -24, height: node.shape === "diamond" ? "50%" : -16, ellipsis: true } },
         },
       });
       if (node.groupId) instance.getCellById(node.groupId)?.addChild(cell);
     }
     for (const edge of page.edges) {
+      const from = positions.get(edge.source);
+      const to = positions.get(edge.target);
+      const forward = from && to && (page.layout === "vertical" ? to.y > from.y : to.x > from.x);
+      const sourceSide = page.layout === "vertical" ? "bottom" : "right";
+      const targetSide = page.layout === "vertical" ? "top" : "left";
       instance.addEdge({
         id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        label: edge.label,
+        source: forward ? { cell: edge.source, anchor: { name: sourceSide } } : edge.source,
+        target: forward ? { cell: edge.target, anchor: { name: targetSide } } : edge.target,
         zIndex: 1,
-        router: { name: "manhattan", args: { padding: 18 } },
+        router: { name: "manhattan", args: { padding: 18, ...(forward ? { startDirections: [sourceSide], endDirections: [targetSide] } : {}) } },
         connector: { name: "rounded", args: { radius: 12 } },
         attrs: {
           line: {
-            stroke: "#687767",
-            strokeWidth: 2,
-            ...(edge.arrow === false ? {} : { targetMarker: { name: "block", width: 9, height: 7 } }),
+            stroke: "var(--muted)",
+            strokeWidth: 1.5,
+            targetMarker: edge.arrow === false ? null : { name: "block", width: 8, height: 6 },
           },
         },
         labels: edge.label
-          ? [{ attrs: { label: { text: edge.label, fill: "#4f5d4d", fontSize: 12 }, body: { fill: "#f8fae4", stroke: "#d5ddc5", rx: 5, ry: 5 } } }]
+          ? [edgeLabel(edge.label)]
           : [],
       });
     }
-    instance.centerContent();
-    instance.zoomToFit({ padding: 48, maxScale: 1 });
+    const host = element.parentElement!;
+    let previousWidth = 0;
+    let previousHeight = 0;
     const resize = () => {
-      if (!element.clientWidth || !element.clientHeight) return;
-      instance.resize(element.clientWidth, element.clientHeight);
+      // X6 writes inline dimensions on its container. Measure the independent
+      // grid cell so an initialization while hidden cannot lock it at zero.
+      const width = host.clientWidth;
+      const height = host.clientHeight;
+      if (!width || !height) {
+        previousWidth = previousHeight = 0;
+        return;
+      }
+      if (width === previousWidth && height === previousHeight) return;
+      previousWidth = width;
+      previousHeight = height;
+      instance.resize(width, height);
+      instance.zoomToFit({ padding: 32, maxScale: 1 });
     };
-    window.addEventListener("resize", resize);
+    const observer = new ResizeObserver(resize);
+    observer.observe(host);
+    resize();
     return () => {
-      window.removeEventListener("resize", resize);
+      observer.disconnect();
       run.current++;
       graph.current = null;
       instance.dispose();
@@ -178,8 +234,8 @@ export default function AnimationCanvas({
       const cell = instance.getCellById(node.id);
       cell?.setVisible(true);
       if (cell?.isNode()) {
-        cell.attr("body/stroke", node.shape === "text" ? "transparent" : "#334534");
-        cell.attr("body/strokeWidth", 2);
+        cell.attr("body/stroke", node.shape === "text" ? "transparent" : node.shape === "group" ? "var(--line)" : "var(--muted)");
+        cell.attr("body/strokeWidth", node.shape === "group" ? 1 : 1.5);
         cell.attr("label/text", node.label);
       }
     }
@@ -187,11 +243,11 @@ export default function AnimationCanvas({
       const cell = instance.getCellById(edge.id);
       cell?.setVisible(true);
       if (cell?.isEdge()) {
-        cell.attr("line/stroke", "#687767");
-        cell.attr("line/strokeWidth", 2);
+        cell.attr("line/stroke", "var(--muted)");
+        cell.attr("line/strokeWidth", 1.5);
         cell.attr("line/strokeDasharray", "");
         cell.attr("line/style/animation", "");
-        if (edge.label) cell.setLabels([edge.label]);
+        cell.setLabels(edge.label ? [edgeLabel(edge.label)] : []);
       }
     }
     playback.current = { pageId: page.id, status: "idle", step: 0 };
@@ -205,22 +261,22 @@ export default function AnimationCanvas({
     if (action.type === "hide") cell.setVisible(false);
     if (action.type === "highlight") {
       if (cell.isNode()) {
-        cell.attr("body/stroke", "#e8872f");
+        cell.attr("body/stroke", "var(--accent)");
         cell.attr("body/strokeWidth", 4);
       } else {
-        cell.attr("line/stroke", "#e8872f");
+        cell.attr("line/stroke", "var(--accent)");
         cell.attr("line/strokeWidth", 4);
       }
     }
     if (action.type === "flow" && cell.isEdge()) {
-      cell.attr("line/stroke", "#2f8057");
+      cell.attr("line/stroke", "var(--accent)");
       cell.attr("line/strokeWidth", 3);
       cell.attr("line/strokeDasharray", "8 6");
       cell.attr("line/style/animation", "animation-flow 0.7s linear infinite");
     }
     if (action.type === "update") {
       if (cell.isNode()) cell.attr("label/text", action.value);
-      else if (cell.isEdge()) cell.setLabels([action.value]);
+      else if (cell.isEdge()) cell.setLabels([edgeLabel(action.value)]);
     }
   };
 
@@ -298,7 +354,7 @@ export default function AnimationCanvas({
     <article className="animation-page" aria-label={`动画页面：${page.title}`} role="img">
       <header>
         <div>
-          <span>INTERACTIVE DIAGRAM</span>
+          <span>互动图示</span>
           <h2>{page.title}</h2>
         </div>
         <nav aria-label="画布视图控制">
@@ -307,7 +363,9 @@ export default function AnimationCanvas({
           <button aria-label="放大画布" onClick={() => graph.current?.zoom(0.15)}>＋</button>
         </nav>
       </header>
-      <div className="animation-canvas" ref={container} />
+      <div className="animation-canvas-host">
+        <div className="animation-canvas" ref={container} />
+      </div>
       <footer>
         <div className="animation-presets">
           {page.buttons.map((button) => (
