@@ -101,7 +101,6 @@
   color: var(--muted);
 }
 .course-home-composer {
-  --chat-composer-radius: 30px;
   position: fixed;
   bottom: 24px;
   left: var(--course-panel-center-x);
@@ -112,7 +111,6 @@
 .course-home-composer > [data-slot="input-group"] {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
-  border-radius: 30px;
   background: var(--panel-fill);
   box-shadow: none;
   backdrop-filter: blur(24px) saturate(125%);
