@@ -103,6 +103,23 @@ CREATE TABLE IF NOT EXISTS course_conversations (
 );
 CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
 CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
+-- Convert stored page navigation once; the application reads only presentations.
+UPDATE course_conversations
+SET state = (state - 'presentedPageIds' - 'currentPageId') || jsonb_build_object(
+ 'presentations', COALESCE((
+   SELECT jsonb_agg(jsonb_build_object('id', page_id, 'pageId', page_id) ORDER BY position)
+   FROM jsonb_array_elements_text(state->'presentedPageIds') WITH ORDINALITY AS pages(page_id, position)
+ ), '[]'::jsonb),
+ 'currentPresentationId', COALESCE(state->>'currentPageId', ''),
+ 'messages', COALESCE((
+   SELECT jsonb_agg(CASE
+     WHEN message->>'pageId' IS NOT NULL AND (state->'presentedPageIds') ? (message->>'pageId')
+     THEN message || jsonb_build_object('presentationId', message->>'pageId')
+     ELSE message END ORDER BY position)
+   FROM jsonb_array_elements(state->'messages') WITH ORDINALITY AS messages(message, position)
+ ), '[]'::jsonb)
+)
+WHERE state ? 'presentedPageIds' AND NOT state ? 'presentations';
 CREATE TABLE IF NOT EXISTS course_outline_reorganizations (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL UNIQUE REFERENCES courses(id) ON DELETE CASCADE,

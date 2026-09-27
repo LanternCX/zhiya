@@ -18,8 +18,8 @@ test("a saved conversation opens directly and returns through its course without
       { id: "answer", role: "assistant", text: "这是上次保存的讲解。" },
     ],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const conversation = {
     id: "chat-1",

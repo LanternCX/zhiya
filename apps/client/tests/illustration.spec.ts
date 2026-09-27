@@ -94,8 +94,8 @@ test("a generated teaching illustration stays hidden until the teacher presents 
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const course = {
     id: "nature-course",
@@ -189,17 +189,10 @@ test("a generated teaching illustration stays hidden until the teacher presents 
     if (transcript.includes("现在展示插图")) {
       if (transcript.includes('"name":"show_lesson_page"')) {
         await route.fulfill(textResponse("我们来看这幅水循环图。"));
-      } else if (transcript.includes('"name":"place_lesson_page"')) {
+      } else if (transcript.includes('"name":"read_lesson_pages"')) {
         await route.fulfill(
           toolResponse("show-water-image", "show_lesson_page", {
             pageId: "water-image",
-          }),
-        );
-      } else if (transcript.includes('"name":"read_lesson_pages"')) {
-        await route.fulfill(
-          toolResponse("place-water-image", "place_lesson_page", {
-            pageId: "water-image",
-            position: 1,
           }),
         );
       } else {
@@ -248,8 +241,8 @@ test("the teacher starts independent illustrations in parallel and keeps teachin
   const emptyState = {
     messages: [],
     pages: [],
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const course = {
     id: "mixed-course",
@@ -376,7 +369,7 @@ test("the teacher starts independent illustrations in parallel and keeps teachin
   expect(submitted).toBe(2);
 });
 
-test("the teacher moves only selected buffered pages into the display sequence", async ({
+test("only pages actually taught enter the presentation history", async ({
   page,
 }) => {
   await mockWorkspace(page);
@@ -397,8 +390,8 @@ test("the teacher moves only selected buffered pages into the display sequence",
   const state = {
     messages: [],
     pages: bufferedPages,
-    presentedPageIds: [],
-    currentPageId: "",
+    presentations: [],
+    currentPresentationId: "",
   };
   const course = {
     id: "sequence-course",
@@ -443,76 +436,12 @@ test("the teacher moves only selected buffered pages into the display sequence",
       };
     };
     const transcript = JSON.stringify(request.payload.messages);
-    const readCalls = (transcript.match(/"name":"read_lesson_pages"/g) ?? [])
-      .length;
-    const latestToolText = () => {
-      const content = [...request.payload.messages]
-        .reverse()
-        .find((message) => message.role === "tool")?.content;
-      if (typeof content === "string") return content;
-      if (!Array.isArray(content)) return "";
-      const text = content.find(
-        (part): part is { type: "text"; text: string } =>
-          typeof part === "object" &&
-          part !== null &&
-          "type" in part &&
-          part.type === "text" &&
-          "text" in part &&
-          typeof part.text === "string",
-      );
-      return text?.text ?? "";
-    };
     if (transcript.includes('"name":"show_lesson_page"')) {
-      await route.fulfill(textResponse("我从缓冲池中选择第二项。"));
-    } else if (readCalls >= 2) {
-      expect(JSON.parse(latestToolText())).toEqual({
-        buffer: [
-          {
-            pageId: "pool-first",
-            kind: "slide",
-            title: "缓冲池中的第一项",
-          },
-        ],
-        displaySequence: [
-          {
-            position: 1,
-            pageId: "pool-second",
-            kind: "slide",
-            title: "缓冲池中的第二项",
-          },
-        ],
-        currentPageId: "",
-      });
+      await route.fulfill(textResponse("我选择第二项开始讲解。"));
+    } else if (transcript.includes('"name":"read_lesson_pages"')) {
       await route.fulfill(
         toolResponse("show-sequence-page", "show_lesson_page", {
           pageId: "pool-second",
-        }),
-      );
-    } else if (transcript.includes('"name":"place_lesson_page"')) {
-      await route.fulfill(
-        toolResponse("read-separated-states", "read_lesson_pages", {}),
-      );
-    } else if (transcript.includes('"name":"read_lesson_pages"')) {
-      expect(JSON.parse(latestToolText())).toEqual({
-        buffer: [
-          {
-            pageId: "pool-first",
-            kind: "slide",
-            title: "缓冲池中的第一项",
-          },
-          {
-            pageId: "pool-second",
-            kind: "slide",
-            title: "缓冲池中的第二项",
-          },
-        ],
-        displaySequence: [],
-        currentPageId: "",
-      });
-      await route.fulfill(
-        toolResponse("place-pool-second", "place_lesson_page", {
-          pageId: "pool-second",
-          position: 1,
         }),
       );
     } else {
@@ -525,9 +454,9 @@ test("the teacher moves only selected buffered pages into the display sequence",
   await page.goto("/");
   await page.getByRole("button", { name: "打开课程：页面编排" }).click();
   await page.getByRole("button", { name: "打开小节：页面编排" }).click();
-  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill(
-    "把第二项放在第一位并展示",
-  );
+  await page
+    .getByRole("textbox", { name: "告诉知芽你想学什么" })
+    .fill("从第二项开始讲解");
   await page.getByRole("button", { name: "发送" }).click();
 
   const classroom = page.getByRole("region", { name: "课堂页面" });

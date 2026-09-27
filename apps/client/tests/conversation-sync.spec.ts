@@ -66,7 +66,7 @@ test("an unconfirmed action is retried with the same request id after reconnecti
     status: "idle",
     leaseUntil: "",
   };
-  await page.route("**/api/learning/socket-ticket", (route) =>
+  await page.route("**/api/socket-ticket", (route) =>
     route.fulfill({ json: { ticket: crypto.randomUUID() } }),
   );
   const requestIds: string[] = [];

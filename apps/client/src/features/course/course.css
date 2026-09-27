@@ -101,7 +101,6 @@
   color: var(--muted);
 }
 .course-home-composer {
-  --chat-composer-radius: 30px;
   position: fixed;
   bottom: 24px;
   left: var(--course-panel-center-x);
@@ -112,7 +111,6 @@
 .course-home-composer > [data-slot="input-group"] {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
-  border-radius: var(--chat-composer-radius);
   background: var(--panel-fill);
   box-shadow: none;
   backdrop-filter: blur(24px) saturate(125%);
@@ -559,7 +557,11 @@
   overflow-y: auto;
   padding: 24px 20px;
   background: transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.course-thread::-webkit-scrollbar {
+  display: none;
 }
 .course-start {
   display: flex;
@@ -2042,5 +2044,129 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Reading surfaces share the quiet workspace canvas. */
+.course-room {
+  background: transparent;
+}
+.slide-stage,
+.coding-page,
+.coding-page-loading {
+  background-color: var(--surface);
+}
+
+/* Green carries brand and conversational emphasis. */
+.course-thinking-trigger,
+.course-tool-activity {
+  color: var(--brand-green);
+}
+.course-message.user > span {
+  color: var(--text);
+  font-weight: 700;
+}
+.course-message.assistant[aria-current="step"]::before,
+.course-tool-mark {
+  background: var(--brand-green);
+}
+
+/* One coherent outline per coding control, with clear separation between rows. */
+.coding-editor-shell {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.coding-editor-bar {
+  border-bottom: 1px solid var(--line);
+}
+.coding-page .coding-stdin {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+.coding-page > .coding-actions button {
+  border-width: 1px;
+  box-shadow: none;
+}
+.coding-page > .coding-actions button:not(:disabled):active {
+  transform: scale(.98);
+  box-shadow: none;
+}
+
+/* Inner classroom regions share the workspace canvas. */
+.workspace-body {
+  background-color: var(--canvas-fill);
+}
+.workspace-toolbar,
+.workspace-content,
+.course-surface,
+.workspace-empty,
+.course-home,
+.course-room {
+  background: transparent;
+}
+
+.course-home-kicker,
+.course-section-number,
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span,
+.coding-editor-bar > span:last-child {
+  color: var(--brand-green);
+}
+.course-section-card[data-status="active"] .course-section-status,
+.coding-page > header > span {
+  border-color: color-mix(in srgb, var(--brand-green) 52%, var(--line));
+  background: color-mix(in srgb, var(--brand-green-soft) 72%, var(--surface));
+}
+
+/* Keep editor, stdin, output, and actions in separate non-overlapping rows. */
+.coding-page {
+  grid-template-rows: auto auto auto auto auto auto;
+}
+.coding-page > .coding-editor-shell {
+  min-height: clamp(220px, 34vh, 360px);
+}
+.coding-page > label {
+  min-height: 86px;
+}
+.coding-page > .coding-actions {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  margin-top: 2px;
+}
+.coding-action-feedback {
+  margin: 0;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.course-section-card:focus-within {
+  background: var(--brand-green-soft);
+  box-shadow: inset 3px 0 var(--brand-green);
+}
+.course-message-body :not(pre) > code {
+  color: var(--text);
+  background: var(--subtle);
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+.course-message-body [data-streamdown="code-block-header"] {
+  background: var(--subtle);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.coding-page > .coding-actions button:focus-visible {
+  outline: 2px solid var(--brand-green);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coding-page > .coding-actions button:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+  .coding-page > .coding-actions button:not(:disabled):active {
+    transform: translate(1px, 1px);
   }
 }

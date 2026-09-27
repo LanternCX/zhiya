@@ -60,7 +60,7 @@ export function publishSlideTool(
     name: "publish_slide",
     label: "发布课件页",
     description:
-      "Publish exactly one completed presentation page into the unordered lesson-page buffer. This does not add it to the right-side display; the teacher separately decides whether to select it, its position, and when it becomes visible.",
+      "Publish exactly one completed slide asset. This makes the next requested slide available and releases any wait for it, but does not present it. The teacher chooses when to teach each page.",
     parameters: Type.Object({
       title: Type.String({
         maxLength: 32,
@@ -80,7 +80,7 @@ export function publishSlideTool(
       const count = publish(id, page);
       return {
         content: [
-          { type: "text", text: `Page ${count} entered the lesson-page buffer.` },
+          { type: "text", text: `Page ${count} is ready for the teacher.` },
         ],
         details: { page: count },
       };

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -12,8 +13,11 @@ import CourseRoom from "./features/course/CourseRoom";
 import CourseOverview from "./features/course/CourseOverview";
 import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
+import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon, { type IconName } from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
+import { useSpeechPreference } from "./features/voice/useSpeechPreference";
+import { Volume2Icon } from "lucide-react";
 import {
   createCourseConversation,
   deleteCourseConversation,
@@ -23,6 +27,7 @@ import {
 } from "./features/course/courses";
 import type {
   CourseSection,
+  InputMode,
   ModelInfo,
   StoredCourse,
   StoredCourseConversation,
@@ -65,6 +70,12 @@ export default function Workspace({
     "conversation",
     "new-conversation",
   ].includes(page);
+  // A destination click takes effect before the router renders the next page.
+  // Async course updates must respect that navigation even in the same tick.
+  const learningNavigationIntent = useRef(learningPage);
+  useLayoutEffect(() => {
+    learningNavigationIntent.current = learningPage;
+  }, [learningPage, location.pathname]);
   // Retain the route of the hidden classroom, matching its existing lifetime
   // when visiting account pages or other workspace destinations.
   const [retainedLearningLocation, retainLearningLocation] = useState(location);
@@ -74,6 +85,7 @@ export default function Workspace({
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [speechReplies, setSpeechReplies] = useSpeechPreference();
   const memoryOpen = page === "learning-profile";
   const [editingMemory, setEditingMemory] = useState(true);
   const [endingMemory, setEndingMemory] = useState(false);
@@ -113,6 +125,8 @@ export default function Workspace({
     id: number;
     text: string;
     materialNames: string[];
+    inputMode?: InputMode;
+    inputMethod?: ComposerInputMode;
     handoff?: boolean;
     conversationId?: string;
   } | null>(null);
@@ -206,6 +220,7 @@ export default function Workspace({
     delete: "注销账号",
   };
   const go = (next: typeof destination) => {
+    learningNavigationIntent.current = next.id === "learning";
     void routeNavigate(next.id === "learning" ? "/learn" : `/${next.id}`);
   };
   const locateSession = (course: StoredCourse) => {
@@ -214,7 +229,8 @@ export default function Workspace({
       : `${coursePath(course.id)}/conversations/new`;
     if (learningLocation.pathname === pathname) return;
     const state = { roomKey: courseRoomToken };
-    if (learningPage) void routeNavigate(pathname, { replace: true, state });
+    if (learningNavigationIntent.current)
+      void routeNavigate(pathname, { replace: true, state });
     else retainLearningLocation({ ...learningLocation, pathname, state });
   };
   const renameCourse = async (course: StoredCourse, title: string) => {
@@ -272,6 +288,8 @@ export default function Workspace({
     section: CourseSection,
     request?: string,
     materialNames: string[] = [],
+    inputMode: InputMode = "text",
+    inputMethod?: ComposerInputMode,
   ) => {
     if (!activeCourse || sectionConversationRequests.current.has(section.id))
       return;
@@ -300,6 +318,8 @@ export default function Workspace({
           id: Date.now(),
           text: request,
           materialNames,
+          inputMode,
+          inputMethod,
           conversationId: conversation.id,
         });
     } catch {
@@ -418,6 +438,16 @@ export default function Workspace({
               <span>外观</span>
               <ThemeToggle />
             </div>
+            <button
+              role="switch"
+              aria-checked={speechReplies}
+              aria-label="语音播报"
+              onClick={() => setSpeechReplies(!speechReplies)}
+            >
+              <Volume2Icon />
+              语音播报
+              <span className="speech-preference-switch" aria-hidden="true" />
+            </button>
             <button
               disabled={busy}
               onClick={() => {
@@ -568,13 +598,13 @@ export default function Workspace({
                     onOpenConversation={(conversation) =>
                       openConversation(conversation)
                     }
-                    onCreateConversation={(section, request, materialNames) =>
-                      createSectionConversation(section, request, materialNames)
+                    onCreateConversation={(section, request, materialNames, inputMode, inputMethod) =>
+                      createSectionConversation(section, request, materialNames, inputMode, inputMethod)
                     }
                     onDeleteConversation={(section, conversation) =>
                       removeSectionConversation(section, conversation)
                     }
-                    onStartLearning={(text, materialNames) => {
+                    onStartLearning={(text, materialNames, inputMode, inputMethod) => {
                       void routeNavigate(
                         `${coursePath(activeCourse.id)}/conversations/new`,
                       );
@@ -582,6 +612,8 @@ export default function Workspace({
                         id: Date.now(),
                         text,
                         materialNames,
+                        inputMode,
+                        inputMethod,
                       });
                     }}
                   />

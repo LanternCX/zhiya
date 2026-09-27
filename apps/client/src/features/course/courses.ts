@@ -17,8 +17,8 @@ import {
 export const emptyCourseState = (): CourseConversationState => ({
   messages: [],
   pages: [],
-  presentedPageIds: [],
-  currentPageId: "",
+  presentations: [],
+  currentPresentationId: "",
 });
 
 export async function listCourses() {

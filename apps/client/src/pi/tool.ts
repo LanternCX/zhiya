@@ -11,6 +11,7 @@ import type {
   AnimationPlaybackCommand,
   AnimationPlaybackState,
   LessonPage,
+  LessonPresentation,
   QuestionPage,
 } from "../domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
@@ -91,10 +92,16 @@ export type CourseManagement = {
 };
 
 export type SlideTools = {
-  start: (request: SlideRequest) => {
+  start: (
+    id: string,
+    request: SlideRequest,
+    signal?: AbortSignal,
+  ) => Promise<{
     taskId: string;
-    status: "running";
-  };
+    status: AgentTaskSummary["status"];
+    pageIds: string[];
+    page?: Slide;
+  }>;
   cancel: () => void;
   read: () => { pages: Slide[]; generating: boolean };
 };
@@ -126,20 +133,20 @@ export type LessonPageSummary = {
 };
 
 export type LessonPageState = {
-  buffer: LessonPageSummary[];
-  displaySequence: Array<LessonPageSummary & { position: number }>;
+  pages: LessonPageSummary[];
+  presentations: Array<LessonPresentation & { position: number }>;
+  currentPresentationId: string;
   currentPageId: string;
+  tasks: AgentTaskSummary[];
 };
 
 export type LessonPageTools = {
   read: () => LessonPageState;
-  place: (
+  show: (
+    id: string,
     pageId: string,
-    position: number,
-  ) => LessonPageState;
-  remove: (pageId: string) => LessonPageState;
-  show: (pageId: string) => Promise<LessonPage>;
-  next: () => Promise<LessonPage>;
+    signal?: AbortSignal,
+  ) => Promise<LessonPage>;
 };
 
 export type QuestionTools = {
@@ -164,6 +171,7 @@ export type AgentTaskSummary = {
   kind: "slides" | "animation" | "illustration" | "outline-classifier";
   status: "running" | "complete" | "failed" | "cancelled";
   pageId?: string;
+  pageIds?: string[];
   sections?: Array<{
     id: string;
     title: string;
@@ -191,7 +199,7 @@ export type CodingTools = {
       CodingExercise,
       "title" | "instructions" | "languageId" | "languageName" | "starterCode"
     >,
-  ) => CodingExercise;
+  ) => Promise<CodingExercise>;
   read: () => CodingExercise;
   end: () => CodingExercise;
 };

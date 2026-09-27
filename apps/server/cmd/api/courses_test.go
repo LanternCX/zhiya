@@ -2,10 +2,44 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"testing"
 )
+
+func TestCoursePresentationUpgradePreservesSavedWork(t *testing.T) {
+	a := setupAccountTest(t)
+	student := a.register("presentation-upgrade@example.com")
+	courseID, conversationID := a.createCourseConversation(student)
+	state := map[string]any{
+		"messages":         []any{map[string]any{"id": 1, "role": "assistant", "text": "继续练习", "pageId": "b"}},
+		"pages":            []any{map[string]any{"id": "b", "kind": "coding", "code": "print(42)"}},
+		"presentedPageIds": []any{"b"}, "currentPageId": "b",
+	}
+	a.request(student, "PUT", "/courses/"+courseID+"/conversation", map[string]any{
+		"conversationId": conversationID, "state": state,
+	}, http.StatusOK)
+	for range 2 {
+		if err := a.app.models.Initialize(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	restored := a.request(student, "GET", "/courses/"+courseID, nil, http.StatusOK)["course"].(map[string]any)["state"].(map[string]any)
+	if restored["currentPresentationId"] != "b" {
+		t.Fatalf("lost teaching position: %v", restored)
+	}
+	presentations := restored["presentations"].([]any)
+	if len(presentations) != 1 || presentations[0].(map[string]any)["pageId"] != "b" || presentations[0].(map[string]any)["id"] != "b" {
+		t.Fatalf("lost presentation: %v", restored)
+	}
+	if restored["messages"].([]any)[0].(map[string]any)["presentationId"] != "b" || restored["pages"].([]any)[0].(map[string]any)["code"] != "print(42)" {
+		t.Fatalf("lost narration or student work: %v", restored)
+	}
+	if _, old := restored["presentedPageIds"]; old {
+		t.Fatalf("old representation retained: %v", restored)
+	}
+}
 
 func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, content string, status int) map[string]any {
 	a.t.Helper()
@@ -94,10 +128,10 @@ func TestCourseCRUDPersistsOneConversation(t *testing.T) {
 	conversationID := conversation["id"].(string)
 
 	state := map[string]any{
-		"messages":         []any{map[string]any{"id": 1, "role": "user", "text": "什么是人工智能？"}},
-		"pages":            []any{},
-		"presentedPageIds": []any{},
-		"currentPageId":    "",
+		"messages":              []any{map[string]any{"id": 1, "role": "user", "text": "什么是人工智能？"}},
+		"pages":                 []any{},
+		"presentations":         []any{},
+		"currentPresentationId": "",
 	}
 	a.request(student, "PUT", "/courses/"+id+"/conversation", map[string]any{
 		"conversationId": conversationID,
@@ -416,7 +450,7 @@ func TestCourseOutlineReorganizationClassifiesConversationContentBeforePublishin
 				map[string]any{"id": 1, "role": "user", "text": "我想给猜数字游戏加上最多五次机会"},
 				map[string]any{"id": 2, "role": "assistant", "text": "可以用循环记录尝试次数。"},
 			},
-			"pages": []any{}, "presentedPageIds": []any{}, "currentPageId": "",
+			"pages": []any{}, "presentations": []any{}, "currentPresentationId": "",
 		},
 	}, http.StatusOK)
 
@@ -490,7 +524,7 @@ func TestCourseOutlineReorganizationRequeuesAConversationThatChangesDuringClassi
 		"conversationId": conversationID,
 		"state": map[string]any{
 			"messages": []any{map[string]any{"id": 1, "role": "user", "text": "项目改成用循环控制五次机会"}},
-			"pages":    []any{}, "presentedPageIds": []any{}, "currentPageId": "",
+			"pages":    []any{}, "presentations": []any{}, "currentPresentationId": "",
 		},
 	}, http.StatusOK)
 	a.request(student, "PUT", "/courses/"+courseID+"/outline-reorganizations/"+job["id"].(string)+"/assignments/"+conversationID, map[string]any{

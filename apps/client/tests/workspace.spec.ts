@@ -186,7 +186,7 @@ test("course content blends into the workspace canvas", async ({ page }) => {
   expect(courseRoom?.height).toBe(courseSurface?.height);
   await expect(
     page.locator('.course-composer > [data-slot="input-group"]'),
-  ).toHaveCSS("border-radius", "8px");
+  ).toHaveCSS("border-radius", "30px");
   await expect(page.locator(".course-conversation")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",

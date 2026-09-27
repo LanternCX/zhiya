@@ -116,13 +116,24 @@ export type CodeRunResult = {
   memory: number;
 };
 
+export type InputMode = "text" | "speech";
+
+export type UserMessage = {
+  role: "user";
+  text: string;
+  input_mode: InputMode;
+  materials?: string[];
+};
+
 export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  input_mode?: InputMode;
   materials?: string[];
   streaming?: boolean;
   pageId?: string;
+  presentationId?: string;
   questionEvent?: { action: "submitted" | "deferred"; pageId: string };
 };
 
@@ -135,11 +146,13 @@ export type CourseActivity =
       status: "running" | "complete" | "error";
     };
 
+export type LessonPresentation = { id: string; pageId: string };
+
 export type CourseConversationState = {
   messages: CourseMessage[];
   pages: LessonPage[];
-  presentedPageIds: string[];
-  currentPageId: string;
+  presentations: LessonPresentation[];
+  currentPresentationId: string;
 };
 
 export type StoredCourseConversation = {

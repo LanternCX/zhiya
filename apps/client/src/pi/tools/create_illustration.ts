@@ -11,7 +11,7 @@ export function createIllustrationTool(
     name: "create_illustration",
     label: activityLabel,
     description:
-      "Start exactly one independent 16:9 teaching-image task and return after submission. Call this tool once per requested image; multiple calls in the same turn run in parallel. Do not add slides or animations merely to balance an image request. The image may be a picture-book scene, explanatory illustration, visual mind map, simple diagram, lightly labeled visual slide, or artwork that accompanies a text slide. The image service supplies a shared style reference, so focus the description on the current teaching subject, action or relationships, composition, and recurring character details rather than forcing a picture-book or comic style. Keep the result clear and 2D; avoid 3D renders. A few short Chinese words may appear when they help the picture; give the exact words in the description, avoid dense labels or paragraphs, and leave precise titles, formulas, and longer explanations to the app's text. Do not request watermarks or logos. Use a unique pageId. Each completed page enters only the unordered buffer and stays hidden until the teacher explicitly moves it into the display sequence and show_lesson_page succeeds; it can be cancelled or replaced independently.",
+      "Start exactly one independent 16:9 teaching-image task and return after submission. Call this tool once per requested image; multiple calls in the same turn run in parallel. Do not add slides or animations merely to balance an image request. The image may be a picture-book scene, explanatory illustration, visual mind map, simple diagram, lightly labeled visual slide, or artwork that accompanies a text slide. The image service supplies a shared style reference, so focus the description on the current teaching subject, action or relationships, composition, and recurring character details rather than forcing a picture-book or comic style. Keep the result clear and 2D; avoid 3D renders. A few short Chinese words may appear when they help the picture; give the exact words in the description, avoid dense labels or paragraphs, and leave precise titles, formulas, and longer explanations to the app's text. Do not request watermarks or logos. Use a unique pageId. Each page becomes a reusable asset and stays hidden until show_lesson_page succeeds. That tool may wait for a pending page; each teaching occurrence appends a presentation. Tasks can be cancelled independently.",
     parameters: Type.Object({
       pageId: Type.String({ minLength: 1, maxLength: 64 }),
       title: Type.String({ minLength: 1, maxLength: 100 }),
@@ -32,7 +32,7 @@ export function createIllustrationTool(
         content: [
           {
             type: "text",
-            text: `Illustration task started: ${JSON.stringify(task)}. Continue teaching without waiting for it.`,
+            text: `Illustration task started: ${JSON.stringify(task)}. You can do independent teaching now, or call show_lesson_page to wait for and teach this page. Completion alone never presents it.`,
           },
         ],
         details: task,

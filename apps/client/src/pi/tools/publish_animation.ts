@@ -60,7 +60,7 @@ export function publishAnimationTool(
     name: "publish_animation",
     label: "发布动画页",
     description:
-      "Publish one complete, validated animation scene into the unordered lesson-page buffer without adding it to the right-side display. Use relationships and layout direction; never supply SVG, code, styles, colors, or pixel coordinates.",
+      "Publish one complete, validated animation asset. This releases any wait for the scene but never presents it automatically. Use relationships and layout direction; never supply SVG, code, styles, colors, or pixel coordinates.",
     parameters: Type.Object(
       {
         pageId: Type.String({ minLength: 1, maxLength: 64 }),
@@ -133,7 +133,7 @@ export function publishAnimationTool(
         content: [
           {
             type: "text",
-            text: "Animation page entered the lesson-page buffer.",
+            text: "Animation page is ready for the teacher.",
           },
         ],
         details: {},
