@@ -19,7 +19,7 @@ fn allowed(method: &str, path: &str) -> bool {
         (method, path),
         ("GET", "/me")
             | ("GET", "/learning/model")
-            | ("POST", "/learning/socket-ticket")
+            | ("POST", "/socket-ticket")
             | ("GET", "/account-rules")
             | ("PATCH", "/me")
             | ("DELETE", "/me")
@@ -70,7 +70,7 @@ fn allowed(method: &str, path: &str) -> bool {
 
 #[test]
 fn learning_bridge_accepts_only_fixed_learning_routes() {
-    assert!(allowed("POST", "/learning/socket-ticket"));
+    assert!(allowed("POST", "/socket-ticket"));
     assert!(!allowed("GET", "/learning"));
     assert!(!allowed("POST", "/learning/action"));
     assert!(!allowed("POST", "/learning/sync"));
@@ -111,10 +111,10 @@ fn request(
     if cfg!(target_os = "android") {
         return Err("Android secure credential storage must be configured before use".into());
     }
-    // Learning metadata and socket tickets cannot mutate native credentials.
+    // Session metadata and socket tickets cannot mutate native credentials.
     // Account identity changes retain their existing mutex.
-    let learning = path.starts_with("/learning") || path.starts_with("/courses");
-    let _guard = if learning {
+    let metadata = path == "/socket-ticket" || path.starts_with("/learning") || path.starts_with("/courses");
+    let _guard = if metadata {
         None
     } else {
         Some(
@@ -162,7 +162,7 @@ fn request(
         .and_then(|value| value.to_str().ok())
         .unwrap_or("")
         .to_owned();
-    if !learning {
+    if !metadata {
         store_session(&entry, &client, base, response.headers())?;
     }
     let body = response

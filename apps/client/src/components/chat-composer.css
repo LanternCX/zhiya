@@ -1,5 +1,17 @@
 :where(.chat-composer) {
-  --chat-composer-radius: var(--radius-md);
+  --chat-composer-radius: 30px;
+}
+.chat-composer.chat-composer-input-modes textarea { padding-right: 144px; }
+.chat-composer-input-mode { width: 40px; min-width: 40px; height: 40px; padding: 0; }
+.chat-composer-capture { padding: 9px 14px 0; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.chat-composer-dialogue .chat-composer-footer { position: relative; }
+.chat-composer-dialogue .chat-composer-capture { min-height: 44px; padding: 16px 18px 0; text-align: center; }
+.chat-composer-dialogue textarea[hidden] { display: none; }
+.chat-composer-dialogue .chat-composer-attachment-button { visibility: hidden; }
+.chat-composer.chat-composer-input-modes.chat-composer-multiline textarea { padding-right: 14px; }
+@media (max-width: 560px) {
+  .chat-composer.chat-composer-input-modes textarea { padding: 14px; }
+  .chat-composer-input-modes .chat-composer-footer { position: relative; }
 }
 .chat-composer > [data-slot="input-group"] {
   position: relative;
@@ -14,9 +26,15 @@
   box-shadow: none;
 }
 .chat-composer textarea {
+  box-sizing: border-box;
+  min-width: 0;
   min-height: 58px;
-  max-height: 140px;
-  padding: 17px 60px;
+  max-height: 58px;
+  overflow-y: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding: 14px 96px 14px 44px;
   resize: none;
   border: 0;
   outline: 0;
@@ -117,6 +135,25 @@
   min-height: 58px;
   padding: 9px 10px;
   pointer-events: none;
+}
+.chat-composer-multiline textarea {
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-padding-bottom: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding: 14px;
+}
+.chat-composer-multiline textarea::-webkit-scrollbar {
+  display: none;
+}
+.chat-composer-multiline .chat-composer-footer {
+  position: relative;
+  inset: auto;
+  background: var(--surface);
 }
 .chat-composer-footer [data-slot="input-group-addon"] {
   padding: 0;

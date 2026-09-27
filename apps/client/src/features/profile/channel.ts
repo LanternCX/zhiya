@@ -124,7 +124,7 @@ export class ConversationChannel implements ConversationStore {
   private async connect(): Promise<Conversation> {
     try {
       const { ticket } = await api<{ ticket: string }>(
-        "/learning/socket-ticket",
+        "/socket-ticket",
         "POST",
         {},
       );

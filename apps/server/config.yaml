@@ -9,6 +9,14 @@ model:
   id: ""
   api_key: ""
 
+# DashScope realtime speech relay. Keep live credentials in environment variables.
+speech:
+  endpoint: "wss://dashscope.aliyuncs.com/api-ws/v1/inference"
+  asr_api_key: ""
+  tts_api_key: ""
+  asr_model: "qwen-audio-3.0-asr-flash-streaming"
+  tts_model: "qwen3-tts-flash-realtime"
+  tts_voice: "Cherry"
 # Native image-generation API base URL.
 # Keep the API key in config.local.yaml or an environment variable.
 image_model:

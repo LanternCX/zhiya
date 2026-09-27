@@ -1,0 +1,378 @@
+import { expect, test } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/socket-ticket", (route) => route.fulfill({ json: { ticket: "voice-test-ticket" } }));
+});
+
+test("voice sockets use the configured service origin and a one-time ticket", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { speechSocketURL } = await import("/src/transport/voice.ts");
+    const voice = await speechSocketURL("/api/voice/session");
+    const dictation = await speechSocketURL("/api/speech/stream");
+    return {
+      voice: voice.pathname,
+      dictation: dictation.pathname,
+      protocol: voice.protocol,
+      host: voice.host,
+      expectedHost: new URL(__ZHIYA_CLIENT_CONFIG__.apiOrigin).host,
+      voiceTicket: voice.searchParams.get("ticket"),
+      dictationTicket: dictation.searchParams.get("ticket"),
+    };
+  });
+  expect(result).toEqual({
+    voice: "/api/voice/session",
+    dictation: "/api/speech/stream",
+    protocol: "ws:",
+    host: result.expectedHost,
+    expectedHost: result.expectedHost,
+    voiceTicket: "voice-test-ticket",
+    dictationTicket: "voice-test-ticket",
+  });
+});
+
+test("voice events require valid session and turn scope", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { isVoiceServerEvent } = await import("/src/transport/voice.ts");
+    return [
+      isVoiceServerEvent({ type: "session-ready", sessionId: "s1", turnId: 0 }),
+      isVoiceServerEvent({ type: "tts-complete", sessionId: "s1", turnId: 1 }),
+      isVoiceServerEvent({ type: "tts-audio", sessionId: "s1", turnId: 1, data: "AQI=", sampleRate: 24000 }),
+      isVoiceServerEvent({ type: "tts-audio", sessionId: "s1", turnId: -1, data: "AQI=", sampleRate: 24000 }),
+      isVoiceServerEvent({ type: "session-ready", turnId: 0 }),
+      isVoiceServerEvent({ type: "unknown", sessionId: "s1", turnId: 0 }),
+      isVoiceServerEvent("not an event"),
+    ];
+  });
+  expect(result).toEqual([true, true, true, false, false, false, false]);
+});
+
+test("voice playback text stays isolated per assistant message", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { appendVoicePlaybackText } = await import("/src/features/voice/VoicePlaybackText.ts");
+    let text = appendVoicePlaybackText({}, 1, "第一条。");
+    text = appendVoicePlaybackText(text, 2, "第二条。");
+    text = appendVoicePlaybackText(text, 1, "继续。");
+    return text;
+  });
+  expect(result).toEqual({ 1: "第一条。继续。", 2: "第二条。" });
+});
+
+test("voice TTS pipeline sends text and schedules returned PCM audio", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const sent: Array<Record<string, unknown>> = [];
+    let started = 0;
+    class FakeSource {
+      onended: (() => void) | null = null;
+      connect() {}
+      start() { started += 1; }
+      stop() {}
+    }
+    class FakeContext {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      createBuffer(_channels: number, length: number) { return { duration: length / 24000, getChannelData: () => new Float32Array(length) }; }
+      createBufferSource() { return new FakeSource(); }
+    }
+    class FakeSocket {
+      static OPEN = 1;
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      constructor() { setTimeout(() => { this.readyState = 1; this.onopen?.(); }, 0); }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.(); }
+      send(raw: string) {
+        const message = JSON.parse(raw) as Record<string, unknown>;
+        sent.push(message);
+        if (message.type === "start-session") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "session-ready", sessionId: message.sessionId, turnId: message.turnId }) }), 0);
+        }
+        if (message.type === "speak-text") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "tts-audio", sessionId: message.sessionId, turnId: message.turnId, data: "AAAAAA==", sampleRate: 24000 }) }), 0);
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "tts-complete", sessionId: message.sessionId, turnId: message.turnId }) }), 1);
+        }
+      }
+    }
+    (window as unknown as { WebSocket: typeof FakeSocket; AudioContext: typeof FakeContext }).WebSocket = FakeSocket;
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = FakeContext;
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    await controller.start();
+    controller.speakText("测试语音输出");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    return { start: sent.some((message) => message.type === "start-session"), speak: sent.some((message) => message.type === "speak-text"), started, status: controller.getState().status };
+  });
+  expect(result).toEqual({ start: true, speak: true, started: 1, status: "speaking" });
+});
+
+
+test("voice reducer exits from speaking", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    state = voiceReducer(state, { type: "speaking" });
+    state = voiceReducer(state, { type: "end" });
+    return state;
+  });
+  expect(result.status).toBe("ended");
+});
+
+test("conversation manager creates unified text and speech user messages", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ConversationManager } = await import("/src/conversation/ConversationManager.ts");
+    return [
+      ConversationManager.userMessage("  打字问题  ", "text"),
+      ConversationManager.userMessage("  语音问题  ", "speech", ["notes.md"]),
+    ];
+  });
+  expect(result).toEqual([
+    { role: "user", text: "打字问题", input_mode: "text" },
+    { role: "user", text: "语音问题", input_mode: "speech", materials: ["notes.md"] },
+  ]);
+});
+
+test("legacy course user messages default to text input mode", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ConversationManager } = await import("/src/conversation/ConversationManager.ts");
+    return ConversationManager.normalizeUserMessage({ role: "user", text: "历史消息" });
+  });
+  expect(result).toEqual({ role: "user", text: "历史消息", input_mode: "text" });
+});
+
+test("response presenter keeps display text and simplifies voice text", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ResponsePresenter } = await import("/src/conversation/ResponsePresenter.ts");
+    return [
+      ResponsePresenter.present("结论在这里。", "text"),
+      ResponsePresenter.present("代码如下：\n```ts\nconst answer = 42;\n```", "speech"),
+      ResponsePresenter.present("详情见 https://example.com/docs。", "speech"),
+      ResponsePresenter.present("请运行 `npm install`，然后查看 **结果**。", "speech"),
+    ];
+  });
+  expect(result).toEqual([
+    { display_text: "结论在这里。", speech_text: "结论在这里。" },
+    { display_text: "代码如下：\n```ts\nconst answer = 42;\n```", speech_text: "代码我已经放在屏幕上了。" },
+    { display_text: "详情见 https://example.com/docs。", speech_text: "链接我已经放在屏幕上了。" },
+    { display_text: "请运行 `npm install`，然后查看 **结果**。", speech_text: "请运行 ，然后查看 结果。" },
+  ]);
+});
+
+test("voice responses keep code and links visible while using a spoken summary", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ResponsePresenter } = await import("/src/conversation/ResponsePresenter.ts");
+    return [
+      ResponsePresenter.present("代码：\n```js\nconsole.log(1)\n```", "speech"),
+      ResponsePresenter.present("参考 https://example.com/lesson", "speech"),
+    ];
+  });
+  expect(result).toEqual([
+    { display_text: "代码：\n```js\nconsole.log(1)\n```", speech_text: "代码我已经放在屏幕上了。" },
+    { display_text: "参考 https://example.com/lesson", speech_text: "链接我已经放在屏幕上了。" },
+  ]);
+});
+
+test("response presenter provides a voice style prompt without replacing the core prompt", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { ResponsePresenter } = await import("/src/conversation/ResponsePresenter.ts");
+    return {
+      text: ResponsePresenter.modePrompt("text"),
+      speech: ResponsePresenter.modePrompt("speech"),
+    };
+  });
+  expect(result.text).toContain("普通文字模式");
+  expect(result.text).toContain("不要因为历史语音对话而刻意口语化");
+  expect(result.speech).toContain("自然、简洁、口语化");
+  expect(result.speech).toContain("不要逐字朗读代码");
+  expect(result.speech).toContain("不要输出英文");
+});
+
+test("playback controller owns one audio queue and clears it on stop", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    class FakeSource {
+      onended: (() => void) | null = null;
+      buffer: unknown = null;
+      stopped = false;
+      connect() {}
+      start() {}
+      stop() { this.stopped = true; }
+    }
+    class FakeContext {
+      currentTime = 0;
+      destination = {};
+      createBuffer() { return { duration: 0.1, getChannelData: () => new Float32Array(2) }; }
+      createBufferSource() { return new FakeSource(); }
+    }
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = FakeContext;
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let idle = 0;
+    const playback = new PlaybackController(() => idle++);
+    playback.enqueue("AAAAAA==", 24000);
+    const wasPlaying = playback.isPlaying;
+    playback.clear();
+    return { wasPlaying, isPlaying: playback.isPlaying, idle };
+  });
+  expect(result).toEqual({ wasPlaying: true, isPlaying: false, idle: 1 });
+});
+
+test("playback controller completes a sentence only after its audio ends", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    class FakeSource {
+      onended: (() => void) | null = null;
+      connect() {}
+      start() {}
+      stop() { this.onended?.(); }
+    }
+    class FakeContext {
+      currentTime = 0;
+      destination = {};
+      source = new FakeSource();
+      createBuffer() { return { duration: 0.1, getChannelData: () => new Float32Array(2) }; }
+      createBufferSource() { return this.source; }
+    }
+    const context = new FakeContext();
+    (window as unknown as { AudioContext: typeof FakeContext }).AudioContext = class extends FakeContext {
+      constructor() { super(); return context; }
+    } as typeof FakeContext;
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let completed = 0;
+    const playback = new PlaybackController();
+    playback.enqueue("AAAAAA==", 24000);
+    playback.onCurrentAudioComplete(() => completed++);
+    const beforeEnd = completed;
+    context.source.onended?.();
+    return { beforeEnd, afterEnd: completed };
+  });
+  expect(result).toEqual({ beforeEnd: 0, afterEnd: 1 });
+});
+
+test("voice reducer keeps the session alive when TTS fails", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    state = voiceReducer(state, { type: "tts-error", message: "TTS unavailable" });
+    return state;
+  });
+  expect(result.status).toBe("ready");
+  expect(result.error).toBe("TTS unavailable");
+  expect(result.errorKind).toBe("tts");
+});
+
+test("playback controller reports malformed audio without throwing", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { PlaybackController } = await import("/src/features/voice/PlaybackController.ts");
+    let errors = 0;
+    const playback = new PlaybackController(() => undefined, () => errors++);
+    playback.enqueue("not-base64", 24000);
+    return { errors, isPlaying: playback.isPlaying };
+  });
+  expect(result).toEqual({ errors: 1, isPlaying: false });
+});
+
+test("voice session ends when the page becomes hidden", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    controller.handleVisibilityChange(true);
+    return controller.getState().status;
+  });
+  expect(result).toBe("ended");
+});
+
+test("voice reconnect policy allows only two bounded retries", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { nextVoiceReconnectDelay } = await import("/src/features/voice/ReconnectPolicy.ts");
+    return [nextVoiceReconnectDelay(0), nextVoiceReconnectDelay(1), nextVoiceReconnectDelay(2)];
+  });
+  expect(result).toEqual([250, 1000, null]);
+});
+
+test("voice session reports an unexpected socket close", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    controller.handleConnectionClosed();
+    return { status: controller.getState().status, errorKind: controller.getState().errorKind };
+  });
+  expect(result).toEqual({ status: "ended", errorKind: "connection" });
+});
+
+test("voice reducer classifies an agent failure without ending the session", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { initialVoiceState, voiceReducer } = await import("/src/features/voice/voice-reducer.ts");
+    let state = voiceReducer(initialVoiceState, { type: "connect", sessionId: "s1" });
+    state = voiceReducer(state, { type: "ready" });
+    return voiceReducer(state, { type: "agent-error", message: "模型暂时不可用" });
+  });
+  expect(result.status).toBe("ready");
+  expect(result.errorKind).toBe("agent");
+  expect(result.error).toBe("模型暂时不可用");
+});
+
+test("voice interrupt stops the current turn and advances its turn id", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    let interrupted = 0;
+    const controller = new VoiceSessionController(() => interrupted++);
+    controller.interrupt();
+    return { interrupted, status: controller.getState().status, turnId: controller.getState().turnId };
+  });
+  expect(result).toEqual({ interrupted: 1, status: "ready", turnId: 1 });
+});
+
+test("voice interrupt cancels an in-flight TTS turn before the next message", async ({ page }) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const sent: Array<Record<string, unknown>> = [];
+    class FakeSocket {
+      static OPEN = 1;
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      constructor() { setTimeout(() => { this.readyState = 1; this.onopen?.(); }, 0); }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.(); }
+      send(raw: string) {
+        const message = JSON.parse(raw) as Record<string, unknown>;
+        sent.push(message);
+        if (message.type === "start-session") {
+          setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "session-ready", sessionId: message.sessionId, turnId: message.turnId }) }), 0);
+        }
+      }
+    }
+    (window as unknown as { WebSocket: typeof FakeSocket }).WebSocket = FakeSocket;
+    const { VoiceSessionController } = await import("/src/features/voice/VoiceSessionController.ts");
+    const controller = new VoiceSessionController();
+    await controller.start();
+    controller.speakText("旧回答");
+    controller.interrupt();
+    return sent.map((message) => message.type);
+  });
+  expect(result).toEqual(["start-session", "speak-text", "cancel-tts"]);
+});
