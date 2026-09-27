@@ -17,7 +17,10 @@ import type {
   OutlineClassification,
   StoredCourse,
   StoredCourseConversation,
+  InputMode,
 } from "../../domain/learning";
+import { ConversationManager } from "../../conversation/ConversationManager";
+import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
@@ -76,6 +79,10 @@ export class CourseSession {
   private stopped = false;
   private messageSequence = 0;
   private teacherMessageId = 0;
+  private activeTeacherMessage: CourseMessage | null = null;
+  private ignoreTeacherOutput = false;
+  private currentInputMode: InputMode = "text";
+  private teacherMessageMode: InputMode = "text";
   private narrationPlayback: {
     id: number;
     promise: Promise<void>;
@@ -271,12 +278,17 @@ export class CourseSession {
         return;
       if (event.message.role !== "assistant") return;
       if (event.type === "message_start") {
+        if (this.teacher.signal?.aborted) return;
+        this.ignoreTeacherOutput = false;
+        this.activeTeacherMessage = null;
         this.teachingInterrupted = false;
+        this.teacherMessageMode = this.currentInputMode;
         this.teacherPresentationId = this.currentPresentationId;
         this.teacherMessageId = ++this.messageSequence;
         this.onActivity({ kind: "thinking", text: "", active: true });
         return;
       }
+      if (this.ignoreTeacherOutput) return;
       const message = event.message as AssistantMessage;
       const reasoning = message.content
         .filter((part) => part.type === "thinking")
@@ -286,27 +298,31 @@ export class CourseSession {
         .filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("");
-      if (reasoning || (event.type === "message_update" && !text)) {
+      const presented = ResponsePresenter.present(text, this.teacherMessageMode);
+      if (reasoning || (event.type === "message_update" && !presented.display_text)) {
         this.onActivity({
           kind: "thinking",
           text: reasoning,
           active: event.type === "message_update",
         });
-      } else if (text) {
+      } else if (presented.display_text) {
         this.onActivity(null);
       }
-      if (text.trim()) {
+      if (presented.display_text.trim()) {
         this.ensureNarrationPlayback(this.teacherMessageId);
-        this.onMessage({
+        const nextMessage: CourseMessage = {
           id: this.teacherMessageId,
           role: "assistant",
-          text,
+          text: presented.display_text,
+          input_mode: this.teacherMessageMode,
           streaming: event.type === "message_update",
           pageId: this.presentations.find(
             (item) => item.id === this.teacherPresentationId,
           )?.pageId,
           presentationId: this.teacherPresentationId || undefined,
-        });
+        };
+        this.activeTeacherMessage = nextMessage;
+        this.onMessage(nextMessage);
       }
     });
     this.startOutlineTask(
@@ -320,14 +336,13 @@ export class CourseSession {
     return this.teacher.state.isStreaming && !this.teacher.signal?.aborted;
   }
 
-  async prompt(text: string, materialNames: string[] = []) {
+  async prompt(text: string, materialNames: string[] = [], inputMode: InputMode = "text") {
     if (this.teacher.signal?.aborted) await this.teacher.waitForIdle();
     if (this.stopped) return;
+    this.currentInputMode = inputMode;
     this.onMessage({
       id: ++this.messageSequence,
-      role: "user",
-      text,
-      ...(materialNames.length ? { materials: materialNames } : {}),
+      ...ConversationManager.userMessage(text, inputMode, materialNames),
     });
     const studentText = materialNames.length
       ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
@@ -336,9 +351,10 @@ export class CourseSession {
       ...this.pendingActiveNotices.splice(0),
       ...this.pendingTaskNotices.splice(0),
     ];
-    const agentText = taskNotices.length
+    const agentTextWithNotices = taskNotices.length
       ? `${taskNotices.join("\n\n")}\n\n${studentText}`
       : studentText;
+    const agentText = `${agentTextWithNotices}\n\n${ResponsePresenter.modePrompt(inputMode)}`;
     if (this.busy) {
       this.teacher.steer({
         role: "user",
@@ -378,12 +394,13 @@ export class CourseSession {
     return true;
   }
 
-  async beginFromHandoff() {
+  async beginFromHandoff(inputMode: InputMode = "text") {
     if (this.stopped) return;
+    this.currentInputMode = inputMode;
     const operation = this.cancellation;
     try {
       await this.teacher.prompt(
-        "Begin teaching in this conversation using the application handoff context.",
+        `Begin teaching in this conversation using the application handoff context.\n\n${ResponsePresenter.modePrompt(inputMode)}`,
       );
       if (await this.finishHandoff()) return;
       await this.waitForNarrationPlayback();
@@ -399,6 +416,11 @@ export class CourseSession {
 
   stopCurrent() {
     this.cancellation++;
+    this.ignoreTeacherOutput = true;
+    if (this.activeTeacherMessage?.streaming) {
+      this.activeTeacherMessage = { ...this.activeTeacherMessage, streaming: false };
+      this.onMessage(this.activeTeacherMessage);
+    }
     this.pendingHandoff = null;
     this.teacher.abort();
     for (const [taskId, task] of this.outlineTasks) {

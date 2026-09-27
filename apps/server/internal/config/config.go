@@ -20,6 +20,7 @@ import (
 
 type Config struct {
 	Model       Model    `yaml:"model"`
+	Speech      Speech   `yaml:"speech"`
 	ImageModel  Model    `yaml:"image_model"`
 	Runner      Runner   `yaml:"runner"`
 	Logging     Logging  `yaml:"logging"`
@@ -30,6 +31,15 @@ type Config struct {
 	SMTP        SMTP     `yaml:"smtp"`
 	Account     Account  `yaml:"account"`
 }
+type Speech struct {
+	Endpoint  string `yaml:"endpoint"`
+	ASRAPIKey string `yaml:"asr_api_key"`
+	TTSAPIKey string `yaml:"tts_api_key"`
+	ASRModel  string `yaml:"asr_model"`
+	TTSModel  string `yaml:"tts_model"`
+	TTSVoice  string `yaml:"tts_voice"`
+}
+
 type Logging struct {
 	Level  string `yaml:"level"`
 	Format string `yaml:"format"`
@@ -213,6 +223,15 @@ func override(value reflect.Value, prefix string, known map[string]bool) error {
 }
 
 func (c Config) Validate() error {
+	if c.Speech.Endpoint != "" {
+		u, err := url.Parse(c.Speech.Endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "wss" && !(c.Development && u.Scheme == "ws" && loopback(u.Hostname()))) {
+			return fmt.Errorf("speech.endpoint must be a secure WebSocket URL (loopback WS allowed in development)")
+		}
+		if c.Speech.ASRModel == "" || c.Speech.TTSModel == "" || c.Speech.TTSVoice == "" {
+			return fmt.Errorf("speech models and voice are required when speech.endpoint is configured")
+		}
+	}
 	switch c.Logging.Level {
 	case "debug", "info", "warn", "error":
 	default:

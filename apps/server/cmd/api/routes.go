@@ -14,10 +14,12 @@ func (a *application) routes() http.Handler {
 	storageOrigin := storageURL.Scheme + "://" + storageURL.Host
 	api := http.NewServeMux()
 	api.HandleFunc("GET /api/learning/socket", a.learningSocket)
-	api.HandleFunc("POST /api/learning/socket-ticket", a.learningSocketTicket)
+	api.HandleFunc("POST /api/socket-ticket", a.socketTicket)
 	api.HandleFunc("GET /api/learning/model", a.modelInfo)
 	api.HandleFunc("POST /api/learning/model", a.modelProxy)
 	api.HandleFunc("POST /api/learning/course/model", a.courseModelProxy)
+	api.HandleFunc("GET /api/speech/stream", a.speechStream)
+	api.HandleFunc("GET /api/voice/session", a.voiceSessionHandler)
 	api.HandleFunc("GET /api/code/languages", a.codeLanguages)
 	api.HandleFunc("POST /api/code/runs", a.runCode)
 	api.HandleFunc("GET /api/courses", a.listCourses)

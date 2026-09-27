@@ -8,6 +8,7 @@ import Confirmation from "../../components/Confirmation";
 import type {
   CourseMaterial,
   CourseSection,
+  InputMode,
   StoredCourse,
   StoredCourseConversation,
 } from "../../domain/learning";
@@ -44,13 +45,15 @@ export default function CourseOverview({
 }: {
   course: StoredCourse;
   onOpenSection: (section: CourseSection) => void;
-  onStartLearning: (request: string, materialNames: string[]) => void;
+  onStartLearning: (request: string, materialNames: string[], inputMode: InputMode, inputMethod?: ChatComposerMessage["inputMethod"]) => void;
   courseError: string;
   onOpenConversation: (conversation: StoredCourseConversation) => void;
   onCreateConversation: (
     section: CourseSection,
     request: string,
     materialNames: string[],
+    inputMode: InputMode,
+    inputMethod?: ChatComposerMessage["inputMethod"],
   ) => Promise<void>;
   onDeleteConversation: (
     section: CourseSection,
@@ -168,7 +171,7 @@ export default function CourseOverview({
     }
   };
 
-  const startLearning = async ({ text, files }: ChatComposerMessage) => {
+  const startLearning = async ({ text, files, speakReplies, inputMethod }: ChatComposerMessage) => {
     if (busy) throw new Error("The course overview is busy");
     setBusy(true);
     setComposerError("");
@@ -192,8 +195,8 @@ export default function CourseOverview({
           ? `请根据我附带的教学材料继续学习${historySection.title}。`
           : "请根据我附带的教学材料继续这门课程。");
       if (historySection)
-        await onCreateConversation(historySection, request, uploadedNames);
-      else onStartLearning(request, uploadedNames);
+        await onCreateConversation(historySection, request, uploadedNames, speakReplies ? "speech" : "text", inputMethod);
+      else onStartLearning(request, uploadedNames, speakReplies ? "speech" : "text", inputMethod);
     } finally {
       setBusy(false);
     }
@@ -382,6 +385,7 @@ export default function CourseOverview({
             : "告诉知芽你想开始什么新的学习"
         }
         onError={setComposerError}
+        onVoiceError={setComposerError}
         onSubmit={startLearning}
         submitLabel={historySection ? "开始新一轮学习" : "开始新的学习"}
       />
