@@ -1,4 +1,4 @@
-package providers
+package speech
 
 import "testing"
 
@@ -51,5 +51,15 @@ func TestParseASREventReadsProviderError(t *testing.T) {
 	}
 	if event.Kind != "error" || event.Data != "upstream failed" {
 		t.Fatalf("event = %#v", event)
+	}
+}
+
+func TestParseASREventReadsTaskCompletion(t *testing.T) {
+	event, err := ParseASREvent([]byte(`{"header":{"event":"task-finished"}}`))
+	if err != nil {
+		t.Fatalf("parse failed: %v", err)
+	}
+	if event.Kind != "done" {
+		t.Fatalf("event = %#v, want done", event)
 	}
 }

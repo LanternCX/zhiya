@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
 	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
+	"github.com/LanternCX/zhiya/apps/server/internal/speech"
 	"github.com/coder/websocket"
 )
 
@@ -175,7 +175,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 		s.asr = nil
 		return err
 	}
-	go s.forwardUpstream(conn, "asr", turnID, 0, providers.ParseASREvent)
+	go s.forwardUpstream(conn, "asr", turnID, 0, speech.ParseASREvent)
 	return nil
 }
 
@@ -222,7 +222,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 		conn.CloseNow()
 		return err
 	}
-	go s.forwardUpstream(conn, "tts", turnID, generation, providers.ParseTTSEvent)
+	go s.forwardUpstream(conn, "tts", turnID, generation, speech.ParseTTSEvent)
 	return nil
 }
 
@@ -266,7 +266,7 @@ func (s *voiceSession) cancelTTS(_ int64) {
 	}
 }
 
-func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64, generation uint64, parse func([]byte) (providers.VoiceEvent, error)) {
+func (s *voiceSession) forwardUpstream(conn *websocket.Conn, mode string, turnID int64, generation uint64, parse func([]byte) (speech.VoiceEvent, error)) {
 	for {
 		typ, raw, err := conn.Read(s.ctx)
 		if err != nil {

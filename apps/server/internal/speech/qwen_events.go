@@ -1,4 +1,4 @@
-package providers
+package speech
 
 import "encoding/json"
 
@@ -59,6 +59,9 @@ func ParseASREvent(raw []byte) (VoiceEvent, error) {
 	}
 	if payload.Header != nil && payload.Header.Event == "task-failed" {
 		return VoiceEvent{Kind: "error", Data: payload.Header.StatusMessage}, nil
+	}
+	if payload.Header != nil && payload.Header.Event == "task-finished" {
+		return VoiceEvent{Kind: "done"}, nil
 	}
 	sentence := payload.Payload.Output.Sentence
 	if sentence.Text == "" {

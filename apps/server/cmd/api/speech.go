@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
 	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
+	"github.com/LanternCX/zhiya/apps/server/internal/speech"
 	"github.com/coder/websocket"
 )
 
@@ -75,7 +75,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": a.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(task))
 			send(map[string]string{"type": "ready"})
-			go a.forwardSpeech(ctx, upstream, browser, "asr", providers.ParseASREvent)
+			go a.forwardSpeech(ctx, upstream, browser, "asr", speech.ParseASREvent)
 		case "tts-start":
 			if a.config.Speech.TTSAPIKey == "" {
 				send(map[string]string{"type": "error", "message": "TTS API Key 尚未配置"})
@@ -99,7 +99,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(setup))
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"type": "input_text_buffer.append", "text": command.Text}))
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(map[string]string{"type": "input_text_buffer.commit"}))
-			go a.forwardSpeech(ctx, upstream, browser, "tts", providers.ParseTTSEvent)
+			go a.forwardSpeech(ctx, upstream, browser, "tts", speech.ParseTTSEvent)
 		case "stop":
 			if upstream != nil {
 				_ = upstream.Write(ctx, websocket.MessageText, mustJSON(map[string]any{"header": map[string]any{"action": "finish-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"input": map[string]any{}}}))
@@ -119,7 +119,7 @@ func (a *application) dialTTS(ctx context.Context, apiKey string) (*websocket.Co
 	conn, response, err := websocket.Dial(ctx, realtimeTTSEndpoint(a.config.Speech.Endpoint, a.config.Speech.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + apiKey}}})
 	return conn, wrapSpeechDialError(response, err)
 }
-func (a *application) forwardSpeech(ctx context.Context, upstream, browser *websocket.Conn, mode string, parse func([]byte) (providers.VoiceEvent, error)) {
+func (a *application) forwardSpeech(ctx context.Context, upstream, browser *websocket.Conn, mode string, parse func([]byte) (speech.VoiceEvent, error)) {
 	for {
 		typ, raw, err := upstream.Read(ctx)
 		if err != nil {
