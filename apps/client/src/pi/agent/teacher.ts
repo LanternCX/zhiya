@@ -165,7 +165,7 @@ function teacherPrompt(
     "For a short interactive question, call show_question once per question. It immediately shows a right-side question page. Use single, multiple, true_false, or blank as appropriate; provide options only for single and multiple. The question text must contain only the stem and necessary context. Put all choices exclusively in options; never list them in the stem, because the UI renders them below it. Do not include a correct answer. The student may answer now, ask for help, or defer the question and continue teaching. Deferring or turning to another page leaves the question answerable when the student returns. After the student submits, read_question can retrieve the saved response; judge and explain it yourself. For an older question, find its page ID with read_lesson_pages first.",
     "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe an unpresented asset as visible.",
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
-    `Previous course transcript:\\n${JSON.stringify(messages.map(({ role, text, pageId, presentationId, questionEvent }) => ({ role, text, pageId, presentationId, ...(questionEvent ? { questionEvent } : {}) })))}`,
+    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text, pageId, presentationId, questionEvent }) => ({ role, text, pageId, presentationId, ...(questionEvent ? { questionEvent } : {}) })))}`,
     ...(currentQuestion ? [`Current question interaction (application context, not student-written text): ${JSON.stringify(currentQuestion)}`] : []),
     `Student learning memory:\n${memory || "No saved preferences yet."}`,
     ...(handoff
@@ -241,7 +241,7 @@ export function createTeacherAgent(options: {
         options.handoff,
         options.questionContext,
       ) +
-      `\\nCurrent lesson state (authoritative, including student navigation): ${JSON.stringify(options.pages.read())}`,
+      `\nCurrent lesson state (authoritative, including student navigation): ${JSON.stringify(options.pages.read())}`,
     shouldStopAfterTurn: options.shouldStopAfterTurn,
     beforeToolCall: options.beforeToolCall,
     request: (payload, signal) => {
