@@ -2,6 +2,7 @@ import type {
   ModelInfo,
   ModelRetryListener,
   CourseMessage,
+  QuestionPage,
 } from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
@@ -14,7 +15,10 @@ import type {
   LessonPageTools,
   AgentTaskTools,
   TeachingToolContext,
+  QuestionTools,
 } from "../tool";
+import { showQuestionTool, activityLabel as showQuestionLabel } from "../tools/show_question";
+import { readQuestionTool, activityLabel as readQuestionLabel } from "../tools/read_question";
 import {
   listCodingLanguagesTool,
   activityLabel as listCodingLanguagesLabel,
@@ -105,7 +109,9 @@ function teacherPrompt(
   messages: CourseMessage[],
   memory: string,
   handoff?: string,
+  questionContext?: () => { action: "submitted" | "deferred"; page: QuestionPage } | null,
 ) {
+  const currentQuestion = questionContext?.();
   const course = courseManagement.course;
   const activeSection = course?.sections?.find((section) =>
     section.conversations.some(
@@ -160,9 +166,11 @@ function teacherPrompt(
     "Use create_slides for structured text, comparisons, summaries, or exact notation. Use create_animation only for one simple interactive relationship or changing process within its hard limits. Use create_illustration for story scenes, visual explanations, diagrams, mind maps, lightly labeled visual slides, or artwork accompanying a text slide. Choose the visual form that best serves the lesson and continue teaching while background tasks run.",
     "The student and you share animation controls: use read_animation before narrating playback state and control_animation to play, pause, or reset; never assume an action succeeded.",
     "When a programming exercise helps, call list_coding_languages and then show_coding_exercise. The student controls editing, running, skipping, and asking for help. Do not read current code during practice unless asked. When the student ends an exercise, call end_coding_exercise and review the final code.",
+    "For a short interactive question, call show_question once per question. It immediately shows a right-side question page. Use single, multiple, true_false, or blank as appropriate; provide options only for single and multiple. Do not include a correct answer. The student may answer now, ask for help, or defer the question and continue teaching. Deferring or turning to another page leaves the question answerable when the student returns. After the student submits, read_question can retrieve the saved response; judge and explain it yourself. For an older question, find its page ID with read_lesson_pages first.",
     "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe a buffered page as visible.",
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
-    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text }) => ({ role, text })))}`,
+    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text, questionEvent }) => ({ role, text, ...(questionEvent ? { questionEvent } : {}) })))}`,
+    ...(currentQuestion ? [`Current question interaction (application context, not student-written text): ${JSON.stringify(currentQuestion)}`] : []),
     `Student learning memory:\n${memory || "No saved preferences yet."}`,
     ...(handoff
       ? [`Teaching handoff from the previous conversation (application context, not a new student message): ${handoff}`]
@@ -182,9 +190,11 @@ export function createTeacherAgent(options: {
   pages: LessonPageTools;
   tasks: AgentTaskTools;
   coding: CodingTools;
+  questions: QuestionTools;
   onRetry: ModelRetryListener;
   handoff?: string;
   shouldStopAfterTurn?: () => boolean;
+  questionContext?: () => { action: "submitted" | "deferred"; page: QuestionPage } | null;
 }) {
   const initial = options.management.course;
   const context: TeachingToolContext = {
@@ -226,12 +236,15 @@ export function createTeacherAgent(options: {
       showCodingExerciseTool(options.coding.show),
       readCodingExerciseTool(options.coding.read),
       endCodingExerciseTool(options.coding.end),
+      showQuestionTool(options.questions.show),
+      readQuestionTool(options.questions.read),
     ],
-    systemPrompt: teacherPrompt(
+    systemPrompt: () => teacherPrompt(
       options.management,
       options.messages,
       options.memory,
       options.handoff,
+      options.questionContext,
     ),
     shouldStopAfterTurn: options.shouldStopAfterTurn,
     request: (payload, signal) => {
@@ -275,6 +288,8 @@ export function teacherToolLabel(name: string) {
       show_coding_exercise: showCodingExerciseLabel,
       read_coding_exercise: readCodingExerciseLabel,
       end_coding_exercise: endCodingExerciseLabel,
+      show_question: showQuestionLabel,
+      read_question: readQuestionLabel,
     }[name] ?? "使用教学工具"
   );
 }

@@ -66,6 +66,169 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+test("a student submits one question page and the teacher can read the saved answer", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  let reviewed = false;
+  let studentMessageIsClean = false;
+  let questionContextProvided = false;
+  await page.route("**/api/learning/course/model", async (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Question response submitted.") && !transcript.includes('"name":"read_question"')) {
+      const userMessages = request.payload.messages.filter((message) => message.role === "user");
+      const lastUserMessage = JSON.stringify(userMessages.at(-1));
+      studentMessageIsClean = !lastUserMessage.includes("question-1") && !lastUserMessage.includes("请根据题目") && !lastUserMessage.includes("哪些图片可以用来");
+      questionContextProvided = transcript.includes("Current question interaction") && transcript.includes('\\"action\\":\\"submitted\\"');
+      reviewed = transcript.includes("训练数据") && transcript.includes("猫和狗");
+      await route.fulfill(toolResponse("read-question", "read_question", { pageId: "question-1" }));
+    } else if (transcript.includes('"name":"read_question"')) {
+      reviewed = reviewed && transcript.includes('\\"selected\\":[\\"猫和狗\\"]');
+      await route.fulfill(textResponse("你选了猫和狗，我们来看看为什么。"));
+    } else if (!transcript.includes('"name":"show_question"')) {
+      await route.fulfill(toolResponse("question-1", "show_question", {
+        title: "训练数据练习",
+        text: "哪些图片可以用来训练猫狗分类器？",
+        kind: "multiple",
+        options: ["猫和狗", "汽车", "水果"],
+      }));
+    } else {
+      await route.fulfill(textResponse("请选择你认为合适的图片。"));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("教我训练数据");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByRole("heading", { name: "训练数据练习" })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.getByRole("checkbox", { name: "猫和狗" }).check();
+  await page.getByRole("button", { name: "提交答案" }).click();
+  await expect(page.getByText("你选了猫和狗，我们来看看为什么。")).toBeVisible();
+  await expect(page.getByRole("button", { name: "已提交" })).toBeDisabled();
+  await expect(page.locator(".course-message.user")).toHaveCount(1);
+  await expect(page.locator(".course-message.user").last()).toContainText("教我训练数据");
+  expect(reviewed).toBe(true);
+  expect(studentMessageIsClean).toBe(true);
+  expect(questionContextProvided).toBe(true);
+});
+
+test("a student can answer a fill-in question and the teacher receives the text", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  let receivedAnswer = false;
+  await page.route("**/api/learning/course/model", async (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Question response submitted.")) {
+      receivedAnswer = transcript.includes("先收集图片，再给它们贴标签");
+      await route.fulfill(textResponse("你提到了收集和标注，很好。"));
+    } else if (!transcript.includes('"name":"show_question"')) {
+      await route.fulfill(toolResponse("question-blank", "show_question", {
+        title: "说说你的想法",
+        text: "训练图片前要做什么？",
+        kind: "blank",
+      }));
+    } else {
+      await route.fulfill(textResponse("写下你的想法。"));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("教我训练图片");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByRole("heading", { name: "说说你的想法" })).toBeVisible();
+  await page.getByRole("textbox", { name: "你的答案" }).fill("先收集图片，再给它们贴标签");
+  await page.getByRole("button", { name: "提交答案" }).click();
+  await expect(page.getByText("你提到了收集和标注，很好。")).toBeVisible();
+  expect(receivedAnswer).toBe(true);
+});
+
+test("a student can choose a single answer with the keyboard", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  let received = false;
+  await page.route("**/api/learning/course/model", async (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Question response submitted.")) {
+      received = transcript.includes("给图片贴标签");
+      await route.fulfill(textResponse("我们继续看图片标签。"));
+    } else if (!transcript.includes('"name":"show_question"')) {
+      await route.fulfill(toolResponse("question-single", "show_question", {
+        title: "数据准备",
+        text: "训练图片前应该做什么？",
+        kind: "single",
+        options: ["直接训练", "给图片贴标签"],
+      }));
+    } else {
+      await route.fulfill(textResponse("选出你认为合适的做法。"));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("教我准备训练数据");
+  await page.getByRole("button", { name: "发送" }).click();
+  const first = page.getByRole("radio", { name: "直接训练" });
+  await first.focus();
+  await first.press("Space");
+  await expect(first).toBeChecked();
+  await first.press("ArrowDown");
+  await expect(page.getByRole("radio", { name: "给图片贴标签" })).toBeChecked();
+  await page.getByRole("button", { name: "提交答案" }).click();
+  await expect(page.getByText("我们继续看图片标签。")).toBeVisible();
+  expect(received).toBe(true);
+});
+
+test("a student can defer a question, continue learning, and answer it after returning", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  let reviewedEarlierQuestion = false;
+  let secondShown = false;
+  await page.route("**/api/learning/course/model", async (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (transcript.includes("Question response submitted.")) {
+      reviewedEarlierQuestion = transcript.includes("question-first") && transcript.includes("有标签的图片");
+      await route.fulfill(textResponse("你回头完成了之前的题目。"));
+    } else if (transcript.includes("Question deferred.") && !secondShown) {
+      secondShown = true;
+      await route.fulfill(toolResponse("question-second", "show_question", {
+        title: "第二题",
+        text: "模型训练后可以做什么？",
+        kind: "single",
+        options: ["测试模型", "删除模型"],
+      }));
+    } else if (transcript.includes("Question deferred.")) {
+      await route.fulfill(textResponse("我们先看下一道。"));
+    } else if (!transcript.includes('"name":"show_question"')) {
+      await route.fulfill(toolResponse("question-first", "show_question", {
+        title: "第一题",
+        text: "哪种图片适合训练？",
+        kind: "single",
+        options: ["有标签的图片", "没有图片"],
+      }));
+    } else {
+      await route.fulfill(textResponse("你可以现在作答，也可以稍后再做。"));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("教我模型训练");
+  await page.getByRole("button", { name: "发送" }).click();
+  await expect(page.getByRole("heading", { name: "第一题" })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.getByRole("button", { name: "稍后再做" }).click();
+  await expect(page.getByRole("heading", { name: "第二题" })).toBeVisible();
+  await expect(page.locator(".course-message.user")).toHaveCount(1);
+  await page.getByRole("button", { name: "上一页" }).click();
+  await expect(page.getByRole("heading", { name: "第一题" })).toBeVisible();
+  await page.getByRole("radio", { name: "有标签的图片" }).check();
+  await page.getByRole("button", { name: "提交答案" }).click();
+  await expect(page.getByText("你回头完成了之前的题目。")).toBeVisible();
+  expect(reviewedEarlierQuestion).toBe(true);
+});
+
 test("slide publication rejects content that would crowd or control the renderer", async () => {
   const accepted: string[] = [];
   const tool = publishSlideTool((_id, slide) => {
