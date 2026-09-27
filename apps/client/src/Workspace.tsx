@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -69,6 +70,12 @@ export default function Workspace({
     "conversation",
     "new-conversation",
   ].includes(page);
+  // A destination click takes effect before the router renders the next page.
+  // Async course updates must respect that navigation even in the same tick.
+  const learningNavigationIntent = useRef(learningPage);
+  useLayoutEffect(() => {
+    learningNavigationIntent.current = learningPage;
+  }, [learningPage, location.pathname]);
   // Retain the route of the hidden classroom, matching its existing lifetime
   // when visiting account pages or other workspace destinations.
   const [retainedLearningLocation, retainLearningLocation] = useState(location);
@@ -213,6 +220,7 @@ export default function Workspace({
     delete: "注销账号",
   };
   const go = (next: typeof destination) => {
+    learningNavigationIntent.current = next.id === "learning";
     void routeNavigate(next.id === "learning" ? "/learn" : `/${next.id}`);
   };
   const locateSession = (course: StoredCourse) => {
@@ -221,7 +229,8 @@ export default function Workspace({
       : `${coursePath(course.id)}/conversations/new`;
     if (learningLocation.pathname === pathname) return;
     const state = { roomKey: courseRoomToken };
-    if (learningPage) void routeNavigate(pathname, { replace: true, state });
+    if (learningNavigationIntent.current)
+      void routeNavigate(pathname, { replace: true, state });
     else retainLearningLocation({ ...learningLocation, pathname, state });
   };
   const renameCourse = async (course: StoredCourse, title: string) => {
