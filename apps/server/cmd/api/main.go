@@ -19,6 +19,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
 	"github.com/LanternCX/zhiya/apps/server/internal/modelproxy"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
+	"github.com/LanternCX/zhiya/apps/server/internal/speech"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -30,7 +31,7 @@ type application struct {
 	learningHub   *learningHub
 	runner        codeRunner
 	objects       objectstore.Store
-	voiceSessions voiceSessionRegistry
+	voiceSessions speech.Registry
 	accounts      *appservice.AccountService
 	model         *modelproxy.Client
 	courses       *appservice.CourseService

@@ -1,4 +1,4 @@
-package main
+package speech
 
 import (
 	"context"
@@ -16,15 +16,15 @@ func TestDecodeVoiceClientMessage(t *testing.T) {
 		bad  bool
 	}{
 		{name: "start", raw: `{"type":"start-session","sessionId":"s1","turnId":0}`, want: "start-session"},
-		{name: "output only start", raw: `{"type":"start-session","sessionId":"s1","turnId":0,"capture":false}`, want: "start-session"},
-		{name: "audio", raw: `{"type":"audio","sessionId":"s1","turnId":1}`, want: "audio"},
-		{name: "commit", raw: `{"type":"commit-turn","sessionId":"s1","turnId":1}`, want: "commit-turn"},
+		{name: "speak", raw: `{"type":"speak-text","sessionId":"s1","turnId":1,"text":"你好"}`, want: "speak-text"},
 		{name: "cancel", raw: `{"type":"cancel-tts","sessionId":"s1","turnId":2}`, want: "cancel-tts"},
 		{name: "end", raw: `{"type":"end-session","sessionId":"s1","turnId":2}`, want: "end-session"},
-		{name: "missing session", raw: `{"type":"commit-turn","turnId":1}`, bad: true},
-		{name: "negative turn", raw: `{"type":"commit-turn","sessionId":"s1","turnId":-1}`, bad: true},
+		{name: "missing session", raw: `{"type":"speak-text","turnId":1}`, bad: true},
+		{name: "negative turn", raw: `{"type":"speak-text","sessionId":"s1","turnId":-1}`, bad: true},
+		{name: "removed capture", raw: `{"type":"start-session","sessionId":"s1","turnId":0,"capture":true}`, bad: true},
+		{name: "removed audio", raw: `{"type":"audio","sessionId":"s1","turnId":1}`, bad: true},
 		{name: "unsupported", raw: `{"type":"explode","sessionId":"s1","turnId":1}`, bad: true},
-		{name: "oversized text", raw: `{"type":"commit-turn","sessionId":"s1","turnId":1,"text":"` + string(make([]byte, 8193)) + `"}`, bad: true},
+		{name: "oversized text", raw: `{"type":"speak-text","sessionId":"s1","turnId":1,"text":"` + string(make([]byte, 8193)) + `"}`, bad: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -52,23 +52,10 @@ func TestVoiceServerEventScope(t *testing.T) {
 	}
 }
 
-func TestVoiceSessionUsesCurrentASRTurn(t *testing.T) {
-	voice := &voiceSession{asrTurnID: 2}
-	if got := voice.currentASRTurn(); got != 2 {
-		t.Fatalf("initial ASR turn = %d, want 2", got)
-	}
-	voice.mu.Lock()
-	voice.asrTurnID = 3
-	voice.mu.Unlock()
-	if got := voice.currentASRTurn(); got != 3 {
-		t.Fatalf("updated ASR turn = %d, want 3", got)
-	}
-}
-
 func TestVoiceSessionIgnoresStaleTTSEvents(t *testing.T) {
 	oldConn := &websocket.Conn{}
 	newConn := &websocket.Conn{}
-	current := &voiceSession{tts: newConn, ttsGeneration: 2}
+	current := &session{tts: newConn, ttsGeneration: 2}
 	if current.ttsEventCurrent(oldConn, 2) {
 		t.Fatal("stale TTS generation was accepted")
 	}
@@ -89,27 +76,16 @@ func TestTTSEventsCarryUniqueEventIDs(t *testing.T) {
 }
 
 func TestVoiceSessionRegistryRejectsConcurrentUserSession(t *testing.T) {
-	registry := voiceSessionRegistry{}
-	if !registry.acquire("user-1") {
+	registry := Registry{}
+	if !registry.Acquire("user-1") {
 		t.Fatal("first session was rejected")
 	}
-	if registry.acquire("user-1") {
+	if registry.Acquire("user-1") {
 		t.Fatal("concurrent session was accepted")
 	}
-	registry.release("user-1")
-	if !registry.acquire("user-1") {
+	registry.Release("user-1")
+	if !registry.Acquire("user-1") {
 		t.Fatal("session was not released")
-	}
-}
-
-func TestLongLivedAPIPathsSkipRequestTimeout(t *testing.T) {
-	for _, path := range []string{"/api/learning/socket", "/api/speech/stream", "/api/voice/session", "/api/learning/model"} {
-		if !isLongLivedAPIPath(path) {
-			t.Fatalf("%s was not marked long-lived", path)
-		}
-	}
-	if isLongLivedAPIPath("/api/courses") {
-		t.Fatal("ordinary API path was marked long-lived")
 	}
 }
 

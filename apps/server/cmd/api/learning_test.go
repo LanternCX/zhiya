@@ -43,7 +43,7 @@ func TestModelStreamsHaveNoAbsoluteDeadline(t *testing.T) {
 
 func learningSocket(t *testing.T, a *testApp, c *http.Client) *websocket.Conn {
 	t.Helper()
-	ticket := a.request(c, "POST", "/learning/socket-ticket", map[string]any{}, 200)["ticket"].(string)
+	ticket := a.request(c, "POST", "/socket-ticket", map[string]any{}, 200)["ticket"].(string)
 	url := "ws" + strings.TrimPrefix(a.server.URL, "http") + "/api/learning/socket?ticket=" + ticket
 	conn, response, err := websocket.Dial(context.Background(), url, &websocket.DialOptions{HTTPClient: c})
 	if err != nil {
@@ -59,7 +59,7 @@ func learningSocket(t *testing.T, a *testApp, c *http.Client) *websocket.Conn {
 func TestLearningSocketTicketCanBeUsedOnlyOnce(t *testing.T) {
 	a := setupAccountTest(t)
 	c := a.register("socket-ticket@example.com")
-	ticket := a.request(c, "POST", "/learning/socket-ticket", map[string]any{}, 200)["ticket"].(string)
+	ticket := a.request(c, "POST", "/socket-ticket", map[string]any{}, 200)["ticket"].(string)
 	url := "ws" + strings.TrimPrefix(a.server.URL, "http") + "/api/learning/socket?ticket=" + ticket
 	conn, _, err := websocket.Dial(context.Background(), url, nil)
 	if err != nil {
@@ -713,7 +713,7 @@ func TestOnboardingIsPersistentAndPrivate(t *testing.T) {
 	if other["id"] == id {
 		t.Fatal("students share a conversation")
 	}
-	a.request(a.client(), "POST", "/learning/socket-ticket", map[string]any{}, http.StatusUnauthorized)
+	a.request(a.client(), "POST", "/socket-ticket", map[string]any{}, http.StatusUnauthorized)
 }
 
 func TestInterruptedQuestionRestoresWithoutExecutingItTwice(t *testing.T) {

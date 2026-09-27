@@ -336,7 +336,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *application) learningSocketTicket(w http.ResponseWriter, r *http.Request) {
+func (a *application) socketTicket(w http.ResponseWriter, r *http.Request) {
 	ticket, err := a.accountService().NewSocketTicket(r.Context(), sessionToken(r), r.Header.Get("X-Zhiya-User"))
 	if err != nil {
 		a.respondError(w, err)
