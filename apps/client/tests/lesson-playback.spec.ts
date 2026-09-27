@@ -101,6 +101,59 @@ async function classroom(page: Page, pages: LessonPage[] = []) {
   return course;
 }
 
+test("a diagram remains readable when opened from a hidden page and resized", async ({ page }) => {
+  const diagram: LessonPage = {
+    kind: "animation", id: "diagram", title: "条件判断", layout: "vertical",
+    nodes: [
+      { id: "start", shape: "circle", label: "开始" },
+      { id: "check", shape: "diamond", label: "分数是否及格？" },
+      { id: "yes", shape: "rectangle", label: "通过" },
+      { id: "no", shape: "rectangle", label: "补考" },
+      { id: "end", shape: "circle", label: "结束" },
+    ],
+    edges: [
+      { id: "a", source: "start", target: "check" },
+      { id: "b", source: "check", target: "yes", label: "是" },
+      { id: "c", source: "check", target: "no", label: "否" },
+      { id: "d", source: "yes", target: "end" },
+      { id: "e", source: "no", target: "end" },
+    ],
+    buttons: [{ id: "play", label: "演示通过", steps: [[{ type: "highlight", targetId: "yes" }]] }],
+  };
+  const course = await classroom(page, [diagram, { ...diagram, id: "second", title: "第二页" }]);
+  course.state.presentations = [{ id: "first", pageId: "diagram" }, { id: "second", pageId: "second" }];
+  course.state.currentPresentationId = "second";
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "第二页" })).toBeVisible();
+  await page.getByRole("button", { name: "上一页", exact: true }).click();
+  const canvas = page.getByRole("img", { name: "动画页面：条件判断", exact: true });
+  const readable = async () => {
+    const bounds = await canvas.locator(".animation-canvas").boundingBox();
+    const nodes = await canvas.locator(".x6-node").evaluateAll(elements => elements.map(element => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    }));
+    return !!bounds && nodes.length === 5 && nodes.every(node =>
+      node.width > 40 && node.height > 20 && node.x >= bounds.x && node.y >= bounds.y &&
+      node.x + node.width <= bounds.x + bounds.width && node.y + node.height <= bounds.y + bounds.height);
+  };
+  await expect.poll(readable).toBe(true);
+  const yes = await canvas.locator('.x6-node[data-cell-id="yes"]').boundingBox();
+  const no = await canvas.locator('.x6-node[data-cell-id="no"]').boundingBox();
+  expect(yes).not.toBeNull();
+  expect(no).not.toBeNull();
+  expect(Math.abs(yes!.y - no!.y)).toBeLessThan(2);
+  expect(Math.abs(yes!.x - no!.x)).toBeGreaterThan(yes!.width);
+  await expect(canvas.locator(".x6-edge-label")).toHaveCount(2);
+  await page.setViewportSize({ width: 1180, height: 800 });
+  await expect.poll(readable).toBe(true);
+  await canvas.getByRole("button", { name: "演示通过" }).click();
+  await expect(canvas.getByRole("button", { name: "演示通过" })).toBeEnabled();
+  await page.getByRole("button", { name: "下一页", exact: true }).click();
+  await page.getByRole("button", { name: "上一页", exact: true }).click();
+  await expect.poll(readable).toBe(true);
+});
+
 test("voice replies hold the teaching turn until speech playback completes", async ({ page }) => {
   await page.addInitScript(() => {
     const nativeSocket = window.WebSocket;
