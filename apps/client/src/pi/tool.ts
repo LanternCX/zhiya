@@ -12,6 +12,7 @@ import type {
   AnimationPlaybackState,
   LessonPage,
   LessonPresentation,
+  QuestionPage,
 } from "../domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
 
@@ -146,6 +147,14 @@ export type LessonPageTools = {
     pageId: string,
     signal?: AbortSignal,
   ) => Promise<LessonPage>;
+};
+
+export type QuestionTools = {
+  show: (
+    id: string,
+    draft: Pick<QuestionPage, "title" | "text" | "questionKind" | "options">,
+  ) => Promise<QuestionPage>;
+  read: (pageId: string) => QuestionPage;
 };
 
 export type IllustrationTools = {

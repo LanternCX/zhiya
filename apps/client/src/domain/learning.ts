@@ -90,8 +90,20 @@ export type CodingExercise = {
   result?: CodeRunResult;
 };
 
+export type QuestionPage = {
+  kind: "question";
+  id: string;
+  title: string;
+  text: string;
+  questionKind: "single" | "multiple" | "true_false" | "blank";
+  options: string[];
+  selected: string[];
+  answerText: string;
+  status: "active" | "submitted";
+};
+
 export type LessonPage =
-  Slide | AnimationPage | IllustrationPage | CodingExercise;
+  Slide | AnimationPage | IllustrationPage | CodingExercise | QuestionPage;
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {
@@ -122,6 +134,7 @@ export type CourseMessage = {
   streaming?: boolean;
   pageId?: string;
   presentationId?: string;
+  questionEvent?: { action: "submitted" | "deferred"; pageId: string };
 };
 
 export type CourseActivity =

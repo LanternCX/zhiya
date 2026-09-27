@@ -10,6 +10,7 @@ import type {
   LessonPage,
   LessonPresentation,
   CodingExercise,
+  QuestionPage,
   CourseMessage,
   CourseActivity,
   CourseConversationState,
@@ -109,6 +110,7 @@ export class CourseSession {
     conversation: StoredCourseConversation;
     text: string;
   } | null = null;
+  private activeQuestionEvent: CourseMessage["questionEvent"] = undefined;
   private switchingSection = false;
   private outlineTasks = new Map<
     string,
@@ -238,6 +240,10 @@ export class CourseSession {
         read: () => this.currentCodingExercise(),
         end: () => this.endCodingExercise(),
       },
+      questions: {
+        show: (id, draft) => this.showQuestion(id, draft),
+        read: (pageId) => this.readQuestion(pageId),
+      },
       onRetry: (status) => this.updateModelRetry("teacher", status),
       handoff: initialHandoff,
       shouldStopAfterTurn: () => this.pendingHandoff !== null,
@@ -249,6 +255,10 @@ export class CourseSession {
                 "The student interrupted this teaching step. Process their new message before using more tools.",
             }
           : undefined,
+      questionContext: () => {
+        const event = this.activeQuestionEvent;
+        return event ? { action: event.action, page: this.readQuestion(event.pageId) } : null;
+      },
     });
     this.teacher.subscribe((event) => {
       if (this.stopped) return;
@@ -336,13 +346,16 @@ export class CourseSession {
     return this.teacher.state.isStreaming && !this.teacher.signal?.aborted;
   }
 
-  async prompt(text: string, materialNames: string[] = [], inputMode: InputMode = "text") {
+  async prompt(text: string, materialNames: string[] = [], inputMode: InputMode = "text", questionEvent?: CourseMessage["questionEvent"]) {
     if (this.teacher.signal?.aborted) await this.teacher.waitForIdle();
     if (this.stopped) return;
     this.currentInputMode = inputMode;
+    this.activeQuestionEvent = questionEvent;
     this.onMessage({
       id: ++this.messageSequence,
-      ...ConversationManager.userMessage(text, inputMode, materialNames),
+      ...(questionEvent
+        ? { role: "user" as const, text: "", questionEvent }
+        : ConversationManager.userMessage(text, inputMode, materialNames)),
     });
     const studentText = materialNames.length
       ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
@@ -1103,6 +1116,37 @@ export class CourseSession {
     );
   }
 
+  updateQuestion(
+    pageId: string,
+    changes: Pick<QuestionPage, "selected" | "answerText">,
+  ) {
+    const page = this.readQuestion(pageId);
+    if (page.status !== "active") return;
+    this.pageStore = this.pageStore.map((candidate) =>
+      candidate.id === pageId ? { ...page, ...changes } : candidate,
+    );
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
+  }
+
+  async submitQuestion(pageId: string) {
+    const page = this.readQuestion(pageId);
+    if (page.status !== "active") return;
+    const answer = page.questionKind === "blank" ? page.answerText.trim() : page.selected;
+    if (answer.length === 0)
+      throw new Error("请先填写答案");
+    this.pageStore = this.pageStore.map((candidate) =>
+      candidate.id === pageId ? { ...page, status: "submitted" as const } : candidate,
+    );
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
+    await this.prompt("Question response submitted.", [], "text", { action: "submitted", pageId });
+  }
+
+  async deferQuestion(pageId: string) {
+    const page = this.readQuestion(pageId);
+    if (page.status !== "active") return;
+    await this.prompt("Question deferred.", [], "text", { action: "deferred", pageId });
+  }
+
   async requestExerciseReview() {
     if (this.stopped || this.busy) return;
     await this.prompt("我结束这次编程练习了，请审查我的最终代码并给出建议。");
@@ -1261,6 +1305,34 @@ export class CourseSession {
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
     await this.showPage(id, id, this.teacher.signal);
     return exercise;
+  }
+
+  private async showQuestion(
+    id: string,
+    draft: Pick<QuestionPage, "title" | "text" | "questionKind" | "options">,
+  ) {
+    if (this.pageStore.some((page) => page.id === id))
+      throw new Error(`课堂页面 ${id} 已存在`);
+    const page: QuestionPage = {
+      kind: "question",
+      id,
+      ...draft,
+      selected: [],
+      answerText: "",
+      status: "active",
+    };
+    this.pageStore.push(page);
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
+    await this.showPage(id, id, this.teacher.signal);
+    return page;
+  }
+
+  private readQuestion(pageId: string) {
+    const page = this.pageStore.find((candidate): candidate is QuestionPage =>
+      candidate.kind === "question" && candidate.id === pageId,
+    );
+    if (!page) throw new Error(`找不到题目页面 ${pageId}`);
+    return page;
   }
 
   private currentCodingExercise() {

@@ -45,6 +45,7 @@ import { useSpeechPreference } from "../voice/useSpeechPreference";
 import { Spinner } from "../../components/ui/spinner";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
 import IllustrationCanvas from "./IllustrationCanvas";
+import QuestionPage from "./QuestionPage";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
@@ -1062,7 +1063,7 @@ export default function CourseRoom({
               )}
             </div>
           ) : (
-            messages.map((message) => (
+            messages.filter((message) => !message.questionEvent).map((message) => (
               <article
                 key={message.id}
                 className={`course-message ${message.role}`}
@@ -1285,6 +1286,28 @@ export default function CourseRoom({
                 }}
               />
             </Suspense>
+          ) : current.kind === "question" ? (
+            <QuestionPage
+              key={current.id}
+              question={current}
+              onChange={(changes) => session.current?.updateQuestion(current.id, changes)}
+              onDefer={async () => {
+                setBusy(true);
+                try {
+                  await session.current?.deferQuestion(current.id);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              onSubmit={async () => {
+                setBusy(true);
+                try {
+                  await session.current?.submitQuestion(current.id);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            />
           ) : null}
           <footer className="slide-controls">
             <button
