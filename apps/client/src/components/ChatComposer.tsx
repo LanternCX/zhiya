@@ -53,8 +53,6 @@ export type ChatComposerProps = {
   onError: (message: string) => void;
   onStop?: () => void;
   onSubmit: (message: ChatComposerMessage) => Promise<void>;
-  onVoiceTranscript?: (text: string, final: boolean) => void;
-  voiceTranscript?: string;
   onVoiceError?: (message: string) => void;
   onStartVoiceMode?: () => void;
   voiceModeActive?: boolean;
@@ -88,8 +86,6 @@ function ChatComposerInput({
   running = false,
   allowSubmitWhileRunning = false,
   submitLabel,
-  onVoiceTranscript,
-  voiceTranscript = "",
   onVoiceError,
   onStartVoiceMode,
   voiceModeActive = false,
@@ -202,7 +198,6 @@ function ChatComposerInput({
           } else {
             next = `${dictationCommitted.current}${text}`;
           }
-          onVoiceTranscript?.(next, event.final);
           setDictationDraft(next);
         }
         if (event.type === "complete") {
@@ -254,10 +249,6 @@ function ChatComposerInput({
     const element = dictationTextRef.current;
     if (element) element.scrollTop = element.scrollHeight;
   }, [dictationDraft]);
-  useEffect(() => {
-    if (!voiceModeActive || !voiceTranscript.trim()) return;
-    controller.textInput.setInput(voiceTranscript);
-  }, [controller, voiceModeActive, voiceTranscript]);
 
   return (
     <PromptInput

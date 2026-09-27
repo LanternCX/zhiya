@@ -217,7 +217,6 @@ export default function CourseRoom({
   );
   const [busy, setBusy] = useState(false);
   const [liveVoice, setLiveVoice] = useState(false);
-  const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voicePlaybackText, setVoicePlaybackText] = useState<Record<number, string>>({});
   const [codeRunning, setCodeRunning] = useState(false);
   const [error, setError] = useState("");
@@ -260,9 +259,7 @@ export default function CourseRoom({
   const pendingInitialMaterials = useRef<File[]>([]);
   const startLiveVoice = () => {
     if (voiceController.current) return;
-    const controller = new VoiceSessionController((text) => {
-      if (text.trim()) setVoiceTranscript(text);
-    }, () => session.current?.stopCurrent());
+    const controller = new VoiceSessionController(() => session.current?.stopCurrent());
     controller.setSpeaker(true);
     controller.subscribe((state) => {
       if (!state.error) return;
@@ -271,9 +268,8 @@ export default function CourseRoom({
       if (latest !== null) session.current?.finishNarration(latest);
     });
     voiceController.current = controller;
-    setVoiceTranscript("");
     setLiveVoice(true);
-    void controller.start({ capture: false }).catch((reason) => {
+    void controller.start().catch((reason) => {
       controller.end();
       if (voiceController.current === controller) voiceController.current = null;
       setLiveVoice(false);
@@ -286,7 +282,6 @@ export default function CourseRoom({
     if (narrationMessage.current !== null)
       session.current?.finishNarration(narrationMessage.current);
     setLiveVoice(false);
-    setVoiceTranscript("");
   };
   useEffect(() => () => { voiceController.current?.end(); }, []);
   useEffect(() => {
@@ -382,8 +377,6 @@ export default function CourseRoom({
       info,
       memory,
       (message) => {
-        if (message.role === "assistant" && message.streaming)
-          voiceController.current?.recordAgentText(message.text);
         setMessages((all) => {
           const next = all.some((item) => item.id === message.id)
             ? all.map((item) => (item.id === message.id ? message : item))
@@ -1114,7 +1107,6 @@ export default function CourseRoom({
           onVoiceError={setError}
           onStop={interrupt}
           onSubmit={submit}
-          voiceTranscript={voiceTranscript}
           onStartVoiceMode={startLiveVoice}
           voiceModeActive={liveVoice}
           onEndVoiceMode={endLiveVoice}
