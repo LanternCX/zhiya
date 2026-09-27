@@ -46,7 +46,6 @@ test("profile correction stays in the main panel and preserves the draft on fail
     },
   );
   await page.goto("/");
-  await page.getByRole("button", { name: "自由探索" }).click();
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -60,7 +59,7 @@ test("profile correction stays in the main panel and preserves the draft on fail
     /正在整理你的学习档案… · \d+ 秒/,
   );
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "探索即将开放" })).toHaveCount(
+  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toHaveCount(
     0,
   );
   failClaim();

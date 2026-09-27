@@ -34,9 +34,7 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await page.getByRole("button", { name: "返回学习", exact: true }).click();
     await expect(dialog).not.toBeVisible();
-    for (const name of ["自由探索", "AI 实验室", "学习地图"]) {
-      await page.getByRole("button", { name, exact: true }).click();
-    }
+    await page.getByRole("button", { name: "学习地图", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "今天想学什么？" }),
     ).toBeInViewport();

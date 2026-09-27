@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
-  ArrowDown, ArrowRight, BookOpen, Contrast, Code2, Compass,
+  ArrowDown, ArrowRight, BookOpen, Contrast, Code2, Compass, MessagesSquare,
   Menu, Moon, Sun, X,
 } from "lucide-react";
 import ClassroomScene from "./ClassroomScene";
@@ -23,8 +23,8 @@ const themeLabels: Record<Theme, string> = {
 };
 const experiences = [
   { icon: BookOpen, title: "课程学习", copy: "沿着清晰的知识结构前进，在讲解与互动练习中建立理解。随时提问，也能回到原来的课堂。", detail: "循序渐进" },
-  { icon: Compass, title: "自由知识探索", copy: "从一个真正好奇的问题出发，展开能回看、能追问的动态讲义，让好奇心连接新的知识。", detail: "由兴趣出发" },
-  { icon: Code2, title: "AI 实验室", copy: "通过可视化操作、参数实验和编程实践，观察模型如何变化，把抽象概念变成自己的经验。", detail: "在实践中理解" },
+  { icon: MessagesSquare, title: "连续对话", copy: "围绕课程随时提问、追问和复习。从最近对话回到上次的内容，让每一次交流都接得上。", detail: "接着上次学" },
+  { icon: Code2, title: "课堂实践", copy: "在讲解中穿插练习和编程，动手验证自己的想法，让具体的尝试帮助理解抽象概念。", detail: "边学边试" },
 ];
 const stages = [
   { name: "小学低年级", title: "故事与观察", copy: "用语音、图画和简单选择，让第一次接触 AI 保持具体。", example: "从认识一只小猫开始", detail: "用故事、声音和图片，发现机器也需要学习很多例子。" },
@@ -155,7 +155,7 @@ export default function App() {
 
         <div className="site-content">
           <section className="content-section" id="experience" aria-labelledby="experience-title">
-            <SectionHeading id="experience-title" title="课程、探索与实验">一条知识路径，一个好问题，一次动手实践。</SectionHeading>
+            <SectionHeading id="experience-title" title="在对话中学习，在课堂里实践">沿着课程前进，随时提问，也随时回来继续。</SectionHeading>
             <div className="feature-grid" id="learning">
               {experiences.map(({ icon: Icon, title, copy, detail }) => <FeatureCard key={title} title={title}
                 description={copy} icon={<Icon aria-hidden="true" />} note={detail} />)}
@@ -200,7 +200,7 @@ export default function App() {
           <section className="content-section about-section" id="about" aria-labelledby="about-title">
             <SectionHeading id="about-title" title="关于知芽" />
             <div className="about-copy"><p className="about-lead">让人工智能，成为每个学生都能理解的知识。</p>
-              <p>知芽面向小学至高中学生，将课程学习、自由探索与动手实践连接起来。我们关注学生怎样理解、在哪里遇到困难，以及下一次尝试需要什么支持。</p>
+              <p>知芽面向小学至高中学生，在课程对话中组织讲解、练习与编程实践。我们关注学生怎样理解、在哪里遇到困难，以及下一次尝试需要什么支持。</p>
               <p>以教材和知识体系组织内容，以具体的回答与实践表现安排下一步。让技术帮助学习，也让学生学会理解和审慎使用技术。</p>
             </div>
           </section>

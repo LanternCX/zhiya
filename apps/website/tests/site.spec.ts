@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("presents learning modes and navigates to multimodal teaching", async ({
+test("presents course learning and navigates to multimodal teaching", async ({
   page,
 }) => {
   await page.goto("./");
@@ -9,9 +9,10 @@ test("presents learning modes and navigates to multimodal teaching", async ({
   await expect(page.getByText("面向 K12 的人工智能学习搭子")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
 
-  for (const heading of ["课程学习", "自由知识探索", "AI 实验室"]) {
+  for (const heading of ["课程学习", "连续对话", "课堂实践"]) {
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
   }
+  await expect(page.getByText(/自由知识探索|AI 实验室|学习回顾|课程、探索与实验/)).toHaveCount(0);
 
   await expect(page.getByText(/项目进展|正在构建|待验收|尚未开放|产品规划/)).toHaveCount(0);
   await page.getByRole("navigation").getByRole("link", { name: "多模态教学" }).click();

@@ -14,8 +14,10 @@ import CourseOverview from "./features/course/CourseOverview";
 import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
 import type { ComposerInputMode } from "./components/ChatComposer";
-import Icon, { type IconName } from "./components/Icon";
+import Icon from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
+import LearningNavigation from "./components/LearningNavigation";
+import { Dialog as SidebarDialog } from "radix-ui";
 import { useSpeechPreference } from "./features/voice/useSpeechPreference";
 import { Volume2Icon } from "lucide-react";
 import {
@@ -42,18 +44,6 @@ import {
   usePage,
 } from "./routes";
 
-const destinations: {
-  id: IconName;
-  label: string;
-  title: string;
-  empty: string;
-}[] = [
-  { id: "learning", label: "学习", title: "学习地图", empty: "今天想学什么？" },
-  { id: "explore", label: "探索", title: "自由探索", empty: "探索即将开放" },
-  { id: "lab", label: "实验", title: "AI 实验室", empty: "实验准备中" },
-  { id: "review", label: "回顾", title: "学习回顾", empty: "还没有学习记录" },
-];
-
 export default function Workspace({
   account,
   feedback,
@@ -77,13 +67,14 @@ export default function Workspace({
     learningNavigationIntent.current = learningPage;
   }, [learningPage, location.pathname]);
   // Retain the route of the hidden classroom, matching its existing lifetime
-  // when visiting account pages or other workspace destinations.
+  // when visiting account pages or the learning profile.
   const [retainedLearningLocation, retainLearningLocation] = useState(location);
   const learningLocation = learningPage ? location : retainedLearningLocation;
   const learningMatch = matchRoutes(pageRoutes, learningLocation)?.at(-1);
   const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
   const memoryOpen = page === "learning-profile";
@@ -99,8 +90,6 @@ export default function Workspace({
     memory: string;
     model: ModelInfo | null;
   }>({ memory: "", model: null });
-  const destination =
-    destinations.find((item) => item.id === page) ?? destinations[0];
   const [courses, setCourses] = useState<StoredCourse[]>([]);
   const storedCourse = courses.find((course) => course.id === courseId);
   const conversation = storedCourse?.sections
@@ -118,6 +107,7 @@ export default function Workspace({
   const courseLevel =
     learningMatch?.route.id === "course" ? "course" : "conversation";
   const [coursesReady, setCoursesReady] = useState(false);
+  const [coursesLoadError, setCoursesLoadError] = useState(false);
   const courseRoomToken: string =
     learningLocation.state?.roomKey ?? learningLocation.key;
   const newSession = learningMatch?.route.id === "new-conversation";
@@ -150,16 +140,29 @@ export default function Workspace({
     if (learningPage) retainLearningLocation(location);
   }, [learningPage, location]);
   useEffect(() => {
+    const screen = window.matchMedia("(max-width: 720px)");
+    const closeOnDesktop = () => {
+      if (!screen.matches) setMobileNavigationOpen(false);
+    };
+    screen.addEventListener("change", closeOnDesktop);
+    return () => screen.removeEventListener("change", closeOnDesktop);
+  }, []);
+  useEffect(() => {
     if (!user) return;
     let current = true;
     setCoursesReady(false);
+    setCoursesLoadError(false);
     void listCourses()
       .then((next) => {
         if (!current) return;
         setCourses(next);
         setCourseError("");
       })
-      .catch(() => current && setCourseError("暂时无法读取课程"))
+      .catch(() => {
+        if (!current) return;
+        setCourseError("暂时无法读取课程");
+        setCoursesLoadError(true);
+      })
       .finally(() => current && setCoursesReady(true));
     return () => {
       current = false;
@@ -219,9 +222,10 @@ export default function Workspace({
     email: "更换邮箱",
     delete: "注销账号",
   };
-  const go = (next: typeof destination) => {
-    learningNavigationIntent.current = next.id === "learning";
-    void routeNavigate(next.id === "learning" ? "/learn" : `/${next.id}`);
+  const goLearn = () => {
+    learningNavigationIntent.current = true;
+    setMobileNavigationOpen(false);
+    void routeNavigate("/learn");
   };
   const locateSession = (course: StoredCourse) => {
     const pathname = course.conversationId
@@ -262,7 +266,6 @@ export default function Workspace({
     learningPage &&
     view === "home" &&
     !memoryOpen &&
-    destination.id === "learning" &&
     Boolean(activeCourse);
   const activeSection = activeCourse?.sections?.find((section) =>
     section.conversations.some(
@@ -350,10 +353,26 @@ export default function Workspace({
       return false;
     }
   };
+  const navigation = (
+    <LearningNavigation
+      courses={courses}
+      ready={coursesReady}
+      loadError={coursesLoadError}
+      onNavigate={() => {
+        learningNavigationIntent.current = true;
+        setMobileNavigationOpen(false);
+      }}
+      onLearn={goLearn}
+    />
+  );
   return (
     <div
       className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
     >
+      <SidebarDialog.Root
+        open={mobileNavigationOpen && !onboarding}
+        onOpenChange={setMobileNavigationOpen}
+      >
       <aside
         hidden={onboarding}
         className="workspace-sidebar"
@@ -363,24 +382,7 @@ export default function Workspace({
           <Mark />
           <span>知芽</span>
         </div>
-        <nav className="workspace-nav" aria-label="主导航">
-          {destinations.map((item) => (
-            <button
-              key={item.id}
-              title={item.title}
-              aria-label={item.title}
-              aria-current={
-                view === "home" && !memoryOpen && page !== "not-found" && destination.id === item.id
-                  ? "page"
-                  : undefined
-              }
-              onClick={() => go(item)}
-            >
-              <Icon name={item.id} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
+        {navigation}
         <div className="workspace-account">
           <button
             ref={trigger}
@@ -413,7 +415,7 @@ export default function Workspace({
                 void routeNavigate("/learning-profile");
               }}
             >
-              <Icon name="review" />
+              <Icon name="notebook" />
               学习档案
             </button>
             <button
@@ -463,6 +465,11 @@ export default function Workspace({
       </aside>
       <div className="workspace-body">
         <header hidden={onboarding} className="workspace-toolbar">
+          <SidebarDialog.Trigger asChild>
+            <button className="icon-button mobile-sidebar-toggle" aria-label="打开侧栏">
+              <Icon name="sidebar" />
+            </button>
+          </SidebarDialog.Trigger>
           <button
             className="icon-button sidebar-toggle"
             aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
@@ -503,7 +510,7 @@ export default function Workspace({
                 } else if (memoryOpen && !editingMemory) {
                   setEndingMemory(true);
                 } else {
-                  void go(destinations[0]);
+                  goLearn();
                 }
               }}
             >
@@ -522,9 +529,9 @@ export default function Workspace({
               : memoryOpen
                 ? "学习档案"
                 : view === "home"
-                  ? onboarding && destination.id === "learning"
+                  ? onboarding
                     ? "初次见面"
-                    : destination.title
+                    : "学习地图"
                   : titles[view]}
           </span>
         </header>
@@ -575,7 +582,7 @@ export default function Workspace({
             (!courseId || coursesReady) && (
               <section
                 className="course-surface"
-                data-hidden={view !== "home" || destination.id !== "learning"}
+                data-hidden={!learningPage}
                 aria-label="学习空间"
               >
                 {activeCourse && courseLevel === "course" && (
@@ -699,23 +706,6 @@ export default function Workspace({
                 )}
               </section>
             )}
-          {!onboarding &&
-            !memoryOpen &&
-            view === "home" &&
-            destination.id !== "learning" && (
-              <section key={destination.id} className="workspace-empty">
-                <div className={`subject-art ${destination.id}`}>
-                  <Icon name={destination.id} />
-                </div>
-                <h1>{destination.empty}</h1>
-                <button
-                  className="text-button"
-                  onClick={() => go(destinations[0])}
-                >
-                  返回学习
-                </button>
-              </section>
-            )}
           {!onboarding && view !== "home" && (
             <section key={view} className="workspace-settings">
               <h1>{titles[view]}</h1>
@@ -738,6 +728,24 @@ export default function Workspace({
           )}
         </main>
       </div>
+      <SidebarDialog.Portal>
+        <SidebarDialog.Overlay className="navigation-overlay" />
+        <SidebarDialog.Content
+          className="navigation-drawer"
+          aria-describedby={undefined}
+        >
+          <div className="navigation-drawer-header">
+            <SidebarDialog.Close asChild>
+              <button className="icon-button" aria-label="关闭侧栏">
+                <Icon name="close" />
+              </button>
+            </SidebarDialog.Close>
+            <SidebarDialog.Title>学习导航</SidebarDialog.Title>
+          </div>
+          {navigation}
+        </SidebarDialog.Content>
+      </SidebarDialog.Portal>
+      </SidebarDialog.Root>
     </div>
   );
 }

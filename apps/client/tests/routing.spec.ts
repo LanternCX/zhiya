@@ -93,18 +93,15 @@ test("workspace navigation survives reload and history protects unsaved profile 
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [] } }),
   );
-  await page.goto("/#/explore");
-  await expect(
-    page.getByRole("heading", { name: "探索即将开放" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "AI 实验室" }).click();
-  await expect(page).toHaveURL(/#\/lab$/);
+  await page.goto("/#/learn");
+  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await page.getByRole("button", { name: "学习档案", exact: true }).click();
+  await expect(page).toHaveURL(/#\/learning-profile$/);
   await page.reload();
-  await expect(page.getByRole("heading", { name: "实验准备中" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
   await page.goBack();
-  await expect(
-    page.getByRole("heading", { name: "探索即将开放" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "个人资料", exact: true }).click();
   await expect(page).toHaveURL(/#\/account\/profile$/);
@@ -121,7 +118,7 @@ test("workspace navigation survives reload and history protects unsaved profile 
   await page.goBack();
   await dialog.getByRole("button", { name: "放弃修改", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "探索即将开放" }),
+    page.getByRole("heading", { name: "今天想学什么？" }),
   ).toBeVisible();
   await page.goForward();
   await expect(page.getByLabel("昵称", { exact: true })).toHaveValue("小芽");
@@ -178,11 +175,11 @@ test("login returns to the requested page", async ({ page }) => {
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [] } }),
   );
-  await page.goto("/#/lab");
+  await page.goto("/#/learning-profile");
   await expect(page.getByRole("heading", { name: "登录知芽" })).toBeVisible();
   await page.getByLabel("邮箱", { exact: true }).fill(learner.email);
   await page.getByLabel("密码", { exact: true }).fill("test-password");
   await page.getByRole("button", { name: "登录", exact: true }).click();
-  await expect(page).toHaveURL(/#\/lab$/);
-  await expect(page.getByRole("heading", { name: "实验准备中" })).toBeVisible();
+  await expect(page).toHaveURL(/#\/learning-profile$/);
+  await expect(page.getByRole("region", { name: "学习档案" })).toBeVisible();
 });

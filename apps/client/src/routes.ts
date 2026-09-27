@@ -34,9 +34,6 @@ export const pageRoutes = [
   { id: "password", path: "account/security/password" },
   { id: "email", path: "account/security/email" },
   { id: "delete", path: "account/security/delete" },
-  { id: "explore", path: "explore" },
-  { id: "lab", path: "lab" },
-  { id: "review", path: "review" },
   { id: "not-found", path: "*" },
 ].map((route) => ({ ...route, element: null }));
 
