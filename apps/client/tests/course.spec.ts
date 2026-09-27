@@ -2692,12 +2692,13 @@ test(`the teacher agent creates and persists a course from the first request${ba
 
   if (background) {
     await expect.poll(() => creation).not.toBeNull();
-    await page.getByRole("button", { name: "自由探索" }).click();
+    await page.getByRole("button", { name: "用户菜单" }).click();
+    await page.getByRole("button", { name: "个人资料", exact: true }).click();
     releaseCreation();
     await expect.poll(() => persisted?.state?.messages?.map((message) => message.text))
       .toContain("我们从把一个苹果平均分开开始。");
-    await expect(page).toHaveURL(/#\/explore$/);
-    await expect(page.getByRole("heading", { name: "探索即将开放" })).toBeVisible();
+    await expect(page).toHaveURL(/#\/account\/profile$/);
+    await expect(page.getByRole("heading", { name: "个人资料" })).toBeVisible();
   } else {
     await expect(
       page.getByText("我们从把一个苹果平均分开开始。", { exact: true }),
@@ -4544,6 +4545,9 @@ test("a course outline opens lessons directly and manages history on demand", as
   ).toHaveCount(0);
   await expect(page.getByText("再练习一次循环", { exact: true })).toBeVisible();
   await expect(
+    page.getByRole("navigation", { name: "最近对话" }).getByRole("link").first(),
+  ).toContainText("新一轮学习");
+  await expect(
     page.getByText("我们继续学习循环。", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "返回课程" }).click();
@@ -4564,6 +4568,9 @@ test("a course outline opens lessons directly and manages history on demand", as
   await page.getByRole("button", { name: "删除记录" }).click();
   await page.getByRole("button", { name: "确认删除记录" }).click();
   await expect.poll(() => deletedConversation).toBe(true);
+  await expect(
+    page.getByRole("navigation", { name: "最近对话" }).getByRole("link", { name: /新一轮学习/ }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "打开学习记录：新一轮学习" }),
   ).toHaveCount(0);

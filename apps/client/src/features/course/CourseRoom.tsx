@@ -263,6 +263,14 @@ export default function CourseRoom({
     state: CourseConversationState;
   } | null>(null);
   const saveInFlight = useRef<Promise<boolean> | null>(null);
+  const savedConversation = useRef(
+    activeCourse && !newSession
+      ? {
+          id: activeCourse.conversationId,
+          state: JSON.stringify(activeCourse.state),
+        }
+      : null,
+  );
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
   const pendingInitialMaterials = useRef<File[]>([]);
@@ -358,8 +366,21 @@ export default function CourseRoom({
     if (!pendingSave.current) return true;
     const next = pendingSave.current;
     pendingSave.current = null;
+    const snapshot = {
+      id: next.course.conversationId,
+      state: JSON.stringify(next.state),
+    };
+    // Merely reopening a conversation must not change its persisted activity time.
+    if (
+      savedConversation.current?.id === snapshot.id &&
+      savedConversation.current.state === snapshot.state
+    )
+      return true;
     const saving = saveCourseConversation(next.course, next.state)
-      .then(() => true)
+      .then(() => {
+        savedConversation.current = snapshot;
+        return true;
+      })
       .catch(() => {
         setError("课程进度暂时无法保存");
         return false;
@@ -706,14 +727,25 @@ export default function CourseRoom({
       presentations: presented,
       currentPresentationId,
     };
+    const previous =
+      sessionCourse.current?.conversationId === course.conversationId
+        ? sessionCourse.current
+        : course;
+    const changed = JSON.stringify(previous.state) !== JSON.stringify(state);
+    const updatedAt = changed ? new Date().toISOString() : previous.updatedAt;
     const updated = {
-      ...course,
+      ...previous,
       state,
-      sections: course.sections?.map((section) => ({
+      updatedAt,
+      sections: previous.sections?.map((section) => ({
         ...section,
         conversations: section.conversations.map((conversation) =>
           conversation.id === course.conversationId
-            ? { ...conversation, state }
+            ? {
+                ...conversation,
+                state,
+                updatedAt: changed ? updatedAt : conversation.updatedAt,
+              }
             : conversation,
         ),
       })),

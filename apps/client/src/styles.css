@@ -958,9 +958,6 @@ body,
   color: var(--brand-ink);
   box-shadow: none;
 }
-.subject-art.explore { background: #dcecc7; color: var(--brand-ink); }
-.subject-art.lab { background: #f6ead0; color: #806122; }
-.subject-art.review { background: #e5edc8; color: #668650; }
 
 :root[data-theme="dark"] .workspace-sidebar,
 :root[data-theme="dark"] .workspace-settings,
@@ -983,9 +980,6 @@ body,
 }
 :root[data-theme="dark"] .danger:hover { background: var(--accent-hover); }
 :root[data-theme="dark"] .subject-art { color: #d3dfac; }
-:root[data-theme="dark"] .subject-art.explore { background: #344b32; color: #b7d19c; }
-:root[data-theme="dark"] .subject-art.lab { background: #6a5745; color: #f0dcb1; }
-:root[data-theme="dark"] .subject-art.review { background: #4b3c2c; color: #dfc9a9; }
 :root[data-theme="dark"] input:not([type="checkbox"]):not([type="file"]),
 :root[data-theme="dark"] textarea {
   background: var(--surface);
