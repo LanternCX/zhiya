@@ -1,6 +1,18 @@
 :where(.chat-composer) {
   --chat-composer-radius: 30px;
 }
+.chat-composer.chat-composer-input-modes textarea { padding-right: 144px; }
+.chat-composer-input-mode { width: 40px; min-width: 40px; height: 40px; padding: 0; }
+.chat-composer-capture { padding: 9px 14px 0; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.chat-composer-dialogue .chat-composer-footer { position: relative; }
+.chat-composer-dialogue .chat-composer-capture { min-height: 44px; padding: 16px 18px 0; text-align: center; }
+.chat-composer-dialogue textarea[hidden] { display: none; }
+.chat-composer-dialogue .chat-composer-attachment-button { visibility: hidden; }
+.chat-composer.chat-composer-input-modes.chat-composer-multiline textarea { padding-right: 14px; }
+@media (max-width: 560px) {
+  .chat-composer.chat-composer-input-modes textarea { padding: 14px; }
+  .chat-composer-input-modes .chat-composer-footer { position: relative; }
+}
 .chat-composer > [data-slot="input-group"] {
   position: relative;
   overflow: hidden;

@@ -12,8 +12,11 @@ import CourseRoom from "./features/course/CourseRoom";
 import CourseOverview from "./features/course/CourseOverview";
 import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
+import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon, { type IconName } from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
+import { useSpeechPreference } from "./features/voice/useSpeechPreference";
+import { Volume2Icon } from "lucide-react";
 import {
   createCourseConversation,
   deleteCourseConversation,
@@ -23,6 +26,7 @@ import {
 } from "./features/course/courses";
 import type {
   CourseSection,
+  InputMode,
   ModelInfo,
   StoredCourse,
   StoredCourseConversation,
@@ -74,6 +78,7 @@ export default function Workspace({
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [speechReplies, setSpeechReplies] = useSpeechPreference();
   const memoryOpen = page === "learning-profile";
   const [editingMemory, setEditingMemory] = useState(true);
   const [endingMemory, setEndingMemory] = useState(false);
@@ -113,6 +118,8 @@ export default function Workspace({
     id: number;
     text: string;
     materialNames: string[];
+    inputMode?: InputMode;
+    inputMethod?: ComposerInputMode;
     handoff?: boolean;
     conversationId?: string;
   } | null>(null);
@@ -272,6 +279,8 @@ export default function Workspace({
     section: CourseSection,
     request?: string,
     materialNames: string[] = [],
+    inputMode: InputMode = "text",
+    inputMethod?: ComposerInputMode,
   ) => {
     if (!activeCourse || sectionConversationRequests.current.has(section.id))
       return;
@@ -300,6 +309,8 @@ export default function Workspace({
           id: Date.now(),
           text: request,
           materialNames,
+          inputMode,
+          inputMethod,
           conversationId: conversation.id,
         });
     } catch {
@@ -418,6 +429,16 @@ export default function Workspace({
               <span>外观</span>
               <ThemeToggle />
             </div>
+            <button
+              role="switch"
+              aria-checked={speechReplies}
+              aria-label="语音播报"
+              onClick={() => setSpeechReplies(!speechReplies)}
+            >
+              <Volume2Icon />
+              语音播报
+              <span className="speech-preference-switch" aria-hidden="true" />
+            </button>
             <button
               disabled={busy}
               onClick={() => {
@@ -568,13 +589,13 @@ export default function Workspace({
                     onOpenConversation={(conversation) =>
                       openConversation(conversation)
                     }
-                    onCreateConversation={(section, request, materialNames) =>
-                      createSectionConversation(section, request, materialNames)
+                    onCreateConversation={(section, request, materialNames, inputMode, inputMethod) =>
+                      createSectionConversation(section, request, materialNames, inputMode, inputMethod)
                     }
                     onDeleteConversation={(section, conversation) =>
                       removeSectionConversation(section, conversation)
                     }
-                    onStartLearning={(text, materialNames) => {
+                    onStartLearning={(text, materialNames, inputMode, inputMethod) => {
                       void routeNavigate(
                         `${coursePath(activeCourse.id)}/conversations/new`,
                       );
@@ -582,6 +603,8 @@ export default function Workspace({
                         id: Date.now(),
                         text,
                         materialNames,
+                        inputMode,
+                        inputMethod,
                       });
                     }}
                   />

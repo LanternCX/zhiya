@@ -16,21 +16,29 @@ export class SpeechStream {
     const url = await speechSocketURL("/api/speech/stream");
     const socket = new WebSocket(url);
     socket.onmessage = (message) => {
-      try { this.onEvent(JSON.parse(message.data) as SpeechEvent); }
-      catch { this.onEvent({ type: "error", message: "语音服务返回了无效消息" }); }
+      let event: SpeechEvent;
+      try { event = JSON.parse(message.data) as SpeechEvent; }
+      catch { this.onEvent({ type: "error", message: "语音服务返回了无效消息" }); return; }
+      this.onEvent(event);
     };
-    socket.onerror = () => this.onEvent({ type: "error", message: "语音连接失败" });
+    socket.onerror = () => { if (this.socket === socket) this.onEvent({ type: "error", message: "语音连接失败" }); };
+    socket.onclose = () => {
+      if (this.socket !== socket) return;
+      this.socket = null;
+      this.onEvent({ type: "error", message: "语音识别连接已断开" });
+    };
     this.socket = socket;
     await new Promise<void>((resolve, reject) => {
       socket.onopen = () => resolve();
       socket.addEventListener("error", () => reject(new Error("语音连接失败")), { once: true });
+      socket.addEventListener("close", () => reject(new Error("语音识别连接已断开")), { once: true });
     });
   }
 
   async startAsr() { await this.connect(); this.send({ type: "start" }); }
   sendAudio(audio: ArrayBuffer) { this.socket?.send(audio); }
   stop() { this.send({ type: "stop" }); }
-  close() { this.socket?.close(); this.socket = null; }
+  close() { const socket = this.socket; this.socket = null; socket?.close(); }
   private send(value: object) { if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(value)); }
 }
 

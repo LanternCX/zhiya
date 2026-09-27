@@ -104,6 +104,17 @@ async function classroom(page: Page, pages: LessonPage[] = []) {
 test("voice replies hold the teaching turn until speech playback completes", async ({ page }) => {
   await page.addInitScript(() => {
     const nativeSocket = window.WebSocket;
+    Object.defineProperty(navigator, "mediaDevices", { value: { getUserMedia: async () => ({ getTracks: () => [{ stop() {} }] }) } });
+    class FakeNode { connect() {} disconnect() {} }
+    class FakeContext {
+      sampleRate = 48000;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      close() { return Promise.resolve(); }
+      createMediaStreamSource() { return new FakeNode(); }
+      createScriptProcessor() { return new FakeNode(); }
+    }
+    window.AudioContext = FakeContext as unknown as typeof AudioContext;
     const voice = window as Window & {
       voiceCommands: string[];
       finishVoice: (() => void) | null;
@@ -114,13 +125,13 @@ test("voice replies hold the teaching turn until speech playback completes", asy
       readyState = 0;
       onopen: (() => void) | null = null;
       onmessage: ((event: { data: string }) => void) | null = null;
-      onclose: (() => void) | null = null;
+      onclose: ((event: { code: number }) => void) | null = null;
       onerror: (() => void) | null = null;
       constructor() {
         window.setTimeout(() => { this.readyState = 1; this.onopen?.(); });
       }
       addEventListener() {}
-      close() { this.readyState = 3; this.onclose?.(); }
+      close() { this.readyState = 3; this.onclose?.({ code: 1000 }); }
       send(raw: string) {
         const command = JSON.parse(raw);
         voice.voiceCommands.push(command.type);
@@ -136,8 +147,20 @@ test("voice replies hold the teaching turn until speech playback completes", asy
         }
       }
     }
+    class SpeechSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      constructor() { window.setTimeout(() => { this.readyState = 1; this.onopen?.(); }); }
+      addEventListener() {}
+      close() { this.readyState = 3; }
+      send(raw: string) {
+        if (JSON.parse(raw).type === "start") window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "ready" }) }));
+      }
+    }
     window.WebSocket = new Proxy(nativeSocket, {
       construct(target, args) {
+        if (String(args[0]).includes("/api/speech/stream")) return new SpeechSocket() as unknown as WebSocket;
         return String(args[0]).includes("/api/voice/session")
           ? new VoiceSocket() as unknown as WebSocket
           : Reflect.construct(target, args);
@@ -145,10 +168,17 @@ test("voice replies hold the teaching turn until speech playback completes", asy
     });
   });
   await classroom(page);
-  await page.route("**/api/learning/course/model", (route) =>
-    route.fulfill(response("你好。")),
-  );
-  await page.getByRole("button", { name: "开启语音模式" }).click();
+  let modelCalls = 0;
+  let releaseSecondModel = () => {};
+  const secondModel = new Promise<void>((resolve) => { releaseSecondModel = resolve; });
+  await page.route("**/api/learning/course/model", async (route) => {
+    modelCalls += 1;
+    if (modelCalls === 2) await secondModel;
+    await route.fulfill(response(modelCalls === 1 ? "你好。" : "不应出现的旧回答。"));
+  });
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await page.getByRole("switch", { name: "语音播报" }).click();
+  await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("你好");
   await page.getByRole("button", { name: "发送", exact: true }).click();
 
@@ -156,11 +186,344 @@ test("voice replies hold the teaching turn until speech playback completes", asy
     (window as Window & { voiceCommands: string[] }).voiceCommands,
   )).toContain("speak-text");
   await expect(page.getByRole("button", { name: "打断" })).toBeVisible();
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("下一条草稿");
+  await expect(page.getByRole("button", { name: "打断", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "发送", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "打断", exact: true }).click();
   await page.evaluate(() =>
     (window as Window & { finishVoice: (() => void) | null }).finishVoice?.(),
   );
   await expect(page.getByRole("button", { name: "打断" })).toHaveCount(0);
-  await expect(page.locator(".course-message.assistant").last()).toContainText("你好。");
+  await expect(page.getByRole("textbox", { name: "告诉知芽你想学什么" })).toHaveValue("下一条草稿");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("再问一次");
+  await page.getByRole("button", { name: "发送", exact: true }).click();
+  await expect.poll(() => modelCalls).toBe(2);
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await page.getByRole("switch", { name: "语音播报" }).click();
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await expect(page.getByRole("button", { name: "打断" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "打断" })).toHaveCount(0);
+  releaseSecondModel();
+  await expect(page.getByText("不应出现的旧回答。")).toHaveCount(0);
+});
+
+test("course overview keeps speech output independent from microphone input", async ({ page }) => {
+  await page.addInitScript(() => {
+    const nativeSocket = window.WebSocket;
+    const voice = window as Window & { voiceCommands: string[]; disconnectVoice: (() => void) | null; asrStarts: number };
+    voice.voiceCommands = [];
+    voice.disconnectVoice = null;
+    voice.asrStarts = 0;
+    Object.defineProperty(navigator, "mediaDevices", { value: { getUserMedia: async () => ({ getTracks: () => [{ stop() {} }] }) } });
+    class FakeNode { connect() {} disconnect() {} }
+    class FakeContext {
+      sampleRate = 48000;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      close() { return Promise.resolve(); }
+      createMediaStreamSource() { return new FakeNode(); }
+      createScriptProcessor() { return new FakeNode(); }
+    }
+    window.AudioContext = FakeContext as unknown as typeof AudioContext;
+    class SpeechSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      constructor() { window.setTimeout(() => { this.readyState = 1; this.onopen?.(); }); }
+      addEventListener() {}
+      close() { this.readyState = 3; }
+      send(raw: string) {
+        if (JSON.parse(raw).type === "start") {
+          voice.asrStarts += 1;
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "ready" }) }));
+        }
+      }
+    }
+    class VoiceSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onclose: ((event: { code: number }) => void) | null = null;
+      constructor() {
+        voice.disconnectVoice = () => { this.readyState = 3; this.onclose?.({ code: 1006 }); };
+        window.setTimeout(() => { this.readyState = 1; this.onopen?.(); });
+      }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.({ code: 1000 }); }
+      send(raw: string) {
+        const command = JSON.parse(raw);
+        voice.voiceCommands.push(command.type);
+        if (command.type === "start-session") {
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({
+            type: "session-ready", sessionId: command.sessionId, turnId: command.turnId,
+          }) }));
+        }
+        if (command.type === "speak-text") {
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({
+            type: "tts-complete", sessionId: command.sessionId, turnId: command.turnId,
+          }) }));
+        }
+      }
+    }
+    window.WebSocket = new Proxy(nativeSocket, {
+      construct(target, args) {
+        if (String(args[0]).includes("/api/speech/stream")) return new SpeechSocket() as unknown as WebSocket;
+        return String(args[0]).includes("/api/voice/session")
+          ? new VoiceSocket() as unknown as WebSocket
+          : Reflect.construct(target, args);
+      },
+    });
+  });
+  await classroom(page);
+  await page.route("**/api/socket-ticket", (route) => route.fulfill({ json: { ticket: "voice-test-ticket" } }));
+  await page.goto("/#/courses/course");
+  await page.route("**/api/learning/course/model", (route) => route.fulfill(response("开始学习。")));
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await page.getByRole("switch", { name: "语音播报" }).click();
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await expect(page).toHaveURL(/\/courses\/course$/);
+  await page.getByRole("textbox").fill("开始学习");
+  await page.getByRole("button", { name: "开始新的学习", exact: true }).click();
+  await expect(page).toHaveURL(/\/courses\/course\/conversations\/new/);
+  await expect.poll(() => page.evaluate(() =>
+    (window as Window & { voiceCommands: string[] }).voiceCommands,
+  )).toContain("start-session");
+  await expect(page.getByRole("button", { name: "进入语音对话" })).toBeVisible();
+  expect(await page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts)).toBe(0);
+  await page.evaluate(() => (window as Window & { disconnectVoice: (() => void) | null }).disconnectVoice?.());
+  await expect(page.getByRole("button", { name: "进入语音对话" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "告诉知芽你想学什么" })).toBeEnabled();
+  await page.goto("/#/learn");
+  await page.getByRole("button", { name: "进入语音对话" }).click();
+  await expect(page.getByRole("button", { name: "退出语音对话" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "告诉知芽你想学什么" })).toHaveCount(0);
+  await page.locator(".chat-composer").screenshot({ path: "/tmp/zhiya-voice-dialogue.png" });
+});
+
+test("dictation waits for the final transcript before it can be used", async ({ page }) => {
+  await page.addInitScript(() => {
+    const nativeSocket = window.WebSocket;
+    const audio = window as Window & { microphoneStopped: boolean };
+    audio.microphoneStopped = false;
+    Object.defineProperty(navigator, "mediaDevices", { value: {
+      getUserMedia: async () => ({ getTracks: () => [{ stop: () => { audio.microphoneStopped = true; } }] }),
+    } });
+    class FakeNode { connect() {} disconnect() {} }
+    class FakeContext {
+      sampleRate = 48000;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      close() { return Promise.resolve(); }
+      createMediaStreamSource() { return new FakeNode(); }
+      createScriptProcessor() { return new FakeNode(); }
+      createAnalyser() { return Object.assign(new FakeNode(), { fftSize: 256, smoothingTimeConstant: 0, getByteTimeDomainData: () => {} }); }
+    }
+    window.AudioContext = FakeContext as unknown as typeof AudioContext;
+    class SpeechSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor() { window.setTimeout(() => { this.readyState = 1; this.onopen?.(); }); }
+      addEventListener() {}
+      close() { this.readyState = 3; }
+      send(raw: string) {
+        const command = JSON.parse(raw);
+        if (command.type === "start") {
+          this.onmessage?.({ data: JSON.stringify({ type: "ready" }) });
+          this.onmessage?.({ data: JSON.stringify({ type: "transcript", text: "先说", final: false }) });
+        }
+        if (command.type === "stop") window.setTimeout(() => {
+          this.onmessage?.({ data: JSON.stringify({ type: "transcript", text: "先说后说", final: true }) });
+          this.onmessage?.({ data: JSON.stringify({ type: "complete" }) });
+        }, 1800);
+      }
+    }
+    window.WebSocket = new Proxy(nativeSocket, {
+      construct(target, args) {
+        return String(args[0]).includes("/api/speech/stream")
+          ? new SpeechSocket() as unknown as WebSocket
+          : Reflect.construct(target, args);
+      },
+    });
+  });
+  await classroom(page);
+  await page.route("**/api/socket-ticket", (route) => route.fulfill({ json: { ticket: "voice-test-ticket" } }));
+  await page.getByRole("button", { name: "开始听写", exact: true }).click();
+  await expect(page.getByLabel("实时听写内容")).toContainText("先说");
+  await page.getByRole("button", { name: "停止听写" }).click();
+  await expect(page.getByLabel("实时听写内容")).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "告诉知芽你想学什么" })).toHaveValue("先说后说");
+  expect(await page.evaluate(() => (window as Window & { microphoneStopped: boolean }).microphoneStopped)).toBe(true);
+});
+
+test("voice dialogue listens during playback and new speech interrupts the current answer", async ({ page }) => {
+  await page.addInitScript(() => {
+    const nativeSocket = window.WebSocket;
+    const state = window as Window & {
+      voiceCommands: string[];
+      asrStarts: number;
+      emitSpeech: (text: string, final?: boolean) => void;
+      disconnectAsr: () => void;
+    };
+    state.voiceCommands = [];
+    state.asrStarts = 0;
+    Object.defineProperty(navigator, "mediaDevices", { value: {
+      getUserMedia: async () => ({ getTracks: () => [{ stop() {} }] }),
+    } });
+    class FakeNode { connect() {} disconnect() {} }
+    class FakeContext {
+      sampleRate = 48000;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      close() { return Promise.resolve(); }
+      createMediaStreamSource() { return new FakeNode(); }
+      createScriptProcessor() { return new FakeNode(); }
+    }
+    window.AudioContext = FakeContext as unknown as typeof AudioContext;
+    class SpeechSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onclose: ((event: { code: number }) => void) | null = null;
+      constructor() {
+        window.setTimeout(() => { this.readyState = 1; this.onopen?.(); });
+        state.emitSpeech = (text, final = true) => this.onmessage?.({ data: JSON.stringify({ type: "transcript", text, final }) });
+        state.disconnectAsr = () => { this.readyState = 3; this.onclose?.({ code: 1006 }); };
+      }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.({ code: 1000 }); }
+      send(raw: string) {
+        const command = JSON.parse(raw);
+        if (command.type === "start") {
+          state.asrStarts += 1;
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "ready" }) }));
+        }
+        if (command.type === "stop") {
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "complete" }) }));
+        }
+      }
+    }
+    class VoiceSocket {
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onclose: ((event: { code: number }) => void) | null = null;
+      constructor() { window.setTimeout(() => { this.readyState = 1; this.onopen?.(); }); }
+      addEventListener() {}
+      close() { this.readyState = 3; this.onclose?.({ code: 1000 }); }
+      send(raw: string) {
+        const command = JSON.parse(raw);
+        state.voiceCommands.push(command.type);
+        if (command.type === "start-session") {
+          window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "session-ready", sessionId: command.sessionId, turnId: command.turnId }) }));
+        }
+        if (command.type === "speak-text") {
+          if (state.voiceCommands.filter((type) => type === "speak-text").length === 1)
+            window.setTimeout(() => this.onmessage?.({ data: JSON.stringify({ type: "tts-complete", sessionId: command.sessionId, turnId: command.turnId }) }), 250);
+        }
+      }
+    }
+    window.WebSocket = new Proxy(nativeSocket, {
+      construct(target, args) {
+        const url = String(args[0]);
+        if (url.includes("/api/speech/stream")) return new SpeechSocket() as unknown as WebSocket;
+        if (url.includes("/api/voice/session")) return new VoiceSocket() as unknown as WebSocket;
+        return Reflect.construct(target, args);
+      },
+    });
+  });
+  await classroom(page);
+  await page.route("**/api/socket-ticket", (route) => route.fulfill({ json: { ticket: "voice-test-ticket" } }));
+  await page.route("**/api/learning/course/model", (route) => route.fulfill(response("我们开始学习。")));
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("保留的草稿");
+  await page.getByRole("button", { name: "进入语音对话" }).click();
+  await expect(page.getByRole("button", { name: "退出语音对话" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("textbox", { name: "告诉知芽你想学什么" })).toHaveCount(0);
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  const initialStarts = await page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts);
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string, final?: boolean) => void }).emitSpeech("帮我", false));
+  await expect(page.getByLabel("实时听写内容")).toContainText("帮我");
+  await page.waitForTimeout(400);
+  await expect(page.locator(".course-message.user")).toHaveCount(0);
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("帮我学"));
+  await page.waitForTimeout(500);
+  await expect(page.locator(".course-message.user")).toHaveCount(0);
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("编程"));
+  await expect(page.locator(".course-message.user").last()).toContainText("帮我学编程");
+  await expect.poll(() => page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands)).toContain("speak-text");
+  await expect.poll(() => page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts)).toBe(initialStarts + 1);
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("再讲一次"));
+  await expect(page.locator(".course-message.user").last()).toContainText("再讲一次");
+  await expect.poll(() => page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands.filter((type) => type === "speak-text").length)).toBe(2);
+  await expect.poll(() => page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts)).toBeGreaterThanOrEqual(3);
+  await expect(page.locator(".chat-composer-submit-tools button")).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "打断" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "退出语音对话" })).toBeVisible();
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("换个问题"));
+  await expect(page.locator(".course-message.user").last()).toContainText("换个问题");
+  await expect.poll(() => page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands)).toContain("cancel-tts");
+  await expect.poll(() => page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts)).toBeGreaterThanOrEqual(4);
+  await expect.poll(() => page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands.filter((type) => type === "speak-text").length)).toBe(3);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "退出语音对话" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "打断" })).toBeDisabled();
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  await page.getByRole("button", { name: "暂停麦克风" }).click();
+  await expect(page.getByLabel("实时听写内容")).toContainText("麦克风已暂停");
+  const startsWhilePaused = await page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts);
+  await page.getByRole("button", { name: "继续语音对话" }).click();
+  await expect.poll(() => page.evaluate(() => (window as Window & { asrStarts: number }).asrStarts)).toBeGreaterThan(startsWhilePaused);
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("尚未发送"));
+  await page.getByRole("button", { name: "退出语音对话" }).click();
+  const draft = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
+  await expect(draft).toHaveValue("保留的草稿尚未发送");
+  await page.waitForTimeout(1400);
+  await expect(page.locator(".course-message.user").last()).toContainText("换个问题");
+  const spokenBefore = await page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands.filter((type) => type === "speak-text").length);
+  await draft.fill("编辑后的问题");
+  await page.getByRole("button", { name: "开始听写", exact: true }).click();
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  await page.evaluate(() => (window as Window & { emitSpeech: (text: string) => void }).emitSpeech("补充内容"));
+  await page.waitForTimeout(1400);
+  await expect(page.locator(".course-message.user").last()).toContainText("换个问题");
+  await page.getByRole("button", { name: "停止听写" }).click();
+  await expect(draft).toHaveValue("编辑后的问题补充内容");
+  await draft.fill("最终编辑的问题");
+  await page.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(page.locator(".course-message.user").last()).toContainText("最终编辑的问题");
+  await expect(page.getByRole("button", { name: "打断", exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands.filter((type) => type === "speak-text").length)).toBe(spokenBefore);
+  for (const width of [390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const buttons = page.locator(".chat-composer-submit-tools button");
+    await expect(buttons).toHaveCount(3);
+    for (const button of await buttons.all()) await expect(button).toBeInViewport();
+  }
+  // A voice conversation temporarily enables playback without changing the preference.
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await expect(page.getByRole("switch", { name: "语音播报" })).toHaveAttribute("aria-checked", "false");
+  await page.getByRole("switch", { name: "语音播报" }).click();
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await page.getByRole("button", { name: "进入语音对话" }).click();
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  await page.getByRole("button", { name: "退出语音对话" }).click();
+  await draft.fill("退出对话后仍然播报");
+  await page.getByRole("button", { name: "发送", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => (window as Window & { voiceCommands: string[] }).voiceCommands.filter((type) => type === "speak-text").length)).toBeGreaterThan(spokenBefore);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "进入语音对话" }).click();
+  await expect(page.getByLabel("实时听写内容")).toContainText("正在听取");
+  await page.evaluate(() => (window as Window & { disconnectAsr: () => void }).disconnectAsr());
+  await expect(page.getByRole("alert")).toContainText("语音识别连接已断开");
+  await expect(page.getByRole("button", { name: "继续语音对话" })).toBeVisible();
+  await page.getByRole("button", { name: "退出语音对话" }).click();
+  await expect(draft).toBeEditable();
+  await page.reload();
+  await page.getByRole("button", { name: "用户菜单" }).click();
+  await expect(page.getByRole("switch", { name: "语音播报" })).toHaveAttribute("aria-checked", "true");
 });
 
 test("slides resume the original lesson after the first page becomes ready", async ({
@@ -378,7 +741,7 @@ test("a student interrupts a pending page and the remaining old tool batch canno
     release = resolve;
   });
   let waitingForSecond = false;
-  let secondPublished = false;
+  let lateResponseReturned = false;
   await page.route("**/api/learning/course/model", async (route) => {
     const request = route.request().postDataJSON();
     const messages = request.payload.messages;
@@ -388,7 +751,6 @@ test("a student interrupts a pending page and the remaining old tool batch canno
         (message: { role: string }) => message.role === "tool",
       ).length;
       if (count > 1) {
-        secondPublished = true;
         await route.fulfill(response(""));
         return;
       }
@@ -405,6 +767,7 @@ test("a student interrupts a pending page and the remaining old tool batch canno
           },
         ]),
       );
+      if (count === 1) lateResponseReturned = true;
       return;
     }
     if (transcript.includes("先回答我的问题")) {
@@ -462,12 +825,14 @@ test("a student interrupts a pending page and the remaining old tool batch canno
     page.getByRole("img", { name: "课件页面：当前第一页" }),
   ).toBeVisible();
   await prompt.fill("先回答我的问题");
+  await page.getByRole("button", { name: "打断", exact: true }).click();
   await page.getByRole("button", { name: "发送", exact: true }).click();
   await expect(
     page.getByText("先回答你的问题，原来的切页已经停止。", { exact: true }),
   ).toBeVisible();
   release();
-  await expect.poll(() => secondPublished).toBe(true);
+  await expect.poll(() => lateResponseReturned).toBe(true);
+  await expect.poll(() => course.state.pages.map((page) => page.title)).not.toContain("迟到的第二页");
   await expect(page.locator(".slide-controls")).toContainText("1 / 1");
   await expect(
     page.getByRole("img", { name: "课件页面：当前第一页" }),
@@ -667,7 +1032,7 @@ test("retrying a presentation does not duplicate history or recreate the exercis
   await expect.poll(() => course.state.presentations.length).toBe(1);
 });
 
-test("a question sent during streaming survives subsequent teacher text updates", async ({
+test("a new question after interruption survives late teacher text updates", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -711,14 +1076,14 @@ test("a question sent during streaming survives subsequent teacher text updates"
   await page.getByRole("button", { name: "发送", exact: true }).click();
   await expect(page.getByText("讲解的前半段。", { exact: true })).toBeVisible();
   await prompt.fill("变量为什么叫变量？");
+  await page.getByRole("button", { name: "打断", exact: true }).click();
+  await expect(prompt).toHaveValue("变量为什么叫变量？");
   await page.getByRole("button", { name: "发送", exact: true }).click();
-  await expect(
-    page.getByText("变量为什么叫变量？", { exact: true }),
-  ).toBeVisible();
   await page.evaluate(() =>
     window.dispatchEvent(new Event("finish-lesson-text")),
   );
   await expect(page.getByText("收到你的问题。", { exact: true })).toBeVisible();
+  await expect(page.getByText("讲解的后半段。", { exact: false })).toHaveCount(0);
   await expect(
     page.getByText("变量为什么叫变量？", { exact: true }),
   ).toBeVisible();

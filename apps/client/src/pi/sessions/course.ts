@@ -79,6 +79,8 @@ export class CourseSession {
   private stopped = false;
   private messageSequence = 0;
   private teacherMessageId = 0;
+  private activeTeacherMessage: CourseMessage | null = null;
+  private ignoreTeacherOutput = false;
   private currentInputMode: InputMode = "text";
   private teacherMessageMode: InputMode = "text";
   private narrationPlayback: {
@@ -276,6 +278,9 @@ export class CourseSession {
         return;
       if (event.message.role !== "assistant") return;
       if (event.type === "message_start") {
+        if (this.teacher.signal?.aborted) return;
+        this.ignoreTeacherOutput = false;
+        this.activeTeacherMessage = null;
         this.teachingInterrupted = false;
         this.teacherMessageMode = this.currentInputMode;
         this.teacherPresentationId = this.currentPresentationId;
@@ -283,6 +288,7 @@ export class CourseSession {
         this.onActivity({ kind: "thinking", text: "", active: true });
         return;
       }
+      if (this.ignoreTeacherOutput) return;
       const message = event.message as AssistantMessage;
       const reasoning = message.content
         .filter((part) => part.type === "thinking")
@@ -304,7 +310,7 @@ export class CourseSession {
       }
       if (presented.display_text.trim()) {
         this.ensureNarrationPlayback(this.teacherMessageId);
-        this.onMessage({
+        const nextMessage: CourseMessage = {
           id: this.teacherMessageId,
           role: "assistant",
           text: presented.display_text,
@@ -314,7 +320,9 @@ export class CourseSession {
             (item) => item.id === this.teacherPresentationId,
           )?.pageId,
           presentationId: this.teacherPresentationId || undefined,
-        });
+        };
+        this.activeTeacherMessage = nextMessage;
+        this.onMessage(nextMessage);
       }
     });
     this.startOutlineTask(
@@ -386,12 +394,13 @@ export class CourseSession {
     return true;
   }
 
-  async beginFromHandoff() {
+  async beginFromHandoff(inputMode: InputMode = "text") {
     if (this.stopped) return;
+    this.currentInputMode = inputMode;
     const operation = this.cancellation;
     try {
       await this.teacher.prompt(
-        "Begin teaching in this conversation using the application handoff context.",
+        `Begin teaching in this conversation using the application handoff context.\n\n${ResponsePresenter.modePrompt(inputMode)}`,
       );
       if (await this.finishHandoff()) return;
       await this.waitForNarrationPlayback();
@@ -407,6 +416,11 @@ export class CourseSession {
 
   stopCurrent() {
     this.cancellation++;
+    this.ignoreTeacherOutput = true;
+    if (this.activeTeacherMessage?.streaming) {
+      this.activeTeacherMessage = { ...this.activeTeacherMessage, streaming: false };
+      this.onMessage(this.activeTeacherMessage);
+    }
     this.pendingHandoff = null;
     this.teacher.abort();
     for (const [taskId, task] of this.outlineTasks) {

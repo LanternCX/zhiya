@@ -37,11 +37,17 @@ export class VoiceSessionController {
     let socket: WebSocket;
     let lastError: unknown;
     for (let attempt = 0; ; attempt += 1) {
+      if (this.getState().status === "ended") throw new Error("语音会话已结束");
       try {
         socket = await connectVoiceSession();
+        if (this.getState().status === "ended") {
+          socket.close();
+          throw new Error("语音会话已结束");
+        }
         break;
       } catch (error) {
         lastError = error;
+        if (this.getState().status === "ended") throw lastError;
         const delay = nextVoiceReconnectDelay(attempt);
         if (delay === null) throw lastError;
         await new Promise((resolve) => window.setTimeout(resolve, delay));
@@ -78,7 +84,7 @@ export class VoiceSessionController {
   }
   setSpeaker(enabled: boolean) { this.speakerEnabled = enabled; if (!enabled) this.stopPlayback(); }
   interrupt() { this.onInterruptAgent(); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechProgress = null; this.speechInFlight = false; this.send({ type: "cancel-tts", sessionId: this.sessionId, turnId: this.turnId }); this.stopPlayback(); this.turnId += 1; this.dispatch({ type: "interrupted" }); }
-  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.stopPlayback(); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; this.dispatch({ type: "end" }); }
+  end() { this.rejectSessionReady?.(new Error("语音会话已结束")); this.speechQueue = []; this.speechPlaybackComplete = null; this.speechInFlight = false; this.playback.dispose(); this.dispatch({ type: "end" }); this.send({ type: "end-session", sessionId: this.sessionId, turnId: this.turnId }); this.socket?.close(); this.socket = null; }
   handleVisibilityChange(hidden: boolean) { if (hidden) this.end(); }
   handleConnectionClosed() {
     if (this.state.status === "ended") return;

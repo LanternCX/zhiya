@@ -41,6 +41,7 @@ import {
 import ChatComposer, {
   type ChatComposerMessage,
 } from "../../components/ChatComposer";
+import { useSpeechPreference } from "../voice/useSpeechPreference";
 import { Spinner } from "../../components/ui/spinner";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
 import IllustrationCanvas from "./IllustrationCanvas";
@@ -54,6 +55,7 @@ import { takeCompletedSentences } from "../../transport/speech";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
 import { replaceVoicePlaybackText } from "../voice/VoicePlaybackText";
 import type { InputMode } from "../../domain/learning";
+import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -169,6 +171,8 @@ export default function CourseRoom({
     id: number;
     text: string;
     materialNames: string[];
+    inputMode?: InputMode;
+    inputMethod?: ChatComposerMessage["inputMethod"];
     handoff?: boolean;
     conversationId?: string;
   } | null;
@@ -217,6 +221,8 @@ export default function CourseRoom({
   );
   const [busy, setBusy] = useState(false);
   const [liveVoice, setLiveVoice] = useState(false);
+  const [speechReplies] = useSpeechPreference();
+  const [voiceStarting, setVoiceStarting] = useState(false);
   const [voicePlaybackText, setVoicePlaybackText] = useState<Record<number, string>>({});
   const [codeRunning, setCodeRunning] = useState(false);
   const [error, setError] = useState("");
@@ -233,7 +239,9 @@ export default function CourseRoom({
   const currentPresentationIdRef = useRef(initialState.currentPresentationId);
   const session = useRef<CourseSession | null>(null);
   const voiceController = useRef<VoiceSessionController | null>(null);
+  const voiceStart = useRef<Promise<boolean> | null>(null);
   const narrationMessage = useRef<number | null>(null);
+  const interruptedNarration = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
   const queuedSpeech = useRef(0);
   const playedSpeech = useRef(0);
@@ -257,8 +265,9 @@ export default function CourseRoom({
   const thread = useRef<HTMLDivElement | null>(null);
   const startedEntryRequest = useRef<number | null>(null);
   const pendingInitialMaterials = useRef<File[]>([]);
-  const startLiveVoice = () => {
-    if (voiceController.current) return;
+  const startLiveVoice = (): Promise<boolean> => {
+    if (voiceStart.current) return voiceStart.current;
+    if (voiceController.current) return Promise.resolve(true);
     const controller = new VoiceSessionController(() => session.current?.stopCurrent());
     controller.setSpeaker(true);
     controller.subscribe((state) => {
@@ -266,24 +275,56 @@ export default function CourseRoom({
       setError(state.error);
       const latest = narrationMessage.current;
       if (latest !== null) session.current?.finishNarration(latest);
+      if ((state.status === "ended" || state.errorKind === "tts" || state.errorKind === "playback") && voiceController.current === controller) {
+        voiceController.current = null;
+        voiceStart.current = null;
+        controller.end();
+        setLiveVoice(false);
+        setVoiceStarting(false);
+      }
     });
     voiceController.current = controller;
-    setLiveVoice(true);
-    void controller.start().catch((reason) => {
-      controller.end();
-      if (voiceController.current === controller) voiceController.current = null;
-      setLiveVoice(false);
-      setError(reason instanceof Error ? reason.message : "无法启动语音对话");
+    setVoiceStarting(true);
+    const pending = controller.start().then(async () => {
+      if (voiceController.current !== controller) {
+        controller.end();
+        return false;
+      }
+      setLiveVoice(true);
+      return true;
+    }).catch((reason) => {
+      if (voiceController.current === controller) {
+        voiceController.current = null;
+        controller.end();
+        setLiveVoice(false);
+        setError(reason instanceof Error ? reason.message : "无法启动语音对话");
+      }
+      return false;
+    }).finally(() => {
+      if (voiceStart.current === pending) {
+        voiceStart.current = null;
+        setVoiceStarting(false);
+      }
     });
+    voiceStart.current = pending;
+    return pending;
   };
   const endLiveVoice = () => {
-    voiceController.current?.end();
+    const controller = voiceController.current;
     voiceController.current = null;
+    voiceStart.current = null;
+    controller?.end();
     if (narrationMessage.current !== null)
       session.current?.finishNarration(narrationMessage.current);
     setLiveVoice(false);
+    setVoiceStarting(false);
   };
-  useEffect(() => () => { voiceController.current?.end(); }, []);
+  useEffect(() => () => {
+    const controller = voiceController.current;
+    voiceController.current = null;
+    voiceStart.current = null;
+    controller?.end();
+  }, []);
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") endLiveVoice();
@@ -712,11 +753,15 @@ export default function CourseRoom({
       }
     }
     if (!latest) return;
+    // Opening playback must not replay a completed response restored from history.
+    if (!latest.streaming && !busy && latest.id !== narrationMessage.current) return;
+    if (latest.id === interruptedNarration.current) return;
     if (!liveVoice || latest.input_mode !== "speech" || !voiceController.current) {
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
     if (latest.id !== narrationMessage.current) {
+      interruptedNarration.current = null;
       narrationMessage.current = latest.id;
       narrationConsumed.current = 0;
       queuedSpeech.current = 0;
@@ -725,8 +770,10 @@ export default function CourseRoom({
       voiceScheduledText.current[latest.id] = "";
       setVoicePlaybackText((current) => ({ ...current, [latest.id]: "" }));
     }
+    const spokenText = ResponsePresenter.present(latest.text, "speech").speech_text;
+    if (latest.streaming && spokenText !== latest.text) return;
     const extracted = takeCompletedSentences(
-      latest.text,
+      spokenText,
       narrationConsumed.current,
       !latest.streaming,
     );
@@ -797,7 +844,9 @@ export default function CourseRoom({
     setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
-    await current.beginFromHandoff();
+    const speechReady = speechReplies && await startLiveVoice();
+    if (run !== promptSequence.current || session.current !== current) return;
+    await current.beginFromHandoff(speechReady ? "speech" : "text");
     if (run === promptSequence.current && session.current === current)
       setBusy(false);
   };
@@ -857,15 +906,20 @@ export default function CourseRoom({
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
       if (entryRequest.handoff) void runHandoff();
-      else void runPrompt(entryRequest.text, entryRequest.materialNames);
+      else if (entryRequest.inputMode === "speech" || speechReplies) {
+        void startLiveVoice().then((ready) => {
+          if (entryRequest.text) void runPrompt(entryRequest.text, entryRequest.materialNames, ready, ready ? "speech" : "text");
+        });
+      } else void runPrompt(entryRequest.text, entryRequest.materialNames);
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
-  const submit = async ({ text: input, files }: ChatComposerMessage) => {
+  const submit = async ({ text: input, files, automatic = false, speakReplies = false }: ChatComposerMessage) => {
     setError("");
     const requested = input.trim();
-    const inputMode: InputMode = liveVoice ? "speech" : "text";
-    if (busy && liveVoice) {
+    const speechReady = speakReplies && await startLiveVoice();
+    const inputMode: InputMode = speechReady ? "speech" : "text";
+    if (busy && (liveVoice || automatic)) {
       if (files.length) throw new Error("请先停止当前讲解，再发送新的材料");
       interrupt();
     } else if (busy) {
@@ -923,6 +977,7 @@ export default function CourseRoom({
   };
   const interrupt = () => {
     promptSequence.current++;
+    interruptedNarration.current = narrationMessage.current;
     if (voiceController.current) voiceController.current.interrupt();
     else session.current?.stopCurrent();
     if (narrationMessage.current !== null)
@@ -930,6 +985,15 @@ export default function CourseRoom({
     setActivity(null);
     setBusy(false);
   };
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented || !busy) return;
+      event.preventDefault();
+      interrupt();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [busy, liveVoice]);
   const running = busy;
   const currentPresentation =
     presented.find((item) => item.id === currentPresentationId) ??
@@ -986,7 +1050,8 @@ export default function CourseRoom({
               <h1>{course ? "开始新的学习对话" : "今天想学什么？"}</h1>
               {course ? (
                 <p>从一个问题、例子或练习开始这次学习。</p>
-              ) : (
+              ) : null}
+              {!course && (
                 <CourseLibrary
                   courses={courses}
                   error={libraryError}
@@ -1018,6 +1083,7 @@ export default function CourseRoom({
                     isAnimating={message.streaming}
                   >
                     {liveVoice && message.input_mode === "speech" &&
+                    ResponsePresenter.present(message.text, "speech").speech_text === message.text &&
                     Object.prototype.hasOwnProperty.call(voicePlaybackText, message.id)
                       ? voicePlaybackText[message.id]
                       : message.text}
@@ -1098,7 +1164,7 @@ export default function CourseRoom({
           </div>
         )}
         <ChatComposer
-          allowSubmitWhileRunning
+          initialInputMode={entryRequest?.inputMethod}
           attachments={courseMaterialAttachments}
           className="course-composer"
           disabled={!info?.available || !coursesReady}
@@ -1109,6 +1175,7 @@ export default function CourseRoom({
           onSubmit={submit}
           onStartVoiceMode={startLiveVoice}
           voiceModeActive={liveVoice}
+          voiceModeStarting={voiceStarting}
           onEndVoiceMode={endLiveVoice}
           running={running}
           submitLabel="发送"
