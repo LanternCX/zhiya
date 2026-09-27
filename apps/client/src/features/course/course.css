@@ -1133,12 +1133,13 @@
   font-size: 13px;
 }
 .lesson-question-heading span:first-child { color: var(--brand-green); font-weight: 700; }
-.lesson-question-heading h2 { margin: 0; font: inherit; }
+.lesson-question-heading [role="heading"] { min-width: 0; font: inherit; }
+.lesson-question-heading [role="heading"] p { margin: 0; }
 .lesson-question-prompt {
-  margin: 28px 0 26px;
-  font-size: clamp(22px, 2.4vw, 30px);
-  font-weight: 650;
-  line-height: 1.45;
+  margin: 24px 0 20px;
+  font-size: clamp(18px, 1.8vw, 22px);
+  font-weight: 550;
+  line-height: 1.55;
   overflow-wrap: anywhere;
 }
 .lesson-question-prompt:focus { outline: none; }
@@ -1163,6 +1164,9 @@
   line-height: 1.5;
 }
 .lesson-question-choice:first-child { border-top: 1px solid var(--line); }
+.lesson-question-choice-text { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.lesson-question-choice-text p { margin: 0; }
+.lesson-question-choice-text pre { max-width: 100%; overflow-x: auto; }
 .lesson-question-choice:hover,
 .lesson-question-choice[data-selected="true"] { color: var(--accent); }
 .lesson-question-choice[data-selected="true"] { font-weight: 600; }
@@ -1679,7 +1683,7 @@
     height: 100%;
     flex-direction: column;
   }
-  .lesson-question-prompt { margin: 16px 0 14px; font-size: 21px; }
+  .lesson-question-prompt { margin: 16px 0 14px; font-size: 18px; }
   .lesson-question-fieldset {
     flex: 1;
     min-height: 0;

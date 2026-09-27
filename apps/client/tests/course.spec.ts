@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { mockLearning } from "./mock-learning";
 import { publishSlideTool } from "../src/pi/tools/publish_slide";
+import { showQuestionTool } from "../src/pi/tools/show_question";
 
 const chunk = (delta: object, finishReason: string | null = null) =>
   `data: ${JSON.stringify({
@@ -111,6 +112,52 @@ test("a student submits one question page and the teacher can read the saved ans
   expect(reviewed).toBe(true);
   expect(studentMessageIsClean).toBe(true);
   expect(questionContextProvided).toBe(true);
+});
+
+test("a question renders Markdown in its title, prompt, and choices", async ({ page }) => {
+  await mockCompletedWorkspace(page);
+  await page.route("**/api/learning/course/model", async (route) => {
+    const request = route.request().postDataJSON() as {
+      payload: { messages: Array<{ role: string; content: unknown }> };
+    };
+    const transcript = JSON.stringify(request.payload.messages);
+    if (!transcript.includes('"name":"show_question"')) {
+      await route.fulfill(toolResponse("markdown-question", "show_question", {
+        title: "**数据** 练习",
+        text: "观察 `if` 的结果：\n\n```python\nif ready:\n    print('go')\n```",
+        kind: "single",
+        options: ["选择 **会执行** 的分支", "选择 `else` 分支"],
+      }));
+    } else {
+      await route.fulfill(textResponse("选出你的答案。"));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("教我条件判断");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  const question = page.getByRole("article", { name: "练习题" });
+  await expect(question.getByRole("heading", { name: "数据 练习" })).toBeVisible();
+  await expect(question.locator(".lesson-question-prompt code").first()).toHaveText("if");
+  await expect(question.locator(".lesson-question-prompt pre")).toContainText("print('go')");
+  await expect(question.getByRole("radio", { name: "选择 会执行 的分支" })).toBeVisible();
+  await question.getByRole("radio", { name: "选择 会执行 的分支" }).check();
+  await expect(question.getByRole("radio", { name: "选择 会执行 的分支" })).toBeChecked();
+});
+
+test("a question does not repeat its choices in the prompt", async () => {
+  const shown: string[] = [];
+  const tool = showQuestionTool((_id, draft) => {
+    shown.push(draft.text);
+    return { kind: "question", id: "question-1", ...draft, selected: [], answerText: "", status: "active" };
+  });
+  await expect(tool.execute("question-1", {
+    title: "变量",
+    text: "哪一行代码把数据存入变量？\n\nA. `print(name)`\nB. `name = '小智'`",
+    kind: "single",
+    options: ["A. `print(name)`", "B. `name = '小智'`"],
+  })).rejects.toThrow(/题干.*选项/);
+  expect(shown).toHaveLength(0);
 });
 
 test("a student can answer a fill-in question and the teacher receives the text", async ({ page }) => {

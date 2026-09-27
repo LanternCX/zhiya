@@ -53,17 +53,25 @@ export default function QuestionPage({
           onChange={() => onChange({ selected: [option], answerText: "" })}
         />
       )}
-      <span>{option}</span>
+      <MessageResponse className="lesson-question-choice-text">{option}</MessageResponse>
     </label>
   ));
 
   return (
-    <article className="lesson-question" aria-label={`练习题：${question.title}`} aria-busy={submitting}>
+    <article className="lesson-question" aria-label="练习题" aria-busy={submitting}>
       <div className="lesson-question-content">
         <header className="lesson-question-heading">
           <span>随堂练习</span>
           <span aria-hidden="true">/</span>
-          <h2>{question.title}</h2>
+          <div role="heading" aria-level={2}>
+            <MessageResponse
+              allowedElements={["p", "strong", "em", "code", "a", "del", "br"]}
+              unwrapDisallowed
+              components={{ p: "span" }}
+            >
+              {question.title}
+            </MessageResponse>
+          </div>
         </header>
         <div className="lesson-question-prompt" id={promptId} ref={prompt} tabIndex={-1}>
           <MessageResponse>{question.text}</MessageResponse>
