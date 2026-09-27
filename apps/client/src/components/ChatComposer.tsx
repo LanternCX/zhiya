@@ -389,7 +389,7 @@ function ChatComposerInput({
               <AudioWaveformIcon />
             </PromptInputButton>
           )}
-          {(canSubmit || running) && <PromptInputSubmit
+          {(!voiceModeActive || canSubmit || running) && <PromptInputSubmit
             aria-label={running && !canSubmit ? "打断" : submitLabel}
             className="chat-composer-submit"
             disabled={disabled || (!running && !canSubmit)}
