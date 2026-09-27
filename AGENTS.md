@@ -9,6 +9,10 @@
 2. This is an early-stage greenfield project with a rapidly evolving design and structure. Do not retain backward-compatibility code for earlier versions.
 3. Write agent harness instructions and configuration, including `AGENTS.md` and `SKILL.md`, in English. User-facing responses and product documents follow the user's requested language.
 
+### Onboarding context
+
+- For every feature change, review the onboarding agent prompt against the current student-facing capabilities and learning flow. Update it in the same task when the change affects what the agent should learn about a student or how later teaching can use the learning profile. Give the agent enough accurate product context to make useful decisions, and let it ask for relevant background and preferences without turning onboarding into a fixed questionnaire. If the feature does not affect onboarding, leave the prompt unchanged and explain that assessment in the change summary.
+
 ### Human authorization and responsibility
 
 1. Do not perform any write operation on the local repository or its GitHub repository without prior human authorization. This includes file changes, Git mutations, and creating, editing, commenting on, labeling, closing, or merging issues and PRs, as well as repository settings changes.
