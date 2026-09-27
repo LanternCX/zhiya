@@ -44,7 +44,11 @@ for (const stage of ["welcome", "question"] as const) {
     await page.route("**/api/auth/logout", (route) =>
       route.fulfill(
         failLogout
-          ? { status: 503, json: { error: "暂时无法退出，请重试" } }
+          ? {
+              status: 503,
+              headers: { "X-Request-ID": "logout-request-id" },
+              json: { error: "暂时无法退出，请重试" },
+            }
           : { json: { ok: true } },
       ),
     );
@@ -62,7 +66,9 @@ for (const stage of ["welcome", "question"] as const) {
     await expect(exit).toBeFocused();
     await exit.click();
     await dialog.getByRole("button", { name: "退出登录", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("暂时无法退出");
+    await expect(page.getByRole("alert")).toHaveText(
+      "暂时无法退出，请重试（错误编号：logout-request-id）",
+    );
     await expect(exit).toBeVisible();
     failLogout = false;
     await exit.click();
@@ -169,6 +175,18 @@ test("course content blends into the workspace canvas", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  const sidebar = await page.locator(".workspace-sidebar").boundingBox();
+  expect(sidebar?.width).toBe(220);
+  await page.getByRole("button", { name: "收起侧栏" }).click();
+  await expect(page.locator(".workspace-sidebar")).toHaveCSS("width", "72px");
+  await page.getByRole("button", { name: "展开侧栏" }).click();
+
+  const courseSurface = await page.locator(".course-surface").boundingBox();
+  const courseRoom = await page.locator(".course-room").boundingBox();
+  expect(courseRoom?.height).toBe(courseSurface?.height);
+  await expect(
+    page.locator('.course-composer > [data-slot="input-group"]'),
+  ).toHaveCSS("border-radius", "8px");
   await expect(page.locator(".course-conversation")).toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
@@ -288,10 +306,11 @@ test("onboarding blocks navigation until completion, including reload and waitin
     waiting = true;
     return { state: state() };
   });
-  await page.goto("/");
+  await page.goto("/#/lab");
   await expect(
     page.getByRole("heading", { name: "你想怎样认识 AI？" }),
   ).toBeVisible();
+  await expect(page).toHaveURL(/#\/onboarding\?returnTo=%2Flab$/);
   await expect(page.getByRole("button", { name: "用户菜单" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "主导航" })).toHaveCount(0);
   await page.reload();
@@ -347,7 +366,8 @@ test("onboarding blocks navigation until completion, including reload and waitin
   completed = true;
   waiting = false;
   learning.sync(state());
-  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "实验准备中" })).toBeVisible();
+  await expect(page).toHaveURL(/#\/lab$/);
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
   await expect(page.getByRole("button", { name: "用户菜单" })).toBeVisible();
 });

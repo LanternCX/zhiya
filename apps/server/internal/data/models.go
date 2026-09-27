@@ -27,11 +27,10 @@ var (
 	ErrEmailInUse                    = errors.New("该邮箱无法使用，请换一个邮箱")
 	ErrRateLimited                   = errors.New("操作太频繁，请稍后重试")
 	ErrConversationBusy              = errors.New("会话正在处理其他操作，请重试")
+	ErrCourseOutlineLimit            = errors.New("course outline section limit reached")
+	ErrOutlineTargetSectionNotFound  = errors.New("outline target section not found")
+	ErrIllustrationNotFound          = errors.New("illustration not found")
 )
-
-type ValidationError string
-
-func (e ValidationError) Error() string { return string(e) }
 
 type database interface {
 	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)
@@ -41,18 +40,24 @@ type database interface {
 
 // ListenConversationChanges reserves one connection for PostgreSQL notifications
 // and reconnects if that connection is interrupted.
-func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- error, reconnected func(), receive func(ConversationChange)) {
+func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- error, failed func(error), reconnected func(), receive func(ConversationChange)) {
 	first := true
+	disconnected := false
 	for ctx.Err() == nil {
 		connection, err := m.pool.Acquire(ctx)
 		if err == nil {
 			_, err = connection.Exec(ctx, `LISTEN zhiya_conversation_change`)
 		}
-		if first {
+		initial := first
+		if initial {
 			ready <- err
 			first = false
 		}
 		if err != nil {
+			if !initial && !disconnected {
+				failed(err)
+				disconnected = true
+			}
 			if connection != nil {
 				connection.Release()
 			}
@@ -63,32 +68,42 @@ func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- erro
 			}
 			continue
 		}
-		reconnected()
+		if disconnected {
+			reconnected()
+			disconnected = false
+		}
 		for ctx.Err() == nil {
 			notification, waitErr := connection.Conn().WaitForNotification(ctx)
 			if waitErr != nil {
+				if ctx.Err() == nil && !disconnected {
+					failed(waitErr)
+					disconnected = true
+				}
 				break
 			}
 			var change ConversationChange
-			if json.Unmarshal([]byte(notification.Payload), &change) == nil && change.User != "" {
-				receive(change)
+			if decodeErr := json.Unmarshal([]byte(notification.Payload), &change); decodeErr != nil || change.User == "" {
+				failed(errors.New("invalid conversation change notification"))
+				continue
 			}
+			receive(change)
 		}
 		connection.Release()
 	}
 }
 
 type Models struct {
-	Courses   CourseModel
-	Materials MaterialModel
-	Learning  LearningModel
-	Users     UserModel
-	Tokens    TokenModel
-	pool      *pgxpool.Pool
+	Courses       CourseModel
+	Materials     MaterialModel
+	Learning      LearningModel
+	Users         UserModel
+	Tokens        TokenModel
+	Illustrations IllustrationModel
+	pool          *pgxpool.Pool
 }
 
 func NewModels(pool *pgxpool.Pool, policy config.Account) Models {
-	return Models{Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, pool: pool}
+	return Models{Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, Illustrations: IllustrationModel{db: pool}, pool: pool}
 }
 
 type TransactionMode bool
@@ -111,7 +126,7 @@ func (m Models) Transaction(ctx context.Context, mode TransactionMode, action fu
 			return err
 		}
 	}
-	err = action(Models{Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}})
+	err = action(Models{Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}, Illustrations: IllustrationModel{db: tx}})
 	var failedAttempt failedVerificationAttempt
 	if errors.As(err, &failedAttempt) {
 		// A rejected code must still consume an attempt. Verify before making other changes.

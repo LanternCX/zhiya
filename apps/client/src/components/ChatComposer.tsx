@@ -60,6 +60,7 @@ export type ChatComposerProps = {
   voiceModeActive?: boolean;
   onEndVoiceMode?: () => void;
   running?: boolean;
+  allowSubmitWhileRunning?: boolean;
   submitLabel: string;
 };
 
@@ -85,6 +86,7 @@ function ChatComposerInput({
   onStop,
   onSubmit,
   running = false,
+  allowSubmitWhileRunning = false,
   submitLabel,
   onVoiceTranscript,
   voiceTranscript = "",
@@ -112,6 +114,7 @@ function ChatComposerInput({
   const canSubmit = Boolean(
     controller.textInput.value.trim() || attachments.files.length,
   );
+  const showSendWhileRunning = running && allowSubmitWhileRunning && canSubmit;
   const hasFiles = (event: DragEvent<HTMLFormElement>) =>
     event.dataTransfer.types.includes("Files");
   const updateMultiline = (element: HTMLTextAreaElement) => {
@@ -366,6 +369,14 @@ function ChatComposerInput({
             <PlusIcon />
           </PromptInputButton>
         </PromptInputTools>
+        {showSendWhileRunning && (
+          <PromptInputSubmit
+            aria-label="打断"
+            title="打断"
+            onStop={onStop}
+            status="streaming"
+          />
+        )}
         <PromptInputTools className="chat-composer-submit-tools">
           <PromptInputButton
             aria-label={recording ? "停止语音输入" : "开始语音输入"}

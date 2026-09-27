@@ -1,5 +1,3 @@
-import { PlaybackController } from "../features/voice/PlaybackController";
-
 export type SpeechEvent =
   | { type: "ready" }
   | { type: "transcript"; text: string; final: boolean }
@@ -50,40 +48,6 @@ export function float32ToPcm16(input: Float32Array, sourceRate: number, targetRa
     view.setInt16(i * 2, Math.max(-1, Math.min(1, sample)) * 0x7fff, true);
   }
   return output;
-}
-
-export class NarrationPlayer {
-  private stream: SpeechStream | null = null;
-  private readonly playback: PlaybackController;
-  private queue: string[] = [];
-  private busy = false;
-
-  constructor(onIdle: () => void) { this.playback = new PlaybackController(onIdle, () => onIdle()); }
-  async speak(text: string) {
-    if (!text.trim()) return;
-    if (!this.stream) {
-      this.stream = new SpeechStream((event) => {
-        if (event.type === "audio") this.playback.enqueue(event.data, event.sampleRate);
-        if (event.type === "complete") { this.busy = false; void this.pump(); }
-      });
-      await this.stream.connect();
-    }
-    this.queue.push(text); await this.pump();
-  }
-  stop() {
-    this.stream?.stopTts(); this.stream?.close(); this.stream = null;
-    this.queue = []; this.busy = false;
-    this.playback.clear();
-  }
-  dispose() {
-    this.stream?.stopTts(); this.stream?.close(); this.stream = null;
-    this.queue = []; this.busy = false;
-    this.playback.dispose();
-  }
-  private async pump() {
-    if (this.busy || !this.queue.length || !this.stream) return;
-    this.busy = true; this.stream.startTts(this.queue.shift()!);
-  }
 }
 
 export function takeCompletedSentences(text: string, consumed: number, flush = false) {

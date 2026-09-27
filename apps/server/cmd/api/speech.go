@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/coder/websocket"
 )
 
@@ -19,7 +19,7 @@ type speechCommand struct {
 }
 
 func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
-	if err := a.withUser(r, data.StandardTransaction, func(_ data.Models, _ data.User) error { return nil }); err != nil {
+	if _, err := a.accountService().Authenticate(r.Context(), sessionToken(r), r.Header.Get("X-Zhiya-User")); err != nil {
 		a.respondError(w, err)
 		return
 	}
@@ -71,7 +71,7 @@ func (a *application) speechStream(w http.ResponseWriter, r *http.Request) {
 				send(map[string]string{"type": "error", "message": fmt.Sprintf("无法连接语音服务：%v", err)})
 				continue
 			}
-			taskID = data.UUID()
+			taskID = identifier.New()
 			task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": a.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
 			_ = upstream.Write(ctx, websocket.MessageText, mustJSON(task))
 			send(map[string]string{"type": "ready"})

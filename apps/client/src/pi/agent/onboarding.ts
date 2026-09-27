@@ -66,7 +66,6 @@ export function createOnboardingAgent(options: {
         payload.tool_choice = options.context().answered
           ? "required"
           : { type: "function", function: { name: "ask_student" } };
-        payload.parallel_tool_calls = false;
       }
       return options.gateway.onboarding(
         options.runId,

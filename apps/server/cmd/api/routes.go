@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	appservice "github.com/LanternCX/zhiya/apps/server/internal/application"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
 func (a *application) routes() http.Handler {
@@ -37,8 +38,12 @@ func (a *application) routes() http.Handler {
 	api.HandleFunc("POST /api/courses/{id}/material-uploads/{uploadId}/complete", a.completeCourseMaterialUpload)
 	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}/download", a.downloadCourseMaterial)
 	api.HandleFunc("DELETE /api/courses/{id}/materials/{materialId}", a.deleteCourseMaterial)
+	api.HandleFunc("POST /api/courses/{id}/image-generations", a.createIllustration)
+	api.HandleFunc("GET /api/courses/{id}/image-generations/{generationId}", a.getIllustration)
+	api.HandleFunc("DELETE /api/courses/{id}/image-generations/{generationId}", a.cancelIllustration)
+	api.HandleFunc("GET /api/courses/{id}/illustrations/{assetId}/download", a.downloadIllustration)
 	api.HandleFunc("GET /api/account-rules", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, data.AccountRules())
+		writeJSON(w, http.StatusOK, appservice.AccountRules())
 	})
 	api.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -63,9 +68,11 @@ func (a *application) routes() http.Handler {
 	mux.Handle("/api/", protected)
 	mux.Handle("/health", protected)
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' "+storageOrigin+"; img-src 'self' data:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' "+storageOrigin+"; img-src 'self' data: blob:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		http.FileServer(http.Dir(a.config.Server.WebDir)).ServeHTTP(w, r)
 	}))
-	return mux
+	return logging.HTTPMiddleware(a.applicationLogger(), func(w http.ResponseWriter) {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "服务暂时不可用，请稍后重试"})
+	})(mux)
 }

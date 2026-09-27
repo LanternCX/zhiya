@@ -231,7 +231,7 @@ export default function Profile({
     isReasoning: Boolean(active),
   };
   useEffect(() => {
-    onOnboardingChange(!state?.completed);
+    if (state) onOnboardingChange(!state.completed);
   }, [state?.completed, onOnboardingChange]);
   useEffect(() => {
     if (progress?.saved) setCorrection("");
@@ -322,6 +322,11 @@ export default function Profile({
                         }
                         active={Boolean(active)}
                         stopped={stopped}
+                        thinkingLabel={
+                          state.completed
+                            ? "正在整理你的学习档案…"
+                            : "正在了解你的学习方式…"
+                        }
                       />
                     </Suspense>
                     <ConnectionRetry status={modelRetry} />

@@ -10,7 +10,7 @@ export function showCodingExerciseTool(show: CodingTools["show"]): AgentTool {
     name: "show_coding_exercise",
     label: "展示编程练习",
     description:
-      "Insert and show one interactive coding page in the lesson. The student controls editing and running after it appears.",
+      "Create a new coding exercise and append its first presentation to the lecture history. To resume an existing exercise, call show_lesson_page with its page ID instead; that preserves the student's code and results. Always show the exercise before asking the student to write code.",
     parameters: Type.Object({
       title: Type.String(),
       instructions: Type.String(),
@@ -20,7 +20,7 @@ export function showCodingExerciseTool(show: CodingTools["show"]): AgentTool {
     }),
     executionMode: "sequential",
     execute: async (id, params) => {
-      const exercise = show(
+      const exercise = await show(
         id,
         params as Pick<
           CodingExercise,

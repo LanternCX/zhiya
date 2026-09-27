@@ -4,33 +4,18 @@ import (
 	"context"
 	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/jackc/pgx/v5"
 )
 
-type CourseMaterial struct {
-	ID        string    `json:"id"`
-	CourseID  string    `json:"-"`
-	Name      string    `json:"name"`
-	MediaType string    `json:"mediaType"`
-	ObjectKey string    `json:"-"`
-	SizeBytes int64     `json:"sizeBytes"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-type CourseMaterialUpload struct {
-	ID        string
-	CourseID  string
-	Name      string
-	MediaType string
-	ObjectKey string
-	SizeBytes int64
-	ExpiresAt time.Time
-}
+type CourseMaterial = domain.CourseMaterial
+type CourseMaterialUpload = domain.CourseMaterialUpload
 
 type MaterialModel struct{ db database }
 
 func (m MaterialModel) StartUpload(ctx context.Context, user, courseID, name, mediaType, objectKey string, size int64, expiresAt time.Time) (CourseMaterialUpload, error) {
-	upload := CourseMaterialUpload{ID: UUID(), CourseID: courseID, Name: name, MediaType: mediaType, ObjectKey: objectKey, SizeBytes: size, ExpiresAt: expiresAt}
+	upload := CourseMaterialUpload{ID: identifier.New(), CourseID: courseID, Name: name, MediaType: mediaType, ObjectKey: objectKey, SizeBytes: size, ExpiresAt: expiresAt}
 	err := m.db.QueryRow(ctx, `INSERT INTO course_material_uploads(id,course_id,name,media_type,object_key,size_bytes,expires_at)
 	 SELECT $1,c.id,$2,$3,$4,$5,$6 FROM courses c WHERE c.id=$7 AND c.user_id=$8
 	 RETURNING id,course_id,name,media_type,object_key,size_bytes,expires_at`, upload.ID, name, mediaType, objectKey, size, expiresAt, courseID, user).Scan(&upload.ID, &upload.CourseID, &upload.Name, &upload.MediaType, &upload.ObjectKey, &upload.SizeBytes, &upload.ExpiresAt)

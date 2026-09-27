@@ -17,10 +17,21 @@ speech:
   asr_model: "qwen-audio-3.0-asr-flash-streaming"
   tts_model: "qwen3-tts-flash-realtime"
   tts_voice: "Cherry"
+# Native image-generation API base URL.
+# Keep the API key in config.local.yaml or an environment variable.
+image_model:
+  endpoint: "https://maas.qianwenaiapi.com/api/v1"
+  id: "qwen-image-3.0"
+  api_key: ""
 
 # The code runner is only reached by the Go server. Development binds it to loopback.
 runner:
   endpoint: "http://127.0.0.1:2358"
+
+# Logs go to stderr. Use JSON when the deployment platform collects logs.
+logging:
+  level: "info"
+  format: "text"
 
 http:
   listen: "127.0.0.1:8080"

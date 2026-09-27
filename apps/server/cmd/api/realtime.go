@@ -3,23 +3,25 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 )
 
 type socketMessage struct {
-	Type      string             `json:"type"`
-	RequestID string             `json:"requestId,omitempty"`
-	Action    *learningAction    `json:"action,omitempty"`
-	State     *data.Conversation `json:"state,omitempty"`
-	Data      any                `json:"data,omitempty"`
-	Status    int                `json:"status,omitempty"`
-	Error     string             `json:"error,omitempty"`
+	Type      string               `json:"type"`
+	RequestID string               `json:"requestId,omitempty"`
+	Action    *learningAction      `json:"action,omitempty"`
+	State     *domain.Conversation `json:"state,omitempty"`
+	Data      any                  `json:"data,omitempty"`
+	Status    int                  `json:"status,omitempty"`
+	Error     string               `json:"error,omitempty"`
 }
 
 type learningConnection struct {
@@ -41,6 +43,30 @@ type learningHub struct {
 type learningExecution struct {
 	runID  string
 	cancel context.CancelFunc
+}
+
+func learningActionError(logger *slog.Logger, requestID string, err error) socketMessage {
+	status, message := errorResponse(err)
+	if status >= http.StatusInternalServerError {
+		logger.Error("learning action failed", "client_request_id", requestID, "error", err)
+	}
+	return socketMessage{Type: "error", RequestID: requestID, Status: status, Error: message}
+}
+
+func logLearningSocketEnd(ctx context.Context, logger *slog.Logger, operation string, err error) {
+	if err == nil {
+		return
+	}
+	status := websocket.CloseStatus(err)
+	if ctx.Err() != nil || status == websocket.StatusNormalClosure || status == websocket.StatusGoingAway {
+		logger.DebugContext(ctx, "learning socket closed", "operation", operation, "close_status", status)
+		return
+	}
+	if status != -1 {
+		logger.WarnContext(ctx, "learning socket interrupted", "operation", operation, "close_status", status)
+		return
+	}
+	logger.WarnContext(ctx, "learning socket interrupted", "operation", operation, "error", err)
 }
 
 func newLearningHub() *learningHub {
@@ -97,7 +123,7 @@ func (h *learningHub) cursor(user string, revision int) (int, bool) {
 	return minimum, true
 }
 
-func (h *learningHub) activate(c *learningConnection, state data.Conversation) bool {
+func (h *learningHub) activate(c *learningConnection, state domain.Conversation) bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if h.latest[c.user] > state.Revision {
@@ -147,7 +173,7 @@ func (h *learningHub) registerExecution(user, runID string, cancel context.Cance
 	}
 }
 
-func (h *learningHub) reconcileExecution(user string, state data.Conversation) {
+func (h *learningHub) reconcileExecution(user string, state domain.Conversation) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if execution := h.executions[user]; execution != nil && execution.runID != state.RunID {
@@ -155,7 +181,7 @@ func (h *learningHub) reconcileExecution(user string, state data.Conversation) {
 	}
 }
 
-func (h *learningHub) publish(user string, state data.Conversation, afterSequence int) {
+func (h *learningHub) publish(user string, state domain.Conversation, afterSequence int) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for c := range h.connections[user] {
@@ -182,7 +208,7 @@ func (h *learningHub) publish(user string, state data.Conversation, afterSequenc
 	}
 }
 
-func (h *learningHub) delta(c *learningConnection, state data.Conversation) *data.Conversation {
+func (h *learningHub) delta(c *learningConnection, state domain.Conversation) *domain.Conversation {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if state.Revision <= c.revision {
@@ -206,18 +232,25 @@ func (a *application) startLearningEvents(ctx context.Context) error {
 		if !subscribed {
 			return
 		}
-		state, err := a.models.Learning.Snapshot(ctx, user, after)
-		if err == nil {
-			a.learningHub.reconcileExecution(user, state)
-			state.RunID = ""
-			a.learningHub.publish(user, state, after)
+		state, err := a.learningService().Snapshot(ctx, user, after)
+		if err != nil {
+			a.applicationLogger().ErrorContext(ctx, "learning synchronization failed", "user_id", user, "error", err)
+			return
 		}
+		a.learningHub.reconcileExecution(user, state)
+		state.RunID = ""
+		a.learningHub.publish(user, state, after)
 	}
-	go a.models.ListenConversationChanges(ctx, ready, func() {
+	go a.learningService().ListenChanges(ctx, ready, func(err error) {
+		if ctx.Err() == nil {
+			a.applicationLogger().ErrorContext(ctx, "learning notification listener failed", "error", err)
+		}
+	}, func() {
+		a.applicationLogger().InfoContext(ctx, "learning notification listener reconnected")
 		for _, user := range a.learningHub.users() {
 			synchronize(user)
 		}
-	}, func(change data.ConversationChange) {
+	}, func(change domain.ConversationChange) {
 		_, subscribed := a.learningHub.cursor(change.User, change.Revision)
 		if !subscribed {
 			return
@@ -228,12 +261,8 @@ func (a *application) startLearningEvents(ctx context.Context) error {
 }
 
 func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
-	var user string
-	err := a.models.Transaction(r.Context(), data.StandardTransaction, func(m data.Models) error {
-		var consumeErr error
-		user, consumeErr = m.Tokens.ConsumeSocketTicket(r.Context(), r.URL.Query().Get("ticket"))
-		return consumeErr
-	})
+	requestLogger := logging.ForResponse(w, a.applicationLogger())
+	user, err := a.accountService().ConsumeSocketTicket(r.Context(), r.URL.Query().Get("ticket"))
 	if err != nil {
 		a.respondError(w, err)
 		return
@@ -249,13 +278,9 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 	c := &learningConnection{user: user, conn: conn, send: make(chan socketMessage, 16)}
 	a.learningHub.add(c)
 	defer a.learningHub.remove(c)
-	var state data.Conversation
-	err = a.models.Transaction(ctx, data.StandardTransaction, func(m data.Models) error {
-		var loadErr error
-		state, loadErr = m.Learning.Load(ctx, user)
-		return loadErr
-	})
+	state, err := a.learningService().Load(ctx, user)
 	if err != nil {
+		requestLogger.ErrorContext(r.Context(), "learning socket initialization failed", "user_id", user, "error", err)
 		_ = conn.Close(websocket.StatusPolicyViolation, "authentication failed")
 		return
 	}
@@ -268,6 +293,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 				return
 			case message := <-c.send:
 				if err := wsjson.Write(ctx, conn, message); err != nil {
+					logLearningSocketEnd(ctx, requestLogger, "write", err)
 					conn.CloseNow()
 					return
 				}
@@ -276,6 +302,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 				err := conn.Ping(pingContext)
 				stopPing()
 				if err != nil {
+					logLearningSocketEnd(ctx, requestLogger, "ping", err)
 					conn.CloseNow()
 					return
 				}
@@ -283,8 +310,9 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 	for !a.learningHub.activate(c, state) {
-		state, err = a.models.Learning.Snapshot(ctx, user, 0)
+		state, err = a.learningService().Snapshot(ctx, user, 0)
 		if err != nil {
+			requestLogger.ErrorContext(ctx, "learning socket synchronization failed", "user_id", user, "error", err)
 			return
 		}
 		state.RunID = ""
@@ -292,6 +320,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 	for {
 		var incoming socketMessage
 		if err := wsjson.Read(ctx, conn, &incoming); err != nil {
+			logLearningSocketEnd(ctx, requestLogger, "read", err)
 			return
 		}
 		if incoming.Type != "action" || incoming.RequestID == "" || len(incoming.RequestID) > 128 || incoming.Action == nil {
@@ -300,8 +329,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 		}
 		state, output, err := a.applyLearningActionForUser(ctx, user, *incoming.Action, incoming.RequestID)
 		if err != nil {
-			status, message := errorResponse(err)
-			c.send <- socketMessage{Type: "error", RequestID: incoming.RequestID, Status: status, Error: message}
+			c.send <- learningActionError(requestLogger, incoming.RequestID, err)
 			continue
 		}
 		c.send <- socketMessage{Type: "response", RequestID: incoming.RequestID, Data: output, State: a.learningHub.delta(c, state)}
@@ -309,12 +337,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *application) learningSocketTicket(w http.ResponseWriter, r *http.Request) {
-	var ticket string
-	err := a.withUser(r, data.StandardTransaction, func(m data.Models, u data.User) error {
-		var issueErr error
-		ticket, issueErr = m.Tokens.NewSocketTicket(r.Context(), sessionToken(r), u.ID)
-		return issueErr
-	})
+	ticket, err := a.accountService().NewSocketTicket(r.Context(), sessionToken(r), r.Header.Get("X-Zhiya-User"))
 	if err != nil {
 		a.respondError(w, err)
 		return

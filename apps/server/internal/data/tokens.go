@@ -11,12 +11,11 @@ import (
 	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/jackc/pgx/v5"
 )
 
-const VerificationTTL = 10 * time.Minute
 const socketTicketTTL = 30 * time.Second
-const verificationCodeDigits = 8
 
 type TokenModel struct {
 	db     database
@@ -32,20 +31,20 @@ type failedVerificationAttempt struct{}
 func (failedVerificationAttempt) Error() string { return ErrInvalidCode.Error() }
 func (m TokenModel) NewChallenge(ctx context.Context, purpose, email, newEmail, userID string) (ChallengeCodes, error) {
 	id := randomToken()
-	n, err := rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(verificationCodeDigits)), nil))
+	n, err := rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(domain.VerificationCodeDigits)), nil))
 	if err != nil {
 		return ChallengeCodes{}, err
 	}
-	code := fmt.Sprintf("%0*d", verificationCodeDigits, n)
+	code := fmt.Sprintf("%0*d", domain.VerificationCodeDigits, n)
 	newCode := ""
 	if newEmail != "" {
-		n, err = rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(verificationCodeDigits)), nil))
+		n, err = rand.Int(rand.Reader, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(domain.VerificationCodeDigits)), nil))
 		if err != nil {
 			return ChallengeCodes{}, err
 		}
-		newCode = fmt.Sprintf("%0*d", verificationCodeDigits, n)
+		newCode = fmt.Sprintf("%0*d", domain.VerificationCodeDigits, n)
 	}
-	_, err = m.db.Exec(ctx, "INSERT INTO challenges(id,purpose,email,new_email,user_id,code_hash,new_code_hash,expires_at) VALUES($1,$2,$3,$4,NULLIF($5,''),$6,$7,clock_timestamp()+$8*interval '1 second')", id, purpose, email, newEmail, userID, digest(id+code), digest(id+newCode), int(VerificationTTL.Seconds()))
+	_, err = m.db.Exec(ctx, "INSERT INTO challenges(id,purpose,email,new_email,user_id,code_hash,new_code_hash,expires_at) VALUES($1,$2,$3,$4,NULLIF($5,''),$6,$7,clock_timestamp()+$8*interval '1 second')", id, purpose, email, newEmail, userID, digest(id+code), digest(id+newCode), int(domain.VerificationTTL.Seconds()))
 	if err != nil {
 		return ChallengeCodes{}, err
 	}

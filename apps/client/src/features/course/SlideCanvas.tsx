@@ -1,102 +1,86 @@
+import { useEffect, useMemo, useRef } from "react";
 import type { Slide } from "../../domain/learning";
-
-function lines(text: string, limit: number) {
-  const result: string[] = [];
-  let line = "";
-  for (const character of text) {
-    line += character;
-    if (line.length >= limit || /[。！？；]/.test(character)) {
-      result.push(line);
-      line = "";
-    }
-  }
-  if (line) result.push(line);
-  return result;
-}
-
-function TextLines({
-  text,
-  x,
-  y,
-  width,
-  lineHeight,
-  className,
-}: {
-  text: string;
-  x: number;
-  y: number;
-  width: number;
-  lineHeight: number;
-  className: string;
-}) {
-  return (
-    <text x={x} y={y} className={className}>
-      {lines(text, width).map((line, index) => (
-        <tspan key={`${line}-${index}`} x={x} dy={index ? lineHeight : 0}>
-          {line}
-        </tspan>
-      ))}
-    </text>
-  );
-}
+import { renderMarpSlide } from "./marp";
 
 export default function SlideCanvas({ slide }: { slide: Slide }) {
-  const titleLines = lines(slide.title, 12);
-  const contentY = 250 + Math.max(0, titleLines.length - 1) * 66;
-  const listX = slide.layout === "steps" ? 650 : 700;
-  return (
-    <svg
-      className={`lesson-slide layout-${slide.layout}`}
-      viewBox="0 0 1200 675"
-      role="img"
-      aria-label={`课件页面：${slide.title}`}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <rect className="slide-svg-background" width="1200" height="675" />
-      <path className="slide-svg-rule" d="M80 72 H1120" />
-      <circle className="slide-svg-index" cx="1090" cy="104" r="22" />
-      <text className="slide-svg-index-text" x="1090" y="110" textAnchor="middle">
-        Z
-      </text>
-      {slide.kicker && (
-        <text className="slide-svg-kicker" x="84" y="112">
-          {slide.kicker}
-        </text>
-      )}
-      <text className="slide-svg-title" x="82" y="184">
-        {titleLines.map((line, index) => (
-          <tspan key={`${line}-${index}`} x="82" dy={index ? 66 : 0}>
-            {line}
-          </tspan>
-        ))}
-      </text>
-      <TextLines
-        text={slide.body}
-        x={84}
-        y={contentY}
-        width={slide.layout === "explain" ? 24 : 20}
-        lineHeight={38}
-        className="slide-svg-body"
-      />
-      {slide.bullets.map((bullet, index) => {
-        const y = 190 + index * 92;
-        return (
-          <g key={`${bullet}-${index}`} className="slide-svg-point">
-            <text className="slide-svg-number" x={listX} y={y}>
-              {String(index + 1).padStart(2, "0")}
-            </text>
-            <path d={`M${listX + 48} ${y - 9} H${listX + 78}`} />
-            <TextLines
-              text={bullet}
-              x={listX + 92}
-              y={y}
-              width={16}
-              lineHeight={30}
-              className="slide-svg-point-text"
-            />
-          </g>
+  const frame = useRef<HTMLIFrameElement>(null);
+  const srcDoc = useMemo(() => {
+    try {
+      return renderMarpSlide(slide.markdown);
+    } catch {
+      return null;
+    }
+  }, [slide.markdown]);
+
+  useEffect(() => {
+    const iframe = frame.current;
+    if (!iframe || !srcDoc) return;
+
+    const syncFrame = () => {
+      const document = iframe.contentDocument;
+      const root = document?.documentElement;
+      if (!root) return;
+      root.dataset.theme =
+        window.document.documentElement.dataset.theme === "dark"
+          ? "dark"
+          : "light";
+      const appColors = window.getComputedStyle(window.document.documentElement);
+      for (const [slideColor, appColor] of [
+        ["paper", "surface"],
+        ["ink", "text"],
+        ["muted", "muted"],
+        ["accent", "accent"],
+        ["rule", "line"],
+        ["tint", "subtle"],
+        ["code", "subtle"],
+      ]) {
+        root.style.setProperty(
+          `--slide-${slideColor}`,
+          appColors.getPropertyValue(`--${appColor}`).trim(),
         );
-      })}
-    </svg>
+      }
+      const scale = Math.min(
+        iframe.clientWidth / 1280,
+        iframe.clientHeight / 720,
+      );
+      root.style.setProperty(
+        "--slide-scale",
+        String(scale),
+      );
+    };
+
+    iframe.addEventListener("load", syncFrame);
+    const resize = new ResizeObserver(syncFrame);
+    resize.observe(iframe);
+    const theme = new MutationObserver(syncFrame);
+    theme.observe(window.document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    syncFrame();
+    return () => {
+      iframe.removeEventListener("load", syncFrame);
+      resize.disconnect();
+      theme.disconnect();
+    };
+  }, [srcDoc]);
+
+  if (!srcDoc) {
+    return (
+      <div className="lesson-slide" role="alert">
+        课件页面暂时无法展示：{slide.title}
+      </div>
+    );
+  }
+
+  return (
+    <iframe
+      ref={frame}
+      className="lesson-slide"
+      title={`课件页面：${slide.title}`}
+      role="img"
+      sandbox="allow-same-origin"
+      srcDoc={srcDoc}
+    />
   );
 }

@@ -73,7 +73,7 @@ for (const kind of ["multiple", "text", "skip"] as const) {
   });
 }
 
-test("AI reasoning is shown only when returned, can be reopened, and normal waiting has no empty disclosure", async ({
+test("AI reasoning is shown only when returned, can be opened, and normal waiting has no empty disclosure", async ({
   page,
 }) => {
   await page.route("**/api/me", (r) =>
@@ -122,18 +122,36 @@ test("AI reasoning is shown only when returned, can be reopened, and normal wait
   const learning = await mockLearning(page, state);
   await page.goto("/");
   await expect(page.getByRole("status", { name: "正在思考" })).toContainText(
-    "思考中",
+    /正在了解你的学习方式… · \d+ 秒/,
   );
   await expect(page.getByRole("button", { name: /思考/ })).toHaveCount(0);
   hasReasoning = true;
-  running = false;
   learning.sync(state());
-  const trigger = page.getByRole("button", { name: /已思考/ });
+  const streamingTrigger = page.getByRole("button", {
+    name: /正在了解你的学习方式/,
+  });
+  await expect(streamingTrigger).toHaveAttribute("aria-expanded", "false");
+  await expect(streamingTrigger).toContainText(
+    /正在了解你的学习方式… · \d+ 秒/,
+  );
+  const livePreview = streamingTrigger.locator(".reasoning-live-preview");
+  await expect(livePreview).toHaveText("先了解学习经验，再选择合适的起点。");
+  await expect(livePreview).toHaveCSS("white-space", "nowrap");
+  await expect(livePreview).toHaveCSS("overflow-x", "hidden");
+  const reasoningContent = streamingTrigger
+    .locator("xpath=..")
+    .locator('[data-slot="collapsible-content"]');
+  await expect(reasoningContent).not.toBeVisible();
+  running = false;
+  await page.reload();
+  const trigger = page.getByRole("button", { name: "思路已整理" });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.click();
   await expect(
-    page.getByText("先了解学习经验，再选择合适的起点。", { exact: true }),
-  ).toBeVisible();
+    trigger
+      .locator("xpath=..")
+      .locator('[data-slot="collapsible-content"]'),
+  ).toContainText("先了解学习经验，再选择合适的起点。");
   await expect(page.getByText("我们从", { exact: false })).toContainText(
     "学习经验",
   );

@@ -66,12 +66,20 @@ func TestEnvironmentOverridesFileAndPathsBelongToConfigDirectory(t *testing.T) {
 	t.Setenv("ZHIYA_SERVER_ACCOUNT_SESSION_TTL_SECONDS", "120")
 	t.Setenv("ZHIYA_SERVER_SMTP_PASSWORD", "private-test-value")
 	t.Setenv("ZHIYA_SERVER_SMTP_USERNAME", "test-user")
+	t.Setenv("ZHIYA_SERVER_LOGGING_LEVEL", "debug")
+	t.Setenv("ZHIYA_SERVER_LOGGING_FORMAT", "json")
+	t.Setenv("ZHIYA_SERVER_IMAGE_MODEL_ENDPOINT", "https://maas.qianwenaiapi.com/api/v1")
+	t.Setenv("ZHIYA_SERVER_IMAGE_MODEL_ID", "qwen-image-3.0")
+	t.Setenv("ZHIYA_SERVER_IMAGE_MODEL_API_KEY", "private-image-key")
 	cfg, err := config.Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.Server.Listen != "127.0.0.1:18080" || cfg.Account.SessionTTLSeconds != 120 || cfg.SMTP.Password != "private-test-value" {
+	if cfg.Server.Listen != "127.0.0.1:18080" || cfg.Account.SessionTTLSeconds != 120 || cfg.SMTP.Password != "private-test-value" || cfg.Logging.Level != "debug" || cfg.Logging.Format != "json" {
 		t.Fatal("environment overrides were not applied")
+	}
+	if cfg.ImageModel.Endpoint != "https://maas.qianwenaiapi.com/api/v1" || cfg.ImageModel.ID != "qwen-image-3.0" || cfg.ImageModel.APIKey != "private-image-key" {
+		t.Fatal("image model settings were not loaded")
 	}
 	if cfg.Server.WebDir != filepath.Join(dir, "../client/dist") {
 		t.Fatal("web_dir must be relative to the configuration file")
@@ -99,9 +107,12 @@ func TestInvalidConfigurationFailsWithoutLeakingSecrets(t *testing.T) {
 		{"ZHIYA_SERVER_DATABASE_URL", "postgres://secret-value@[bad"},
 		{"ZHIYA_SERVER_STORAGE_ENDPOINT", "http://storage.example.com"},
 		{"ZHIYA_SERVER_STORAGE_SECRET_KEY", ""},
+		{"ZHIYA_SERVER_IMAGE_MODEL_ENDPOINT", "http://dashscope.example.com/api/v1"},
 		{"ZHIYA_SERVER_DEVELOPMENT", "false"},
 		{"ZHIYA_SERVER_SMTP_ADDRESS", "localhost:70000"},
 		{"ZHIYA_SERVER_ACCOUNT_RATE_WINDOW_SECONDS", "2147483648"},
+		{"ZHIYA_SERVER_LOGGING_LEVEL", "verbose"},
+		{"ZHIYA_SERVER_LOGGING_FORMAT", "xml"},
 		{"ZHIYA_SERVER_HTTP_LISTENN", "127.0.0.1:9000"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

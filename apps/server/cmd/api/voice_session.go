@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/LanternCX/zhiya/apps/server/cmd/api/providers"
-	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/coder/websocket"
 )
 
@@ -38,14 +38,12 @@ func voiceSessionContext(parent context.Context, timeout time.Duration) (context
 }
 
 func (a *application) voiceSessionHandler(w http.ResponseWriter, r *http.Request) {
-	var userID string
-	if err := a.withUser(r, data.StandardTransaction, func(_ data.Models, user data.User) error {
-		userID = user.ID
-		return nil
-	}); err != nil {
+	user, err := a.accountService().Authenticate(r.Context(), sessionToken(r), r.Header.Get("X-Zhiya-User"))
+	if err != nil {
 		a.respondError(w, err)
 		return
 	}
+	userID := user.ID
 	if !a.voiceSessions.acquire(userID) {
 		a.respondError(w, failure{http.StatusConflict, "当前用户已有语音会话"})
 		return
@@ -168,7 +166,7 @@ func (s *voiceSession) startASR(turnID int64) error {
 		return wrapSpeechDialError(response, err)
 	}
 	s.asr = conn
-	taskID := data.UUID()
+	taskID := identifier.New()
 	s.asrTaskID = taskID
 	s.asrTurnID = turnID
 	task := map[string]any{"header": map[string]any{"action": "run-task", "task_id": taskID, "streaming": "duplex"}, "payload": map[string]any{"task_group": "audio", "task": "asr", "function": "recognition", "model": s.app.config.Speech.ASRModel, "parameters": map[string]any{"format": "pcm", "sample_rate": 16000}, "input": map[string]any{}}}
@@ -229,7 +227,7 @@ func (s *voiceSession) startTTS(turnID int64, text string) error {
 }
 
 func ttsClientEvent(eventType string, fields map[string]any) map[string]any {
-	event := map[string]any{"event_id": data.UUID(), "type": eventType}
+	event := map[string]any{"event_id": identifier.New(), "type": eventType}
 	for key, value := range fields {
 		event[key] = value
 	}

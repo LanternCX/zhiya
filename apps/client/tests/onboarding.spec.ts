@@ -284,7 +284,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
   await editor.getByRole("button", { name: "提交修改" }).click();
   await expect(editor).not.toBeVisible();
   await expect(other.getByRole("status", { name: "正在思考" })).toContainText(
-    "思考中",
+    /正在整理你的学习档案… · \d+ 秒/,
   );
   await expect(other.getByRole("alert")).toContainText("尚未完成");
   await expect(
@@ -311,7 +311,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
   await other.getByRole("button", { name: "提交回答", exact: true }).click();
   await generating;
   await expect(other.getByRole("status", { name: "正在思考" })).toContainText(
-    "思考中",
+    /正在整理你的学习档案… · \d+ 秒/,
   );
   const canceled = other.waitForEvent("requestfailed", {
     predicate: (request) => request.url().endsWith("/api/learning/model"),

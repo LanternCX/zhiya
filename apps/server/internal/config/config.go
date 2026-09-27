@@ -21,7 +21,9 @@ import (
 type Config struct {
 	Model       Model    `yaml:"model"`
 	Speech      Speech   `yaml:"speech"`
+	ImageModel  Model    `yaml:"image_model"`
 	Runner      Runner   `yaml:"runner"`
+	Logging     Logging  `yaml:"logging"`
 	Development bool     `yaml:"development"`
 	Server      Server   `yaml:"http"`
 	Database    Database `yaml:"database"`
@@ -36,6 +38,11 @@ type Speech struct {
 	ASRModel  string `yaml:"asr_model"`
 	TTSModel  string `yaml:"tts_model"`
 	TTSVoice  string `yaml:"tts_voice"`
+}
+
+type Logging struct {
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
 }
 type Runner struct {
 	Endpoint string `yaml:"endpoint"`
@@ -225,6 +232,14 @@ func (c Config) Validate() error {
 			return fmt.Errorf("speech models and voice are required when speech.endpoint is configured")
 		}
 	}
+	switch c.Logging.Level {
+	case "debug", "info", "warn", "error":
+	default:
+		return fmt.Errorf("logging.level must be debug, info, warn, or error")
+	}
+	if c.Logging.Format != "text" && c.Logging.Format != "json" {
+		return fmt.Errorf("logging.format must be text or json")
+	}
 	if c.Model.Endpoint != "" {
 		u, err := url.Parse(c.Model.Endpoint)
 		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
@@ -232,6 +247,15 @@ func (c Config) Validate() error {
 		}
 		if c.Model.ID == "" {
 			return fmt.Errorf("model.id is required when model.endpoint is configured")
+		}
+	}
+	if c.ImageModel.Endpoint != "" {
+		u, err := url.Parse(c.ImageModel.Endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
+			return fmt.Errorf("image_model.endpoint must be an HTTPS URL (loopback HTTP allowed in development)")
+		}
+		if c.ImageModel.ID == "" {
+			return fmt.Errorf("image_model.id is required when image_model.endpoint is configured")
 		}
 	}
 	runner, err := url.Parse(c.Runner.Endpoint)

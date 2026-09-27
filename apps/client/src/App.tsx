@@ -8,8 +8,12 @@ import { useAccount } from "./features/account/useAccount";
 import type { View } from "./features/account/types";
 import { PolicyContext } from "./features/account/Policy";
 import Workspace from "./Workspace";
+import { Navigate, useLocation } from "react-router";
+import { isAuthPage, returnPath, usePage } from "./routes";
 
 export default function App() {
+  const page = usePage();
+  const location = useLocation();
   const account = useAccount();
   const {
     user,
@@ -65,6 +69,24 @@ export default function App() {
       )}
     </>
   );
+
+  if (!loading && !offline) {
+    if (!user && !isAuthPage(page)) {
+      const target = location.pathname + location.search;
+      return (
+        <Navigate
+          replace
+          to={
+            page === "index"
+              ? "/login"
+              : `/login?returnTo=${encodeURIComponent(target)}`
+          }
+        />
+      );
+    }
+    if (user && (isAuthPage(page) || page === "index"))
+      return <Navigate replace to={returnPath(location.search)} />;
+  }
 
   if (user && !loading && !offline)
     return (

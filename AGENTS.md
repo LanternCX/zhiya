@@ -19,15 +19,20 @@
 
 ## Git and PRs
 
-1. The main branch is protected. Contribute code through pull requests.
-2. Write commit messages in English and follow the Conventional Commits format.
-3. PR titles must follow Conventional Commits. Follow the PR template, fill in its required sections, and have a human complete its mandatory checklist before merging.
+1. `main` is the only long-lived branch and is protected. Do not push directly to it.
+2. Every change must have a corresponding GitHub Issue before implementation begins.
+3. Create each task branch from the latest `main` using `<type>/issue-<number>-<description>`. Allowed types are `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, and `ci`. Use lowercase English words separated by hyphens.
+4. Keep one Issue per branch and PR. If an Issue requires multiple branches, give each branch a description that identifies its distinct scope. Do not mix unrelated Issues.
+5. Do not use `dev` as a development or integration branch. All contribution PRs target `main`.
+6. Write commit messages in English and follow Conventional Commits. Commit messages do not need to repeat the Issue number.
+7. PR titles must follow Conventional Commits. Link the Issue with `Closes #<issue-number>`, follow the PR template, fill in its required sections, and have a human complete its mandatory checklist before merging.
+8. Merge approved PRs into `main` with Squash merge, then delete the task branch.
 
 ## Agent skills
 
 ### Issue tracker
 
-- Track contributions through GitHub Issues or PRs for `LanternCX/zhiya` using `gh`. Work may reference an existing issue or be tracked directly in a PR; a new issue is not required for every change. When reading an issue, include its body, comments, and labels. A skill requesting publication does not authorize a GitHub write; follow the human authorization rules above.
+- Track every contribution through a GitHub Issue for `LanternCX/zhiya` using `gh`. Read the Issue body, comments, and labels before implementation. A skill requesting publication does not authorize a GitHub write; follow the human authorization rules above.
 - Maintain product requirements only in the body of [product requirements issue #3](https://github.com/LanternCX/zhiya/issues/3). Use comments for discussion and consolidate confirmed requirement changes into its body. Development issues reference relevant sections and track scope, acceptance, and progress without duplicating requirements. Record technical decisions in [technology selection issue #2](https://github.com/LanternCX/zhiya/issues/2) and implementation discussions in the relevant issue or PR. Close the requirements issue for archival after the agreed scope is implemented and accepted, with unfinished items explicitly resolved or deferred; retain the issue and its discussion. Do not create local mirrors of PRDs, specs, plans, tickets, or task status.
 - External PRs are not a triage request surface. Development PRs follow the normal review process.
 - Add `bot-added` when an agent or other automation creates an issue or PR, including draft PRs. This source label can coexist with status labels.

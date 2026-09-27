@@ -18,6 +18,8 @@ type AgentSetup = {
     signal?: AbortSignal,
   ) => Promise<Response>;
   shouldStopAfterTurn?: AgentOptions["shouldStopAfterTurn"];
+  toolExecution?: AgentOptions["toolExecution"];
+  beforeToolCall?: AgentOptions["beforeToolCall"];
 };
 
 /** Shared model and streaming policy; each scenario supplies its prompt, tools and request. */
@@ -37,6 +39,11 @@ export function createAgent(setup: AgentSetup) {
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
     contextWindow: 32768,
     maxTokens: 8192,
+    compat: {
+      supportsStore: false,
+      supportsDeveloperRole: false,
+      maxTokensField: "max_tokens",
+    },
   };
   return new Agent({
     initialState: {
@@ -45,8 +52,9 @@ export function createAgent(setup: AgentSetup) {
       tools: setup.tools,
       systemPrompt: prompt(),
     },
-    toolExecution: "sequential",
+    toolExecution: setup.toolExecution ?? "sequential",
     shouldStopAfterTurn: setup.shouldStopAfterTurn,
+    beforeToolCall: setup.beforeToolCall,
     streamFn: (_model, context, options) =>
       streamSimple(
         model,

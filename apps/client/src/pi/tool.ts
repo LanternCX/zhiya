@@ -8,7 +8,10 @@ import type {
   OutlineClassification,
   OutlineReorganization,
   Slide,
+  AnimationPlaybackCommand,
+  AnimationPlaybackState,
   LessonPage,
+  LessonPresentation,
 } from "../domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
 
@@ -58,7 +61,10 @@ export type CourseManagement = {
       reorganization: OutlineReorganization,
       conversation: StoredCourseConversation,
     ) => Promise<OutlineClassification>,
-  ) => Promise<StoredCourse>;
+  ) => Promise<
+    | StoredCourse
+    | { taskId: string; status: "running"; kind: "outline-classifier" }
+  >;
   resumeOutline: (
     classify: (
       reorganization: OutlineReorganization,
@@ -68,6 +74,11 @@ export type CourseManagement = {
   createConversation: (
     sectionId: string,
     title: string,
+  ) => Promise<StoredCourseConversation>;
+  switchSection: (
+    sectionId: string,
+    title: string,
+    handoff: string,
   ) => Promise<StoredCourseConversation>;
   listConversations: () => Promise<StoredCourseConversation[]>;
   readConversation: (
@@ -80,10 +91,90 @@ export type CourseManagement = {
 };
 
 export type SlideTools = {
-  start: (request: SlideRequest) => Promise<Slide>;
+  start: (
+    id: string,
+    request: SlideRequest,
+    signal?: AbortSignal,
+  ) => Promise<{
+    taskId: string;
+    status: AgentTaskSummary["status"];
+    pageIds: string[];
+    page?: Slide;
+  }>;
   cancel: () => void;
   read: () => { pages: Slide[]; generating: boolean };
-  next: () => Promise<LessonPage>;
+};
+
+export type AnimationTools = {
+  start: (request: { pageId: string; goal: string }) => {
+    taskId: string;
+    pageId: string;
+    status: "running";
+  };
+  read: () => Array<{
+    taskId: string;
+    pageId: string;
+    status: "running" | "complete" | "failed" | "cancelled";
+    error?: string;
+  }>;
+  cancel: (taskId: string) => void;
+  control: (
+    pageId: string,
+    command: AnimationPlaybackCommand,
+  ) => AnimationPlaybackState;
+  playback: (pageId: string) => AnimationPlaybackState;
+};
+
+export type LessonPageSummary = {
+  pageId: string;
+  kind: LessonPage["kind"];
+  title: string;
+};
+
+export type LessonPageState = {
+  pages: LessonPageSummary[];
+  presentations: Array<LessonPresentation & { position: number }>;
+  currentPresentationId: string;
+  currentPageId: string;
+  tasks: AgentTaskSummary[];
+};
+
+export type LessonPageTools = {
+  read: () => LessonPageState;
+  show: (
+    id: string,
+    pageId: string,
+    signal?: AbortSignal,
+  ) => Promise<LessonPage>;
+};
+
+export type IllustrationTools = {
+  start: (request: {
+    pageId: string;
+    title: string;
+    description: string;
+    alt: string;
+  }) => Promise<{ taskId: string; pageId: string; status: "running" }>;
+};
+
+export type AgentTaskSummary = {
+  taskId: string;
+  kind: "slides" | "animation" | "illustration" | "outline-classifier";
+  status: "running" | "complete" | "failed" | "cancelled";
+  pageId?: string;
+  pageIds?: string[];
+  sections?: Array<{
+    id: string;
+    title: string;
+    objective: string;
+    status: "planned" | "active" | "complete" | "archived";
+  }>;
+  error?: string;
+};
+
+export type AgentTaskTools = {
+  read: () => AgentTaskSummary[];
+  cancel: (taskId: string) => AgentTaskSummary;
 };
 
 export type TeachingToolContext = {
@@ -99,7 +190,7 @@ export type CodingTools = {
       CodingExercise,
       "title" | "instructions" | "languageId" | "languageName" | "starterCode"
     >,
-  ) => CodingExercise;
+  ) => Promise<CodingExercise>;
   read: () => CodingExercise;
   end: () => CodingExercise;
 };

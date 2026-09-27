@@ -7,9 +7,11 @@ use std::{sync::Mutex, time::Duration};
 static ACCOUNT_REQUEST_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Response {
     status: u16,
     body: String,
+    request_id: String,
 }
 
 fn allowed(method: &str, path: &str) -> bool {
@@ -154,13 +156,23 @@ fn request(
         .send()
         .map_err(|_| "Unable to connect to account server")?;
     let status = response.status().as_u16();
+    let request_id = response
+        .headers()
+        .get("X-Request-ID")
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("")
+        .to_owned();
     if !learning {
         store_session(&entry, &client, base, response.headers())?;
     }
     let body = response
         .text()
         .map_err(|_| "Unable to read account response")?;
-    Ok(Response { status, body })
+    Ok(Response {
+        status,
+        body,
+        request_id,
+    })
 }
 
 fn api_origin() -> Result<&'static str, String> {

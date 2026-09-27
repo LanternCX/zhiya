@@ -57,7 +57,7 @@ test("profile correction stays in the main panel and preserves the draft on fail
   await dialog.getByRole("button", { name: "提交修改" }).click();
   await expect(dialog).not.toBeVisible();
   await expect(page.getByRole("status", { name: "正在思考" })).toContainText(
-    "思考中",
+    /正在整理你的学习档案… · \d+ 秒/,
   );
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "探索即将开放" })).toHaveCount(

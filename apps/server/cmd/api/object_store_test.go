@@ -66,6 +66,17 @@ func (s *memoryObjectStore) Open(_ context.Context, key string) (io.ReadCloser, 
 	return io.NopCloser(bytes.NewReader(content)), objectstore.Metadata{SizeBytes: int64(len(content))}, nil
 }
 
+func (s *memoryObjectStore) Put(_ context.Context, key, _ string, body io.Reader) error {
+	content, err := io.ReadAll(body)
+	if err != nil {
+		return err
+	}
+	s.mu.Lock()
+	s.objects[key] = content
+	s.mu.Unlock()
+	return nil
+}
+
 func (s *memoryObjectStore) Copy(_ context.Context, source, destination string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

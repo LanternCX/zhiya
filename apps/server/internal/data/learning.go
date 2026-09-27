@@ -2,55 +2,20 @@ package data
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"time"
 
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
 	"github.com/jackc/pgx/v5"
 )
 
-type Question struct {
-	ID          string   `json:"id"`
-	Text        string   `json:"text"`
-	Description string   `json:"description,omitempty"`
-	Kind        string   `json:"kind"`
-	Options     []string `json:"options"`
-}
-
-type Conversation struct {
-	ID              string            `json:"id"`
-	Purpose         string            `json:"purpose"`
-	Messages        []json.RawMessage `json:"messages"`
-	Question        *Question         `json:"question"`
-	Completed       bool              `json:"completed"`
-	CorrectionEnded bool              `json:"correctionEnded"`
-	Memory          string            `json:"memory"`
-	MemoryVersion   int               `json:"memoryVersion"`
-	MessageSequence int               `json:"messageSequence"`
-	Revision        int               `json:"revision"`
-	Status          string            `json:"status"`
-	RunID           string            `json:"runId,omitempty"`
-	Inference       bool              `json:"inference"`
-	LeaseUntil      time.Time         `json:"leaseUntil"`
-}
+type Question = domain.Question
+type Conversation = domain.Conversation
 
 type LearningModel struct{ db database }
 
-type ConversationChange struct {
-	User     string `json:"user"`
-	Revision int    `json:"revision"`
-}
-
-func UUID() string {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-	b[6] = b[6]&0x0f | 0x40
-	b[8] = b[8]&0x3f | 0x80
-	return fmt.Sprintf("%x-%x-%x-%x-%x", b[:4], b[4:6], b[6:8], b[8:10], b[10:])
-}
+type ConversationChange = domain.ConversationChange
 
 func (m LearningModel) Load(ctx context.Context, user string) (Conversation, error) {
 	return m.load(ctx, user, false)
@@ -63,7 +28,7 @@ func (m LearningModel) LoadForAction(ctx context.Context, user string) (Conversa
 }
 
 func (m LearningModel) load(ctx context.Context, user string, nowait bool) (Conversation, error) {
-	initial := Conversation{ID: UUID(), Purpose: "onboarding", Messages: []json.RawMessage{}, Status: "idle"}
+	initial := Conversation{ID: identifier.New(), Purpose: "onboarding", Messages: []json.RawMessage{}, Status: "idle"}
 	raw, _ := json.Marshal(initial)
 	_, err := m.db.Exec(ctx, `INSERT INTO conversations(id,user_id,purpose,state) VALUES($1,$2,'onboarding',$3) ON CONFLICT(user_id,purpose) DO NOTHING`, initial.ID, user, raw)
 	if err != nil {

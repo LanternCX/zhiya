@@ -50,7 +50,6 @@ test("password fields use one reveal control and preserve the value when toggled
 });
 
 test("verification can expire and be resent without losing the chosen password", async ({ page }) => {
-  await page.clock.install();
   await page.route("**/api/me", route => route.fulfill({ status: 401, json: { error: "请登录" } }));
   await page.route("**/api/account-rules", route => route.fulfill({ json: {
     password_min_characters: 8, password_max_bytes: 256, nickname_max_characters: 40,
@@ -66,6 +65,7 @@ test("verification can expire and be resent without losing the chosen password",
   await page.goto("/");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
   await page.getByLabel("邮箱", { exact: true }).fill("learner@example.com");
+  await page.clock.install();
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await page.getByLabel("密码", { exact: true }).fill("my-password");
   await page.getByLabel("确认密码", { exact: true }).fill("my-password");

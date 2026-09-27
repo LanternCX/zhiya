@@ -1,4 +1,12 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import "./course.css";
 import type { CourseSession } from "../../pi";
 import { createCourseSession } from "./runtime";
@@ -6,15 +14,21 @@ import type {
   CourseActivity,
   CourseMessage,
   LessonPage,
+  LessonPresentation,
+  AnimationPlaybackCommand,
+  AnimationPlaybackState,
   ModelInfo,
   ModelRetryStatus,
   CourseConversationState,
+  StoredCourseConversation,
   StoredCourse,
+  CourseSection,
 } from "../../domain/learning";
 import { MessageResponse } from "../../components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
+  ReasoningLiveSummary,
   ReasoningTrigger,
 } from "../../components/ai-elements/reasoning";
 import { Shimmer } from "../../components/ai-elements/shimmer";
@@ -28,17 +42,18 @@ import ChatComposer, {
   type ChatComposerMessage,
 } from "../../components/ChatComposer";
 import { Spinner } from "../../components/ui/spinner";
-import SlideCanvas from "./SlideCanvas";
+import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
+import IllustrationCanvas from "./IllustrationCanvas";
 import { listCodeLanguages, runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
 import Icon from "../../components/Icon";
 import ConnectionRetry from "../../components/ConnectionRetry";
-import { NarrationPlayer, takeCompletedSentences } from "../../transport/speech";
 import { courseMaterialAttachments } from "./course-composer";
+import { useElapsedSeconds } from "../../lib/use-elapsed-seconds";
+import { takeCompletedSentences } from "../../transport/speech";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
 import { replaceVoicePlaybackText } from "../voice/VoicePlaybackText";
 import type { InputMode } from "../../domain/learning";
-import { ResponsePresenter } from "../../conversation/ResponsePresenter";
 import {
   createCourse,
   createCourseConversation as createStoredCourseConversation,
@@ -55,6 +70,7 @@ import {
 type RenderedCourseMessage = CourseMessage;
 
 const CodingPage = lazy(() => import("./CodingPage"));
+const SlideCanvas = lazy(() => import("./SlideCanvas"));
 
 const conversationControls = {
   code: { copy: true, download: false },
@@ -80,17 +96,28 @@ function Activity({ activity }: { activity: CourseActivity | null }) {
           className="course-thinking-trigger"
           getThinkingMessage={(streaming, seconds) =>
             streaming ? (
-              <Shimmer className="course-thinking-shimmer" duration={1}>
-                正在思考教学节奏…
-              </Shimmer>
+              <ReasoningLiveSummary
+                status={`正在组织本次讲解… · ${seconds ?? 0} 秒`}
+                preview={activity.text}
+              />
             ) : (
-              <span>{seconds ? `已思考 ${seconds} 秒` : "已完成思考"}</span>
+              <span>讲解思路已整理</span>
             )
           }
         />
         {activity.text && <ReasoningContent>{activity.text}</ReasoningContent>}
       </Reasoning>
     );
+  return <ToolActivity activity={activity} />;
+}
+
+function ToolActivity({
+  activity,
+}: {
+  activity: Extract<CourseActivity, { kind: "tool" }>;
+}) {
+  const elapsed = useElapsedSeconds(activity.status === "running");
+
   return (
     <div
       className="course-activity course-tool-activity"
@@ -100,7 +127,9 @@ function Activity({ activity }: { activity: CourseActivity | null }) {
       {activity.status === "running" && <Spinner />}
       <span className="course-tool-mark" aria-hidden="true" />
       {activity.status === "running" ? (
-        <Shimmer duration={1}>{`正在${activity.label}`}</Shimmer>
+        <Shimmer duration={1}>
+          {`正在${activity.label} · ${elapsed ?? 0} 秒`}
+        </Shimmer>
       ) : (
         <span>
           {activity.status === "error"
@@ -118,7 +147,6 @@ export default function CourseRoom({
   courses,
   activeCourse,
   coursesReady,
-  roomToken,
   newSession,
   entryRequest,
   libraryError,
@@ -128,15 +156,22 @@ export default function CourseRoom({
   onDeleteCourse,
   onCourseCreated,
   onCourseUpdated,
+  onSwitchConversation,
+  onEnterNextSection,
 }: {
   info: ModelInfo | null;
   memory: string;
   courses: StoredCourse[];
   activeCourse: StoredCourse | null;
   coursesReady: boolean;
-  roomToken: number;
   newSession: boolean;
-  entryRequest: { id: number; text: string; materialNames: string[] } | null;
+  entryRequest: {
+    id: number;
+    text: string;
+    materialNames: string[];
+    handoff?: boolean;
+    conversationId?: string;
+  } | null;
   libraryError: string;
   onEntryRequestHandled: (id: number) => void;
   onOpenCourse: (course: StoredCourse) => void;
@@ -144,7 +179,25 @@ export default function CourseRoom({
   onDeleteCourse: (course: StoredCourse) => Promise<boolean>;
   onCourseCreated: (course: StoredCourse) => void;
   onCourseUpdated: (course: StoredCourse) => void;
+  onSwitchConversation: (
+    course: StoredCourse,
+    conversation: StoredCourseConversation,
+    handoff: string,
+  ) => void;
+  onEnterNextSection: (section: CourseSection, request?: string) => Promise<void>;
 }) {
+  // Long-running sessions must notify the current page, not the route that
+  // happened to be visible when generation started.
+  const courseCallbacks = useRef<{
+    onCourseCreated: typeof onCourseCreated;
+    onCourseUpdated: typeof onCourseUpdated;
+  } | null>(null);
+  useLayoutEffect(() => {
+    courseCallbacks.current = { onCourseCreated, onCourseUpdated };
+    return () => {
+      courseCallbacks.current = null;
+    };
+  }, [onCourseCreated, onCourseUpdated]);
   const initialState =
     activeCourse && newSession
       ? emptyCourseState()
@@ -153,40 +206,42 @@ export default function CourseRoom({
     initialState.messages,
   );
   const [pages, setPages] = useState<LessonPage[]>(initialState.pages);
-  const [presented, setPresented] = useState<Set<string>>(
-    () => new Set(initialState.presentedPageIds),
-  );
-  const [page, setPage] = useState(() =>
-    Math.max(
-      0,
-      initialState.pages.findIndex(
-        ({ id }) => id === initialState.currentPageId,
-      ),
-    ),
+  const [presented, setPresented] = useState<LessonPresentation[]>(() => [
+    ...initialState.presentations,
+  ]);
+  const [currentPresentationId, setCurrentPresentationId] = useState(
+    () =>
+      initialState.currentPresentationId ||
+      initialState.presentations.at(-1)?.id ||
+      "",
   );
   const [busy, setBusy] = useState(false);
-  const [codeRunning, setCodeRunning] = useState(false);
-  const [error, setError] = useState("");
-  const [activity, setActivity] = useState<CourseActivity | null>(null);
-  const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
-  const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
-  const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
-  const pagesRef = useRef<LessonPage[]>(initialState.pages);
-  const presentedRef = useRef<Set<string>>(
-    new Set(initialState.presentedPageIds),
-  );
-  const session = useRef<CourseSession | null>(null);
-  const codeRunSequence = useRef(0);
   const [liveVoice, setLiveVoice] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voicePlaybackText, setVoicePlaybackText] = useState<Record<number, string>>({});
+  const [codeRunning, setCodeRunning] = useState(false);
+  const [error, setError] = useState("");
+  const [activity, setActivity] = useState<CourseActivity | null>(null);
+  const [generatingPages, setGeneratingPages] = useState(false);
+  const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
+  const [switchingSection, setSwitchingSection] = useState(false);
+  const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
+  const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
+  const pagesRef = useRef<LessonPage[]>(initialState.pages);
+  const presentedRef = useRef<LessonPresentation[]>([
+    ...initialState.presentations,
+  ]);
+  const currentPresentationIdRef = useRef(initialState.currentPresentationId);
+  const session = useRef<CourseSession | null>(null);
   const voiceController = useRef<VoiceSessionController | null>(null);
-  const narrationPlayer = useRef<NarrationPlayer | null>(null);
   const narrationMessage = useRef<number | null>(null);
   const narrationConsumed = useRef(0);
+  const queuedSpeech = useRef(0);
+  const playedSpeech = useRef(0);
+  const narrationComplete = useRef(false);
   const voiceScheduledText = useRef<Record<number, string>>({});
   const promptSequence = useRef(0);
-  const promptRunning = useRef(false);
+  const codeRunSequence = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const boundConversationId = useRef<string | null>(
     activeCourse && !newSession ? activeCourse.conversationId : null,
@@ -210,7 +265,10 @@ export default function CourseRoom({
     }, () => session.current?.stopCurrent());
     controller.setSpeaker(true);
     controller.subscribe((state) => {
-      if (state.error) setError(state.error);
+      if (!state.error) return;
+      setError(state.error);
+      const latest = narrationMessage.current;
+      if (latest !== null) session.current?.finishNarration(latest);
     });
     voiceController.current = controller;
     setVoiceTranscript("");
@@ -225,20 +283,36 @@ export default function CourseRoom({
   const endLiveVoice = () => {
     voiceController.current?.end();
     voiceController.current = null;
-    session.current?.setInputMode("text");
+    if (narrationMessage.current !== null)
+      session.current?.finishNarration(narrationMessage.current);
     setLiveVoice(false);
+    setVoiceTranscript("");
   };
-  useEffect(() => endLiveVoice, []);
+  useEffect(() => () => { voiceController.current?.end(); }, []);
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState !== "hidden") return;
-      voiceController.current?.handleVisibilityChange(true);
-      voiceController.current = null;
-      setLiveVoice(false);
+      if (document.visibilityState === "hidden") endLiveVoice();
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
+  const animationControllers = useRef(new Map<string, AnimationController>());
+  const pendingAnimationCommands = useRef(
+    new Map<string, AnimationPlaybackCommand[]>(),
+  );
+  const registerAnimationController = useCallback(
+    (pageId: string, controller: AnimationController | null) => {
+      if (!controller) {
+        animationControllers.current.delete(pageId);
+        return;
+      }
+      animationControllers.current.set(pageId, controller);
+      const pending = pendingAnimationCommands.current.get(pageId) ?? [];
+      pendingAnimationCommands.current.delete(pageId);
+      for (const command of pending) controller.control(command);
+    },
+    [],
+  );
   const flushCourseSave = async (): Promise<boolean> => {
     if (saveInFlight.current) {
       const saved = await saveInFlight.current;
@@ -276,12 +350,12 @@ export default function CourseRoom({
     messagesRef.current = initial.messages;
     setPages(initial.pages);
     pagesRef.current = initial.pages;
-    setPresented(new Set(initial.presentedPageIds));
-    presentedRef.current = new Set(initial.presentedPageIds);
-    const initialPage = initial.pages.findIndex(
-      (page) => page.id === initial.currentPageId,
+    setPresented([...initial.presentations]);
+    presentedRef.current = [...initial.presentations];
+    currentPresentationIdRef.current = initial.currentPresentationId;
+    setCurrentPresentationId(
+      initial.currentPresentationId || initial.presentations.at(-1)?.id || "",
     );
-    setPage(Math.max(0, initialPage));
     setBusy(false);
     setActivity(null);
     setModelRetry(null);
@@ -290,8 +364,7 @@ export default function CourseRoom({
       const currentConversation = updated.sections
         ?.flatMap((section) => section.conversations)
         .find(
-          (conversation) =>
-            conversation.id === boundConversationId.current,
+          (conversation) => conversation.id === boundConversationId.current,
         );
       const next = currentConversation
         ? {
@@ -302,39 +375,33 @@ export default function CourseRoom({
         : updated;
       sessionCourse.current = next;
       setCourse(next);
-      onCourseUpdated(next);
+      courseCallbacks.current?.onCourseUpdated(next);
       return next;
     };
     const current = createCourseSession(
       info,
       memory,
-      (message, replaceLast) => {
-        if (message.role === "assistant" && message.streaming) {
+      (message) => {
+        if (message.role === "assistant" && message.streaming)
           voiceController.current?.recordAgentText(message.text);
-        }
         setMessages((all) => {
-          const next = !replaceLast
-            ? [...all, message]
-            : [...all.slice(0, -1), message];
+          const next = all.some((item) => item.id === message.id)
+            ? all.map((item) => (item.id === message.id ? message : item))
+            : [...all, message];
           messagesRef.current = next;
           return next;
         });
       },
-      (next) => {
+      (next, generating) => {
         pagesRef.current = next;
         setPages(next);
+        setGeneratingPages(generating);
       },
-      (pageId) => {
-        setPresented((existing) => {
-          const next = new Set(existing).add(pageId);
-          presentedRef.current = next;
-          return next;
-        });
-        setPages((existing) => {
-          const index = existing.findIndex((page) => page.id === pageId);
-          if (index >= 0) setPage(index);
-          return existing;
-        });
+      (sequence, presentationId) => {
+        presentedRef.current = sequence;
+        currentPresentationIdRef.current = presentationId;
+        setPresented(sequence);
+        setCurrentPresentationId(presentationId);
       },
       setActivity,
       setModelRetry,
@@ -344,14 +411,18 @@ export default function CourseRoom({
       },
       initial,
       {
-        course: selectedCourse,
-        currentConversationId: boundConversationId.current,
+        get course() {
+          return sessionCourse.current;
+        },
+        get currentConversationId() {
+          return boundConversationId.current;
+        },
         create: async (title, topic, cover) => {
           const created = await createCourse(title, topic, cover);
           boundConversationId.current = null;
           sessionCourse.current = created;
           setCourse(created);
-          onCourseCreated(created);
+          courseCallbacks.current?.onCourseCreated(created);
           const initialMaterials = pendingInitialMaterials.current;
           pendingInitialMaterials.current = [];
           if (initialMaterials.length) {
@@ -381,7 +452,7 @@ export default function CourseRoom({
           const next = { ...updated, state: sessionCourse.current.state };
           sessionCourse.current = next;
           setCourse(next);
-          onCourseUpdated(next);
+          courseCallbacks.current?.onCourseUpdated(next);
           return next;
         },
         setOutline: async (sections, classify) => {
@@ -394,7 +465,7 @@ export default function CourseRoom({
                 ...sessionCourse.current.state,
                 messages: messagesRef.current,
                 pages: pagesRef.current,
-                presentedPageIds: [...presentedRef.current],
+                presentations: presentedRef.current,
               },
             };
             if (!(await flushCourseSave()))
@@ -419,6 +490,20 @@ export default function CourseRoom({
           if (!sessionCourse.current) throw new Error("课程尚未建立");
           if (boundConversationId.current)
             throw new Error("当前学习对话已经建立");
+          const section = sessionCourse.current.sections?.find(
+            (candidate) => candidate.id === sectionId,
+          );
+          if (!section) {
+            const available = (sessionCourse.current.sections ?? []).map(
+              (candidate) => ({
+                id: candidate.id,
+                title: candidate.title,
+              }),
+            );
+            throw new Error(
+              `课程小节 ${sectionId} 不存在。请使用当前大纲中的真实小节：${JSON.stringify(available)}`,
+            );
+          }
           const conversation = await createStoredCourseConversation(
             sessionCourse.current.id,
             sectionId,
@@ -427,8 +512,8 @@ export default function CourseRoom({
           const state: CourseConversationState = {
             messages: messagesRef.current,
             pages: pagesRef.current,
-            presentedPageIds: [...presentedRef.current],
-            currentPageId: pagesRef.current.at(-1)?.id ?? "",
+            presentations: presentedRef.current,
+            currentPresentationId: currentPresentationIdRef.current,
           };
           boundConversationId.current = conversation.id;
           const updated = {
@@ -449,7 +534,47 @@ export default function CourseRoom({
           };
           sessionCourse.current = updated;
           setCourse(updated);
-          onCourseUpdated(updated);
+          courseCallbacks.current?.onCourseUpdated(updated);
+          return conversation;
+        },
+        switchSection: async (sectionId, title) => {
+          const currentCourse = sessionCourse.current;
+          if (!currentCourse || !boundConversationId.current)
+            throw new Error("当前没有可切换的学习对话");
+          const section = currentCourse.sections?.find(
+            (candidate) => candidate.id === sectionId,
+          );
+          if (!section) throw new Error(`课程小节 ${sectionId} 不存在`);
+          pendingSave.current = {
+            course: currentCourse,
+            state: {
+              messages: messagesRef.current,
+              pages: pagesRef.current,
+              presentations: presentedRef.current,
+              currentPresentationId: currentPresentationIdRef.current,
+            },
+          };
+          if (!(await flushCourseSave()))
+            throw new Error("保存当前学习对话后才能切换小节");
+          const conversation = await createStoredCourseConversation(
+            currentCourse.id,
+            sectionId,
+            title,
+          );
+          const updated = {
+            ...sessionCourse.current!,
+            sections: sessionCourse.current!.sections?.map((candidate) =>
+              candidate.id === sectionId
+                ? {
+                    ...candidate,
+                    conversations: [...candidate.conversations, conversation],
+                  }
+                : candidate,
+            ),
+          };
+          sessionCourse.current = updated;
+          setCourse(updated);
+          courseCallbacks.current?.onCourseUpdated(updated);
           return conversation;
         },
         listConversations: async () =>
@@ -473,26 +598,65 @@ export default function CourseRoom({
         },
       },
       listCodeLanguages,
+      {
+        control: (pageId, command) => {
+          const controller = animationControllers.current.get(pageId);
+          if (controller) return controller.control(command);
+          const page = pagesRef.current.find(
+            (candidate) => candidate.kind === "animation" && candidate.id === pageId,
+          );
+          if (!page) throw new Error(`找不到动画页面 ${pageId}`);
+          pendingAnimationCommands.current.set(pageId, [
+            ...(pendingAnimationCommands.current.get(pageId) ?? []),
+            command,
+          ]);
+          return {
+            pageId,
+            status: "idle",
+            step: 0,
+            ...(command.action === "play" ? { buttonId: command.buttonId } : {}),
+          } satisfies AnimationPlaybackState;
+        },
+        playback: (pageId) => {
+          const controller = animationControllers.current.get(pageId);
+          if (controller) return controller.read();
+          const page = pagesRef.current.find(
+            (candidate) => candidate.kind === "animation" && candidate.id === pageId,
+          );
+          if (!page) throw new Error(`找不到动画页面 ${pageId}`);
+          return { pageId, status: "idle", step: 0 };
+        },
+      },
+      async (conversation, handoff, isCurrent) => {
+        const currentCourse = sessionCourse.current;
+        if (!currentCourse) throw new Error("课程尚未建立");
+        pendingSave.current = {
+          course: currentCourse,
+          state: {
+            messages: messagesRef.current,
+            pages: pagesRef.current,
+            presentations: presentedRef.current,
+            currentPresentationId: currentPresentationIdRef.current,
+          },
+        };
+        if (!(await flushCourseSave()))
+          throw new Error("保存当前学习对话后才能切换小节");
+        if (!isCurrent()) return;
+        onSwitchConversation(currentCourse, conversation, handoff);
+      },
+      entryRequest?.handoff &&
+      entryRequest.conversationId === selectedCourse?.conversationId
+        ? entryRequest.text
+        : undefined,
     );
     session.current = current;
-    narrationPlayer.current?.stop();
-    narrationPlayer.current = new NarrationPlayer(() => {
-      const latest = messagesRef.current.at(-1);
-      if (latest?.role === "assistant" && !latest.streaming) current.finishNarration(latest.id);
-    });
     return () => {
+      codeRunSequence.current += 1;
+      setCodeRunning(false);
       current.stop();
-      narrationPlayer.current?.dispose();
-      narrationPlayer.current = null;
       if (session.current === current) session.current = null;
     };
-  }, [
-    info?.available,
-    info?.id,
-    memory,
-    roomToken,
-    coursesReady,
-  ]);
+  }, [info?.available, info?.id, memory, coursesReady]);
 
   useEffect(() => {
     if (
@@ -504,8 +668,8 @@ export default function CourseRoom({
     const state = {
       messages,
       pages,
-      presentedPageIds: [...presented],
-      currentPageId: pages[page]?.id ?? "",
+      presentations: presented,
+      currentPresentationId,
     };
     const updated = {
       ...course,
@@ -521,13 +685,20 @@ export default function CourseRoom({
     };
     sessionCourse.current = updated;
     latestSnapshot.current = { course, state };
-    onCourseUpdated(updated);
+    courseCallbacks.current?.onCourseUpdated(updated);
     const timer = window.setTimeout(() => {
       pendingSave.current = { course, state };
       void flushCourseSave();
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [course?.id, course?.conversationId, messages, pages, presented, page]);
+  }, [
+    course?.id,
+    course?.conversationId,
+    messages,
+    pages,
+    presented,
+    currentPresentationId,
+  ]);
 
   useEffect(
     () => () => {
@@ -548,52 +719,52 @@ export default function CourseRoom({
       }
     }
     if (!latest) return;
-    if (latest.id !== narrationMessage.current) {
-      narrationMessage.current = latest.id;
-      narrationConsumed.current = 0;
-      if (liveVoice) {
-        voiceScheduledText.current[latest.id] = "";
-        setVoicePlaybackText((current) =>
-          Object.prototype.hasOwnProperty.call(current, latest.id)
-            ? current
-            : { ...current, [latest.id]: "" },
-        );
-      }
-    }
-    if (
-      liveVoice &&
-      !Object.prototype.hasOwnProperty.call(voicePlaybackText, latest.id)
-    ) {
-      setVoicePlaybackText((current) => ({ ...current, [latest.id]: "" }));
-    }
-    const extracted = takeCompletedSentences(latest.text, narrationConsumed.current, !latest.streaming);
-    narrationConsumed.current = extracted.consumed;
-    if (!liveVoice) {
+    if (!liveVoice || latest.input_mode !== "speech" || !voiceController.current) {
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
+    if (latest.id !== narrationMessage.current) {
+      narrationMessage.current = latest.id;
+      narrationConsumed.current = 0;
+      queuedSpeech.current = 0;
+      playedSpeech.current = 0;
+      narrationComplete.current = false;
+      voiceScheduledText.current[latest.id] = "";
+      setVoicePlaybackText((current) => ({ ...current, [latest.id]: "" }));
+    }
+    const extracted = takeCompletedSentences(
+      latest.text,
+      narrationConsumed.current,
+      !latest.streaming,
+    );
+    narrationConsumed.current = extracted.consumed;
     for (const sentence of extracted.sentences) {
-      const speechText = ResponsePresenter.present(sentence, "speech").speech_text;
       const messageId = latest.id;
       const baseText = voiceScheduledText.current[messageId] ?? "";
-      voiceScheduledText.current[messageId] = `${baseText}${speechText}`;
+      voiceScheduledText.current[messageId] = `${baseText}${sentence}`;
+      queuedSpeech.current += 1;
       const updateVisibleText = (visibleSentence: string) => {
         setVoicePlaybackText((current) =>
           replaceVoicePlaybackText(current, messageId, `${baseText}${visibleSentence}`),
         );
       };
-      voiceController.current?.speakText(speechText, () => updateVisibleText(speechText), updateVisibleText);
+      voiceController.current.speakText(
+        sentence,
+        () => {
+          updateVisibleText(sentence);
+          playedSpeech.current += 1;
+          if (narrationComplete.current && playedSpeech.current >= queuedSpeech.current)
+            session.current?.finishNarration(messageId);
+        },
+        updateVisibleText,
+      );
     }
-    if (!latest.streaming) session.current?.finishNarration(latest.id);
+    if (!latest.streaming) {
+      narrationComplete.current = true;
+      if (playedSpeech.current >= queuedSpeech.current)
+        session.current?.finishNarration(latest.id);
+    }
   }, [messages, liveVoice]);
-
-  useEffect(() => {
-    if (liveVoice) return;
-    narrationPlayer.current?.stop();
-    const latest = messagesRef.current.at(-1);
-    if (latest?.role === "assistant" && !latest.streaming)
-      session.current?.finishNarration(latest.id);
-  }, [liveVoice]);
 
   useEffect(() => {
     const element = thread.current;
@@ -612,36 +783,103 @@ export default function CourseRoom({
     clearError = true,
     inputMode: InputMode = "text",
   ) => {
-    if (!value || promptRunning.current || !session.current) return;
-    const sequence = ++promptSequence.current;
-    promptRunning.current = true;
+    const current = session.current;
+    if (!value || !current) return;
+    if (current.busy) {
+      await current.prompt(value, materialNames, inputMode);
+      return;
+    }
+    const run = ++promptSequence.current;
     if (clearError) setError("");
     setActivity({ kind: "thinking", text: "", active: true });
     setBusy(true);
-    await session.current.prompt(value, materialNames, inputMode);
-    if (promptSequence.current === sequence) {
-      promptRunning.current = false;
+    await current.prompt(value, materialNames, inputMode);
+    if (run === promptSequence.current && session.current === current)
       setBusy(false);
+  };
+  const runHandoff = async () => {
+    const current = session.current;
+    if (busy || !current) return;
+    const run = ++promptSequence.current;
+    setError("");
+    setActivity({ kind: "thinking", text: "", active: true });
+    setBusy(true);
+    await current.beginFromHandoff();
+    if (run === promptSequence.current && session.current === current)
+      setBusy(false);
+  };
+  const orderedSections = [...(course?.sections ?? [])].sort(
+    (left, right) => left.position - right.position,
+  );
+  const currentSectionIndex = orderedSections.findIndex((section) =>
+    section.conversations.some(
+      (conversation) => conversation.id === boundConversationId.current,
+    ),
+  );
+  const nextSection =
+    currentSectionIndex < 0
+      ? undefined
+      : orderedSections
+          .slice(currentSectionIndex + 1)
+          .find((section) => section.status !== "archived");
+  const enterNextSection = async (request?: string) => {
+    const currentCourse = sessionCourse.current;
+    if (
+      !nextSection ||
+      !currentCourse ||
+      !boundConversationId.current ||
+      busy ||
+      switchingSection
+    )
+      return;
+    setSwitchingSection(true);
+    pendingSave.current = {
+      course: currentCourse,
+      state: {
+        messages: messagesRef.current,
+        pages: pagesRef.current,
+        presentations: presentedRef.current,
+        currentPresentationId: currentPresentationIdRef.current,
+      },
+    };
+    try {
+      if (await flushCourseSave())
+        await onEnterNextSection(nextSection, request);
+    } catch {
+      setError("暂时无法进入下一小节，请重试");
+    } finally {
+      setSwitchingSection(false);
     }
   };
   useEffect(() => {
     if (!entryRequest) return;
     const timer = window.setTimeout(() => {
+      if (!session.current || startedEntryRequest.current === entryRequest.id)
+        return;
       if (
-        !session.current ||
-        startedEntryRequest.current === entryRequest.id
+        entryRequest.conversationId &&
+        boundConversationId.current !== entryRequest.conversationId
       )
         return;
       startedEntryRequest.current = entryRequest.id;
       onEntryRequestHandled(entryRequest.id);
-      void runPrompt(entryRequest.text, entryRequest.materialNames);
+      if (entryRequest.handoff) void runHandoff();
+      else void runPrompt(entryRequest.text, entryRequest.materialNames);
     });
     return () => window.clearTimeout(timer);
   }, [entryRequest, onEntryRequestHandled]);
-  const submit = async ({ text: input, files }: ChatComposerMessage, inputMode: InputMode = "text") => {
-    if (promptRunning.current) interrupt();
+  const submit = async ({ text: input, files }: ChatComposerMessage) => {
     setError("");
     const requested = input.trim();
+    const inputMode: InputMode = liveVoice ? "speech" : "text";
+    if (busy && liveVoice) {
+      if (files.length) throw new Error("请先停止当前讲解，再发送新的材料");
+      interrupt();
+    } else if (busy) {
+      if (files.length) throw new Error("请先停止当前讲解，再发送新的材料");
+      if (requested) void runPrompt(requested);
+      return;
+    }
     if (!course) {
       pendingInitialMaterials.current = files;
       void runPrompt(
@@ -670,6 +908,19 @@ export default function CourseRoom({
       (uploads.length > 0 && uploadedNames.length === 0)
     )
       throw new Error("No course material was uploaded");
+    if (
+      files.length === 0 &&
+      nextSection &&
+      /(?:想学|要学|进入|开始|学习|学|跳到|跳转到|去|切换到)\s*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      ) &&
+      !/(?:不想|不要|别|不打算|暂时不|无需|不必)[^。！？]*下(?:一)?(?:小节|节|章|关)/.test(
+        requested,
+      )
+    ) {
+      await enterNextSection(requested);
+      return;
+    }
     void runPrompt(
       requested || "请根据我附带的教学材料继续教学。",
       uploadedNames,
@@ -678,15 +929,19 @@ export default function CourseRoom({
     );
   };
   const interrupt = () => {
-    promptSequence.current += 1;
-    promptRunning.current = false;
+    promptSequence.current++;
     if (voiceController.current) voiceController.current.interrupt();
     else session.current?.stopCurrent();
+    if (narrationMessage.current !== null)
+      session.current?.finishNarration(narrationMessage.current);
     setActivity(null);
     setBusy(false);
   };
   const running = busy;
-  const current = pages[Math.min(page, Math.max(0, pages.length - 1))];
+  const currentPresentation =
+    presented.find((item) => item.id === currentPresentationId) ??
+    presented.at(-1);
+  const current = pages.find((page) => page.id === currentPresentation?.pageId);
 
   useEffect(() => {
     const container = thread.current;
@@ -694,7 +949,9 @@ export default function CourseRoom({
     const frame = window.requestAnimationFrame(() => {
       const anchor = [
         ...container.querySelectorAll<HTMLElement>(".course-message"),
-      ].find((message) => message.dataset.pageId === current.id);
+      ].find(
+        (message) => message.dataset.presentationId === currentPresentation?.id,
+      );
       if (!anchor) return;
       const top =
         container.scrollTop +
@@ -708,20 +965,17 @@ export default function CourseRoom({
       });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [current?.id]);
+  }, [currentPresentation?.id, current?.id]);
 
-  const previousPage = page - 1;
-  const nextPage = page + 1;
-  const canGoPrevious =
-    !busy &&
-    !codeRunning &&
-    previousPage >= 0 &&
-    presented.has(pages[previousPage]?.id ?? "");
-  const canGoNext =
-    !busy &&
-    !codeRunning &&
-    nextPage < pages.length &&
-    presented.has(pages[nextPage]?.id ?? "");
+  const presentedPage = currentPresentation
+    ? presented.findIndex(
+        (candidate) => candidate.id === currentPresentation.id,
+      )
+    : -1;
+  const previousPage = presented[presentedPage - 1];
+  const nextPage = presented[presentedPage + 1];
+  const canGoPrevious = !codeRunning && Boolean(previousPage);
+  const canGoNext = !codeRunning && Boolean(nextPage);
 
   return (
     <section
@@ -755,11 +1009,13 @@ export default function CourseRoom({
                 key={message.id}
                 className={`course-message ${message.role}`}
                 aria-current={
-                  message.pageId && message.pageId === current?.id
+                  message.presentationId &&
+                  message.presentationId === currentPresentation?.id
                     ? "step"
                     : undefined
                 }
                 data-page-id={message.pageId}
+                data-presentation-id={message.presentationId}
               >
                 <span>{message.role === "user" ? "我" : "知芽"}</span>
                 {message.role === "assistant" ? (
@@ -768,7 +1024,8 @@ export default function CourseRoom({
                     controls={conversationControls}
                     isAnimating={message.streaming}
                   >
-                    {liveVoice && Object.prototype.hasOwnProperty.call(voicePlaybackText, message.id)
+                    {liveVoice && message.input_mode === "speech" &&
+                    Object.prototype.hasOwnProperty.call(voicePlaybackText, message.id)
                       ? voicePlaybackText[message.id]
                       : message.text}
                   </MessageResponse>
@@ -805,6 +1062,21 @@ export default function CourseRoom({
             ))
           )}
           <Activity activity={activity} />
+          {generatingPages &&
+            !(
+              activity?.kind === "tool" &&
+              activity.name === "create_slides" &&
+              activity.status === "running"
+            ) && (
+              <ToolActivity
+                activity={{
+                  kind: "tool",
+                  name: "background-pages",
+                  label: "准备课件",
+                  status: "running",
+                }}
+              />
+            )}
           <ConnectionRetry status={modelRetry} />
         </div>
         {error && (
@@ -812,7 +1084,28 @@ export default function CourseRoom({
             {error}
           </p>
         )}
+        {nextSection && (
+          <div className="course-next-section">
+            <button
+              aria-label={`进入下一小节：${nextSection.title}`}
+              disabled={
+                !info?.available ||
+                !coursesReady ||
+                busy ||
+                codeRunning ||
+                switchingSection
+              }
+              onClick={() => void enterNextSection()}
+              type="button"
+            >
+              <span>下一小节</span>
+              <strong>{nextSection.title}</strong>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        )}
         <ChatComposer
+          allowSubmitWhileRunning
           attachments={courseMaterialAttachments}
           className="course-composer"
           disabled={!info?.available || !coursesReady}
@@ -820,7 +1113,7 @@ export default function CourseRoom({
           onError={setError}
           onVoiceError={setError}
           onStop={interrupt}
-          onSubmit={(message) => submit(message, liveVoice ? "speech" : "text")}
+          onSubmit={submit}
           voiceTranscript={voiceTranscript}
           onStartVoiceMode={startLiveVoice}
           voiceModeActive={liveVoice}
@@ -832,9 +1125,42 @@ export default function CourseRoom({
 
       {current && (
         <section className="slide-stage" aria-label="课堂页面">
-          {current.kind === "slide" ? (
-            <SlideCanvas key={current.id} slide={current} />
-          ) : (
+          {pages
+            .filter(
+              (candidate) =>
+                candidate.kind === "animation" &&
+                presented.some((item) => item.pageId === candidate.id),
+            )
+            .map((animation) =>
+              animation.kind === "animation" ? (
+                <div
+                  className="animation-page-slot"
+                  hidden={current.id !== animation.id}
+                  key={animation.id}
+                >
+                  <AnimationCanvas
+                    active={current.id === animation.id}
+                    page={animation}
+                    onController={(controller) =>
+                      registerAnimationController(animation.id, controller)
+                    }
+                  />
+                </div>
+              ) : null,
+            )}
+          {current.kind === "animation" ? null : current.kind === "slide" ? (
+            <Suspense fallback={<div className="lesson-slide" role="status">正在排版课件…</div>}>
+              <SlideCanvas key={current.id} slide={current} />
+            </Suspense>
+          ) : current.kind === "illustration" ? (
+            course ? (
+              <IllustrationCanvas
+                courseId={course.id}
+                key={current.id}
+                page={current}
+              />
+            ) : null
+          ) : current.kind === "coding" ? (
             <Suspense
               fallback={
                 <div className="coding-page-loading" role="status">
@@ -900,22 +1226,27 @@ export default function CourseRoom({
                 }}
               />
             </Suspense>
-          )}
+          ) : null}
           <footer className="slide-controls">
             <button
               aria-label="上一页"
               title="上一页"
               disabled={!canGoPrevious}
-              onClick={() => setPage(previousPage)}
+              onClick={() =>
+                previousPage &&
+                session.current?.selectPresentation(previousPage.id)
+              }
             >
               ←
             </button>
-            <span>{`${page + 1} / ${presented.size}`}</span>
+            <span>{`${presentedPage + 1} / ${presented.length}`}</span>
             <button
               aria-label="下一页"
               title="下一页"
               disabled={!canGoNext}
-              onClick={() => setPage(nextPage)}
+              onClick={() =>
+                nextPage && session.current?.selectPresentation(nextPage.id)
+              }
             >
               →
             </button>

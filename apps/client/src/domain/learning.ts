@@ -17,10 +17,63 @@ export type Slide = {
   kind: "slide";
   id: string;
   title: string;
-  kicker?: string;
-  body: string;
-  bullets: string[];
-  layout: "explain" | "steps" | "compare";
+  markdown: string;
+};
+
+export type AnimationNode = {
+  id: string;
+  shape: "rectangle" | "circle" | "diamond" | "text" | "group";
+  label: string;
+  groupId?: string;
+};
+
+export type AnimationEdge = {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  arrow?: boolean;
+};
+
+export type AnimationAction =
+  | { type: "show" | "hide" | "highlight"; targetId: string }
+  | { type: "flow"; targetId: string }
+  | { type: "update"; targetId: string; value: string };
+
+export type AnimationButton = {
+  id: string;
+  label: string;
+  steps: AnimationAction[][];
+};
+
+export type AnimationPage = {
+  kind: "animation";
+  id: string;
+  title: string;
+  layout: "horizontal" | "vertical" | "grid";
+  nodes: AnimationNode[];
+  edges: AnimationEdge[];
+  buttons: AnimationButton[];
+};
+
+export type IllustrationPage = {
+  kind: "illustration";
+  id: string;
+  title: string;
+  alt: string;
+  assetId: string;
+};
+
+export type AnimationPlaybackCommand =
+  | { action: "play"; buttonId: string }
+  | { action: "pause" }
+  | { action: "reset" };
+
+export type AnimationPlaybackState = {
+  pageId: string;
+  status: "idle" | "playing" | "paused" | "complete";
+  buttonId?: string;
+  step: number;
 };
 
 export type CodingExercise = {
@@ -37,7 +90,8 @@ export type CodingExercise = {
   result?: CodeRunResult;
 };
 
-export type LessonPage = Slide | CodingExercise;
+export type LessonPage =
+  Slide | AnimationPage | IllustrationPage | CodingExercise;
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {
@@ -67,6 +121,7 @@ export type CourseMessage = {
   materials?: string[];
   streaming?: boolean;
   pageId?: string;
+  presentationId?: string;
 };
 
 export type CourseActivity =
@@ -78,11 +133,13 @@ export type CourseActivity =
       status: "running" | "complete" | "error";
     };
 
+export type LessonPresentation = { id: string; pageId: string };
+
 export type CourseConversationState = {
   messages: CourseMessage[];
   pages: LessonPage[];
-  presentedPageIds: string[];
-  currentPageId: string;
+  presentations: LessonPresentation[];
+  currentPresentationId: string;
 };
 
 export type StoredCourseConversation = {
