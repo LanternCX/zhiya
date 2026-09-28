@@ -101,6 +101,42 @@ async function classroom(page: Page, pages: LessonPage[] = []) {
   return course;
 }
 
+for (const background of [false, true]) {
+  test(`text followed by a question tool returns the displayed page to the model${background ? " after a background task fails" : ""}`, async ({ page }) => {
+    const course = await classroom(page);
+    let receivedResult = false;
+    let receivedFailure = false;
+    await page.route("**/api/learning/course/model", async (route) => {
+      const messages = route.request().postDataJSON().payload.messages;
+      receivedFailure ||= JSON.stringify(messages).includes("大纲恢复失败");
+      const result = messages.find((message: { role: string; tool_call_id?: string }) =>
+        message.role === "tool" && message.tool_call_id === "question-after-text");
+      if (result) {
+        receivedResult = JSON.stringify(result).includes("now visible");
+        await route.fulfill(response("题目已展示，可以作答。"));
+      } else {
+        await route.fulfill(response("接下来展示一道题。", [{
+          id: "question-after-text", name: "show_question",
+          args: { title: "判断题", text: "Python 可以输出文字。", kind: "true_false" },
+        }]));
+      }
+    });
+    if (background) {
+      await page.route("**/api/courses/course/outline-reorganization", (route) =>
+        route.fulfill({ status: 400, json: { error: "大纲恢复失败" } }));
+      await page.reload();
+    } else {
+      await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("展示练习题");
+      await page.getByRole("button", { name: "发送", exact: true }).click();
+    }
+    await expect.poll(() => receivedResult).toBe(true);
+    if (background) expect(receivedFailure).toBe(true);
+    await expect(page.getByRole("region", { name: "课堂页面" })).toContainText("Python 可以输出文字。");
+    await expect.poll(() => course.state.presentations.length).toBe(1);
+    await expect(page.getByRole("button", { name: "打断", exact: true })).toHaveCount(0);
+  });
+}
+
 test("a diagram remains readable when opened from a hidden page and resized", async ({ page }) => {
   const diagram: LessonPage = {
     kind: "animation", id: "diagram", title: "条件判断", layout: "vertical",
@@ -907,6 +943,7 @@ for (const outcome of ["complete", "failed", "stopped"] as const) {
     });
     let secondRequested = false;
     let oldResponseReleased = false;
+    let returnedFailure = "";
     await page.route("**/api/learning/course/model", async (route) => {
       const request = route.request().postDataJSON();
       const messages = request.payload.messages;
@@ -990,6 +1027,11 @@ for (const outcome of ["complete", "failed", "stopped"] as const) {
           ]),
         );
       } else {
+        const result = messages.find(
+          (message: { role: string; tool_call_id?: string }) =>
+            message.role === "tool" && message.tool_call_id === "show-second",
+        );
+        if (outcome === "failed") returnedFailure = result?.content ?? "";
         await route.fulfill(
           response(
             outcome === "failed"
@@ -1032,6 +1074,7 @@ for (const outcome of ["complete", "failed", "stopped"] as const) {
       await expect(
         page.getByText("第二页生成失败，我们可以换一种讲法。", { exact: true }),
       ).toBeVisible();
+      expect(returnedFailure).toContain("课件只生成了 1 / 2 页");
       await expect(page.locator(".slide-controls")).toContainText("1 / 1");
     } else {
       await expect(
