@@ -786,13 +786,14 @@ export default function CourseRoom({
       }
     }
     if (!latest) return;
-    // Opening playback must not replay a completed response restored from history.
-    if (!latest.streaming && !busy && latest.id !== narrationMessage.current) return;
-    if (latest.id === interruptedNarration.current) return;
     if (!liveVoice || latest.input_mode !== "speech" || !voiceController.current) {
       if (!latest.streaming) session.current?.finishNarration(latest.id);
       return;
     }
+    // Only speech playback needs to skip completed responses restored from history.
+    // Text can also finish in a teaching turn started by a background task.
+    if (!latest.streaming && !busy && latest.id !== narrationMessage.current) return;
+    if (latest.id === interruptedNarration.current) return;
     if (latest.id !== narrationMessage.current) {
       interruptedNarration.current = null;
       narrationMessage.current = latest.id;
