@@ -3,107 +3,130 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "知芽技术架构",
+    "output": "zhiya-architecture.html",
     "locale": "zh-CN",
     "quality_profile": "showcase",
     "legend": {
       "mode": "hidden"
     },
-    "viewBox": [1390, 740]
+    "viewBox": [1240, 850]
   },
   "components": [
     {
       "id": "student",
       "type": "external",
-      "label": "学生",
-      "sublabel": "学习与互动",
-      "pos": [30, 310],
-      "size": [120, 64]
+      "label": "学生 / 教师",
+      "sublabel": "学习与备课",
+      "pos": [40, 170],
+      "size": [110, 64]
     },
     {
       "id": "ui",
       "type": "frontend",
       "label": "React 学习界面",
-      "sublabel": "React 19 · TypeScript 7 · Vite 8",
-      "pos": [230, 220],
-      "size": [190, 72]
+      "sublabel": "交互 · 展示 · 播放",
+      "pos": [20, 314],
+      "size": [150, 72]
     },
     {
       "id": "agent",
       "type": "backend",
-      "label": "pi Agent",
-      "sublabel": "建档 · 大纲 · 教学 · 课件",
-      "pos": [230, 420],
-      "size": [190, 72]
-    },
-    {
-      "id": "transport",
-      "type": "messagebus",
-      "label": "客户端传输层",
-      "sublabel": "HTTP API · WebSocket · 模型流",
-      "pos": [520, 320],
-      "size": [190, 78]
+      "label": "Pi 主／子 Agent",
+      "sublabel": "后台生成 · 对话隔离",
+      "pos": [510, 680],
+      "size": [220, 72]
     },
     {
       "id": "server",
       "type": "backend",
-      "label": "Go 服务",
-      "sublabel": "API · 会话同步 · 模型代理 · 材料存取",
-      "pos": [770, 320],
-      "size": [230, 78]
+      "label": "应用层",
+      "sublabel": "会话 · 课程 · 任务",
+      "pos": [510, 314],
+      "size": [220, 72]
+    },
+    {
+      "id": "client-api",
+      "type": "messagebus",
+      "label": "客户端 API",
+      "sublabel": "用户认证与授权",
+      "pos": [260, 314],
+      "size": [190, 72]
+    },
+    {
+      "id": "agent-api",
+      "type": "messagebus",
+      "label": "Agent 内部 API",
+      "sublabel": "服务认证与执行授权",
+      "pos": [260, 490],
+      "size": [190, 72]
+    },
+    {
+      "id": "infrastructure",
+      "type": "backend",
+      "label": "基础设施层",
+      "sublabel": "数据存取 · 模型代理",
+      "pos": [770, 314],
+      "size": [200, 72]
     },
     {
       "id": "model",
       "type": "cloud",
       "label": "模型服务",
-      "sublabel": "OpenAI-compatible",
-      "pos": [805, 60],
-      "size": [160, 64]
+      "sublabel": "语言 · 图像 · 语音",
+      "pos": [770, 110],
+      "size": [200, 64]
     },
     {
       "id": "smtp",
       "type": "external",
-      "label": "SMTP 服务器",
-      "sublabel": "部署环境",
-      "pos": [805, 590],
-      "size": [160, 64]
+      "label": "SMTP",
+      "sublabel": "邮件服务",
+      "pos": [785, 684],
+      "size": [170, 64]
     },
     {
       "id": "postgres",
       "type": "database",
       "label": "PostgreSQL 17",
-      "sublabel": "账号 · 课程 · 会话 · 材料元数据",
-      "pos": [1100, 150],
-      "size": [220, 64]
+      "sublabel": "用户 · 对话 · 任务",
+      "pos": [1030, 190],
+      "size": [170, 64]
     },
     {
       "id": "rustfs",
       "type": "database",
       "label": "RustFS",
-      "sublabel": "课程材料对象存储",
-      "pos": [1115, 320],
-      "size": [190, 64]
+      "sublabel": "材料 · 素材（S3）",
+      "pos": [1030, 318],
+      "size": [170, 64]
     },
     {
       "id": "runner",
       "type": "backend",
       "label": "go-judge",
       "sublabel": "多语言沙箱执行",
-      "pos": [1120, 490],
-      "size": [180, 64]
+      "pos": [1030, 446],
+      "size": [170, 64]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "知芽客户端 · Web / Tauri 2 + Rust",
-      "wraps": ["ui", "agent", "transport"],
-      "pad": 28
+      "label": "Web / Tauri 客户端",
+      "wraps": ["ui"],
+      "pad": 14
     },
     {
       "kind": "region",
-      "label": "Docker 部署",
-      "wraps": ["postgres", "rustfs", "runner"],
-      "pad": 28
+      "label": "TypeScript Agent 服务",
+      "wraps": ["agent"],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Go 服务",
+      "wraps": ["client-api", "agent-api", "server", "infrastructure"],
+      "pad": 20
     }
   ],
   "connections": [
@@ -114,78 +137,83 @@
       "variant": "emphasis"
     },
     {
-      "id": "ui-agent",
+      "id": "ui-server",
       "from": "ui",
-      "to": "agent",
-      "label": "教学交互",
-      "labelDy": 24,
-      "fromSide": "bottom",
-      "toSide": "top",
-      "variant": "emphasis"
-    },
-    {
-      "id": "ui-transport",
-      "from": "ui",
-      "to": "transport",
-      "label": "HTTP · WebSocket",
-      "variant": "emphasis"
-    },
-    {
-      "id": "agent-transport",
-      "from": "agent",
-      "to": "transport",
-      "label": "会话操作 · 模型流",
-      "variant": "emphasis"
-    },
-    {
-      "id": "transport-server",
-      "from": "transport",
-      "to": "server",
-      "label": "HTTP · WS · 流式响应",
-      "labelDy": 60,
+      "to": "client-api",
+      "label": "HTTP / WS",
       "variant": "emphasis"
     },
     {
       "id": "server-model",
-      "from": "server",
+      "from": "infrastructure",
       "to": "model",
-      "label": "Chat Completions",
+      "label": "模型代理",
       "fromSide": "top",
       "toSide": "bottom"
     },
     {
       "id": "server-smtp",
-      "from": "server",
+      "from": "infrastructure",
       "to": "smtp",
-      "label": "SMTP · 部署",
-      "labelDy": 24,
+      "label": "邮件",
       "fromSide": "bottom",
       "toSide": "top"
     },
     {
       "id": "server-postgres",
-      "from": "server",
+      "from": "infrastructure",
       "to": "postgres",
       "label": "SQL",
-      "fromSide": "right",
-      "toSide": "left"
+      "route": "straight"
     },
     {
       "id": "server-rustfs",
-      "from": "server",
+      "from": "infrastructure",
       "to": "rustfs",
-      "label": "S3 API",
-      "labelDx": 40,
       "fromSide": "right",
       "toSide": "left"
     },
     {
       "id": "server-runner",
-      "from": "server",
+      "from": "infrastructure",
       "to": "runner",
-      "label": "代码提交 · 执行结果",
-      "fromSide": "right",
-      "toSide": "left"
+      "label": "代码执行",
+      "route": "straight"
+    },
+    {
+      "id": "server-agent",
+      "from": "server",
+      "to": "agent",
+      "label": "启动／停止",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "emphasis"
+    },
+    {
+      "id": "client-business",
+      "from": "client-api",
+      "to": "server",
+      "variant": "emphasis"
+    },
+    {
+      "id": "agent-business",
+      "from": "agent-api",
+      "to": "server",
+      "route": "straight"
+    },
+    {
+      "id": "business-infrastructure",
+      "from": "server",
+      "to": "infrastructure",
+      "variant": "emphasis"
+    },
+    {
+      "id": "agent-callback",
+      "from": "agent",
+      "to": "agent-api",
+      "label": "工具／生成事件",
+      "fromSide": "left",
+      "toSide": "bottom"
     }
   ]
 }
