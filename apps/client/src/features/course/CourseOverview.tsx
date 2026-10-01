@@ -11,7 +11,7 @@ import type {
   InputMode,
   StoredCourse,
   StoredCourseConversation,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import CourseCover from "./CourseCover";
 import SectionHistory from "./SectionHistory";
 import { courseMaterialAttachments } from "./course-composer";

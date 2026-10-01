@@ -17,6 +17,11 @@ import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
 import LearningNavigation from "./components/LearningNavigation";
+import {
+  subscribeAgentStatuses,
+  type AgentStatus,
+  type ConversationSummary,
+} from "./transport/agent";
 import { Dialog as SidebarDialog } from "radix-ui";
 import { useSpeechPreference } from "./features/voice/useSpeechPreference";
 import { Volume2Icon } from "lucide-react";
@@ -25,6 +30,7 @@ import {
   deleteCourseConversation,
   deleteCourse,
   listCourses,
+  emptyCourseState,
   updateCourse,
 } from "./features/course/courses";
 import type {
@@ -33,11 +39,12 @@ import type {
   ModelInfo,
   StoredCourse,
   StoredCourseConversation,
-} from "./domain/learning";
+} from "../../../packages/learning/src/domain/learning";
 import "./workspace.css";
 import { matchRoutes, useLocation, useNavigate } from "react-router";
 import {
   conversationPath,
+  independentConversationPath,
   coursePath,
   pageRoutes,
   returnPath,
@@ -58,6 +65,7 @@ export default function Workspace({
     "learning",
     "course",
     "conversation",
+    "independent-conversation",
     "new-conversation",
   ].includes(page);
   // A destination click takes effect before the router renders the next page.
@@ -91,7 +99,17 @@ export default function Workspace({
     model: ModelInfo | null;
   }>({ memory: "", model: null });
   const [courses, setCourses] = useState<StoredCourse[]>([]);
-  const storedCourse = courses.find((course) => course.id === courseId);
+  const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<
+    ConversationSummary[]
+  >([]);
+  const independentConversation =
+    learningMatch?.route.id === "independent-conversation";
+  const stableConversationId = useRef<string | null>(null);
+  const assignedCourseId =
+    courseId ??
+    conversationHistory.find((item) => item.id === conversationId)?.courseId;
+  const storedCourse = courses.find((course) => course.id === assignedCourseId);
   const conversation = storedCourse?.sections
     ?.flatMap((section) => section.conversations)
     .find((item) => item.id === conversationId);
@@ -102,7 +120,9 @@ export default function Workspace({
           conversationId: conversation.id,
           state: conversation.state,
         }
-      : storedCourse
+      : independentConversation && conversationId
+        ? { ...storedCourse, conversationId, state: emptyCourseState() }
+        : storedCourse
     : null;
   const courseLevel =
     learningMatch?.route.id === "course" ? "course" : "conversation";
@@ -125,11 +145,11 @@ export default function Workspace({
     page === "not-found"
       ? "页面不存在"
       : learningPage && courseId && coursesReady
-        ? (!storedCourse
-            ? courseError || "课程不存在或无法访问"
-            : conversationId && !conversation
-              ? "学习对话不存在或无法访问"
-              : "")
+        ? !storedCourse
+          ? courseError || "课程不存在或无法访问"
+          : conversationId && !conversation
+            ? "学习对话不存在或无法访问"
+            : ""
         : "";
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -166,6 +186,69 @@ export default function Workspace({
       .finally(() => current && setCoursesReady(true));
     return () => {
       current = false;
+    };
+  }, [user?.id]);
+  useEffect(() => {
+    setAgentStatuses([]);
+    setConversationHistory([]);
+    if (!user) return;
+    let current = true;
+    let previous: AgentStatus[] | undefined;
+    let refresh = 0;
+    const close = subscribeAgentStatuses((next, conversations) => {
+      if (!current) return;
+      setAgentStatuses(next);
+      if (conversations) setConversationHistory(conversations);
+      const changed =
+        previous &&
+        next.some((status) => {
+          const old = previous!.find((item) => item.id === status.id);
+          return (
+            !old ||
+            old.conversationId !== status.conversationId ||
+            (old.running && !status.running)
+          );
+        });
+      previous = next;
+      if (changed) {
+        const version = ++refresh;
+        void listCourses()
+          .then((courses) => {
+            if (current && version === refresh) {
+              setCourses((all) => {
+                const merged = courses.map((course) => {
+                  const local = all.find((item) => item.id === course.id);
+                  if (!local) return course;
+                  const known = new Set(
+                    course.sections?.flatMap((section) =>
+                      section.conversations.map((item) => item.id),
+                    ),
+                  );
+                  // A list request can precede a newer projection. Never remove
+                  // conversations that arrived over the live stream meanwhile.
+                  if (
+                    local.sections?.some((section) =>
+                      section.conversations.some((item) => !known.has(item.id)),
+                    )
+                  )
+                    return local;
+                  return course;
+                });
+                return [
+                  ...merged,
+                  ...all.filter(
+                    (course) => !courses.some((item) => item.id === course.id),
+                  ),
+                ];
+              });
+            }
+          })
+          .catch(() => {});
+      }
+    });
+    return () => {
+      current = false;
+      close();
     };
   }, [user?.id]);
   useEffect(() => {
@@ -228,9 +311,14 @@ export default function Workspace({
     void routeNavigate("/learn");
   };
   const locateSession = (course: StoredCourse) => {
-    const pathname = course.conversationId
-      ? conversationPath(course.id, course.conversationId)
-      : `${coursePath(course.id)}/conversations/new`;
+    const pathname =
+      course.conversationId &&
+      (independentConversation ||
+        stableConversationId.current === course.conversationId)
+        ? independentConversationPath(course.conversationId)
+        : course.conversationId
+          ? conversationPath(course.id, course.conversationId)
+          : `${coursePath(course.id)}/conversations/new`;
     if (learningLocation.pathname === pathname) return;
     const state = { roomKey: courseRoomToken };
     if (learningNavigationIntent.current)
@@ -255,6 +343,9 @@ export default function Workspace({
       await deleteCourse(course.id);
       const remaining = courses.filter((item) => item.id !== course.id);
       setCourses(remaining);
+      setConversationHistory((all) =>
+        all.filter((item) => item.courseId !== course.id),
+      );
       setCourseError("");
       return true;
     } catch {
@@ -263,10 +354,7 @@ export default function Workspace({
     }
   };
   const courseOpen =
-    learningPage &&
-    view === "home" &&
-    !memoryOpen &&
-    Boolean(activeCourse);
+    learningPage && view === "home" && !memoryOpen && Boolean(activeCourse);
   const activeSection = activeCourse?.sections?.find((section) =>
     section.conversations.some(
       (conversation) => conversation.id === activeCourse.conversationId,
@@ -343,6 +431,9 @@ export default function Workspace({
         section.id,
         conversation.id,
       );
+      setConversationHistory((all) =>
+        all.filter((item) => item.id !== conversation.id),
+      );
       setCourses((all) =>
         all.map((item) => (item.id === updated.id ? updated : item)),
       );
@@ -356,6 +447,8 @@ export default function Workspace({
   const navigation = (
     <LearningNavigation
       courses={courses}
+      statuses={agentStatuses}
+      conversations={conversationHistory}
       ready={coursesReady}
       loadError={coursesLoadError}
       onNavigate={() => {
@@ -373,378 +466,421 @@ export default function Workspace({
         open={mobileNavigationOpen && !onboarding}
         onOpenChange={setMobileNavigationOpen}
       >
-      <aside
-        hidden={onboarding}
-        className="workspace-sidebar"
-        aria-label="侧栏"
-      >
-        <div className="workspace-brand">
-          <Mark />
-          <span>知芽</span>
-        </div>
-        {navigation}
-        <div className="workspace-account">
-          <button
-            ref={trigger}
-            className="user-trigger"
-            aria-label="用户菜单"
-            aria-expanded={menuOpen}
-            aria-controls="user-menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <span className="user-avatar">
-              {user.avatar ? (
-                <img src={user.avatar} alt="" />
-              ) : (
-                <Icon name="profile" />
-              )}
-            </span>
-            <span className="user-name">{user.nickname}</span>
-            <Icon name="more" />
-          </button>
-          <div
-            ref={menu}
-            hidden={!menuOpen}
-            id="user-menu"
-            className="user-popover"
-            aria-label="用户设置"
-          >
-            <button
-              onClick={async () => {
-                setMenuOpen(false);
-                void routeNavigate("/learning-profile");
-              }}
-            >
-              <Icon name="notebook" />
-              学习档案
-            </button>
-            <button
-              onClick={async () => {
-                setMenuOpen(false);
-                void navigate("profile");
-              }}
-            >
-              <Icon name="profile" />
-              个人资料
-            </button>
-            <button
-              onClick={async () => {
-                setMenuOpen(false);
-                void navigate("security");
-              }}
-            >
-              <Icon name="shield" />
-              账号安全
-            </button>
-            <div className="appearance-row">
-              <span>外观</span>
-              <ThemeToggle />
-            </div>
-            <button
-              role="switch"
-              aria-checked={speechReplies}
-              aria-label="语音播报"
-              onClick={() => setSpeechReplies(!speechReplies)}
-            >
-              <Volume2Icon />
-              语音播报
-              <span className="speech-preference-switch" aria-hidden="true" />
-            </button>
-            <button
-              disabled={busy}
-              onClick={() => {
-                setMenuOpen(false);
-                void logout(false);
-              }}
-            >
-              <Icon name="logout" />
-              退出登录
-            </button>
+        <aside
+          hidden={onboarding}
+          className="workspace-sidebar"
+          aria-label="侧栏"
+        >
+          <div className="workspace-brand">
+            <Mark />
+            <span>知芽</span>
           </div>
-        </div>
-      </aside>
-      <div className="workspace-body">
-        <header hidden={onboarding} className="workspace-toolbar">
-          <SidebarDialog.Trigger asChild>
-            <button className="icon-button mobile-sidebar-toggle" aria-label="打开侧栏">
+          {navigation}
+          <div className="workspace-account">
+            <button
+              ref={trigger}
+              className="user-trigger"
+              aria-label="用户菜单"
+              aria-expanded={menuOpen}
+              aria-controls="user-menu"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <span className="user-avatar">
+                {user.avatar ? (
+                  <img src={user.avatar} alt="" />
+                ) : (
+                  <Icon name="profile" />
+                )}
+              </span>
+              <span className="user-name">{user.nickname}</span>
+              <Icon name="more" />
+            </button>
+            <div
+              ref={menu}
+              hidden={!menuOpen}
+              id="user-menu"
+              className="user-popover"
+              aria-label="用户设置"
+            >
+              <button
+                onClick={async () => {
+                  setMenuOpen(false);
+                  void routeNavigate("/learning-profile");
+                }}
+              >
+                <Icon name="notebook" />
+                学习档案
+              </button>
+              <button
+                onClick={async () => {
+                  setMenuOpen(false);
+                  void navigate("profile");
+                }}
+              >
+                <Icon name="profile" />
+                个人资料
+              </button>
+              <button
+                onClick={async () => {
+                  setMenuOpen(false);
+                  void navigate("security");
+                }}
+              >
+                <Icon name="shield" />
+                账号安全
+              </button>
+              <div className="appearance-row">
+                <span>外观</span>
+                <ThemeToggle />
+              </div>
+              <button
+                role="switch"
+                aria-checked={speechReplies}
+                aria-label="语音播报"
+                onClick={() => setSpeechReplies(!speechReplies)}
+              >
+                <Volume2Icon />
+                语音播报
+                <span className="speech-preference-switch" aria-hidden="true" />
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => {
+                  setMenuOpen(false);
+                  void logout(false);
+                }}
+              >
+                <Icon name="logout" />
+                退出登录
+              </button>
+            </div>
+          </div>
+        </aside>
+        <div className="workspace-body">
+          <header hidden={onboarding} className="workspace-toolbar">
+            <SidebarDialog.Trigger asChild>
+              <button
+                className="icon-button mobile-sidebar-toggle"
+                aria-label="打开侧栏"
+              >
+                <Icon name="sidebar" />
+              </button>
+            </SidebarDialog.Trigger>
+            <button
+              className="icon-button sidebar-toggle"
+              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
+              aria-expanded={!collapsed}
+              onClick={() => setCollapsed(!collapsed)}
+            >
               <Icon name="sidebar" />
             </button>
-          </SidebarDialog.Trigger>
-          <button
-            className="icon-button sidebar-toggle"
-            aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
-            aria-expanded={!collapsed}
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <Icon name="sidebar" />
-          </button>
-          {(view !== "home" || memoryOpen || courseOpen) && (
-            <button
-              className="icon-button"
-              aria-label={
-                courseOpen
-                  ? courseLevel === "conversation"
-                    ? "返回课程"
-                    : "返回课程列表"
-                  : memoryOpen && !editingMemory
-                    ? "停止对话"
-                    : "返回学习"
-              }
-              title={
-                courseOpen
-                  ? courseLevel === "conversation"
-                    ? "返回课程"
-                    : "返回课程列表"
-                  : memoryOpen && !editingMemory
-                    ? "停止对话"
-                    : "返回学习"
-              }
-              disabled={endingMemory}
-              onClick={() => {
-                if (courseOpen) {
-                  if (courseLevel === "conversation") {
-                    void routeNavigate(coursePath(activeCourse!.id));
-                  } else {
-                    void routeNavigate("/learn");
-                  }
-                } else if (memoryOpen && !editingMemory) {
-                  setEndingMemory(true);
-                } else {
-                  goLearn();
-                }
-              }}
-            >
-              <Icon
-                name={
-                  !courseOpen && memoryOpen && !editingMemory ? "close" : "back"
-                }
-              />
-            </button>
-          )}
-          <span>
-            {courseOpen
-              ? courseLevel === "conversation"
-                ? (activeSection?.title ?? activeCourse?.title)
-                : activeCourse?.title
-              : memoryOpen
-                ? "学习档案"
-                : view === "home"
-                  ? onboarding
-                    ? "初次见面"
-                    : "学习地图"
-                  : titles[view]}
-          </span>
-        </header>
-        <main className="workspace-content" aria-busy={busy}>
-          {onboarding && (
-            <div className="onboarding-controls">
+            {(view !== "home" || memoryOpen || courseOpen) && (
               <button
-                ref={onboardingExit}
                 className="icon-button"
-                aria-label="退出建档"
-                title="退出建档"
-                disabled={busy}
-                onClick={() => void logout(false, "onboarding")}
+                aria-label={
+                  courseOpen
+                    ? courseLevel === "conversation"
+                      ? "返回课程"
+                      : "返回课程列表"
+                    : memoryOpen && !editingMemory
+                      ? "停止对话"
+                      : "返回学习"
+                }
+                title={
+                  courseOpen
+                    ? courseLevel === "conversation"
+                      ? "返回课程"
+                      : "返回课程列表"
+                    : memoryOpen && !editingMemory
+                      ? "停止对话"
+                      : "返回学习"
+                }
+                disabled={endingMemory}
+                onClick={() => {
+                  if (courseOpen) {
+                    if (courseLevel === "conversation") {
+                      void routeNavigate(coursePath(activeCourse!.id));
+                    } else {
+                      void routeNavigate("/learn");
+                    }
+                  } else if (memoryOpen && !editingMemory) {
+                    setEndingMemory(true);
+                  } else {
+                    goLearn();
+                  }
+                }}
               >
-                <Icon name="close" />
+                <Icon
+                  name={
+                    !courseOpen && memoryOpen && !editingMemory
+                      ? "close"
+                      : "back"
+                  }
+                />
               </button>
-            </div>
-          )}
-          {feedback}
-          <Profile
-            user={user}
-            visible={onboarding || (view === "home" && memoryOpen)}
-            memoryOpen={!onboarding && memoryOpen}
-            editing={editingMemory}
-            setEditing={setEditingMemory}
-            ending={endingMemory}
-            setEnding={setEndingMemory}
-            onOnboardingChange={receiveOnboarding}
-            onContextChange={setLearningContext}
-          />
-          {!onboarding && routeError && (
-            <section className="workspace-empty">
-              <h1>{routeError}</h1>
-              <button
-                className="text-button"
-                onClick={() => void routeNavigate("/learn")}
-              >
-                返回学习
-              </button>
-            </section>
-          )}
-          {!onboarding && learningPage && courseId && !coursesReady && (
-            <p role="status">正在读取课程…</p>
-          )}
-          {!onboarding &&
-            !memoryOpen &&
-            !routeError &&
-            (!courseId || coursesReady) && (
-              <section
-                className="course-surface"
-                data-hidden={!learningPage}
-                aria-label="学习空间"
-              >
-                {activeCourse && courseLevel === "course" && (
-                  <CourseOverview
-                    course={activeCourse}
-                    courseError={courseError}
-                    onOpenSection={(section: CourseSection) => {
-                      const latest = [...section.conversations].sort((a, b) =>
-                        b.updatedAt.localeCompare(a.updatedAt),
-                      )[0];
-                      if (latest) openConversation(latest);
-                      else {
-                        void createSectionConversation(
-                          section,
-                          `请开始${section.title}的学习。`,
-                          [],
-                        ).catch(() => undefined);
+            )}
+            <span>
+              {courseOpen
+                ? courseLevel === "conversation"
+                  ? (activeSection?.title ?? activeCourse?.title)
+                  : activeCourse?.title
+                : memoryOpen
+                  ? "学习档案"
+                  : view === "home"
+                    ? onboarding
+                      ? "初次见面"
+                      : "学习地图"
+                    : titles[view]}
+            </span>
+          </header>
+          <main className="workspace-content" aria-busy={busy}>
+            {onboarding && (
+              <div className="onboarding-controls">
+                <button
+                  ref={onboardingExit}
+                  className="icon-button"
+                  aria-label="退出建档"
+                  title="退出建档"
+                  disabled={busy}
+                  onClick={() => void logout(false, "onboarding")}
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+            )}
+            {feedback}
+            <Profile
+              user={user}
+              visible={onboarding || (view === "home" && memoryOpen)}
+              memoryOpen={!onboarding && memoryOpen}
+              editing={editingMemory}
+              setEditing={setEditingMemory}
+              ending={endingMemory}
+              setEnding={setEndingMemory}
+              onOnboardingChange={receiveOnboarding}
+              onContextChange={setLearningContext}
+            />
+            {!onboarding && routeError && (
+              <section className="workspace-empty">
+                <h1>{routeError}</h1>
+                <button
+                  className="text-button"
+                  onClick={() => void routeNavigate("/learn")}
+                >
+                  返回学习
+                </button>
+              </section>
+            )}
+            {!onboarding && learningPage && courseId && !coursesReady && (
+              <p role="status">正在读取课程…</p>
+            )}
+            {!onboarding &&
+              !memoryOpen &&
+              !routeError &&
+              (!courseId || coursesReady) && (
+                <section
+                  className="course-surface"
+                  data-hidden={!learningPage}
+                  aria-label="学习空间"
+                >
+                  {activeCourse && courseLevel === "course" && (
+                    <CourseOverview
+                      course={activeCourse}
+                      courseError={courseError}
+                      onOpenSection={(section: CourseSection) => {
+                        const latest = [...section.conversations].sort((a, b) =>
+                          b.updatedAt.localeCompare(a.updatedAt),
+                        )[0];
+                        if (latest) openConversation(latest);
+                        else {
+                          void createSectionConversation(
+                            section,
+                            `请开始${section.title}的学习。`,
+                            [],
+                          ).catch(() => undefined);
+                        }
+                      }}
+                      onOpenConversation={(conversation) =>
+                        openConversation(conversation)
                       }
-                    }}
-                    onOpenConversation={(conversation) =>
-                      openConversation(conversation)
-                    }
-                    onCreateConversation={(section, request, materialNames, inputMode, inputMethod) =>
-                      createSectionConversation(section, request, materialNames, inputMode, inputMethod)
-                    }
-                    onDeleteConversation={(section, conversation) =>
-                      removeSectionConversation(section, conversation)
-                    }
-                    onStartLearning={(text, materialNames, inputMode, inputMethod) => {
-                      void routeNavigate(
-                        `${coursePath(activeCourse.id)}/conversations/new`,
-                      );
-                      setCourseEntryRequest({
-                        id: Date.now(),
+                      onCreateConversation={(
+                        section,
+                        request,
+                        materialNames,
+                        inputMode,
+                        inputMethod,
+                      ) =>
+                        createSectionConversation(
+                          section,
+                          request,
+                          materialNames,
+                          inputMode,
+                          inputMethod,
+                        )
+                      }
+                      onDeleteConversation={(section, conversation) =>
+                        removeSectionConversation(section, conversation)
+                      }
+                      onStartLearning={(
                         text,
                         materialNames,
                         inputMode,
                         inputMethod,
-                      });
-                    }}
-                  />
-                )}
-                {(!activeCourse || courseLevel === "conversation") && (
-                  <CourseRoom
-                    key={courseRoomToken}
-                    info={learningContext.model}
-                    memory={learningContext.memory}
-                    courses={courses}
-                    activeCourse={activeCourse}
-                    coursesReady={coursesReady}
-                    newSession={newSession}
-                    entryRequest={courseEntryRequest}
-                    libraryError={courseError}
-                    onEntryRequestHandled={(id) => {
-                      setCourseEntryRequest((current) =>
-                        current?.id === id ? null : current,
-                      );
-                    }}
-                    onOpenCourse={(course) => {
-                      void routeNavigate(coursePath(course.id));
-                    }}
-                    onRenameCourse={renameCourse}
-                    onDeleteCourse={removeCourse}
-                    onCourseCreated={(course) => {
-                      setCourses((all) => [
-                        course,
-                        ...all.filter((item) => item.id !== course.id),
-                      ]);
-                      locateSession(course);
-                    }}
-                    onCourseUpdated={(course) => {
-                      setCourses((all) =>
-                        all.map((item) =>
-                          item.id === course.id ? course : item,
-                        ),
-                      );
-                      if (
-                        course.conversationId &&
-                        course.id === courseId &&
-                        courseLevel === "conversation"
-                      )
-                        locateSession(course);
-                    }}
-                    onSwitchConversation={(course, conversation, handoff) => {
-                      setCourses((all) =>
-                        all.map((item) =>
-                          item.id === course.id ? course : item,
-                        ),
-                      );
-                      setCourseEntryRequest({
-                        id: Date.now(),
-                        text: handoff,
-                        materialNames: [],
-                        handoff: true,
-                        conversationId: conversation.id,
-                      });
-                      void routeNavigate(
-                        conversationPath(course.id, conversation.id),
-                      );
-                    }}
-                    onEnterNextSection={async (section, request) => {
-                      const latest = [...section.conversations].sort((a, b) =>
-                        b.updatedAt.localeCompare(a.updatedAt),
-                      )[0];
-                      if (latest) {
-                        openConversation(latest);
+                      ) => {
+                        void routeNavigate(
+                          `${coursePath(activeCourse.id)}/conversations/new`,
+                        );
                         setCourseEntryRequest({
                           id: Date.now(),
-                          text:
-                            request ?? `请从上次进度继续${section.title}的学习。`,
-                          materialNames: [],
-                          conversationId: latest.id,
+                          text,
+                          materialNames,
+                          inputMode,
+                          inputMethod,
                         });
-                      } else
-                        await createSectionConversation(
-                          section,
-                          request ?? `请开始${section.title}的学习。`,
+                      }}
+                    />
+                  )}
+                  {(!activeCourse || courseLevel === "conversation") && (
+                    <CourseRoom
+                      key={courseRoomToken}
+                      info={learningContext.model}
+                      memory={learningContext.memory}
+                      courses={courses}
+                      activeCourse={activeCourse}
+                      conversationId={
+                        independentConversation ? conversationId : undefined
+                      }
+                      onConversationReady={(id) => {
+                        stableConversationId.current = id;
+                        const pathname = independentConversationPath(id);
+                        if (learningLocation.pathname === pathname) return;
+                        const state = { roomKey: courseRoomToken };
+                        if (learningNavigationIntent.current)
+                          void routeNavigate(pathname, {
+                            replace: true,
+                            state,
+                          });
+                        else
+                          retainLearningLocation({
+                            ...learningLocation,
+                            pathname,
+                            state,
+                          });
+                      }}
+                      coursesReady={coursesReady}
+                      newSession={newSession}
+                      entryRequest={courseEntryRequest}
+                      libraryError={courseError}
+                      onEntryRequestHandled={(id) => {
+                        setCourseEntryRequest((current) =>
+                          current?.id === id ? null : current,
                         );
-                    }}
-                  />
+                      }}
+                      onOpenCourse={(course) => {
+                        void routeNavigate(coursePath(course.id));
+                      }}
+                      onRenameCourse={renameCourse}
+                      onDeleteCourse={removeCourse}
+                      onCourseCreated={(course) => {
+                        setCourses((all) => [
+                          course,
+                          ...all.filter((item) => item.id !== course.id),
+                        ]);
+                        locateSession(course);
+                      }}
+                      onCourseUpdated={(course) => {
+                        setCourses((all) =>
+                          all.map((item) =>
+                            item.id === course.id ? course : item,
+                          ),
+                        );
+                        if (
+                          course.conversationId &&
+                          (course.id === courseId || independentConversation) &&
+                          courseLevel === "conversation"
+                        )
+                          locateSession(course);
+                      }}
+                      onSwitchConversation={(course, conversation, handoff) => {
+                        setCourses((all) =>
+                          all.map((item) =>
+                            item.id === course.id ? course : item,
+                          ),
+                        );
+                        setCourseEntryRequest({
+                          id: Date.now(),
+                          text: handoff,
+                          materialNames: [],
+                          handoff: true,
+                          conversationId: conversation.id,
+                        });
+                        void routeNavigate(
+                          conversationPath(course.id, conversation.id),
+                        );
+                      }}
+                      onEnterNextSection={async (section, request) => {
+                        const latest = [...section.conversations].sort((a, b) =>
+                          b.updatedAt.localeCompare(a.updatedAt),
+                        )[0];
+                        if (latest) {
+                          openConversation(latest);
+                          setCourseEntryRequest({
+                            id: Date.now(),
+                            text:
+                              request ??
+                              `请从上次进度继续${section.title}的学习。`,
+                            materialNames: [],
+                            conversationId: latest.id,
+                          });
+                        } else
+                          await createSectionConversation(
+                            section,
+                            request ?? `请开始${section.title}的学习。`,
+                          );
+                      }}
+                    />
+                  )}
+                </section>
+              )}
+            {!onboarding && view !== "home" && (
+              <section key={view} className="workspace-settings">
+                <h1>{titles[view]}</h1>
+                {view === "profile" ? (
+                  <AccountProfile {...account} user={user} />
+                ) : (
+                  <>
+                    <Security {...account} user={user} />
+                    {view !== "security" && (
+                      <button
+                        className="text-button"
+                        onClick={() => navigate("security")}
+                      >
+                        返回账号安全
+                      </button>
+                    )}
+                  </>
                 )}
               </section>
             )}
-          {!onboarding && view !== "home" && (
-            <section key={view} className="workspace-settings">
-              <h1>{titles[view]}</h1>
-              {view === "profile" ? (
-                <AccountProfile {...account} user={user} />
-              ) : (
-                <>
-                  <Security {...account} user={user} />
-                  {view !== "security" && (
-                    <button
-                      className="text-button"
-                      onClick={() => navigate("security")}
-                    >
-                      返回账号安全
-                    </button>
-                  )}
-                </>
-              )}
-            </section>
-          )}
-        </main>
-      </div>
-      <SidebarDialog.Portal>
-        <SidebarDialog.Overlay className="navigation-overlay" />
-        <SidebarDialog.Content
-          className="navigation-drawer"
-          aria-describedby={undefined}
-        >
-          <div className="navigation-drawer-header">
-            <SidebarDialog.Close asChild>
-              <button className="icon-button" aria-label="关闭侧栏">
-                <Icon name="close" />
-              </button>
-            </SidebarDialog.Close>
-            <SidebarDialog.Title>学习导航</SidebarDialog.Title>
-          </div>
-          {navigation}
-        </SidebarDialog.Content>
-      </SidebarDialog.Portal>
+          </main>
+        </div>
+        <SidebarDialog.Portal>
+          <SidebarDialog.Overlay className="navigation-overlay" />
+          <SidebarDialog.Content
+            className="navigation-drawer"
+            aria-describedby={undefined}
+          >
+            <div className="navigation-drawer-header">
+              <SidebarDialog.Close asChild>
+                <button className="icon-button" aria-label="关闭侧栏">
+                  <Icon name="close" />
+                </button>
+              </SidebarDialog.Close>
+              <SidebarDialog.Title>学习导航</SidebarDialog.Title>
+            </div>
+            {navigation}
+          </SidebarDialog.Content>
+        </SidebarDialog.Portal>
       </SidebarDialog.Root>
     </div>
   );

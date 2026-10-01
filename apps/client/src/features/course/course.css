@@ -2171,3 +2171,10 @@
     transform: translate(1px, 1px);
   }
 }
+.agent-progress-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  padding: 4px 0;
+  margin-right: 8px;
+}

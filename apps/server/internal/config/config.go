@@ -19,6 +19,7 @@ import (
 )
 
 type Config struct {
+	Agent       Agent    `yaml:"agent"`
 	Model       Model    `yaml:"model"`
 	Speech      Speech   `yaml:"speech"`
 	ImageModel  Model    `yaml:"image_model"`
@@ -30,6 +31,11 @@ type Config struct {
 	Storage     Storage  `yaml:"storage"`
 	SMTP        SMTP     `yaml:"smtp"`
 	Account     Account  `yaml:"account"`
+}
+type Agent struct {
+	Endpoint       string `yaml:"endpoint"`
+	InternalListen string `yaml:"internal_listen"`
+	Secret         string `yaml:"secret"`
 }
 type Speech struct {
 	Endpoint  string `yaml:"endpoint"`
@@ -223,6 +229,16 @@ func override(value reflect.Value, prefix string, known map[string]bool) error {
 }
 
 func (c Config) Validate() error {
+	agentURL, err := url.Parse(c.Agent.Endpoint)
+	if err != nil || agentURL.Host == "" || agentURL.User != nil || agentURL.RawQuery != "" || agentURL.Fragment != "" || (agentURL.Scheme != "http" && agentURL.Scheme != "https") {
+		return fmt.Errorf("agent.endpoint must be an HTTP(S) URL")
+	}
+	if !address(c.Agent.InternalListen) {
+		return fmt.Errorf("agent.internal_listen must be a host:port address")
+	}
+	if !c.Development && len(c.Agent.Secret) < 32 {
+		return fmt.Errorf("agent.secret must contain at least 32 characters in production")
+	}
 	if c.Speech.Endpoint != "" {
 		u, err := url.Parse(c.Speech.Endpoint)
 		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "wss" && !(c.Development && u.Scheme == "ws" && loopback(u.Hostname()))) {

@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { MessageResponse } from "../../components/ai-elements/message";
 import { Spinner } from "../../components/ui/spinner";
-import type { CodingExercise } from "../../domain/learning";
-import type { CodeRunResult } from "../../domain/learning";
+import type { CodingExercise } from "../../../../../packages/learning/src/domain/learning";
+import type { CodeRunResult } from "../../../../../packages/learning/src/domain/learning";
 import CodeEditor from "./CodeEditor";
 
 function exerciseFilename(languageName: string) {

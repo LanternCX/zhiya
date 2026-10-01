@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { Slide } from "../../domain/learning";
+import type { Slide } from "../../../../../packages/learning/src/domain/learning";
 import { renderMarpSlide } from "./marp";
 
 export default function SlideCanvas({ slide }: { slide: Slide }) {

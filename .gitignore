@@ -12,3 +12,5 @@ playwright-report/
 /apps/client/debug.log
 /apps/server/config.local.yaml
 /dev-services.local.env
+
+/apps/agent/.workspaces/

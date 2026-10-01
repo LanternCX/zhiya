@@ -1,7 +1,6 @@
 use keyring::Entry;
 use reqwest::{blocking::Client, header, Method};
 use serde::Serialize;
-use std::io::Read;
 use std::{sync::Mutex, time::Duration};
 
 static ACCOUNT_REQUEST_LOCK: Mutex<()> = Mutex::new(());
@@ -20,6 +19,7 @@ fn allowed(method: &str, path: &str) -> bool {
         ("GET", "/me")
             | ("GET", "/learning/model")
             | ("POST", "/socket-ticket")
+            | ("POST", "/agent/sessions")
             | ("GET", "/account-rules")
             | ("PATCH", "/me")
             | ("DELETE", "/me")
@@ -35,6 +35,7 @@ fn allowed(method: &str, path: &str) -> bool {
             | ("POST", "/me/email/start")
             | ("POST", "/me/email/complete")
             | ("GET", "/courses")
+            | ("GET", "/conversations")
             | ("POST", "/courses")
     );
     if fixed {
@@ -42,6 +43,12 @@ fn allowed(method: &str, path: &str) -> bool {
     }
     let segments: Vec<_> = path.trim_matches('/').split('/').collect();
     matches!(
+        (method, segments.as_slice()),
+        ("GET", ["agent", "sessions", id]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("POST", ["agent", "sessions", id, "commands"]) if !id.is_empty()
+    ) || matches!(
         (method, segments.as_slice()),
         ("GET" | "PATCH" | "DELETE", ["courses", id]) if !id.is_empty()
     ) || matches!(
@@ -113,7 +120,8 @@ fn request(
     }
     // Session metadata and socket tickets cannot mutate native credentials.
     // Account identity changes retain their existing mutex.
-    let metadata = path == "/socket-ticket" || path.starts_with("/learning") || path.starts_with("/courses");
+    let metadata =
+        path == "/socket-ticket" || path.starts_with("/learning") || path.starts_with("/courses");
     let _guard = if metadata {
         None
     } else {
@@ -194,86 +202,6 @@ fn api_origin() -> Result<&'static str, String> {
         return Err("Invalid application configuration: HTTPS origin required".into());
     }
     Ok(base)
-}
-
-#[derive(Clone, Serialize)]
-pub struct ModelPart {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    status: Option<u16>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    bytes: Option<Vec<u8>>,
-    done: bool,
-}
-
-#[tauri::command]
-pub async fn model_request(
-    body: String,
-    expected_user: String,
-    course: bool,
-    on_event: tauri::ipc::Channel<ModelPart>,
-) -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(move || {
-        if cfg!(target_os = "android") {
-            return Err("Android secure credential storage must be configured before use".into());
-        }
-        let base = api_origin()?;
-        let entry = Entry::new("com.lanterncx.zhiya.session", base)
-            .map_err(|_| "Secure storage unavailable")?;
-        let token = entry
-            .get_password()
-            .map_err(|_| "Unable to read secure storage")?;
-        let client = Client::builder()
-            .timeout(None)
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .map_err(|_| "Network unavailable")?;
-        let path = if course {
-            "/api/learning/course/model"
-        } else {
-            "/api/learning/model"
-        };
-        let mut response = client
-            .post(format!("{}{}", base.trim_end_matches('/'), path))
-            .header(header::CONTENT_TYPE, "application/json")
-            .header("X-Zhiya-Request", "1")
-            .header("X-Zhiya-User", expected_user)
-            .header(header::COOKIE, format!("zhiya_session={token}"))
-            .body(body)
-            .send()
-            .map_err(|_| "Unable to connect to model proxy")?;
-        on_event
-            .send(ModelPart {
-                status: Some(response.status().as_u16()),
-                bytes: None,
-                done: false,
-            })
-            .map_err(|_| "Stream closed")?;
-        let mut buffer = [0u8; 8192];
-        loop {
-            let n = response
-                .read(&mut buffer)
-                .map_err(|_| "Unable to read model response")?;
-            if n == 0 {
-                break;
-            }
-            on_event
-                .send(ModelPart {
-                    status: None,
-                    bytes: Some(buffer[..n].to_vec()),
-                    done: false,
-                })
-                .map_err(|_| "Stream closed")?;
-        }
-        on_event
-            .send(ModelPart {
-                status: None,
-                bytes: None,
-                done: true,
-            })
-            .map_err(|_| "Stream closed".to_string())
-    })
-    .await
-    .map_err(|_| "Model request failed".to_string())?
 }
 
 fn configured_request_timeout_seconds() -> u64 {

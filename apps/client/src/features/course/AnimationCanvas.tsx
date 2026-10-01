@@ -5,7 +5,7 @@ import type {
   AnimationPage,
   AnimationPlaybackCommand,
   AnimationPlaybackState,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 
 const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
@@ -69,10 +69,12 @@ export default function AnimationCanvas({
   page,
   active,
   onController,
+  onPlayback,
 }: {
   page: AnimationPage;
   active: boolean;
   onController: (controller: AnimationController | null) => void;
+  onPlayback?: (state:AnimationPlaybackState)=>void;
 }) {
   const container = useRef<HTMLDivElement | null>(null);
   const graph = useRef<Graph | null>(null);
@@ -228,6 +230,7 @@ export default function AnimationCanvas({
     const instance = graph.current;
     if (!instance) {
       playback.current = { pageId: page.id, status: "idle", step: 0 };
+      onPlayback?.(playback.current);
       return playback.current;
     }
     for (const node of page.nodes) {
@@ -251,6 +254,7 @@ export default function AnimationCanvas({
       }
     }
     playback.current = { pageId: page.id, status: "idle", step: 0 };
+    onPlayback?.(playback.current);
     return playback.current;
   };
 
@@ -288,6 +292,7 @@ export default function AnimationCanvas({
       ...playback.current,
       status: playback.current.status === "idle" ? "idle" : "paused",
     };
+    onPlayback?.(playback.current);
     return playback.current;
   };
 
@@ -307,17 +312,20 @@ export default function AnimationCanvas({
       buttonId,
       step: startStep,
     };
+    onPlayback?.(playback.current);
     void (async () => {
       for (const [index, step] of steps.entries()) {
         if (index < startStep) continue;
         if (run.current !== token || paused.current) break;
         for (const action of step) applyAction(action);
         playback.current = { ...playback.current, step: index + 1 };
+        onPlayback?.(playback.current);
         await wait(650);
       }
       if (run.current === token) {
         setPlaying(false);
         playback.current = { ...playback.current, status: "complete" };
+        onPlayback?.(playback.current);
       }
     })();
     return playback.current;

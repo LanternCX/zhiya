@@ -1,4 +1,4 @@
-import type { CourseCover as CourseCoverData } from "../../domain/learning";
+import type { CourseCover as CourseCoverData } from "../../../../../packages/learning/src/domain/learning";
 
 function Motif({ motif }: { motif: CourseCoverData["motif"] }) {
   if (motif === "code")

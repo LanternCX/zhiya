@@ -1,4 +1,5 @@
 import type { BrowserContext, Page, WebSocketRoute } from "@playwright/test";
+import { mockAgent } from "./mock-agent";
 
 type State = Record<string, unknown> & {
   messages: unknown[];
@@ -7,9 +8,7 @@ type State = Record<string, unknown> & {
 };
 
 type ActionResult = { data?: unknown; state?: State };
-type Router =
-  | Pick<Page, "route" | "routeWebSocket">
-  | Pick<BrowserContext, "route" | "routeWebSocket">;
+type Router = Page | BrowserContext;
 
 export async function mockLearning(
   router: Router,
@@ -20,6 +19,7 @@ export async function mockLearning(
     state: current(),
   }),
 ) {
+  await mockAgent(router,current,action);
   let socket: WebSocketRoute | undefined;
   await router.route("**/api/socket-ticket", (route) =>
     route.fulfill({ json: { ticket: "test-ticket" } }),

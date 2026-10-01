@@ -22,6 +22,7 @@ export const pageRoutes = [
   { id: "reset", path: "reset-password" },
   { id: "onboarding", path: "onboarding" },
   { id: "learning", path: "learn" },
+  { id: "independent-conversation", path: "conversations/:conversationId" },
   { id: "course", path: "courses/:courseId" },
   {
     id: "conversation",
@@ -63,5 +64,10 @@ export function coursePath(courseId: string) {
 }
 
 export function conversationPath(courseId: string, conversationId: string) {
+  if (!courseId) return independentConversationPath(conversationId);
   return `${coursePath(courseId)}/conversations/${encodeURIComponent(conversationId)}`;
+}
+
+export function independentConversationPath(conversationId: string) {
+  return `/conversations/${encodeURIComponent(conversationId)}`;
 }

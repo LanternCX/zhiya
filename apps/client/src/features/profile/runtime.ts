@@ -1,57 +1,101 @@
-import { ProfileSession, conversationView } from "../../pi";
-import type { ModelGateway } from "../../pi";
+import { conversationView } from "../../../../../packages/learning/src/conversation/view";
 import type {
   Answer,
   AssistantOutput,
   ConversationView,
   ModelInfo,
   ModelRetryListener,
-} from "../../domain/learning";
-import { modelRequest, courseModelRequest } from "../../transport/model";
+} from "../../../../../packages/learning/src/domain/learning";
+import type { ProfileProjection } from "../../../../../packages/learning/src/domain/agent";
 import { ConversationChannel } from "./channel";
+import { AgentConnection } from "../../transport/agent";
 
-const gateway: ModelGateway = {
-  onboarding: modelRequest,
-  course: courseModelRequest,
-};
-
-/** Own the business connection; expose presentation state to React and storage to PI. */
 export class ProfileConnection {
   private channel = new ConversationChannel();
-
+  private agent?: AgentConnection<ProfileProjection>;
+  private observer?: (state: ProfileProjection) => void;
+  private latest?: ProfileProjection;
+  private detachWaiting?: () => void;
+  private attached?: Promise<void>;
+  get running() {
+    return Boolean(this.latest?.busy);
+  }
   subscribe(listener: (state: ConversationView) => void) {
     return this.channel.subscribe((state) => listener(conversationView(state)));
   }
-
   async open() {
+    this.agent ??= new AgentConnection<ProfileProjection>(
+      { kind: "profile" },
+      (state) => {
+        this.latest = state;
+        this.observer?.(state);
+      },
+      () => {},
+    );
+    this.attached ??= this.agent.ready.then(() =>
+      this.agent!.command("attach"),
+    );
+    await this.attached;
     return conversationView(await this.channel.open());
   }
-
   async answer(questionId: string, answer: Answer) {
     return conversationView(await this.channel.answer(questionId, answer));
   }
-
   async endCorrection() {
-    return conversationView(await this.channel.endCorrection());
+    await this.agent?.command("endCorrection");
+    return conversationView(await this.channel.open());
   }
-
   createSession(
-    info: ModelInfo,
+    _info: ModelInfo,
     update: (state: ConversationView) => void,
-    output: (value: AssistantOutput) => void,
+    output: (state: AssistantOutput) => void,
     onRetry: ModelRetryListener,
   ) {
-    return new ProfileSession(
-      gateway,
-      info,
-      this.channel,
-      (state) => update(conversationView(state)),
-      output,
-      onRetry,
-    );
+    let stopped = false;
+    const observe = (state: ProfileProjection) => {
+      if (stopped) return;
+      update(conversationView(state.conversation));
+      if (state.output) output(state.output);
+      onRetry(state.retry ?? null);
+    };
+    this.observer = observe;
+    if (this.latest) observe(this.latest);
+    return {
+      get isStopped() {
+        return stopped;
+      },
+      run: async (text?: string) => {
+        await this.open();
+        // A returning view attaches to the existing run instead of claiming another one.
+        if (this.latest?.busy && !text) {
+          await new Promise<void>((resolve, reject) => {
+            this.detachWaiting = resolve;
+            this.observer = (state) => {
+              observe(state);
+              if (!state.busy) {
+                this.observer = observe;
+                if (state.error) reject(new Error(state.error));
+                else resolve();
+              }
+            };
+          });
+        } else await this.agent!.command("run", [text]);
+      },
+      stop: () => {
+        stopped = true;
+        void this.agent?.command("stop").catch(() => {});
+      },
+      detach: () => {
+        stopped = true;
+        this.detachWaiting?.();
+        this.observer = undefined;
+      },
+    };
   }
-
   close() {
+    this.detachWaiting?.();
+    this.observer = undefined;
+    this.agent?.close();
     this.channel.close();
   }
 }

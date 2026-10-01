@@ -3,7 +3,7 @@ import { completedOnboarding } from "./completed-onboarding";
 import type {
   CourseConversationState,
   LessonPage,
-} from "../src/domain/learning";
+} from "../../../packages/learning/src/domain/learning";
 
 function response(
   text: string,
@@ -36,7 +36,7 @@ function response(
   };
 }
 
-async function classroom(page: Page, pages: LessonPage[] = []) {
+async function classroom(page: Page, pages: LessonPage[] = [], enter = true) {
   await completedOnboarding(page);
   await page.route("**/api/me", (route) =>
     route.fulfill({
@@ -97,13 +97,13 @@ async function classroom(page: Page, pages: LessonPage[] = []) {
     conversation.state = course.state;
     return route.fulfill({ json: { ok: true } });
   });
-  await page.goto("/#/courses/course/conversations/lesson");
+  if (enter) await page.goto("/#/courses/course/conversations/lesson");
   return course;
 }
 
 for (const background of [false, true]) {
   test(`text followed by a question tool returns the displayed page to the model${background ? " after a background task fails" : ""}`, async ({ page }) => {
-    const course = await classroom(page);
+    const course = await classroom(page, [], false);
     let receivedResult = false;
     let receivedFailure = false;
     await page.route("**/api/learning/course/model", async (route) => {
@@ -124,8 +124,9 @@ for (const background of [false, true]) {
     if (background) {
       await page.route("**/api/courses/course/outline-reorganization", (route) =>
         route.fulfill({ status: 400, json: { error: "大纲恢复失败" } }));
-      await page.reload();
-    } else {
+    }
+    await page.goto("/#/courses/course/conversations/lesson");
+    if (!background) {
       await page.getByRole("textbox", { name: "告诉知芽你想学什么" }).fill("展示练习题");
       await page.getByRole("button", { name: "发送", exact: true }).click();
     }

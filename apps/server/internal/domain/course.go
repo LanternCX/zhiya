@@ -38,6 +38,20 @@ type CourseConversation struct {
 	UpdatedAt time.Time       `json:"updatedAt"`
 }
 
+// LearningConversation exists before its optional course and section assignment.
+type LearningConversation struct {
+	CourseConversation
+	CourseID string `json:"courseId"`
+}
+
+type ConversationSummary struct {
+	ID        string    `json:"id"`
+	CourseID  string    `json:"courseId"`
+	SectionID string    `json:"sectionId"`
+	Title     string    `json:"title"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 type CourseCover struct {
 	Motif   string `json:"motif"`
 	Palette string `json:"palette"`

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageResponse } from "../../components/ai-elements/message";
 import { Checkbox } from "../../components/ui/checkbox";
-import type { QuestionPage as QuestionPageData } from "../../domain/learning";
+import type { QuestionPage as QuestionPageData } from "../../../../../packages/learning/src/domain/learning";
 
 export default function QuestionPage({
   question,
