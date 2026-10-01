@@ -406,6 +406,44 @@ func TestConfiguredRateLimitAndRetryAfter(t *testing.T) {
 	}
 }
 
+func TestSyncLimitsAreIndependentOfAuthIPLimit(t *testing.T) {
+	t.Setenv("ZHIYA_SERVER_ACCOUNT_IP_LIMIT", "1")
+	a := setupAccountTest(t)
+	first := a.register("sync-first@example.com")
+	// The registration helper completes registration and logs in on the same IP.
+	for range 65 {
+		a.request(first, "POST", "/socket-ticket", map[string]any{}, 200)
+	}
+	// Exhausting registration's IP budget does not consume sync capacity.
+	a.request(a.client(), "POST", "/auth/register/start", map[string]string{"email": "blocked@example.com"}, 429)
+	a.request(first, "POST", "/socket-ticket", map[string]any{}, 200)
+}
+
+func TestSocketTicketBudgetIsPerUserAndSeparateFromInitialization(t *testing.T) {
+	a := setupAccountTest(t)
+	first := a.register("ticket-first@example.com")
+	second := a.register("ticket-second@example.com")
+	for range 600 {
+		a.request(first, "POST", "/socket-ticket", map[string]any{}, 200)
+	}
+	a.request(first, "POST", "/socket-ticket", map[string]any{}, 429)
+	a.request(second, "POST", "/socket-ticket", map[string]any{}, 200)
+	// A claimed identity cannot borrow another user's quota.
+	req, _ := http.NewRequest("POST", a.server.URL+"/api/socket-ticket", strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Zhiya-Request", "1")
+	req.Header.Set("X-Zhiya-User", "another-user")
+	response, err := first.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("claimed identity status = %d; want 401", response.StatusCode)
+	}
+	a.request(first, "POST", "/agent/sessions", map[string]any{"kind": "profile"}, 201)
+}
+
 func TestConfiguredSessionExpiresEvenWhenCookieIsReplayed(t *testing.T) {
 	t.Setenv("ZHIYA_SERVER_ACCOUNT_SESSION_TTL_SECONDS", "1")
 	a := setupAccountTest(t)

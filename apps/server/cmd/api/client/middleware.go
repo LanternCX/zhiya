@@ -45,16 +45,31 @@ func (a *application) protect(next http.Handler) http.Handler {
 					return
 				}
 			}
-			if strings.HasPrefix(r.URL.Path, "/api/auth/") || r.Method != "GET" {
-				ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-				if err := a.accountService().LimitIP(r.Context(), ip); err != nil {
-					a.http().RespondError(w, err)
-					return
-				}
-			}
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (a *application) limitIP(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+		if err := a.accountService().LimitEndpointIP(r.Context(), r.Pattern, ip); err != nil {
+			a.http().RespondError(w, err)
+			return
+		}
+		next(w, r)
+	}
+}
+
+// Each route has its own budget per authenticated user and account rate window.
+func (a *application) limitUser(max int, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := a.accountService().LimitEndpointUser(r.Context(), r.Pattern, sessionToken(r), r.Header.Get("X-Zhiya-User"), max); err != nil {
+			a.http().RespondError(w, err)
+			return
+		}
+		next(w, r)
+	}
 }
 
 func isLongLivedAPIPath(path string) bool {
