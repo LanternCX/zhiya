@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -42,6 +43,77 @@ func TestAgentSessionSurvivesClientDepartureAndRejectsOtherUsers(t *testing.T) {
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusNotFound {
 		t.Fatalf("internal route exposed: %d", response.StatusCode)
+	}
+}
+
+func TestConversationHistoryOnlyReordersWhenContentChanges(t *testing.T) {
+	a := setupAccountTest(t)
+	client := a.register("conversation-order@example.com")
+	user := a.request(client, "GET", "/me", nil, 200)["id"].(string)
+	older := a.request(client, "POST", "/agent/sessions", map[string]any{"kind": "course"}, 201)
+	newer := a.request(client, "POST", "/agent/sessions", map[string]any{"kind": "course"}, 201)
+	olderState := older["state"].(map[string]any)
+	newerState := newer["state"].(map[string]any)
+	olderID := olderState["conversationId"].(string)
+	newerID := newerState["conversationId"].(string)
+	lesson := map[string]any{
+		"messages":              []any{map[string]any{"id": 1, "role": "user", "text": "认识 AI"}},
+		"pages":                 []any{map[string]any{"id": "page-1", "kind": "slide"}, map[string]any{"id": "page-2", "kind": "slide"}},
+		"presentations":         []any{map[string]any{"id": "first", "pageId": "page-1"}, map[string]any{"id": "second", "pageId": "page-2"}},
+		"currentPresentationId": "second",
+	}
+	olderState["lesson"] = lesson
+	newerState["lesson"] = map[string]any{"messages": []any{map[string]any{"id": 1, "role": "user", "text": "学习编程"}}, "pages": []any{}, "presentations": []any{}, "currentPresentationId": ""}
+	save := func(session map[string]any, state map[string]any) {
+		t.Helper()
+		id := session["id"].(string)
+		claimed, err := a.app.executionService().Claim(context.Background(), user, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := json.Marshal(state)
+		req, _ := http.NewRequest("POST", a.internal.URL+"/sessions/"+id+"/state", bytes.NewReader(raw))
+		req.Header.Set("Authorization", "Bearer "+a.config.Agent.Secret)
+		req.Header.Set("X-Zhiya-Agent-Session", id)
+		req.Header.Set("X-Zhiya-Execution", claimed.Grant)
+		response, err := client.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			t.Fatalf("save projection: %s", response.Status)
+		}
+	}
+	history := func(first, second string) []any {
+		t.Helper()
+		items := a.request(client, "GET", "/conversations", nil, 200)["conversations"].([]any)
+		if len(items) != 2 || items[0].(map[string]any)["id"] != first || items[1].(map[string]any)["id"] != second {
+			t.Fatalf("unexpected conversation order: %v", items)
+		}
+		return items
+	}
+	save(older, olderState)
+	save(newer, newerState)
+	updatedAt := history(newerID, olderID)[1].(map[string]any)["updatedAt"]
+	a.request(client, "POST", "/agent/sessions", map[string]any{"kind": "course", "conversationId": olderID}, 201)
+	save(older, olderState)
+	if history(newerID, olderID)[1].(map[string]any)["updatedAt"] != updatedAt {
+		t.Fatal("opening or saving unchanged content updated conversation time")
+	}
+	lesson["currentPresentationId"] = "first"
+	save(older, olderState)
+	if history(newerID, olderID)[1].(map[string]any)["updatedAt"] != updatedAt {
+		t.Fatal("browsing saved pages updated conversation time")
+	}
+	restored := a.request(client, "GET", "/agent/sessions/"+older["id"].(string), nil, 200)["state"].(map[string]any)["lesson"].(map[string]any)
+	if restored["currentPresentationId"] != "first" {
+		t.Fatal("browsing position was not saved")
+	}
+	lesson["messages"] = append(lesson["messages"].([]any), map[string]any{"id": 2, "role": "user", "text": "继续学习"})
+	save(older, olderState)
+	if history(olderID, newerID)[0].(map[string]any)["updatedAt"] == updatedAt {
+		t.Fatal("new conversation content did not update conversation time")
 	}
 }
 

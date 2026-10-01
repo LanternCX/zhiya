@@ -52,8 +52,6 @@ export default function LearningNavigation({
   ]
     .sort(
       (a, b) =>
-        Number(running.has(b.conversation.id)) -
-          Number(running.has(a.conversation.id)) ||
         Date.parse(b.conversation.updatedAt) -
           Date.parse(a.conversation.updatedAt) ||
         a.conversation.id.localeCompare(b.conversation.id),
