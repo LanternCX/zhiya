@@ -1,5 +1,5 @@
 import { APIError, api } from "../../api";
-import type { Conversation } from "../../../../../packages/learning/src/pi";
+import type { Conversation } from "../../../../../packages/learning/src/domain/conversation";
 import type { Answer } from "../../../../../packages/learning/src/domain/learning";
 
 type Pending = {

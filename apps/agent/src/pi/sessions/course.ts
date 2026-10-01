@@ -1,4 +1,6 @@
-import type { Agent } from "@earendil-works/pi-agent-core";
+import { agentBranch, type Session } from "../session";
+import type { Agent, AgentMessage } from "@earendil-works/pi-agent-core";
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { AssistantMessage } from "@earendil-works/pi-ai";
 import type {
   ModelInfo,
@@ -19,9 +21,9 @@ import type {
   StoredCourse,
   StoredCourseConversation,
   InputMode,
-} from "../../domain/learning";
-import { ConversationManager } from "../../conversation/ConversationManager";
-import { ResponsePresenter } from "../../conversation/ResponsePresenter";
+} from "../../../../../packages/learning/src/domain/learning";
+import { ConversationManager } from "../../../../../packages/learning/src/conversation/ConversationManager";
+import { ResponsePresenter } from "../../../../../packages/learning/src/conversation/ResponsePresenter";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
@@ -163,6 +165,11 @@ export class CourseSession {
     ) => Promise<void>,
     initialHandoff?: string,
     private illustrations?: IllustrationGateway,
+    private transcript?: {
+      messages: AgentMessage[];
+      branch: Branch;
+      session: Session;
+    },
   ) {
     this.pageStore = [...initial.pages];
     this.presentations = [...initial.presentations];
@@ -208,7 +215,8 @@ export class CourseSession {
       model: info,
       gateway: this.gateway,
       memory,
-      messages: initial.messages,
+      messages: transcript?.messages,
+      branch: transcript?.branch,
       management: teachingManagement,
       slides: {
         start: (id, request, signal) =>
@@ -493,6 +501,25 @@ export class CourseSession {
     this.onRetry(null);
   }
 
+  private taskBranch(kind: string) {
+    const session = this.transcript?.session;
+    return session
+      ? () => agentBranch(session, `${kind}:${crypto.randomUUID()}`)
+      : undefined;
+  }
+
+  async waitForIdle() {
+    await Promise.all([
+      this.teacher.waitForIdle(),
+      ...[...this.slideAgents.values(), ...this.animationTasks.values()].map(
+        ({ agent }) => agent.waitForIdle(),
+      ),
+      ...[...this.outlineTasks.values()].flatMap(({ agents }) =>
+        [...agents].map((agent) => agent.waitForIdle()),
+      ),
+    ]);
+  }
+
   stop() {
     if (this.stopped) return;
     this.stopped = true;
@@ -566,6 +593,7 @@ export class CourseSession {
       throw new Error(`页面 ID 已被使用：${request.pageId}`);
     const taskId = `animation-${++this.animationSequence}-${request.pageId}`;
     const agent = createAnimationAgent({
+      branch: this.taskBranch("animation"),
       model: info,
       gateway: this.gateway,
       memory,
@@ -926,6 +954,7 @@ export class CourseSession {
       conversation: StoredCourseConversation,
     ) =>
       classifyCourseConversation({
+        branch: this.taskBranch("outline-classifier"),
         model: info,
         gateway: this.gateway,
         reorganization,
@@ -1262,6 +1291,7 @@ export class CourseSession {
     const slides: Slide[] = [];
     const publishedCalls = new Set<string>();
     const agent = createSlidesAgent({
+      branch: this.taskBranch("slides"),
       model: info,
       gateway: this.gateway,
       memory,

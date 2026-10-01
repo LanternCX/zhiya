@@ -1,8 +1,9 @@
 import { AgentConnection, type SyncStatus } from "../../transport/agent";
 import type { CourseProjection } from "../../../../../packages/learning/src/domain/agent";
-import type { CourseSession } from "../../../../../packages/learning/src/pi/sessions/course";
 import type {
   InputMode,
+  CodingExercise,
+  QuestionPage,
   AnimationPlaybackState,
 } from "../../../../../packages/learning/src/domain/learning";
 
@@ -105,11 +106,11 @@ export function createCourseSession(
       void command("selectPresentation", [id]);
     },
     updateCodingExercise: (
-      ...args: Parameters<CourseSession["updateCodingExercise"]>
+      ...args: [string, Partial<Pick<CodingExercise, "code" | "stdin" | "result">>]
     ) => {
       edit("updateCodingExercise", args[0], args[1]);
     },
-    updateQuestion: (...args: Parameters<CourseSession["updateQuestion"]>) => {
+    updateQuestion: (...args: [string, Pick<QuestionPage, "selected" | "answerText">]) => {
       edit("updateQuestion", args[0], args[1]);
     },
     submitQuestion: (id: string) =>

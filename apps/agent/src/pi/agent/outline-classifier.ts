@@ -1,3 +1,4 @@
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { Agent, AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type {
@@ -6,7 +7,7 @@ import type {
   OutlineClassification,
   OutlineReorganization,
   StoredCourseConversation,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import { createAgent } from "../agent";
 import type { ModelGateway } from "../gateway";
 
@@ -43,6 +44,7 @@ function classificationContent(conversation: StoredCourseConversation) {
 
 export async function classifyCourseConversation(options: {
   model: ModelInfo;
+  branch?: () => Promise<Branch>;
   gateway: ModelGateway;
   reorganization: OutlineReorganization;
   conversation: StoredCourseConversation;
@@ -94,6 +96,7 @@ export async function classifyCourseConversation(options: {
   };
   const agent = createAgent({
     model: options.model,
+    branch: options.branch,
     tools: [tool],
     systemPrompt: classifierPrompt(options.reorganization),
     shouldStopAfterTurn: () => classification !== null,

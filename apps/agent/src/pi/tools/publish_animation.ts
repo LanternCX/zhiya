@@ -1,6 +1,6 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
-import type { AnimationPage } from "../../domain/learning";
+import type { AnimationPage } from "../../../../../packages/learning/src/domain/learning";
 
 const nodeId = Type.String({ minLength: 1, maxLength: 48 });
 export const animationLimits = {

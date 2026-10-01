@@ -1,8 +1,9 @@
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type {
   ModelInfo,
   ModelRetryListener,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import { askStudentTool } from "../tools/ask_student";
@@ -45,6 +46,7 @@ export function createOnboardingAgent(options: {
   gateway: ModelGateway;
   runId: string;
   messages: AgentMessage[];
+  branch?: Branch;
   correcting: boolean;
   context: () => {
     memory: string;
@@ -67,6 +69,7 @@ export function createOnboardingAgent(options: {
   return createAgent({
     model: options.model,
     messages: options.messages,
+    branch: options.branch,
     tools,
     systemPrompt: () =>
       onboardingPrompt({

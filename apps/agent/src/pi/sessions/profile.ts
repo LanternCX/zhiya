@@ -1,3 +1,4 @@
+import { agentBranch, branchMessages, BACKGROUND_CONTEXT, type Session } from "../session";
 import type { Agent, AgentMessage } from "@earendil-works/pi-agent-core";
 import type {
   AssistantMessage,
@@ -7,7 +8,7 @@ import type {
   AssistantOutput,
   ModelInfo,
   ModelRetryListener,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import type { Conversation, ConversationStore } from "../contracts";
 import type { ModelGateway } from "../gateway";
 import { createOnboardingAgent } from "../agent/onboarding";
@@ -22,7 +23,7 @@ function interruptedAssistant(message: AgentMessage | undefined) {
   );
 }
 
-import { correctionProgress } from "../progress";
+import { correctionProgress } from "../../../../../packages/learning/src/conversation/progress";
 
 export class ProfileSession {
   private agent: Agent | null = null;
@@ -36,6 +37,7 @@ export class ProfileSession {
     private update: (state: Conversation) => void,
     private output: (value: AssistantOutput) => void,
     private onRetry: ModelRetryListener,
+    private transcript?: Session,
   ) {}
   get isStopped() {
     return this.stopped;
@@ -132,7 +134,30 @@ export class ProfileSession {
           }
         }
       }
-      const messages = [...state.messages];
+      const branch = this.transcript
+        ? await agentBranch(this.transcript, "onboarding")
+        : undefined;
+      const messages = branch
+        ? await branchMessages(branch)
+        : [...state.messages];
+      if (branch) {
+        // Submitted answers and correction requests enter through Go's product workflow.
+        // Import acknowledged external messages before Pi continues the agent loop.
+        for (const message of state.messages) {
+          const present = messages.some(
+            (saved) =>
+              saved.role === message.role &&
+              (message.role === "toolResult"
+                ? saved.role === "toolResult" &&
+                  saved.toolCallId === message.toolCallId
+                : saved.timestamp === message.timestamp),
+          );
+          if (!present) {
+            await branch.appendMessage(message, BACKGROUND_CONTEXT);
+            messages.push(message);
+          }
+        }
+      }
       if (correcting && !userText) {
         // Retry an interrupted structured turn without inventing a student reply.
         while (messages.at(-1)?.role === "assistant") {
@@ -147,6 +172,7 @@ export class ProfileSession {
         gateway: this.gateway,
         runId: this.runId,
         messages,
+        branch,
         correcting,
         context: () => {
           const progress = correctionProgress(state);

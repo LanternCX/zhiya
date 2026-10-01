@@ -53,7 +53,11 @@ npm run dev:desktop
 
 独立部署时，分别执行 `npm run build:server` 与 `npm run build:agent`，再运行 Go 二进制和 `node apps/agent/dist/server.mjs`。Go 的 `agent.secret`（或 `ZHIYA_SERVER_AGENT_SECRET`）与 Pi 的 `ZHIYA_AGENT_SECRET` 必须一致；Pi 使用 `ZHIYA_AGENT_API` 指定 Go 内部 API 地址，使用 `ZHIYA_AGENT_LISTEN` 指定监听地址。Go 的 `agent.endpoint` 指向 Pi，`agent.internal_listen` 指定工具 API 监听地址。生产密钥至少 32 个字符。
 
-当前运行一个 Pi 服务进程，Go 实例共同向它下发指令。Pi 按会话实例化 Agent，同一会话的并发请求复用同一实例；执行和工具调用不依赖客户端连接。会话状态持久化到 PostgreSQL，空闲实例会回收；服务进程故障后的自动续跑不在本功能范围内。
+当前运行一个 Pi 服务进程，Go 实例共同向它下发指令。Pi 按会话实例化 Agent，同一会话的并发请求复用同一实例；执行和工具调用不依赖客户端连接。Pi 使用原生 `JsonlSessionRepo` 在每个用户的独立工作空间保存完整消息和工具记录；PostgreSQL 保存课程、权限、前端展示状态，以及建档问答和档案修改的事务状态。空闲实例会回收，再次实例化时读取 Pi 会话；服务进程故障后的自动续跑不在本功能范围内。
+
+通过 `ZHIYA_AGENT_WORKSPACES` 指定工作空间根目录，默认是 Pi 进程工作目录下的 `.workspaces`。部署时应配置固定的绝对路径并挂载持久化磁盘，同时备份 Pi 会话与 PostgreSQL。
+
+Agent 开发集中在 `apps/agent/src/pi`：`agent/` 定义各 Agent，`tools/` 定义工具，`sessions/` 保留教学与建档编排，`session.ts` 接入 Pi 原生会话。HTTP 入口在 `server.ts`，实例生命周期和状态同步在 `runtime/`，Go API 适配在 `adapters/`。`packages/learning` 只提供共享数据类型和展示转换。
 
 当前使用 OpenAI-compatible Chat Completions 流式接口。可以在 [`apps/server/config.yaml`](../apps/server/config.yaml) 中配置，也可以使用环境变量覆盖：
 

@@ -1,7 +1,7 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { TeachingToolContext } from "../tool";
-import type { CourseCover } from "../../domain/learning";
+import type { CourseCover } from "../../../../../packages/learning/src/domain/learning";
 
 export const activityLabel = "建立课程";
 

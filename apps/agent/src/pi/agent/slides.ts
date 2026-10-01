@@ -1,8 +1,9 @@
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type {
   ModelInfo,
   ModelRetryListener,
   Slide,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import { publishSlideTool } from "../tools/publish_slide";
@@ -17,6 +18,7 @@ Use slides for explaining concepts, comparing ideas, and showing small readable 
 
 export function createSlidesAgent(options: {
   model: ModelInfo;
+  branch?: () => Promise<Branch>;
   gateway: ModelGateway;
   memory: string;
   publish: (id: string, page: Omit<Slide, "id" | "kind">) => number;
@@ -24,6 +26,7 @@ export function createSlidesAgent(options: {
 }) {
   return createAgent({
     model: options.model,
+    branch: options.branch,
     tools: [publishSlideTool(options.publish)],
     systemPrompt: slidesPrompt(options.memory),
     request: (payload, signal) => {

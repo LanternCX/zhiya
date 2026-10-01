@@ -1,8 +1,9 @@
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type {
   ModelInfo,
   ModelRetryListener,
   AnimationPage,
-} from "../../domain/learning";
+} from "../../../../../packages/learning/src/domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import {
@@ -12,6 +13,7 @@ import {
 
 export function createAnimationAgent(options: {
   model: ModelInfo;
+  branch?: () => Promise<Branch>;
   gateway: ModelGateway;
   memory: string;
   pageId: string;
@@ -23,6 +25,7 @@ export function createAnimationAgent(options: {
   let published = false;
   return createAgent({
     model: options.model,
+    branch: options.branch,
     tools: [
       publishAnimationTool((page) => {
         options.publish(page);

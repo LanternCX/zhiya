@@ -1,4 +1,4 @@
-import { conversationView } from "../../../../../packages/learning/src/pi/view";
+import { conversationView } from "../../../../../packages/learning/src/conversation/view";
 import type {
   Answer,
   AssistantOutput,

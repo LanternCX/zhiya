@@ -1,21 +1,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ToolResultMessage } from "@earendil-works/pi-ai";
-import type { Question } from "../domain/learning";
-
-export type Conversation = {
-  id: string;
-  purpose: "onboarding";
-  messages: AgentMessage[];
-  question: Question | null;
-  completed: boolean;
-  correctionEnded: boolean;
-  memory: string;
-  memoryVersion: number;
-  messageSequence: number;
-  revision: number;
-  status: "idle" | "running" | "waiting";
-  leaseUntil: string;
-};
+import type { Conversation } from "../../../../packages/learning/src/domain/conversation";
+export type { Conversation } from "../../../../packages/learning/src/domain/conversation";
 
 /** Persisted transcript operations supplied by the server host. */
 export interface ConversationStore {

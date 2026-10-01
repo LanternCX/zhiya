@@ -1,7 +1,7 @@
 import type { BrowserContext, Page, WebSocketRoute } from "@playwright/test";
-import { CourseHost } from "../../agent/src/course";
-import { ProfileHost } from "../../agent/src/profile";
-import { ToolAPI, ToolAPIError } from "../../agent/src/api";
+import { CourseHost } from "../../agent/src/runtime/course";
+import { ProfileHost } from "../../agent/src/runtime/profile";
+import { ToolAPI, ToolAPIError } from "../../agent/src/adapters/api";
 
 // Run Pi in the test host. Browser routes remain fixtures for model/tool responses,
 // while the application under test only sends commands and receives projections.

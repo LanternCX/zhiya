@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
@@ -13,6 +16,8 @@ test(
   "server-owned Pi completes after the dispatch connection closes; duplicate delivery does not run twice",
   { timeout: 15000 },
   async (t) => {
+    const workspace = await mkdtemp(join(tmpdir(), "zhiya-worker-"));
+    t.after(() => rm(workspace, { recursive: true, force: true }));
     let projection: any;
     let models = 0;
     let release!: () => void;
@@ -44,6 +49,7 @@ test(
     const worker = spawn(process.execPath, ["dist/server.mjs"], {
       env: {
         ...process.env,
+        ZHIYA_AGENT_WORKSPACES: workspace,
         ZHIYA_AGENT_SECRET: "test-secret",
         ZHIYA_AGENT_API: `http://127.0.0.1:${port}`,
         ZHIYA_AGENT_LISTEN: "127.0.0.1:0",
@@ -58,12 +64,13 @@ test(
     assert.ok(address, errors);
     const url = `http://127.0.0.1:${address}/commands`;
     const input = {
+      userId: "test-user",
       session: {
         id: "course-session",
         kind: "course",
         state: {
           course: null,
-          conversationId: "",
+          conversationId: "conversation-1",
           lesson: {
             messages: [],
             pages: [],

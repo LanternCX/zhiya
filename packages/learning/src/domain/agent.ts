@@ -6,7 +6,7 @@ import type {
   AnimationPlaybackCommand,
   AssistantOutput,
 } from "./learning";
-import type { Conversation } from "../pi/contracts";
+import type { Conversation } from "./conversation";
 
 export type CourseProjection = {
   course: StoredCourse | null;

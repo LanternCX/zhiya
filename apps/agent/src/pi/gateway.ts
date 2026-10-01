@@ -1,4 +1,4 @@
-import type { ModelRetryListener } from "../domain/learning";
+import type { ModelRetryListener } from "../../../../packages/learning/src/domain/learning";
 
 /** Model payloads and streams are transported by the host application. */
 export interface ModelGateway {

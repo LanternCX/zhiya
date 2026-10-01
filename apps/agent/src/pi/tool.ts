@@ -13,7 +13,7 @@ import type {
   LessonPage,
   LessonPresentation,
   QuestionPage,
-} from "../domain/learning";
+} from "../../../../packages/learning/src/domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
 
 import type { AgentTool } from "@earendil-works/pi-agent-core";

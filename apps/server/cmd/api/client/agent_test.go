@@ -453,7 +453,7 @@ func startAgentWorker(t *testing.T, a *testApp) {
 	}
 	worker := exec.Command("node", "dist/server.mjs")
 	worker.Dir = "../../../../agent"
-	worker.Env = append(os.Environ(), "ZHIYA_AGENT_SECRET="+a.config.Agent.Secret, "ZHIYA_AGENT_API="+a.internal.URL, "ZHIYA_AGENT_LISTEN=127.0.0.1:0")
+	worker.Env = append(os.Environ(), "ZHIYA_AGENT_WORKSPACES="+t.TempDir(), "ZHIYA_AGENT_SECRET="+a.config.Agent.Secret, "ZHIYA_AGENT_API="+a.internal.URL, "ZHIYA_AGENT_LISTEN=127.0.0.1:0")
 	stdout, err := worker.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)

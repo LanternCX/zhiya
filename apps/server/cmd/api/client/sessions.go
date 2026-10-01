@@ -53,7 +53,7 @@ func (a *application) commandAgentSession(w http.ResponseWriter, r *http.Request
 		a.http().RespondError(w, err)
 		return
 	}
-	body, err := json.Marshal(map[string]any{"session": session, "grant": session.Grant, "command": command, "memory": learning.Memory, "model": map[string]any{"id": a.config.Model.ID, "available": a.config.Model.Endpoint != ""}})
+	body, err := json.Marshal(map[string]any{"userId": session.UserID, "session": session, "grant": session.Grant, "command": command, "memory": learning.Memory, "model": map[string]any{"id": a.config.Model.ID, "available": a.config.Model.Endpoint != ""}})
 	if err != nil {
 		a.http().RespondError(w, err)
 		return

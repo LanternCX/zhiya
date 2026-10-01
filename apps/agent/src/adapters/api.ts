@@ -1,5 +1,5 @@
 import { observeModelRetries } from "./model";
-import type { ModelRetryListener } from "../../../packages/learning/src/domain/learning";
+import type { ModelRetryListener } from "../../../../packages/learning/src/domain/learning";
 
 export class ToolAPIError extends Error {
   constructor(

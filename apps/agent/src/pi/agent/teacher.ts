@@ -1,10 +1,10 @@
 import type {
   ModelInfo,
   ModelRetryListener,
-  CourseMessage,
   QuestionPage,
-} from "../../domain/learning";
-import type { AgentOptions } from "@earendil-works/pi-agent-core";
+} from "../../../../../packages/learning/src/domain/learning";
+import type { AgentMessage, AgentOptions } from "@earendil-works/pi-agent-core";
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import type {
@@ -107,7 +107,6 @@ import {
 
 function teacherPrompt(
   courseManagement: CourseManagement,
-  messages: CourseMessage[],
   memory: string,
   handoff?: string,
   questionContext?: () => {
@@ -175,7 +174,6 @@ function teacherPrompt(
     "For a short interactive question, call show_question once per question. It immediately shows a right-side question page. Use single, multiple, true_false, or blank as appropriate; provide options only for single and multiple. The question text must contain only the stem and necessary context. Put all choices exclusively in options; never list them in the stem, because the UI renders them below it. Do not include a correct answer. The student may answer now, ask for help, or defer the question and continue teaching. Deferring or turning to another page leaves the question answerable when the student returns. After the student submits, read_question can retrieve the saved response; judge and explain it yourself. For an older question, find its page ID with read_lesson_pages first.",
     "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe an unpresented asset as visible.",
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
-    `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text, pageId, presentationId, questionEvent }) => ({ role, text, pageId, presentationId, ...(questionEvent ? { questionEvent } : {}) })))}`,
     ...(currentQuestion
       ? [
           `Current question interaction (application context, not student-written text): ${JSON.stringify(currentQuestion)}`,
@@ -194,7 +192,8 @@ export function createTeacherAgent(options: {
   model: ModelInfo;
   gateway: ModelGateway;
   memory: string;
-  messages: CourseMessage[];
+  messages?: AgentMessage[];
+  branch?: Branch;
   management: CourseManagement;
   slides: SlideTools;
   animations: AnimationTools;
@@ -223,6 +222,8 @@ export function createTeacherAgent(options: {
   };
   return createAgent({
     model: options.model,
+    messages: options.messages,
+    branch: options.branch,
     toolExecution: "parallel",
     tools: [
       createCourseTool(context),
@@ -255,7 +256,6 @@ export function createTeacherAgent(options: {
     systemPrompt: () =>
       teacherPrompt(
         options.management,
-        options.messages,
         options.memory,
         options.handoff,
         options.questionContext,

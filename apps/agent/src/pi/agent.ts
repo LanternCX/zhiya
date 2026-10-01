@@ -4,13 +4,16 @@ import {
   type AgentTool,
   type AgentOptions,
 } from "@earendil-works/pi-agent-core";
+import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
+import { persistAgent } from "./session";
 import type { Model } from "@earendil-works/pi-ai";
 import { streamSimple } from "@earendil-works/pi-ai/api/openai-completions";
-import type { ModelInfo } from "../domain/learning";
+import type { ModelInfo } from "../../../../packages/learning/src/domain/learning";
 
 type AgentSetup = {
   model: ModelInfo;
   messages?: AgentMessage[];
+  branch?: Branch | (() => Promise<Branch>);
   tools: AgentTool[];
   systemPrompt: string | (() => string);
   request: (
@@ -45,7 +48,7 @@ export function createAgent(setup: AgentSetup) {
       maxTokensField: "max_tokens",
     },
   };
-  return new Agent({
+  const agent = new Agent({
     initialState: {
       model,
       messages: setup.messages ?? [],
@@ -68,4 +71,6 @@ export function createAgent(setup: AgentSetup) {
         },
       ),
   });
+  if (setup.branch) persistAgent(agent, setup.branch);
+  return agent;
 }

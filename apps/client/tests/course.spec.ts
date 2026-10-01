@@ -1,7 +1,7 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { mockLearning } from "./mock-learning";
-import { publishSlideTool } from "../../../packages/learning/src/pi/tools/publish_slide";
-import { showQuestionTool } from "../../../packages/learning/src/pi/tools/show_question";
+import { publishSlideTool } from "../../agent/src/pi/tools/publish_slide";
+import { showQuestionTool } from "../../agent/src/pi/tools/show_question";
 
 const chunk = (delta: object, finishReason: string | null = null) =>
   `data: ${JSON.stringify({
