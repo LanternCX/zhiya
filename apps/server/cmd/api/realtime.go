@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	appservice "github.com/LanternCX/zhiya/apps/server/internal/application"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/coder/websocket"
@@ -34,6 +35,7 @@ type learningConnection struct {
 }
 
 type learningHub struct {
+	agents      map[string]map[chan struct{}]struct{}
 	mu          sync.RWMutex
 	connections map[string]map[*learningConnection]struct{}
 	executions  map[string]*learningExecution
@@ -246,11 +248,18 @@ func (a *application) startLearningEvents(ctx context.Context) error {
 			a.applicationLogger().ErrorContext(ctx, "learning notification listener failed", "error", err)
 		}
 	}, func() {
+		a.learningHub.notifyAgent("")
 		a.applicationLogger().InfoContext(ctx, "learning notification listener reconnected")
 		for _, user := range a.learningHub.users() {
 			synchronize(user)
 		}
 	}, func(change domain.ConversationChange) {
+		if change.AgentSessionID != "" {
+			a.learningHub.notifyAgent("user:" + change.User)
+			a.learningHub.notifyAgent(change.AgentSessionID)
+			return
+		}
+		a.learningHub.notifyAgent("learning:" + change.User)
 		_, subscribed := a.learningHub.cursor(change.User, change.Revision)
 		if !subscribed {
 			return
@@ -262,7 +271,16 @@ func (a *application) startLearningEvents(ctx context.Context) error {
 
 func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 	requestLogger := logging.ForResponse(w, a.applicationLogger())
-	user, err := a.accountService().ConsumeSocketTicket(r.Context(), r.URL.Query().Get("ticket"))
+	var user string
+	var err error
+	internal := r.Header.Get("X-Zhiya-Agent-Session") != "" && appservice.IsAgentExecution(r.Context())
+	if internal {
+		session, authErr := a.agentService().Authorize(r.Context(), r.Header.Get("X-Zhiya-Agent-Session"), r.Header.Get("X-Zhiya-Execution"))
+		user = session.UserID
+		err = authErr
+	} else {
+		user, err = a.accountService().ConsumeSocketTicket(r.Context(), r.URL.Query().Get("ticket"))
+	}
 	if err != nil {
 		a.respondError(w, err)
 		return
@@ -273,7 +291,7 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.CloseNow()
 	conn.SetReadLimit(int64(a.config.Server.MaxBodyBytes))
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.WithoutCancel(r.Context()))
 	defer cancel()
 	c := &learningConnection{user: user, conn: conn, send: make(chan socketMessage, 16)}
 	a.learningHub.add(c)
@@ -325,6 +343,10 @@ func (a *application) learningSocket(w http.ResponseWriter, r *http.Request) {
 		}
 		if incoming.Type != "action" || incoming.RequestID == "" || len(incoming.RequestID) > 128 || incoming.Action == nil {
 			c.send <- socketMessage{Type: "error", RequestID: incoming.RequestID, Status: http.StatusBadRequest, Error: "会话请求无效"}
+			continue
+		}
+		if !internal && incoming.Action.Action != "answer" && incoming.Action.Action != "end_correction" {
+			c.send <- socketMessage{Type: "error", RequestID: incoming.RequestID, Status: 403, Error: "此操作仅供 Agent 执行"}
 			continue
 		}
 		state, output, err := a.applyLearningActionForUser(ctx, user, *incoming.Action, incoming.RequestID)

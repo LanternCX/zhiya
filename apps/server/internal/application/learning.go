@@ -74,10 +74,7 @@ func (s *LearningService) ListenChanges(ctx context.Context, ready chan<- error,
 
 func (s *LearningService) AuthorizeModel(ctx context.Context, token, claimedUser string, available bool) error {
 	return s.models.Transaction(ctx, data.StandardTransaction, func(models data.Models) error {
-		if token == "" {
-			return data.ErrInvalidSession
-		}
-		if _, err := models.Users.GetBySession(ctx, token, claimedUser); err != nil {
+		if _, err := businessIdentity(ctx, models, token, claimedUser); err != nil {
 			return err
 		}
 		if !available {
@@ -90,14 +87,15 @@ func (s *LearningService) AuthorizeModel(ctx context.Context, token, claimedUser
 func (s *LearningService) ClaimModelRun(ctx context.Context, token, claimedUser, runID string, available bool) (string, error) {
 	var userID string
 	err := s.models.Transaction(ctx, data.StandardTransaction, func(models data.Models) error {
-		if token == "" {
-			return data.ErrInvalidSession
-		}
-		user, err := models.Users.GetBySession(ctx, token, claimedUser)
+		user, err := businessIdentity(ctx, models, token, claimedUser)
 		if err != nil {
 			return err
 		}
-		conversation, err := models.Learning.LoadForAction(ctx, user.ID)
+		load := models.Learning.LoadForAction
+		if IsAgentExecution(ctx) {
+			load = models.Learning.Load
+		}
+		conversation, err := load(ctx, user.ID)
 		if err != nil {
 			return err
 		}
@@ -145,8 +143,21 @@ func ApplyLearningAction(ctx context.Context, models data.Models, user string, i
 	var output any
 	var response any
 	err := models.Transaction(ctx, data.StandardTransaction, func(m data.Models) error {
+		if IsAgentExecution(ctx) {
+			identity, err := businessIdentity(ctx, m, "", "")
+			if err != nil {
+				return err
+			}
+			if identity.ID != user {
+				return Unauthorized("执行范围无效")
+			}
+		}
 		var err error
-		state, err = m.Learning.LoadForAction(ctx, user)
+		load := m.Learning.LoadForAction
+		if IsAgentExecution(ctx) {
+			load = m.Learning.Load
+		}
+		state, err = load(ctx, user)
 		if err != nil {
 			return err
 		}

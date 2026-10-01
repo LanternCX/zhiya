@@ -1,7 +1,4 @@
-import type {
-  Agent,
-  AgentMessage,
-} from "@earendil-works/pi-agent-core";
+import type { Agent, AgentMessage } from "@earendil-works/pi-agent-core";
 import type {
   AssistantMessage,
   ToolResultMessage,
@@ -11,10 +8,7 @@ import type {
   ModelInfo,
   ModelRetryListener,
 } from "../../domain/learning";
-import type {
-  Conversation,
-  ConversationStore,
-} from "../contracts";
+import type { Conversation, ConversationStore } from "../contracts";
 import type { ModelGateway } from "../gateway";
 import { createOnboardingAgent } from "../agent/onboarding";
 
@@ -28,31 +22,7 @@ function interruptedAssistant(message: AgentMessage | undefined) {
   );
 }
 
-// Derive correction progress from acknowledged tools, not generated prose.
-// Keeping this in the transcript also lets another device resume the same flow.
-export function correctionProgress(state: Conversation) {
-  if (!state.completed || state.correctionEnded) return null;
-  let completedAt = -1;
-  let startedAt = -1;
-  state.messages.forEach((message, index) => {
-    if (message.role === "user") startedAt = index;
-    if (
-      message.role === "toolResult" &&
-      message.toolName === "complete_onboarding" &&
-      !message.isError
-    )
-      completedAt = index;
-  });
-  if (startedAt <= completedAt) return null;
-  let answered = false;
-  let saved = false;
-  for (const message of state.messages.slice(startedAt + 1)) {
-    if (message.role !== "toolResult" || message.isError) continue;
-    if (message.toolName === "ask_student") answered = true;
-    if (message.toolName === "update_memory" && answered) saved = true;
-  }
-  return { answered, saved };
-}
+import { correctionProgress } from "../progress";
 
 export class ProfileSession {
   private agent: Agent | null = null;
@@ -75,8 +45,7 @@ export class ProfileSession {
     this.stopped = true;
     this.cancelRetryWait?.();
     this.agent?.abort();
-    if (this.runId)
-      void this.store.release(this.runId).catch(() => {});
+    if (this.runId) void this.store.release(this.runId).catch(() => {});
   }
   private waitBeforeRetry(attempt: number) {
     return new Promise<void>((resolve) => {

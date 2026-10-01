@@ -32,7 +32,7 @@
 
 ## 系统架构
 
-下图为已确认的目标架构，实现进度由 [#54](https://github.com/LanternCX/zhiya/issues/54) 跟踪。主／子 Agent 统一在服务端运行；Go 分别向客户端和 Agent 提供 API，共用业务与持久化能力。客户端断开连接不取消生成，重新进入后恢复已保存的内容与运行状态。
+主／子 Agent 统一在服务端运行；Go 分别向客户端和 Agent 提供 API，共用业务与持久化能力。客户端断开连接不取消生成，重新进入后恢复已保存的内容与运行状态。
 
 ![知芽技术架构：客户端、Go 双 API 入口与服务端 Pi 运行时](docs/assets/zhiya-architecture.svg)
 

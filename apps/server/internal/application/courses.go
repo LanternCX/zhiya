@@ -81,6 +81,9 @@ func (s *CourseService) Create(ctx context.Context, token, claimedUser, title, t
 	err = s.withUser(ctx, token, claimedUser, data.StandardTransaction, func(models data.Models, user domain.User) error {
 		var err error
 		course, err = models.Courses.Create(ctx, user.ID, title, topic, cover)
+		if err == nil {
+			err = bindAgentCourse(ctx, models, course.ID)
+		}
 		return err
 	})
 	return course, err
@@ -155,6 +158,22 @@ func (s *CourseService) CreateConversation(ctx context.Context, token, claimedUs
 	var conversation domain.CourseConversation
 	err = s.withUser(ctx, token, claimedUser, data.StandardTransaction, func(models data.Models, user domain.User) error {
 		var err error
+		if identity, ok := ctx.Value(agentIdentityKey{}).(agentIdentity); ok {
+			session, err := models.Agents.Authorize(ctx, identity.id, identity.grant)
+			if err != nil {
+				return err
+			}
+			if session.ConversationID != "" {
+				current, err := models.Conversations.Get(ctx, user.ID, session.ConversationID)
+				if err != nil {
+					return err
+				}
+				if current.SectionID == "" {
+					conversation, err = models.Conversations.Assign(ctx, user.ID, current.ID, courseID, sectionID, title)
+					return err
+				}
+			}
+		}
 		conversation, err = models.Courses.CreateConversation(ctx, user.ID, courseID, sectionID, title)
 		return err
 	})
@@ -468,10 +487,7 @@ func (s *CourseService) CleanupExpired(ctx context.Context, now time.Time, warn 
 
 func (s *CourseService) withUser(ctx context.Context, token, claimedUser string, mode data.TransactionMode, action func(data.Models, domain.User) error) error {
 	return s.models.Transaction(ctx, mode, func(models data.Models) error {
-		if token == "" {
-			return data.ErrInvalidSession
-		}
-		user, err := models.Users.GetBySession(ctx, token, claimedUser)
+		user, err := businessIdentity(ctx, models, token, claimedUser)
 		if err != nil {
 			return err
 		}

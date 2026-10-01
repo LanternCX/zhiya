@@ -2,6 +2,12 @@
 # Override a field with ZHIYA_SERVER_<SECTION>_<KEY>.
 development: true
 
+# Private TypeScript runtime and Go tool API. Supply the same secret to both services.
+agent:
+  endpoint: "http://127.0.0.1:8082"
+  internal_listen: "127.0.0.1:8081"
+  secret: ""
+
 # OpenAI-compatible Chat Completions endpoint, including /v1/chat/completions.
 # Leave empty to run account services without a model. Never put live keys here.
 model:

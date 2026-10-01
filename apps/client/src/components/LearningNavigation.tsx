@@ -1,31 +1,61 @@
 import { Link, useLocation } from "react-router";
-import type { StoredCourse } from "../domain/learning";
-import { conversationPath } from "../routes";
+import type { StoredCourse } from "../../../../packages/learning/src/domain/learning";
+import { conversationPath, independentConversationPath } from "../routes";
 import Icon from "./Icon";
+import { Spinner } from "./ui/spinner";
+import type { AgentStatus, ConversationSummary } from "../transport/agent";
 
 export default function LearningNavigation({
   courses,
+  statuses,
+  conversations,
   ready,
   loadError,
   onNavigate,
   onLearn,
 }: {
   courses: StoredCourse[];
+  statuses: AgentStatus[];
+  conversations: ConversationSummary[];
   ready: boolean;
   loadError: boolean;
   onNavigate: () => void;
   onLearn: () => void;
 }) {
   const { pathname } = useLocation();
-  const recent = courses
-    .flatMap((course) =>
-      (course.sections ?? []).flatMap((section) =>
-        section.conversations.map((conversation) => ({ course, conversation })),
-      ),
-    )
+  const running = new Set(
+    statuses
+      .filter((status) => status.running)
+      .map((status) => status.conversationId),
+  );
+  const assigned = courses.flatMap((course) =>
+    (course.sections ?? []).flatMap((section) =>
+      section.conversations.map((conversation) => ({
+        course,
+        conversation,
+        path: conversationPath(course.id, conversation.id),
+      })),
+    ),
+  );
+  const recent = [
+    ...assigned,
+    ...conversations
+      .filter(
+        (item) =>
+          !assigned.some(({ conversation }) => conversation.id === item.id),
+      )
+      .map((conversation) => ({
+        conversation,
+        course: courses.find((item) => item.id === conversation.courseId),
+        path: independentConversationPath(conversation.id),
+      })),
+  ]
     .sort(
       (a, b) =>
-        Date.parse(b.conversation.updatedAt) - Date.parse(a.conversation.updatedAt) ||
+        Number(running.has(b.conversation.id)) -
+          Number(running.has(a.conversation.id)) ||
+        Date.parse(b.conversation.updatedAt) -
+          Date.parse(a.conversation.updatedAt) ||
         a.conversation.id.localeCompare(b.conversation.id),
     )
     .slice(0, 10);
@@ -57,8 +87,7 @@ export default function LearningNavigation({
           <p>还没有学习对话</p>
         ) : (
           <ul>
-            {recent.map(({ course, conversation }) => {
-              const path = conversationPath(course.id, conversation.id);
+            {recent.map(({ course, conversation, path }) => {
               return (
                 <li key={conversation.id}>
                   <Link
@@ -67,13 +96,41 @@ export default function LearningNavigation({
                       if (pathname === path) event.preventDefault();
                       onNavigate();
                     }}
-                    aria-current={pathname === path ? "page" : undefined}
-                    title={`${conversation.title} · ${course.title}`}
+                    aria-current={
+                      pathname === path ||
+                      pathname ===
+                        `/conversations/${encodeURIComponent(conversation.id)}`
+                        ? "page"
+                        : undefined
+                    }
+                    title={
+                      course
+                        ? `${conversation.title} · ${course.title}`
+                        : conversation.title
+                    }
                   >
                     <span className="recent-conversation-title">
-                      {conversation.title}
+                      {conversation.title || "新对话"}
                     </span>
-                    <span className="recent-conversation-course">{course.title}</span>
+                    {course && (
+                      <span className="recent-conversation-course">
+                        {course.title}
+                      </span>
+                    )}
+                    {running.has(conversation.id) && (
+                      <span
+                        className="recent-conversation-progress"
+                        role="status"
+                        aria-label="正在生成"
+                        title="正在生成"
+                      >
+                        <Spinner
+                          aria-hidden="true"
+                          role={undefined}
+                          aria-label={undefined}
+                        />
+                      </span>
+                    )}
                   </Link>
                 </li>
               );

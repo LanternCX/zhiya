@@ -57,6 +57,12 @@ func (a *application) protect(next http.Handler) http.Handler {
 }
 
 func isLongLivedAPIPath(path string) bool {
+	if path == "/api/agent/socket" {
+		return true
+	}
+	if strings.HasPrefix(path, "/api/agent/sessions/") && strings.HasSuffix(path, "/socket") {
+		return true
+	}
 	switch path {
 	case "/api/learning/socket", "/api/learning/model", "/api/learning/course/model", "/api/speech/stream", "/api/voice/session":
 		return true

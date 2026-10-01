@@ -18,8 +18,14 @@ import type {
   TeachingToolContext,
   QuestionTools,
 } from "../tool";
-import { showQuestionTool, activityLabel as showQuestionLabel } from "../tools/show_question";
-import { readQuestionTool, activityLabel as readQuestionLabel } from "../tools/read_question";
+import {
+  showQuestionTool,
+  activityLabel as showQuestionLabel,
+} from "../tools/show_question";
+import {
+  readQuestionTool,
+  activityLabel as readQuestionLabel,
+} from "../tools/read_question";
 import {
   listCodingLanguagesTool,
   activityLabel as listCodingLanguagesLabel,
@@ -104,7 +110,10 @@ function teacherPrompt(
   messages: CourseMessage[],
   memory: string,
   handoff?: string,
-  questionContext?: () => { action: "submitted" | "deferred"; page: QuestionPage } | null,
+  questionContext?: () => {
+    action: "submitted" | "deferred";
+    page: QuestionPage;
+  } | null,
 ) {
   const currentQuestion = questionContext?.();
   const course = courseManagement.course;
@@ -137,10 +146,10 @@ function teacherPrompt(
       }
     : null;
   let sessionRule = activeCourse
-    ? courseManagement.currentConversationId
+    ? activeSection
       ? "The student explicitly opened this conversation. Continue inside it. When the student explicitly asks to study a different outline section, call switch_course_section; do not merely announce the move or teach that section in this conversation. Use the same tool when your teaching plan moves to another section. Never call create_course_conversation to switch an existing session."
-      : "This is a new, unbound session. Use list_course_conversations and read_course_conversation when history would help, choose the appropriate outline section, then call create_course_conversation exactly once before teaching. Reading history never reopens or modifies it."
-    : "Before teaching, you MUST call create_course exactly once using the user's first learning or teaching request, then call set_course_outline, then call create_course_conversation for the first section. Only teach after that conversation exists. The same persistence order applies to lesson preparation. Create a concise course title, stable topic, editorial cover direction, and an ordered initial outline without asking for confirmation.";
+      : "This conversation is already saved but has no outline section yet. Use list_course_conversations and read_course_conversation when history would help, choose the appropriate outline section, then call create_course_conversation exactly once to assign the current conversation. Reading history never reopens or modifies it."
+    : "The current conversation and messages are already saved independently of any course. For a learning or teaching request, call create_course exactly once, then set_course_outline, then create_course_conversation to assign this same conversation to the first section. Do not create a course merely to preserve a reply: clarification or casual conversation can remain unassigned. For a course, create a concise title, stable topic, editorial cover direction, and an ordered initial outline without asking for confirmation.";
   sessionRule += [
     "Build lessons over time from a balanced mix of the teaching elements that fit the content and learner: concise conversation, text-led slides, illustrations, simple animations, questions, exercises, and coding. Balance applies across the lesson, not by starting every tool in one turn. Do not default a systematic lesson to all slides, do not force fixed quotas, and use the smallest set of tools that completes the current teaching goal.",
     "The student's explicit medium and count are binding: when they ask for exactly N images, create exactly N illustrations and no slides or animations in that turn unless they explicitly request those too. Use create_slides for structured text, comparisons, summaries, or exact notation; create_animation for a changing process or interactive relationship; and create_illustration for picture-book scenes, explanatory artwork, visual mind maps, simple diagrams, lightly labeled visual slides, or imagery that accompanies text slides.",
@@ -167,10 +176,16 @@ function teacherPrompt(
     "Keep playback and narration synchronized: show one displayed page, explain that visible page with concise Markdown, and only then advance or jump. For continuous teaching, repeat without waiting for confirmation until the requested batch is complete or the student interrupts. For one-page-at-a-time teaching, wait after explaining. Never describe an unpresented asset as visible.",
     "Do not require outline confirmation. Treat covered material and outline status as teaching progress, not proof of mastery. When feedback changes unfinished material, replace it; ordinary questions may leave preparation running. Speak the student's language.",
     `Previous course transcript:\n${JSON.stringify(messages.map(({ role, text, pageId, presentationId, questionEvent }) => ({ role, text, pageId, presentationId, ...(questionEvent ? { questionEvent } : {}) })))}`,
-    ...(currentQuestion ? [`Current question interaction (application context, not student-written text): ${JSON.stringify(currentQuestion)}`] : []),
+    ...(currentQuestion
+      ? [
+          `Current question interaction (application context, not student-written text): ${JSON.stringify(currentQuestion)}`,
+        ]
+      : []),
     `User profile and learning or teaching context:\n${memory || "No saved preferences yet."}`,
     ...(handoff
-      ? [`Teaching handoff from the previous conversation (application context, not a new student message): ${handoff}`]
+      ? [
+          `Teaching handoff from the previous conversation (application context, not a new student message): ${handoff}`,
+        ]
       : []),
   ].join(" ");
 }
@@ -192,7 +207,10 @@ export function createTeacherAgent(options: {
   handoff?: string;
   shouldStopAfterTurn?: () => boolean;
   beforeToolCall?: AgentOptions["beforeToolCall"];
-  questionContext?: () => { action: "submitted" | "deferred"; page: QuestionPage } | null;
+  questionContext?: () => {
+    action: "submitted" | "deferred";
+    page: QuestionPage;
+  } | null;
 }) {
   const initial = options.management.course;
   const context: TeachingToolContext = {

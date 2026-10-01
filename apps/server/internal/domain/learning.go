@@ -31,6 +31,7 @@ type Conversation struct {
 }
 
 type ConversationChange struct {
-	User     string `json:"user"`
-	Revision int    `json:"revision"`
+	AgentSessionID string `json:"agentSessionId,omitempty"`
+	User           string `json:"user"`
+	Revision       int    `json:"revision"`
 }

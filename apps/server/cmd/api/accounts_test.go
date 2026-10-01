@@ -25,13 +25,14 @@ import (
 )
 
 type testApp struct {
-	t       *testing.T
-	server  *httptest.Server
-	mail    map[string]string
-	db      *pgxpool.Pool
-	config  config.Config
-	objects objectstore.Store
-	app     *application
+	internal *httptest.Server
+	t        *testing.T
+	server   *httptest.Server
+	mail     map[string]string
+	db       *pgxpool.Pool
+	config   config.Config
+	objects  objectstore.Store
+	app      *application
 }
 
 func setupAccountTest(t *testing.T) *testApp {
@@ -49,6 +50,7 @@ func setupAccountTest(t *testing.T) *testApp {
 	}
 	url := settings.Database.URL
 	settings.Server.Origin = ""
+	settings.Agent.Secret = "agent-test-secret"
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, url)
 	if err != nil {
@@ -83,6 +85,8 @@ func setupAccountTest(t *testing.T) *testApp {
 	}
 	a.server = httptest.NewServer(app.routes())
 	t.Cleanup(a.server.Close)
+	a.internal = httptest.NewServer(app.agentInternalRoutes())
+	t.Cleanup(a.internal.Close)
 	return a
 }
 
@@ -111,6 +115,9 @@ func (a *testApp) anotherInstance() *testApp {
 		a.t.Fatal(err)
 	}
 	other.server = httptest.NewServer(app.routes())
+	other.app = app
+	other.internal = httptest.NewServer(app.agentInternalRoutes())
+	a.t.Cleanup(other.internal.Close)
 	a.t.Cleanup(other.server.Close)
 	return other
 }
@@ -130,7 +137,7 @@ func (a *testApp) request(c *http.Client, method, path string, body any, status 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
 	req.Header.Set("Origin", a.server.URL)
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		a.t.Fatal(err)
 	}

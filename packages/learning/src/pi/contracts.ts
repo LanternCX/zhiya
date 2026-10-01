@@ -17,7 +17,7 @@ export type Conversation = {
   leaseUntil: string;
 };
 
-/** Persisted transcript operations. The client owns transport and synchronization. */
+/** Persisted transcript operations supplied by the server host. */
 export interface ConversationStore {
   open(): Promise<Conversation>;
   current(): Promise<Conversation>;

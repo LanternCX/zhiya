@@ -94,13 +94,20 @@ CREATE TABLE IF NOT EXISTS course_sections (
 CREATE INDEX IF NOT EXISTS course_sections_course ON course_sections(course_id,position);
 CREATE TABLE IF NOT EXISTS course_conversations (
  id uuid PRIMARY KEY,
- course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
- section_id uuid NOT NULL REFERENCES course_sections(id) ON DELETE CASCADE,
+ user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ course_id uuid REFERENCES courses(id) ON DELETE CASCADE,
+ section_id uuid REFERENCES course_sections(id) ON DELETE CASCADE,
  title text NOT NULL,
  state jsonb NOT NULL,
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE course_conversations ADD COLUMN IF NOT EXISTS user_id text REFERENCES users(id) ON DELETE CASCADE;
+UPDATE course_conversations cc SET user_id=c.user_id FROM courses c WHERE cc.course_id=c.id AND cc.user_id IS NULL;
+ALTER TABLE course_conversations ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE course_conversations ALTER COLUMN course_id DROP NOT NULL;
+ALTER TABLE course_conversations ALTER COLUMN section_id DROP NOT NULL;
+CREATE INDEX IF NOT EXISTS course_conversations_user ON course_conversations(user_id,updated_at DESC);
 CREATE INDEX IF NOT EXISTS course_conversations_section ON course_conversations(section_id,created_at);
 CREATE INDEX IF NOT EXISTS course_conversations_course_updated ON course_conversations(course_id,updated_at DESC);
 -- Convert stored page navigation once; the application reads only presentations.
@@ -174,3 +181,18 @@ CREATE TABLE IF NOT EXISTS course_illustrations (
 );
 ALTER TABLE course_illustrations DROP COLUMN IF EXISTS provider_task_id;
 CREATE INDEX IF NOT EXISTS course_illustrations_course ON course_illustrations(course_id,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS agent_sessions (
+ id uuid PRIMARY KEY,
+ user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ kind text NOT NULL CHECK(kind IN ('course','profile')),
+ course_id text NOT NULL DEFAULT '',
+ conversation_id text NOT NULL DEFAULT '',
+ revision integer NOT NULL DEFAULT 1,
+ state jsonb NOT NULL,
+ grant_token text NOT NULL DEFAULT '',
+ lease_until timestamptz,
+ updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS agent_sessions_conversation ON agent_sessions(user_id,kind,conversation_id) WHERE conversation_id<>'';
+CREATE INDEX IF NOT EXISTS agent_sessions_user ON agent_sessions(user_id,id);

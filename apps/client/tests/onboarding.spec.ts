@@ -1,9 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { mockLearning } from "./mock-learning";
+import { modelServer } from "./model-server";
 import { readFileSync } from "node:fs";
 import { parseEnv } from "node:util";
 import { resolve } from "node:path";
 import { root } from "../../../scripts/config.mjs";
+let closeModel: (() => void) | undefined;
+test.afterEach(() => {
+  closeModel?.();
+  closeModel = undefined;
+});
 
 test("Pi resumes a persisted question across devices and saves memory before completing", async ({
   page,
@@ -71,7 +77,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
   const heldCorrection = new Promise<void>((resolve) => {
     releaseCorrection = resolve;
   });
-  await context.route("**/api/learning/model", async (route) => {
+  const model = await modelServer(async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({ json: { id: "gpt-5.6-luna", available: true } });
       return;
@@ -228,6 +234,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
       body: `data: ${JSON.stringify(chunk)}\n\ndata: ${JSON.stringify(end)}\n\ndata: [DONE]\n\n`,
     });
   });
+  closeModel = model.close;
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "欢迎来到知芽" }),
@@ -266,7 +273,9 @@ test("Pi resumes a persisted question across devices and saves memory before com
   ).toBeVisible();
   await other.getByRole("radio", { name: "用过", exact: true }).check();
   await other.getByRole("button", { name: "提交回答", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible({
+  await expect(
+    page.getByRole("heading", { name: "今天想学什么？" }),
+  ).toBeVisible({
     timeout: 15000,
   });
   await expect(
@@ -303,26 +312,20 @@ test("Pi resumes a persisted question across devices and saves memory before com
   await expect(editor).not.toBeVisible();
   holdCorrection = true;
   await other.getByRole("radio", { name: "给我一点提示", exact: true }).check();
-  const generating = other.waitForRequest(
-    (request) =>
-      request.url().endsWith("/api/learning/model") &&
-      request.method() === "POST",
-  );
+  const generating = model.started();
   await other.getByRole("button", { name: "提交回答", exact: true }).click();
   await generating;
   await expect(other.getByRole("status", { name: "正在思考" })).toContainText(
     /正在整理你的学习档案… · \d+ 秒/,
   );
-  const canceled = other.waitForEvent("requestfailed", {
-    predicate: (request) => request.url().endsWith("/api/learning/model"),
-  });
+  const canceled = model.cancelled();
   await other.screenshot({
     path: "test-results/correction-end-mobile.png",
     animations: "disabled",
   });
   await other.getByRole("button", { name: "停止对话", exact: true }).click();
-  releaseCorrection();
   await canceled;
+  releaseCorrection();
   await expect(editor).toBeVisible();
   await expect(other.getByRole("alert")).toHaveCount(0);
   await expect(other.getByRole("button", { name: "继续交流" })).toHaveCount(0);
@@ -355,6 +358,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
   await expect(editor.getByRole("textbox", { name: "修改或忘记" })).toBeEmpty();
   expect(renderingErrors).toEqual([]);
   await other.close();
+  model.close();
 });
 
 test("a student answers one concrete question and sees the overview when the agent finishes", async ({
@@ -411,7 +415,9 @@ test("a student answers one concrete question and sees the overview when the age
   ).toBeDisabled();
   await page.getByRole("radio", { name: "看一个例子" }).check();
   await page.getByRole("button", { name: "提交回答", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "今天想学什么？" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "用户菜单" }).click();
   await page.getByRole("button", { name: "学习档案", exact: true }).click();
   await expect(

@@ -1,6 +1,6 @@
 import { APIError, api } from "../../api";
-import type { Conversation, ConversationStore } from "../../pi";
-import type { Answer } from "../../domain/learning";
+import type { Conversation } from "../../../../../packages/learning/src/pi";
+import type { Answer } from "../../../../../packages/learning/src/domain/learning";
 
 type Pending = {
   action: object;
@@ -17,7 +17,7 @@ type ServerMessage = {
   error?: string;
 };
 
-export class ConversationChannel implements ConversationStore {
+export class ConversationChannel {
   private socket: WebSocket | null = null;
   private connecting: Promise<Conversation> | null = null;
   private latest: Conversation | null = null;
@@ -32,40 +32,8 @@ export class ConversationChannel implements ConversationStore {
     return () => this.listeners.delete(listener);
   }
 
-  claim(correction?: { correctionText: string; revision: number }) {
-    return this.action<{ runId: string }>({ action: "claim", ...correction });
-  }
-
   answer(toolCallId: string, answer: Answer) {
     return this.action<Conversation>({ action: "answer", toolCallId, answer });
-  }
-
-  endCorrection() {
-    return this.action<Conversation>({ action: "end_correction" });
-  }
-
-  release(runId: string) {
-    return this.action({ action: "release", runId });
-  }
-
-  heartbeat(runId: string) {
-    return this.action({ action: "heartbeat", runId });
-  }
-
-  saveMessage(runId: string, message: Conversation["messages"][number]) {
-    return this.action({ action: "message", runId, message });
-  }
-
-  executeTool(runId: string, toolCallId: string) {
-    return this.action<Awaited<ReturnType<ConversationStore["executeTool"]>>>({
-      action: "tool",
-      runId,
-      toolCallId,
-    });
-  }
-
-  recordToolError(runId: string, toolCallId: string) {
-    return this.action({ action: "tool_error", runId, toolCallId });
   }
 
   open(): Promise<Conversation> {
@@ -73,23 +41,6 @@ export class ConversationChannel implements ConversationStore {
       return Promise.resolve(this.latest);
     if (!this.connecting) this.connecting = this.connect();
     return this.connecting;
-  }
-
-  current(): Promise<Conversation> {
-    return this.latest ? Promise.resolve(this.latest) : this.open();
-  }
-
-  waitForChange(revision: number): Promise<Conversation> {
-    if (this.latest && this.latest.revision > revision)
-      return Promise.resolve(this.latest);
-    return new Promise((resolve) => {
-      const unsubscribe = this.subscribe((state) => {
-        if (state.revision > revision) {
-          unsubscribe();
-          resolve(state);
-        }
-      });
-    });
   }
 
   private action<T>(action: object): Promise<T> {

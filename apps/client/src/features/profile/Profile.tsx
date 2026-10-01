@@ -8,8 +8,7 @@ import type {
   ModelInfo,
   Question,
   AssistantOutput,
-} from "../../domain/learning";
-import type { ProfileSession } from "../../pi";
+} from "../../../../../packages/learning/src/domain/learning";
 import { ProfileConnection } from "./runtime";
 import "./profile.css";
 import Mark from "../../components/Mark";
@@ -50,7 +49,10 @@ export default function Profile({
   ending: boolean;
   setEnding: (value: boolean) => void;
   onOnboardingChange: (value: boolean) => void;
-  onContextChange: (context: { memory: string; model: ModelInfo | null }) => void;
+  onContextChange: (context: {
+    memory: string;
+    model: ModelInfo | null;
+  }) => void;
   visible?: boolean;
 }) {
   const [state, setState] = useState<Conversation | null>(null);
@@ -65,7 +67,9 @@ export default function Profile({
   const [stopped, setStopped] = useState(false);
   const paused = useRef(false);
   const [introduced, setIntroduced] = useState(false);
-  const session = useRef<ProfileSession | null>(null);
+  const session = useRef<ReturnType<ProfileConnection["createSession"]> | null>(
+    null,
+  );
   const channel = useRef<ProfileConnection | null>(null);
   const generation = useRef(0);
   const latest = useRef<Conversation | null>(null);
@@ -184,17 +188,15 @@ export default function Profile({
         ]);
         if (disposed) return;
         receive(initial);
-        if (initial.correction && !initial.correction.saved) {
-          receive(await connection.endCorrection());
-        }
         setInfo(model);
         if (
           model.available &&
-          !initial.completed &&
           !paused.current &&
           !session.current &&
-          initial.status === "running" &&
-          Date.parse(initial.leaseUntil) < Date.now()
+          (connection.running ||
+            (!initial.completed &&
+              initial.status === "running" &&
+              Date.parse(initial.leaseUntil) < Date.now()))
         )
           void run(model);
       } catch (e) {
@@ -210,7 +212,7 @@ export default function Profile({
       alive.current = false;
       clearTimeout(retry);
       unsubscribe();
-      session.current?.stop();
+      session.current?.detach();
       session.current = null;
       connection.close();
       if (channel.current === connection) channel.current = null;
@@ -356,8 +358,7 @@ export default function Profile({
                                 info,
                                 state.completed && (!progress || progress.saved)
                                   ? correction.trim() || undefined
-                                  : !state.completed &&
-                                      state.lastAssistant
+                                  : !state.completed && state.lastAssistant
                                     ? "请继续我们的交流。"
                                     : undefined,
                               )

@@ -2,7 +2,7 @@ import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { TeachingToolContext } from "../tool";
 
-export const activityLabel = "建立新学习对话";
+export const activityLabel = "整理学习对话";
 
 export function createCourseConversationTool(
   context: Pick<TeachingToolContext, "course" | "management">,
@@ -11,7 +11,7 @@ export function createCourseConversationTool(
     name: "create_course_conversation",
     label: activityLabel,
     description:
-      "Bind the current new teaching session to one existing outline section and persist it as a separate conversation. In an unbound course session, call this exactly once after choosing the section and before teaching. Do not call it while continuing a conversation the student explicitly opened from history.",
+      "Assign the current saved conversation to one existing outline section, keeping its ID and prior messages. In a conversation without a section, call this exactly once after choosing the section. Do not call it while continuing a conversation already assigned to a section.",
     parameters: Type.Object({
       sectionId: Type.String({ minLength: 1 }),
       title: Type.String({ minLength: 1, maxLength: 100 }),
@@ -28,7 +28,7 @@ export function createCourseConversationTool(
         content: [
           {
             type: "text",
-            text: `The new course conversation is ready: ${JSON.stringify({ id: conversation.id, sectionId: conversation.sectionId, title: conversation.title })}. Continue the requested activity now.`,
+            text: `The saved conversation is assigned to a course section: ${JSON.stringify({ id: conversation.id, sectionId: conversation.sectionId, title: conversation.title })}. Continue the requested activity now.`,
           },
         ],
         details: { conversationId: conversation.id },

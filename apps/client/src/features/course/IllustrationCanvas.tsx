@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IllustrationPage } from "../../domain/learning";
+import type { IllustrationPage } from "../../../../../packages/learning/src/domain/learning";
 import { readIllustration } from "../../transport/illustrations";
 
 export default function IllustrationCanvas({

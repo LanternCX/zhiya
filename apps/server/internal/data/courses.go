@@ -214,7 +214,7 @@ func (m CourseModel) BeginOutlineReorganization(ctx context.Context, user, cours
 		return OutlineReorganization{}, err
 	}
 	if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_assignments(reorganization_id,conversation_id,conversation_updated_at)
-		SELECT $1,id,updated_at FROM course_conversations WHERE course_id=$2`, id, courseID); err != nil {
+		SELECT $1,id,updated_at FROM course_conversations WHERE course_id=$2 AND section_id IS NOT NULL`, id, courseID); err != nil {
 		return OutlineReorganization{}, err
 	}
 	return m.loadOutlineReorganization(ctx, user, courseID, false)
@@ -247,7 +247,7 @@ func (m CourseModel) loadOutlineReorganization(ctx context.Context, user, course
 	if refresh {
 		if _, err := m.db.Exec(ctx, `INSERT INTO course_outline_assignments(reorganization_id,conversation_id,conversation_updated_at)
 			SELECT $1,c.id,c.updated_at FROM course_conversations c
-			WHERE c.course_id=$2 ON CONFLICT(reorganization_id,conversation_id) DO NOTHING`, result.ID, courseID); err != nil {
+			WHERE c.course_id=$2 AND c.section_id IS NOT NULL ON CONFLICT(reorganization_id,conversation_id) DO NOTHING`, result.ID, courseID); err != nil {
 			return OutlineReorganization{}, err
 		}
 		if _, err := m.db.Exec(ctx, `UPDATE course_outline_assignments a
@@ -374,8 +374,8 @@ func (m CourseModel) CreateConversation(ctx context.Context, user, courseID, sec
 	}
 	id := identifier.New()
 	var result CourseConversation
-	err := m.db.QueryRow(ctx, `INSERT INTO course_conversations(id,course_id,section_id,title,state) VALUES($1,$2,$3,$4,$5)
-	 RETURNING id,section_id,title,state,created_at,updated_at`, id, courseID, sectionID, title, emptyCourseState).Scan(&result.ID, &result.SectionID, &result.Title, &result.State, &result.CreatedAt, &result.UpdatedAt)
+	err := m.db.QueryRow(ctx, `INSERT INTO course_conversations(id,course_id,section_id,title,state,user_id) VALUES($1,$2,$3,$4,$5,$6)
+	 RETURNING id,section_id,title,state,created_at,updated_at`, id, courseID, sectionID, title, emptyCourseState, user).Scan(&result.ID, &result.SectionID, &result.Title, &result.State, &result.CreatedAt, &result.UpdatedAt)
 	return result, err
 }
 

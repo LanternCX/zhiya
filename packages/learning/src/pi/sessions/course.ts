@@ -34,11 +34,27 @@ import type {
   CourseManagement,
 } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
-import {
-  cancelIllustration,
-  createIllustration,
-  getIllustration,
-} from "../../transport/illustrations";
+export type IllustrationGateway = {
+  create(
+    courseId: string,
+    conversationId: string,
+    request: {
+      pageId: string;
+      title: string;
+      description: string;
+      alt: string;
+    },
+  ): Promise<{ id: string }>;
+  get(
+    courseId: string,
+    generationId: string,
+  ): Promise<{
+    status: "running" | "complete" | "failed" | "cancelled";
+    assetId?: string;
+    error?: string;
+  }>;
+  cancel(courseId: string, generationId: string): Promise<unknown>;
+};
 
 export class CourseSession {
   private teacher: Agent;
@@ -146,6 +162,7 @@ export class CourseSession {
       isCurrent: () => boolean,
     ) => Promise<void>,
     initialHandoff?: string,
+    private illustrations?: IllustrationGateway,
   ) {
     this.pageStore = [...initial.pages];
     this.presentations = [...initial.presentations];
@@ -257,7 +274,9 @@ export class CourseSession {
           : undefined,
       questionContext: () => {
         const event = this.activeQuestionEvent;
-        return event ? { action: event.action, page: this.readQuestion(event.pageId) } : null;
+        return event
+          ? { action: event.action, page: this.readQuestion(event.pageId) }
+          : null;
       },
     });
     this.teacher.subscribe((event) => {
@@ -308,8 +327,14 @@ export class CourseSession {
         .filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("");
-      const presented = ResponsePresenter.present(text, this.teacherMessageMode);
-      if (reasoning || (event.type === "message_update" && !presented.display_text)) {
+      const presented = ResponsePresenter.present(
+        text,
+        this.teacherMessageMode,
+      );
+      if (
+        reasoning ||
+        (event.type === "message_update" && !presented.display_text)
+      ) {
         this.onActivity({
           kind: "thinking",
           text: reasoning,
@@ -346,7 +371,19 @@ export class CourseSession {
     return this.teacher.state.isStreaming && !this.teacher.signal?.aborted;
   }
 
-  async prompt(text: string, materialNames: string[] = [], inputMode: InputMode = "text", questionEvent?: CourseMessage["questionEvent"]) {
+  get running() {
+    return (
+      this.busy ||
+      this.readAgentTasks().some((task) => task.status === "running")
+    );
+  }
+
+  async prompt(
+    text: string,
+    materialNames: string[] = [],
+    inputMode: InputMode = "text",
+    questionEvent?: CourseMessage["questionEvent"],
+  ) {
     if (this.teacher.signal?.aborted) await this.teacher.waitForIdle();
     if (this.stopped) return;
     this.currentInputMode = inputMode;
@@ -390,7 +427,9 @@ export class CourseSession {
         throw new Error(this.teacher.state.errorMessage);
     } catch (error) {
       if (!this.stopped && operation === this.cancellation)
-        this.onError(error instanceof Error ? error.message : "暂时无法继续教学");
+        this.onError(
+          error instanceof Error ? error.message : "暂时无法继续教学",
+        );
     }
   }
 
@@ -431,7 +470,10 @@ export class CourseSession {
     this.cancellation++;
     this.ignoreTeacherOutput = true;
     if (this.activeTeacherMessage?.streaming) {
-      this.activeTeacherMessage = { ...this.activeTeacherMessage, streaming: false };
+      this.activeTeacherMessage = {
+        ...this.activeTeacherMessage,
+        streaming: false,
+      };
       this.onMessage(this.activeTeacherMessage);
     }
     this.pendingHandoff = null;
@@ -440,7 +482,8 @@ export class CourseSession {
       if (task.status === "running") this.cancelAgentTask(taskId);
     }
     this.cancelSlides();
-    for (const taskId of this.animationTasks.keys()) this.cancelAnimation(taskId);
+    for (const taskId of this.animationTasks.keys())
+      this.cancelAnimation(taskId);
     for (const taskId of this.illustrationTasks.keys())
       this.cancelIllustrationTask(taskId);
     this.narrationPlayback?.resolve();
@@ -469,7 +512,9 @@ export class CourseSession {
   private validateAnimation(page: AnimationPage) {
     const ids = new Set<string>();
     const groupIds = new Set(
-      page.nodes.filter((node) => node.shape === "group").map((node) => node.id),
+      page.nodes
+        .filter((node) => node.shape === "group")
+        .map((node) => node.id),
     );
     for (const node of page.nodes) {
       if (ids.has(node.id)) throw new Error(`动画对象 ID 重复：${node.id}`);
@@ -579,8 +624,7 @@ export class CourseSession {
         );
         if (agent.state.errorMessage || !published) {
           task.status = "failed";
-          task.error =
-            agent.state.errorMessage || "动画没有生成可展示的页面";
+          task.error = agent.state.errorMessage || "动画没有生成可展示的页面";
           this.onError(task.error);
         } else {
           task.status = "complete";
@@ -623,8 +667,7 @@ export class CourseSession {
   ) {
     const course = management.course;
     const conversationId = management.currentConversationId;
-    if (!course || !conversationId)
-      throw new Error("请先创建并进入课程对话");
+    if (!course || !conversationId) throw new Error("请先创建并进入课程对话");
     if (
       this.pageStore.some((page) => page.id === request.pageId) ||
       [...this.illustrationTasks.values()].some(
@@ -632,7 +675,8 @@ export class CourseSession {
       )
     )
       throw new Error(`页面 ID 已被使用：${request.pageId}`);
-    const generation = await createIllustration(
+    if (!this.illustrations) throw new Error("插图服务不可用");
+    const generation = await this.illustrations.create(
       course.id,
       conversationId,
       request,
@@ -655,14 +699,14 @@ export class CourseSession {
     const task = this.illustrationTasks.get(taskId);
     if (!task || task.status !== "running" || this.stopped) return;
     try {
-      const generation = await getIllustration(
+      const generation = await this.illustrations!.get(
         task.courseId,
         task.generationId,
       );
       const current = this.illustrationTasks.get(taskId);
       if (!current || current.status !== "running" || this.stopped) return;
       if (generation.status === "running") {
-        window.setTimeout(() => void this.pollIllustration(taskId), 1500);
+        setTimeout(() => void this.pollIllustration(taskId), 1500);
         return;
       }
       if (generation.status === "complete" && generation.assetId) {
@@ -711,14 +755,20 @@ export class CourseSession {
     if (!task || task.status !== "running") return;
     task.status = "cancelled";
     this.wakePageWaiters();
-    void cancelIllustration(task.courseId, task.generationId).catch(() => {});
+    void this.illustrations!.cancel(task.courseId, task.generationId).catch(
+      () => {},
+    );
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
   }
 
   private hasRunningVisualTask() {
     return (
-      [...this.slideAgents.values()].some((task) => task.status === "running") ||
-      [...this.animationTasks.values()].some((task) => task.status === "running") ||
+      [...this.slideAgents.values()].some(
+        (task) => task.status === "running",
+      ) ||
+      [...this.animationTasks.values()].some(
+        (task) => task.status === "running",
+      ) ||
       [...this.illustrationTasks.values()].some(
         (task) => task.status === "running",
       )
@@ -870,6 +920,7 @@ export class CourseSession {
       recovery: !notifyWhenEmpty,
     };
     this.outlineTasks.set(taskId, task);
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
     const classify = (
       reorganization: OutlineReorganization,
       conversation: StoredCourseConversation,
@@ -923,6 +974,10 @@ export class CourseSession {
           error: current.error,
         });
         this.onError(current.error);
+      })
+      .finally(() => {
+        if (!this.stopped)
+          this.onPages([...this.pageStore], this.hasRunningVisualTask());
       });
     return {
       taskId,
@@ -1047,24 +1102,27 @@ export class CourseSession {
     )
       return;
     const notice = this.pendingActiveNotices.splice(0).join("\n\n");
-    void this.teacher.prompt({
-      role: "user",
-      content: notice,
-      timestamp: Date.now(),
-    }).then(
-      () => {
-        if (!this.stopped && this.teacher.state.errorMessage)
-          this.onError(this.teacher.state.errorMessage);
-        this.flushPendingActiveNotices();
-      },
-      (error) => {
-        if (!this.stopped) {
-          this.onError(
-            error instanceof Error ? error.message : "后台任务通知失败",
-          );
-        }
-      },
-    );
+    void this.teacher
+      .prompt({
+        role: "user",
+        content: notice,
+        timestamp: Date.now(),
+      })
+      .then(
+        () => {
+          if (!this.stopped && this.teacher.state.errorMessage)
+            this.onError(this.teacher.state.errorMessage);
+          if (!this.stopped) this.onActivity(null);
+          this.flushPendingActiveNotices();
+        },
+        (error) => {
+          if (!this.stopped) {
+            this.onError(
+              error instanceof Error ? error.message : "后台任务通知失败",
+            );
+          }
+        },
+      );
   }
 
   private updateModelRetry(
@@ -1110,10 +1168,7 @@ export class CourseSession {
       ...(this.pageStore[index] as CodingExercise),
       ...changes,
     };
-    this.onPages(
-      [...this.pageStore],
-      this.hasRunningVisualTask(),
-    );
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
   }
 
   updateQuestion(
@@ -1131,20 +1186,28 @@ export class CourseSession {
   async submitQuestion(pageId: string) {
     const page = this.readQuestion(pageId);
     if (page.status !== "active") return;
-    const answer = page.questionKind === "blank" ? page.answerText.trim() : page.selected;
-    if (answer.length === 0)
-      throw new Error("请先填写答案");
+    const answer =
+      page.questionKind === "blank" ? page.answerText.trim() : page.selected;
+    if (answer.length === 0) throw new Error("请先填写答案");
     this.pageStore = this.pageStore.map((candidate) =>
-      candidate.id === pageId ? { ...page, status: "submitted" as const } : candidate,
+      candidate.id === pageId
+        ? { ...page, status: "submitted" as const }
+        : candidate,
     );
     this.onPages([...this.pageStore], this.hasRunningVisualTask());
-    await this.prompt("Question response submitted.", [], "text", { action: "submitted", pageId });
+    await this.prompt("Question response submitted.", [], "text", {
+      action: "submitted",
+      pageId,
+    });
   }
 
   async deferQuestion(pageId: string) {
     const page = this.readQuestion(pageId);
     if (page.status !== "active") return;
-    await this.prompt("Question deferred.", [], "text", { action: "deferred", pageId });
+    await this.prompt("Question deferred.", [], "text", {
+      action: "deferred",
+      pageId,
+    });
   }
 
   async requestExerciseReview() {
@@ -1328,8 +1391,9 @@ export class CourseSession {
   }
 
   private readQuestion(pageId: string) {
-    const page = this.pageStore.find((candidate): candidate is QuestionPage =>
-      candidate.kind === "question" && candidate.id === pageId,
+    const page = this.pageStore.find(
+      (candidate): candidate is QuestionPage =>
+        candidate.kind === "question" && candidate.id === pageId,
     );
     if (!page) throw new Error(`找不到题目页面 ${pageId}`);
     return page;
@@ -1353,10 +1417,7 @@ export class CourseSession {
   private endCodingExercise() {
     const exercise = this.currentCodingExercise();
     exercise.status = "ended";
-    this.onPages(
-      [...this.pageStore],
-      this.hasRunningVisualTask(),
-    );
+    this.onPages([...this.pageStore], this.hasRunningVisualTask());
     return exercise;
   }
 }

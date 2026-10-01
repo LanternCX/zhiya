@@ -150,6 +150,13 @@ func main() {
 		IdleTimeout:       config.Seconds(cfg.Server.IdleTimeoutSeconds),
 		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
+	internalServer := &http.Server{Addr: cfg.Agent.InternalListen, Handler: app.agentInternalRoutes(), ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
+	go func() {
+		if err := internalServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("agent API stopped", "error", err)
+			stop()
+		}
+	}()
 	go func() {
 		ticker := time.NewTicker(config.Seconds(cfg.Server.CleanupIntervalSeconds))
 		defer ticker.Stop()
@@ -159,6 +166,7 @@ func main() {
 				logger.Info("server shutdown started")
 				shutdown, cancel := context.WithTimeout(context.Background(), config.Seconds(cfg.Server.ShutdownTimeoutSeconds))
 				defer cancel()
+				_ = internalServer.Shutdown(shutdown)
 				if shutdownErr := server.Shutdown(shutdown); shutdownErr != nil {
 					logger.Error("server shutdown failed", "error", shutdownErr)
 				}

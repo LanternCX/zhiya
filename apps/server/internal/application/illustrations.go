@@ -28,10 +28,7 @@ func NewIllustrationService(models data.Models, objects objectstore.Store, gener
 
 func (s *IllustrationService) withUser(ctx context.Context, token, claimedUser string, action func(data.Models, domain.User) error) error {
 	return s.models.Transaction(ctx, data.StandardTransaction, func(models data.Models) error {
-		if token == "" {
-			return data.ErrInvalidSession
-		}
-		user, err := models.Users.GetBySession(ctx, token, claimedUser)
+		user, err := businessIdentity(ctx, models, token, claimedUser)
 		if err != nil {
 			return err
 		}

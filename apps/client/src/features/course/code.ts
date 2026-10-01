@@ -1,5 +1,5 @@
 import { api } from "../../api";
-import type { CodeLanguage, CodeRunResult } from "../../domain/learning";
+import type { CodeLanguage, CodeRunResult } from "../../../../../packages/learning/src/domain/learning";
 
 export async function listCodeLanguages() {
   return (await api<{ languages: CodeLanguage[] }>("/code/languages"))

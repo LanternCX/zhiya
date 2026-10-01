@@ -47,7 +47,13 @@ npm run dev:desktop
 
 ## 连接模型
 
-教学 Agent 在客户端运行，模型请求通过 Go 服务转发。模型凭据只配置在服务端，不要写入客户端配置或提交到版本库。
+主 Agent 与子 Agent 在服务端的 TypeScript 进程中运行，模型请求通过 Go 内部 API 转发。客户端只发送操作并订阅状态；关闭页面、退出客户端或退出登录不会终止已开始的执行，主动停止仍会取消执行。模型凭据只配置在 Go 服务端。
+
+`npm run dev:server` 同时启动 Go 与 Pi 服务，并为本次开发进程生成共享认证密钥。默认的 Go 内部 API 监听 `127.0.0.1:8081`，Pi 监听 `127.0.0.1:8082`。内部端口不要作为客户端 API 暴露。
+
+独立部署时，分别执行 `npm run build:server` 与 `npm run build:agent`，再运行 Go 二进制和 `node apps/agent/dist/server.mjs`。Go 的 `agent.secret`（或 `ZHIYA_SERVER_AGENT_SECRET`）与 Pi 的 `ZHIYA_AGENT_SECRET` 必须一致；Pi 使用 `ZHIYA_AGENT_API` 指定 Go 内部 API 地址，使用 `ZHIYA_AGENT_LISTEN` 指定监听地址。Go 的 `agent.endpoint` 指向 Pi，`agent.internal_listen` 指定工具 API 监听地址。生产密钥至少 32 个字符。
+
+当前运行一个 Pi 服务进程，Go 实例共同向它下发指令。Pi 按会话实例化 Agent，同一会话的并发请求复用同一实例；执行和工具调用不依赖客户端连接。会话状态持久化到 PostgreSQL，空闲实例会回收；服务进程故障后的自动续跑不在本功能范围内。
 
 当前使用 OpenAI-compatible Chat Completions 流式接口。可以在 [`apps/server/config.yaml`](../apps/server/config.yaml) 中配置，也可以使用环境变量覆盖：
 
@@ -117,6 +123,7 @@ Docker 基础设施配置由 [`dev-services.env`](../dev-services.env) 管理。
 | 命令 | 用途 |
 | --- | --- |
 | `npm run check` | TypeScript 类型检查 |
+| `npm run test:agent` | 验证 Pi 后台执行、重复请求与主动停止 |
 | `npm run check:client-config` | 校验客户端配置 |
 | `npm run check:server-config` | 校验服务端配置，不连接数据库或发送邮件 |
 | `npm test` | Go 行为测试和仓库规则测试 |
@@ -146,20 +153,24 @@ ZHIYA_SERVER_HTTP_ORIGIN=http://127.0.0.1:11420 npm run test:e2e
 
 ```text
 apps/
-├─ client/                 React、Tauri 与客户端 Agent
+├─ client/                 React 与 Tauri 客户端
 │  └─ src/
 │     ├─ features/         账号、学生档案与课堂
-│     ├─ pi/               Agent、工具和会话编排
-│     ├─ domain/           学习领域类型
-│     └─ transport/        HTTP、模型流与身份状态
+│     └─ transport/        HTTP、状态订阅与身份状态
+├─ agent/                  服务端 Pi 实例与执行管理
 └─ server/                 Go 服务
-   ├─ cmd/api/             路由、中间件与请求处理
+   ├─ cmd/api/             客户端与内部 API
    └─ internal/
+      ├─ application/      业务与执行授权
       ├─ data/             PostgreSQL 数据访问
       └─ mailer/           邮件投递
+packages/
+└─ learning/src/
+   ├─ domain/              学习领域与同步状态类型
+   └─ pi/                  Agent、工具和会话编排
 ```
 
-教学与课件使用独立的模型流，可以并行工作。会话操作与在线设备同步通过 WebSocket 完成，完整回复保存后才会出现在其他设备；生成中的文字只在执行设备显示。客户端退出时不会把 Agent 转移到云端继续运行。
+教学与课件使用独立的模型流，可以并行工作。Agent 在服务端持续执行，生成状态保存后通过 WebSocket 同步到在线设备。首次发送时建立独立对话和固定入口，模型未调用课程工具时，消息仍会保存并出现在最近对话中。课程和章节是可选归属；归属操作保留原对话 ID 与消息。空白学习页不创建对话，筛选课程只改变展示范围。侧边栏独立订阅当前用户的对话与任务状态，优先展示正在生成的对话；离开会话不会停止任务。重新进入会话或断线重连时，客户端先恢复最新状态，再持续接收流式内容、工具调用和页面更新；生成和重新连接通过状态图标提示。
 
 桌面端登录凭据通过 Tauri 原生层保存到系统安全存储。macOS 使用钥匙串，Windows 使用系统凭据存储，Linux 需要可用且已解锁的 Secret Service；各平台仍需在正式发布前完成实测。
 

@@ -1,0 +1,17 @@
+{
+  "name": "@zhiya/agent",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@zhiya/learning": "*"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "dev": "node build.mjs --run",
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0"
+  }
+}

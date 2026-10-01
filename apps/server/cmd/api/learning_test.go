@@ -43,9 +43,8 @@ func TestModelStreamsHaveNoAbsoluteDeadline(t *testing.T) {
 
 func learningSocket(t *testing.T, a *testApp, c *http.Client) *websocket.Conn {
 	t.Helper()
-	ticket := a.request(c, "POST", "/socket-ticket", map[string]any{}, 200)["ticket"].(string)
-	url := "ws" + strings.TrimPrefix(a.server.URL, "http") + "/api/learning/socket?ticket=" + ticket
-	conn, response, err := websocket.Dial(context.Background(), url, &websocket.DialOptions{HTTPClient: c})
+	url := "ws" + strings.TrimPrefix(a.internal.URL, "http") + "/learning/socket"
+	conn, response, err := websocket.Dial(context.Background(), url, &websocket.DialOptions{HTTPClient: c, HTTPHeader: a.workerHeaders(c, "profile")})
 	if err != nil {
 		if response != nil {
 			t.Fatalf("connect learning socket: %v (%s)", err, response.Status)
@@ -240,7 +239,12 @@ func TestLearningSocketAcceptsOnlyOneConcurrentAnswer(t *testing.T) {
 func TestLearningSocketRejectsAnActionInsteadOfWaitingForTheConversationLock(t *testing.T) {
 	a := setupAccountTest(t)
 	c := a.register("socket-lock@example.com")
-	conn := learningSocket(t, a, c)
+	ticket := a.request(c, "POST", "/socket-ticket", map[string]any{}, 200)["ticket"].(string)
+	conn, _, err := websocket.Dial(context.Background(), "ws"+strings.TrimPrefix(a.server.URL, "http")+"/api/learning/socket?ticket="+ticket, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.CloseNow()
 	snapshot := socketType(t, conn, "snapshot")["state"].(map[string]any)
 	tx, err := a.db.Begin(context.Background())
 	if err != nil {
@@ -250,7 +254,7 @@ func TestLearningSocketRejectsAnActionInsteadOfWaitingForTheConversationLock(t *
 	if _, err := tx.Exec(context.Background(), `SELECT id FROM conversations WHERE id=$1 FOR UPDATE`, snapshot["id"]); err != nil {
 		t.Fatal(err)
 	}
-	if err := wsjson.Write(context.Background(), conn, map[string]any{"type": "action", "requestId": "locked", "action": map[string]any{"action": "claim"}}); err != nil {
+	if err := wsjson.Write(context.Background(), conn, map[string]any{"type": "action", "requestId": "locked", "action": map[string]any{"action": "end_correction"}}); err != nil {
 		t.Fatal(err)
 	}
 	response := socketResponse(t, conn, "locked")
@@ -338,7 +342,7 @@ func TestModelProxyUsesServerCredentialsAndRequiresExecution(t *testing.T) {
 	req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", strings.NewReader(string(body)))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -389,7 +393,7 @@ func TestModelProxyRetriesTransientUpstreamFailures(t *testing.T) {
 	req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -432,7 +436,7 @@ func TestModelProxySendsDeepSeekCompatibleCompletionFields(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodPost, a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -466,7 +470,7 @@ func TestModelProxyStopsAfterFiveRetriesAndReleasesExecution(t *testing.T) {
 	req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -503,7 +507,7 @@ func TestModelProxyDoesNotReplayAnInterruptedPartialStream(t *testing.T) {
 	req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -556,7 +560,7 @@ func TestModelProxyStopsRetryingWhenTheClientCancels(t *testing.T) {
 	req, _ := http.NewRequestWithContext(ctx, "POST", a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -607,7 +611,7 @@ func TestCourseModelProxyAllowsTeachingAgentsToStreamConcurrently(t *testing.T) 
 			for _, cookie := range c.Jar.Cookies(req.URL) {
 				req.AddCookie(cookie)
 			}
-			res, err := c.Do(req)
+			res, err := a.workerDo(c, req)
 			if err != nil {
 				result <- 0
 				return
@@ -789,7 +793,7 @@ func TestEndingCorrectionCancelsUpstreamGenerationAcrossInstances(t *testing.T) 
 		req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", strings.NewReader(string(body)))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Zhiya-Request", "1")
-		res, err := c.Do(req)
+		res, err := a.workerDo(c, req)
 		if err == nil {
 			_, _ = io.Copy(io.Discard, res.Body)
 			res.Body.Close()
@@ -826,7 +830,7 @@ func TestInterruptedModelStreamReleasesExecution(t *testing.T) {
 	req, _ := http.NewRequest("POST", a.server.URL+"/api/learning/model", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Zhiya-Request", "1")
-	res, err := c.Do(req)
+	res, err := a.workerDo(c, req)
 	if err != nil {
 		t.Fatal(err)
 	}
