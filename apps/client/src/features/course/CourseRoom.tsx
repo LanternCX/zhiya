@@ -257,6 +257,7 @@ export default function CourseRoom({
   const codeRunSequence = useRef(0);
   const sessionCourse = useRef<StoredCourse | null>(activeCourse);
   const thread = useRef<HTMLDivElement | null>(null);
+  const followThread = useRef(true);
   const startedEntryRequest = useRef<number | null>(null);
   const boundConversationId = useRef<string | null>(
     activeCourse && !newSession ? activeCourse.conversationId : null,
@@ -538,14 +539,11 @@ export default function CourseRoom({
 
   useEffect(() => {
     const element = thread.current;
-    if (!element) return;
+    if (!element || !followThread.current) return;
     element.scrollTo({
       top: element.scrollHeight,
-      behavior:
-        liveVoice ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
+      // Repeated smooth scrolling competes with the user's scroll gestures.
+      behavior: "instant",
     });
   }, [messages, activity, voicePlaybackText, liveVoice]);
 
@@ -780,7 +778,17 @@ export default function CourseRoom({
       data-has-slides={Boolean(current)}
     >
       <section className="course-conversation" aria-label="教学对话">
-        <div className="course-thread" aria-live="polite" ref={thread}>
+        <div
+          className="course-thread"
+          aria-live="polite"
+          ref={thread}
+          onScroll={(event) => {
+            const element = event.currentTarget;
+            followThread.current =
+              element.scrollHeight - element.clientHeight - element.scrollTop <=
+              24;
+          }}
+        >
           {messages.length === 0 ? (
             <div className="course-start">
               <div className="subject-art learning">
