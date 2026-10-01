@@ -1,4 +1,4 @@
-import { APIError, api } from "../../api";
+import { APIError, api, retryRateLimited } from "../../api";
 import type { Conversation } from "../../../../../packages/learning/src/domain/conversation";
 import type { Answer } from "../../../../../packages/learning/src/domain/learning";
 
@@ -25,6 +25,7 @@ export class ConversationChannel {
   private listeners = new Set<(state: Conversation) => void>();
   private stopped = false;
   private retry: ReturnType<typeof setTimeout> | undefined;
+  private lifetime = new AbortController();
 
   subscribe(listener: (state: Conversation) => void) {
     this.listeners.add(listener);
@@ -64,6 +65,7 @@ export class ConversationChannel {
 
   close() {
     this.stopped = true;
+    this.lifetime.abort();
     clearTimeout(this.retry);
     this.socket?.close(1000, "view closed");
     this.socket = null;
@@ -74,10 +76,9 @@ export class ConversationChannel {
 
   private async connect(): Promise<Conversation> {
     try {
-      const { ticket } = await api<{ ticket: string }>(
-        "/socket-ticket",
-        "POST",
-        {},
+      const { ticket } = await retryRateLimited(
+        () => api<{ ticket: string }>("/socket-ticket", "POST", {}),
+        this.lifetime.signal,
       );
       if (this.stopped) throw new APIError(0, "会话已离开");
       const origin = new URL(__ZHIYA_CLIENT_CONFIG__.apiOrigin);

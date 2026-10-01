@@ -1,4 +1,4 @@
-import { api, APIError } from "../api";
+import { api, APIError, connectionRetryDelay, retryRateLimited } from "../api";
 
 export type SyncStatus = "connecting" | "live" | "reconnecting";
 export type AgentStatus = {
@@ -27,8 +27,9 @@ export function subscribeAgentStatuses(
   let socket: WebSocket | undefined;
   let retry: ReturnType<typeof setTimeout> | undefined;
   const connect = async () => {
-    const again = () => {
-      if (!stopped) retry = setTimeout(() => void connect(), 1000);
+    const again = (error?: unknown) => {
+      if (!stopped)
+        retry = setTimeout(() => void connect(), connectionRetryDelay(error));
     };
     try {
       const { ticket } = await api<{ ticket: string }>(
@@ -54,8 +55,8 @@ export function subscribeAgentStatuses(
       };
       current.onclose = again;
       current.onerror = () => current.close();
-    } catch {
-      again();
+    } catch (error) {
+      again(error);
     }
   };
   void connect();
@@ -83,6 +84,7 @@ export class AgentConnection<T> {
     { resolve: () => void; reject: (error: Error) => void }
   >();
   private opening?: Promise<AgentSnapshot<T>>;
+  private lifetime = new AbortController();
   constructor(
     private input: { kind: string; courseId?: string; conversationId?: string },
     private receive: (state: T) => void,
@@ -94,16 +96,16 @@ export class AgentConnection<T> {
   }
   get ready(): Promise<AgentSnapshot<T>> {
     if (this.opening) return this.opening;
-    this.opening = api<AgentSnapshot<T>>(
-      "/agent/sessions",
-      "POST",
-      this.input,
+    this.opening = retryRateLimited(
+      () => api<AgentSnapshot<T>>("/agent/sessions", "POST", this.input),
+      this.lifetime.signal,
     ).then((snapshot) => {
       this.update(snapshot);
       void this.connect(snapshot.id);
       return snapshot;
     });
     void this.opening.catch((error) => {
+      this.opening = undefined;
       if (!this.stopped) this.failure(error.message);
     });
     return this.opening;
@@ -170,6 +172,7 @@ export class AgentConnection<T> {
   }
   close() {
     this.stopped = true;
+    this.lifetime.abort();
     clearTimeout(this.retry);
     this.socket?.close();
     for (const waiting of this.pending.values()) waiting.resolve();
@@ -177,10 +180,13 @@ export class AgentConnection<T> {
   }
   private async connect(id: string) {
     if (this.stopped) return;
-    const again = () => {
+    const again = (error?: unknown) => {
       if (!this.stopped) {
         this.sync?.("reconnecting");
-        this.retry = setTimeout(() => void this.connect(id), 1000);
+        this.retry = setTimeout(
+          () => void this.connect(id),
+          connectionRetryDelay(error),
+        );
       }
     };
     try {
@@ -211,7 +217,7 @@ export class AgentConnection<T> {
         this.failure(
           error instanceof APIError ? error.message : "暂时无法同步",
         );
-      again();
+      again(error);
     }
   }
 }

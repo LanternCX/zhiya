@@ -11,6 +11,7 @@ pub struct Response {
     status: u16,
     body: String,
     request_id: String,
+    retry_after: Option<String>,
 }
 
 fn allowed(method: &str, path: &str) -> bool {
@@ -164,6 +165,11 @@ fn request(
         .send()
         .map_err(|_| "Unable to connect to account server")?;
     let status = response.status().as_u16();
+    let retry_after = response
+        .headers()
+        .get(header::RETRY_AFTER)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
     let request_id = response
         .headers()
         .get("X-Request-ID")
@@ -180,6 +186,7 @@ fn request(
         status,
         body,
         request_id,
+        retry_after,
     })
 }
 

@@ -45,8 +45,16 @@ func (s *Service) Authenticate(ctx context.Context, token, claimedUser string) (
 	return user, err
 }
 
-func (s *Service) LimitIP(ctx context.Context, ip string) error {
-	return s.models.Tokens.Limit(ctx, "ip:"+ip, s.policy.IPLimit)
+func (s *Service) LimitEndpointIP(ctx context.Context, endpoint, ip string) error {
+	return s.models.Tokens.Limit(ctx, "endpoint:"+endpoint+":ip:"+ip, s.policy.IPLimit)
+}
+
+func (s *Service) LimitEndpointUser(ctx context.Context, endpoint, token, claimedUser string, max int) error {
+	user, err := s.Authenticate(ctx, token, claimedUser)
+	if err != nil {
+		return err
+	}
+	return s.models.Tokens.Limit(ctx, "endpoint:"+endpoint+":user:"+user.ID, max)
 }
 
 func (s *Service) NewSocketTicket(ctx context.Context, token, claimedUser string) (string, error) {
