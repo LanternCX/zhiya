@@ -75,6 +75,12 @@ func TestTTSEventsCarryUniqueEventIDs(t *testing.T) {
 	}
 }
 
+func TestTTSReadLimitAcceptsLargeAudioEvents(t *testing.T) {
+	if ttsReadLimit <= 32*1024 {
+		t.Fatalf("TTS read limit = %d, want more than the websocket default", ttsReadLimit)
+	}
+}
+
 func TestVoiceSessionRegistryRejectsConcurrentUserSession(t *testing.T) {
 	registry := Registry{}
 	if !registry.Acquire("user-1") {

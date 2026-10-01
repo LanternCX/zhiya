@@ -12,6 +12,8 @@ import (
 	"github.com/coder/websocket"
 )
 
+const ttsReadLimit = 4 << 20
+
 func dialASR(ctx context.Context, settings config.Speech) (*websocket.Conn, error) {
 	conn, response, err := websocket.Dial(ctx, settings.Endpoint, &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + settings.ASRAPIKey}}})
 	return conn, wrapSpeechDialError(response, err)
@@ -19,6 +21,9 @@ func dialASR(ctx context.Context, settings config.Speech) (*websocket.Conn, erro
 
 func dialTTS(ctx context.Context, settings config.Speech) (*websocket.Conn, error) {
 	conn, response, err := websocket.Dial(ctx, realtimeTTSEndpoint(settings.Endpoint, settings.TTSModel), &websocket.DialOptions{HTTPHeader: http.Header{"Authorization": []string{"Bearer " + settings.TTSAPIKey}}})
+	if err == nil {
+		conn.SetReadLimit(ttsReadLimit)
+	}
 	return conn, wrapSpeechDialError(response, err)
 }
 
