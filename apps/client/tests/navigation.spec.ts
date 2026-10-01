@@ -121,6 +121,26 @@ test("opening and leaving a saved conversation does not update its activity time
   expect(writes).toEqual([]);
 });
 
+test("generation status does not override conversation time in the sidebar", async ({ page }) => {
+  await page.route("**/api/courses", (route) => route.fulfill({ json: { courses: historyCourses() } }));
+  await page.routeWebSocket("**/api/agent/socket*", (socket) => {
+    socket.send(JSON.stringify({ sessions: [{
+      id: "older-session", kind: "course", courseId: "course-乙",
+      conversationId: "chat-10", running: true,
+    }] }));
+  });
+  await page.goto("/#/learn");
+  const links = page.getByRole("navigation", { name: "最近对话" }).getByRole("link");
+  const older = links.filter({ hasText: "第10次学习" });
+  await expect(older.getByRole("status", { name: "正在生成" })).toBeVisible();
+  await expect(links.first()).toContainText("第11次学习");
+  await expect(links.nth(1)).toContainText("第10次学习");
+  await older.click();
+  await expect(page.getByText("保存的第10次讲解", { exact: true })).toBeVisible();
+  await expect(links.first()).toContainText("第11次学习");
+  await expect(older).toHaveAttribute("aria-current", "page");
+});
+
 test("continuing an older conversation moves it to the top and persists the new order", async ({ page }) => {
   const courses = historyCourses();
   await page.route("**/api/learning/model", (route) => route.fulfill({ json: { available: true, id: "test-model" } }));

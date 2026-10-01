@@ -55,7 +55,8 @@ func (m ConversationModel) List(ctx context.Context, user string) ([]domain.Conv
 }
 
 func (m ConversationModel) Save(ctx context.Context, user, id string, state json.RawMessage) error {
-	tag, err := m.db.Exec(ctx, `UPDATE course_conversations SET state=$3,updated_at=CASE WHEN state<>$3::jsonb THEN now() ELSE updated_at END,title=CASE WHEN title='' THEN COALESCE((SELECT left(message->>'text',60) FROM jsonb_array_elements($3::jsonb->'messages') message WHERE message->>'role'='user' LIMIT 1),'') ELSE title END WHERE user_id=$1 AND id=$2`, user, id, state)
+	// Persist browsing position without treating a history visit as new conversation activity.
+	tag, err := m.db.Exec(ctx, `UPDATE course_conversations SET state=$3,updated_at=CASE WHEN (state-'currentPresentationId')<>($3::jsonb-'currentPresentationId') THEN now() ELSE updated_at END,title=CASE WHEN title='' THEN COALESCE((SELECT left(message->>'text',60) FROM jsonb_array_elements($3::jsonb->'messages') message WHERE message->>'role'='user' LIMIT 1),'') ELSE title END WHERE user_id=$1 AND id=$2`, user, id, state)
 	if err == nil && tag.RowsAffected() != 1 {
 		return ErrConversationNotFound
 	}
