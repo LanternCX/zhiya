@@ -15,6 +15,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
+	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/modelproxy"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 )
@@ -48,7 +49,7 @@ func (a *application) learningService() *learning.Service {
 	return learning.New(a.Models)
 }
 func (a *application) courseService() *courses.Service {
-	return courses.New(a.Models, a.Objects, a.Config.Server.MaxBodyBytes, a.Config.Storage.URLTTLSeconds)
+	return courses.New(a.Models, a.Objects, a.Config.Server.MaxBodyBytes, a.Config.Storage.URLTTLSeconds, materialparse.New(a.Config.MaterialParser.Endpoint, a.Config.VisionModel.Endpoint, a.Config.VisionModel.ID, a.Config.VisionModel.APIKey, http.DefaultClient))
 }
 func (a *application) illustrationService() *illustrations.Service {
 	generator := imagegen.New(a.Config.ImageModel.Endpoint, a.Config.ImageModel.ID, a.Config.ImageModel.APIKey, http.DefaultClient)

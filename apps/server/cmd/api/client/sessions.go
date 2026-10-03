@@ -22,9 +22,17 @@ func (a *application) commandAgentSession(w http.ResponseWriter, r *http.Request
 		Action    string            `json:"action"`
 		Args      []json.RawMessage `json:"args"`
 	}
-	if err = a.http().ReadJSON(w, r, &command); err != nil {
+	// Inline attachments include base64 overhead; the worker has the same 32 MiB envelope limit.
+	if err = a.http().ReadJSONWithLimit(w, r, &command, 32<<20); err != nil {
 		a.http().RespondError(w, err)
 		return
+	}
+	if command.Action != "materials" {
+		raw, marshalErr := json.Marshal(command)
+		if marshalErr != nil || len(raw) > a.config.Server.MaxBodyBytes {
+			a.http().RespondError(w, transport.Bad("提交内容无效或过大"))
+			return
+		}
 	}
 	if command.RequestID == "" || len(command.RequestID) > 128 {
 		a.http().RespondError(w, transport.Bad("请求编号无效"))

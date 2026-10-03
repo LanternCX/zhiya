@@ -1,8 +1,6 @@
 import { agentBranch, branchMessages, type Session } from "../pi/session";
 import { CourseSession } from "../pi/sessions/course";
-import type {
-  AnimationTools,
-} from "../pi/tool";
+import type { AnimationTools } from "../pi/tool";
 import type {
   ModelInfo,
   CodeLanguage,
@@ -24,6 +22,7 @@ export class CourseHost {
   private saving: Promise<void> = Promise.resolve();
   private saveTimer?: ReturnType<typeof setTimeout>;
   private pendingPrompts = 0;
+  private promptRevision = 0;
   private stopped = false;
   private playback = new Map<string, AnimationPlaybackState>();
   private courses: CourseAPI;
@@ -40,6 +39,10 @@ export class CourseHost {
       state,
       () => this.changed(),
       () => this.flush(),
+      (progress) => {
+        this.state.activity = { kind: "materials", progress };
+        this.changed();
+      },
     );
     this.state.animations = [];
     this.ready = this.createSession();
@@ -59,16 +62,22 @@ export class CourseHost {
 
   async flush() {
     await this.ready;
+    this.state.busy = this.pendingPrompts > 0 || Boolean(this.session?.busy);
     this.state.running = this.running;
     clearTimeout(this.saveTimer);
     this.saveTimer = undefined;
-    const snapshot = JSON.parse(JSON.stringify(this.state));
-    this.saving = this.saving
+    const save = this.saving
       .then(() =>
-        this.api.json(`/sessions/${this.api.id}/state`, "POST", snapshot),
+        this.api.json(
+          `/sessions/${this.api.id}/state`,
+          "POST",
+          structuredClone(this.state),
+        ),
       )
       .then(() => {});
-    await this.saving;
+    // Report this failure to its caller, but leave the queue usable for terminal-state saves.
+    this.saving = save.catch(() => {});
+    await save;
   }
 
   private async createSession(handoff?: string) {
@@ -204,10 +213,29 @@ export class CourseHost {
       case "attach":
         break;
       case "prompt":
+        const promptRevision = ++this.promptRevision;
         this.pendingPrompts++;
         this.state.activity = { kind: "thinking", text: "", active: true };
         this.changed();
         try {
+          if (this.courses.materials.length) {
+            this.state.activity = {
+              kind: "materials",
+              progress: {
+                total: this.courses.materials.length,
+                completed: 0,
+                fileName: this.courses.materials[0].name,
+                phase: "uploading",
+              },
+            };
+            this.changed();
+            if (await this.courses.prepareMaterials(String(args[0]))) {
+              if (promptRevision !== this.promptRevision || this.stopped) break;
+              this.session.stop();
+              await this.createSession();
+            }
+          }
+          if (promptRevision !== this.promptRevision || this.stopped) break;
           await this.session.prompt(
             String(args[0]),
             (args[1] as string[]) ?? [],
@@ -222,6 +250,7 @@ export class CourseHost {
         this.courses.materials = args[0] as typeof this.courses.materials;
         break;
       case "stop":
+        this.promptRevision++;
         this.session.stopCurrent();
         this.state.busy = false;
         break;

@@ -11,6 +11,7 @@ import "./course.css";
 import { createCourseSession } from "./runtime";
 import type {
   CourseActivity,
+  MaterialPreparationProgress,
   CourseMessage,
   LessonPage,
   LessonPresentation,
@@ -21,7 +22,8 @@ import type {
   StoredCourse,
   CourseSection,
 } from "../../../../../packages/learning/src/domain/learning";
-import { MessageResponse } from "../../components/ai-elements/message";
+import { CourseMessageResponse } from "./MaterialReference";
+import MaterialParsingProgress from "./MaterialParsingProgress";
 import {
   Reasoning,
   ReasoningContent,
@@ -55,7 +57,7 @@ import { VoiceSessionController } from "../voice/VoiceSessionController";
 import { replaceVoicePlaybackText } from "../voice/VoicePlaybackText";
 import type { InputMode } from "../../../../../packages/learning/src/domain/learning";
 import { ResponsePresenter } from "../../../../../packages/learning/src/conversation/ResponsePresenter";
-import { emptyCourseState, uploadCourseMaterial } from "./courses";
+import { emptyCourseState, uploadCourseMaterials } from "./courses";
 
 type RenderedCourseMessage = CourseMessage;
 
@@ -76,6 +78,7 @@ const conversationControls = {
 
 function Activity({ activity }: { activity: CourseActivity | null }) {
   if (!activity) return null;
+  if (activity.kind === "materials") return <MaterialParsingProgress progress={activity.progress} />;
   if (activity.kind === "thinking")
     return (
       <Reasoning
@@ -232,6 +235,8 @@ export default function CourseRoom({
   const [codeRunning, setCodeRunning] = useState(false);
   const [error, setError] = useState("");
   const [activity, setActivity] = useState<CourseActivity | null>(null);
+  const [materialProgress, setMaterialProgress] =
+    useState<MaterialPreparationProgress | null>(null);
   const [generatingPages, setGeneratingPages] = useState(false);
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [switchingSection, setSwitchingSection] = useState(false);
@@ -545,7 +550,7 @@ export default function CourseRoom({
       // Repeated smooth scrolling competes with the user's scroll gestures.
       behavior: "instant",
     });
-  }, [messages, activity, voicePlaybackText, liveVoice]);
+  }, [messages, activity, materialProgress, voicePlaybackText, liveVoice]);
 
   const runPrompt = async (
     value: string,
@@ -668,24 +673,16 @@ export default function CourseRoom({
       );
       return;
     }
-    const uploads = await Promise.allSettled(
-      files.map((file) => uploadCourseMaterial(course.id, file)),
-    );
-    const uploadedNames = uploads.flatMap((result) =>
-      result.status === "fulfilled" ? [result.value.name] : [],
-    );
-    const failed = uploads.length - uploadedNames.length;
-    if (failed)
-      setError(
-        failed === uploads.length
-          ? "教学材料上传失败，请重试"
-          : `有 ${failed} 份教学材料上传失败`,
-      );
-    if (
-      (!requested && uploadedNames.length === 0) ||
-      (uploads.length > 0 && uploadedNames.length === 0)
-    )
-      throw new Error("No course material was uploaded");
+    setMaterialProgress(null);
+    let uploadedNames: string[];
+    try {
+      const uploaded = await uploadCourseMaterials(course.id, files, setMaterialProgress);
+      uploadedNames = uploaded.map(material => material.name);
+    } catch (error) {
+      setError("教学材料上传或解析失败，请重试");
+      throw new Error("教学材料上传或解析失败，请重试", { cause: error });
+    }
+    setMaterialProgress(null);
     if (
       files.length === 0 &&
       nextSection &&
@@ -702,7 +699,7 @@ export default function CourseRoom({
     void runPrompt(
       requested || "请根据我附带的教学材料继续教学。",
       uploadedNames,
-      failed === 0,
+      true,
       inputMode,
     );
   };
@@ -789,7 +786,7 @@ export default function CourseRoom({
               24;
           }}
         >
-          {messages.length === 0 ? (
+          {messages.length === 0 && !busy && !activity && !materialProgress ? (
             <div className="course-start">
               <div className="subject-art learning">
                 <Icon name="learning" />
@@ -824,7 +821,8 @@ export default function CourseRoom({
                 >
                   <span>{message.role === "user" ? "我" : "知芽"}</span>
                   {message.role === "assistant" ? (
-                    <MessageResponse
+                    <CourseMessageResponse
+                      courseId={course?.id}
                       className="course-message-body"
                       controls={conversationControls}
                       isAnimating={message.streaming}
@@ -839,7 +837,7 @@ export default function CourseRoom({
                       )
                         ? voicePlaybackText[message.id]
                         : message.text}
-                    </MessageResponse>
+                    </CourseMessageResponse>
                   ) : (
                     <>
                       <p>{message.text}</p>
@@ -872,8 +870,8 @@ export default function CourseRoom({
                 </article>
               ))
           )}
-          <Activity activity={activity} />
-          {agentRunning && (
+          <Activity activity={materialProgress ? { kind: "materials", progress: materialProgress } : activity} />
+          {agentRunning && !materialProgress && activity?.kind !== "materials" && (
             <span
               className="agent-progress-icon"
               role="status"

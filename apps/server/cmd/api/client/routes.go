@@ -40,6 +40,8 @@ func (a *application) Routes() http.Handler {
 	api.HandleFunc("DELETE /api/courses/{id}/sections/{sectionId}/conversations/{conversationId}", a.deleteCourseConversation)
 	api.HandleFunc("GET /api/courses/{id}/materials", a.listCourseMaterials)
 	api.HandleFunc("POST /api/courses/{id}/material-uploads", a.startCourseMaterialUpload)
+	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}/content", a.readCourseMaterial)
+	api.HandleFunc("POST /api/courses/{id}/materials/{materialId}/parse", a.retryCourseMaterial)
 	api.HandleFunc("POST /api/courses/{id}/material-uploads/{uploadId}/complete", a.completeCourseMaterialUpload)
 	api.HandleFunc("GET /api/courses/{id}/materials/{materialId}/download", a.downloadCourseMaterial)
 	api.HandleFunc("DELETE /api/courses/{id}/materials/{materialId}", a.deleteCourseMaterial)

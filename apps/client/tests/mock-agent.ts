@@ -121,7 +121,7 @@ export async function mockAgent(
                   body === undefined
                     ? undefined
                     : external
-                      ? String(body)
+                      ? Array.isArray(body) ? new Uint8Array(body) : String(body)
                       : JSON.stringify(body),
                 signal: controller.signal,
               });
@@ -266,7 +266,7 @@ export async function mockAgent(
               entry.page,
               url,
               init?.method ?? "GET",
-              init?.body,
+              init?.body instanceof Uint8Array ? Array.from(init.body) : init?.body,
               undefined,
               init?.headers as Record<string, string>,
             );

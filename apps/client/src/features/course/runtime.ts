@@ -89,7 +89,12 @@ export function createCourseSession(
         await Promise.all(
           files.map(async (file) => ({
             name: file.name,
-            content: await file.text(),
+            base64: await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result).split(",")[1]);
+              reader.onerror = () => reject(new Error("无法读取教学材料，请重新选择文件"));
+              reader.readAsDataURL(file);
+            }),
           })),
         ),
       ]),

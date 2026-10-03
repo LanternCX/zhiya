@@ -194,3 +194,7 @@ func (a *requestHandler) downloadCourseMaterial(w http.ResponseWriter, r *http.R
 	}
 	transport.WriteJSON(w, http.StatusOK, map[string]any{"material": material, "url": request.URL, "headers": request.Headers})
 }
+
+func (a *requestHandler) readCourseMaterial(w http.ResponseWriter, r *http.Request) {
+	a.http().ReadMaterial(w, r, a.courseService(), a.grant.Authorize)
+}

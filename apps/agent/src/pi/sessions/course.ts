@@ -403,7 +403,7 @@ export class CourseSession {
         : ConversationManager.userMessage(text, inputMode, materialNames)),
     });
     const studentText = materialNames.length
-      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. If this is a new course, create it first so the files can be uploaded. Then list and read the relevant course materials before planning or teaching from them.`
+      ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. Upload and parsing have completed before this turn. List and read the relevant course materials before planning or teaching from them. A course established for these attachments may initially use the first filename as its title; use rename_course if the request and parsed contents suggest a better title.`
       : text;
     const taskNotices = [
       ...this.pendingActiveNotices.splice(0),

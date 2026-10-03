@@ -1,0 +1,8 @@
+[project]
+name = "zhiya-material-parser"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["pypdfium2>=4.30,<6", "pillow>=11,<13"]
+
+[dependency-groups]
+dev = ["reportlab>=4,<5"]

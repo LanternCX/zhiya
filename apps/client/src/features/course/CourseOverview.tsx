@@ -7,6 +7,7 @@ import ChatComposer, {
 import Confirmation from "../../components/Confirmation";
 import type {
   CourseMaterial,
+  MaterialPreparationProgress,
   CourseSection,
   InputMode,
   StoredCourse,
@@ -14,24 +15,26 @@ import type {
 } from "../../../../../packages/learning/src/domain/learning";
 import CourseCover from "./CourseCover";
 import SectionHistory from "./SectionHistory";
-import { courseMaterialAttachments } from "./course-composer";
+import {
+  acceptsCourseMaterial,
+  courseMaterialAttachments,
+  courseMaterialFormatHint,
+  courseMaterialMaxSize,
+  courseMaterialTypes,
+} from "./course-composer";
 import {
   deleteCourseMaterial,
   getCourseMaterial,
   listCourseMaterials,
-  uploadCourseMaterial,
+  uploadCourseMaterials,
 } from "./courses";
+import MaterialParsingProgress from "./MaterialParsingProgress";
 
 const statusLabel: Record<CourseSection["status"], string> = {
   planned: "待学习",
   active: "学习中",
   complete: "已完成",
   archived: "已归档",
-};
-
-const materialTypes = {
-  "text/markdown": [".md"],
-  "text/plain": [".txt"],
 };
 
 export default function CourseOverview({
@@ -70,6 +73,8 @@ export default function CourseOverview({
   const [error, setError] = useState("");
   const [composerError, setComposerError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [materialProgress, setMaterialProgress] =
+    useState<MaterialPreparationProgress | null>(null);
   const [materialToDelete, setMaterialToDelete] =
     useState<CourseMaterial | null>(null);
   const [historySectionId, setHistorySectionId] = useState("");
@@ -97,7 +102,7 @@ export default function CourseOverview({
     setBusy(true);
     setError("");
     try {
-      const material = await uploadCourseMaterial(course.id, file);
+      const [material] = await uploadCourseMaterials(course.id, [file], setMaterialProgress);
       setMaterials((items) => [
         material,
         ...items.filter(({ id }) => id !== material.id),
@@ -119,7 +124,11 @@ export default function CourseOverview({
     isDragActive,
     isDragReject,
   } = useDropzone({
-    accept: materialTypes,
+    accept: courseMaterialTypes,
+    maxSize: courseMaterialMaxSize,
+    validator: file => acceptsCourseMaterial(file.name)
+      ? null
+      : { code: "file-invalid-type", message: courseMaterialFormatHint },
     multiple: false,
     maxFiles: 1,
     disabled: busy,
@@ -128,10 +137,15 @@ export default function CourseOverview({
       const invalidType = rejections.some((rejection) =>
         rejection.errors.some((item) => item.code === "file-invalid-type"),
       );
+      const tooLarge = rejections.some(rejection =>
+        rejection.errors.some(item => item.code === "file-too-large"),
+      );
       setError(
         invalidType
-          ? "目前仅支持 Markdown 和 TXT 文件"
-          : "每次只能上传一个课程材料",
+          ? courseMaterialFormatHint
+          : tooLarge
+            ? "单个课程材料不能超过 3 MB"
+            : "每次只能上传一个课程材料",
       );
     },
   });
@@ -144,17 +158,17 @@ export default function CourseOverview({
         ? "active"
         : "idle";
   const uploadTitle = busy
-    ? "正在上传材料…"
+    ? "正在上传并解析材料…"
     : isDragReject
       ? "不支持这种文件"
       : isDragActive
         ? "松开即可上传"
         : "拖放材料到这里";
   const uploadHint = isDragReject
-    ? "目前仅支持 Markdown 和 TXT 文件"
+    ? courseMaterialFormatHint
     : isDragActive
       ? "材料会自动添加到当前课程"
-      : "或点击选择 Markdown、TXT 文件";
+      : `或点击选择文件；${courseMaterialFormatHint}`;
 
   const remove = async (material: CourseMaterial) => {
     if (busy) return;
@@ -176,19 +190,14 @@ export default function CourseOverview({
     setBusy(true);
     setComposerError("");
     try {
-      const uploads = await Promise.allSettled(
-        files.map((file) => uploadCourseMaterial(course.id, file)),
-      );
-      const uploadedNames = uploads.flatMap((result) =>
-        result.status === "fulfilled" ? [result.value.name] : [],
-      );
-      const failed = uploads.length - uploadedNames.length;
-      if (files.length > 0 && uploadedNames.length === 0) {
-        setComposerError("教学材料上传失败，请重试");
-        throw new Error("No course material was uploaded");
+      let uploadedNames: string[];
+      try {
+        const uploaded = await uploadCourseMaterials(course.id, files, setMaterialProgress);
+        uploadedNames = uploaded.map(material => material.name);
+      } catch (error) {
+        setComposerError("教学材料上传或解析失败，请处理后再发送");
+        throw new Error("教学材料上传或解析失败，请处理后再发送", { cause: error });
       }
-      if (failed > 0)
-        setComposerError(`${failed} 个教学材料上传失败`);
       const request =
         text.trim() ||
         (historySection
@@ -243,6 +252,7 @@ export default function CourseOverview({
         </button>
       </div>
 
+      {materialProgress && <MaterialParsingProgress progress={materialProgress} />}
       {view === "outline" ? (
         <div className="course-home-sections">
           {sections.map((section) => (
@@ -308,7 +318,7 @@ export default function CourseOverview({
             </span>
             <strong>{uploadTitle}</strong>
             <span>{uploadHint}</span>
-            <small>每次上传一个文件</small>
+            <small>每次上传一个文件，单个文件不超过 3 MB</small>
           </div>
           {error && (
             <p className="course-context-error" role="alert">
@@ -326,6 +336,8 @@ export default function CourseOverview({
                 <article key={material.id} className="course-material-item">
                   <button
                     aria-label={material.name}
+                    disabled={!/\.(md|txt)$/i.test(material.name)}
+                    title={/\.(md|txt)$/i.test(material.name) ? undefined : "暂不支持预览，知芽可以读取解析后的内容"}
                     onClick={async () => {
                       setError("");
                       try {

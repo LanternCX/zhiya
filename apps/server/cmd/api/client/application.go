@@ -15,6 +15,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
+	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 	"github.com/LanternCX/zhiya/apps/server/internal/speech"
 )
@@ -64,7 +65,7 @@ func (a *application) courseService() *courses.Service {
 	if a.courses != nil {
 		return a.courses
 	}
-	return courses.New(a.models, a.objects, a.config.Server.MaxBodyBytes, a.config.Storage.URLTTLSeconds)
+	return courses.New(a.models, a.objects, a.config.Server.MaxBodyBytes, a.config.Storage.URLTTLSeconds, materialparse.New(a.config.MaterialParser.Endpoint, a.config.VisionModel.Endpoint, a.config.VisionModel.ID, a.config.VisionModel.APIKey, http.DefaultClient))
 }
 
 func (a *application) learningService() *learning.Service {

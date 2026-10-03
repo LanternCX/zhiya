@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,6 +45,40 @@ func TestAgentSessionSurvivesClientDepartureAndRejectsOtherUsers(t *testing.T) {
 	if response.StatusCode != http.StatusNotFound {
 		t.Fatalf("internal route exposed: %d", response.StatusCode)
 	}
+}
+
+func TestBinaryMaterialCommandFitsUploadLimit(t *testing.T) {
+	a := setupAccountTest(t)
+	client := a.register("binary-command@example.com")
+	opened := a.request(client, "POST", "/agent/sessions", map[string]any{"kind": "course"}, 201)
+	original := bytes.Repeat([]byte{0xff}, a.config.Server.MaxBodyBytes)
+	var received []byte
+	worker := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var input struct {
+			Command struct {
+				Args [][]struct {
+					Base64 string `json:"base64"`
+				} `json:"args"`
+			} `json:"command"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			t.Error(err)
+		}
+		received, _ = base64.StdEncoding.DecodeString(input.Command.Args[0][0].Base64)
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = io.WriteString(w, `{"ok":true}`)
+	}))
+	defer worker.Close()
+	a.app.config.Agent.Endpoint = worker.URL
+	a.request(client, "POST", "/agent/sessions/"+opened["id"].(string)+"/commands", map[string]any{
+		"requestId": "binary", "action": "materials", "args": []any{[]any{map[string]any{"name": "lesson.docx", "base64": base64.StdEncoding.EncodeToString(original)}}},
+	}, http.StatusAccepted)
+	if !bytes.Equal(received, original) {
+		t.Fatal("binary attachment changed in dispatch")
+	}
+	a.request(client, "POST", "/agent/sessions/"+opened["id"].(string)+"/commands", map[string]any{
+		"requestId": "oversized-prompt", "action": "prompt", "args": []any{strings.Repeat("a", a.config.Server.MaxBodyBytes+1)},
+	}, http.StatusBadRequest)
 }
 
 func TestConversationHistoryOnlyReordersWhenContentChanges(t *testing.T) {
@@ -494,6 +529,12 @@ func TestCourseAssignmentKeepsOriginalDialogue(t *testing.T) {
 	request("POST", "/sessions/"+id+"/state", state)
 	created := request("POST", "/courses", map[string]any{"title": "编程入门", "topic": "循环", "cover": map[string]any{"motif": "code", "palette": "sprout", "label": "CODE"}})["course"].(map[string]any)
 	courseID := created["id"].(string)
+	// A save captured before create_course can arrive after its transaction commits.
+	request("POST", "/sessions/"+id+"/state", state)
+	bound := a.request(client, "GET", "/agent/sessions/"+id, nil, 200)["state"].(map[string]any)
+	if bound["course"].(map[string]any)["id"] != courseID {
+		t.Fatalf("late projection cleared the course binding: %v", bound)
+	}
 	outline := request("PUT", "/courses/"+courseID+"/outline", map[string]any{"sections": []any{map[string]any{"title": "循环", "objective": "理解重复", "status": "active"}}})["course"].(map[string]any)
 	section := outline["sections"].([]any)[0].(map[string]any)["id"].(string)
 	assigned := request("POST", "/courses/"+courseID+"/sections/"+section+"/conversations", map[string]any{"title": "认识循环"})["conversation"].(map[string]any)

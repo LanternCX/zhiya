@@ -2845,6 +2845,13 @@ test("a student creates a course with teaching materials attached to the first r
       body: "# 变量\n变量是给数据起的名字。\n",
     }),
   );
+  await page.route("**/api/courses/course-with-material/materials/variables-notes/content?*", route =>
+    route.fulfill({ json: { material, revision: 1, excerpt: {
+      status: "ready", warnings: [], totalLines: 2,
+      lines: [{ number: 1, text: "# 变量", kind: "text", source: {} },
+        { number: 2, text: "变量是给数据起的名字。", kind: "text", source: {} }],
+    } } }),
+  );
   await page.route("**/api/courses/course-with-material/outline", (route) =>
     route.fulfill({ json: { course: outlined } }),
   );
@@ -2971,15 +2978,15 @@ test("the course composer validates and removes teaching materials before sendin
   const input = page.locator('input[type="file"]');
 
   await input.setInputFiles({
-    name: "worksheet.pdf",
-    mimeType: "application/pdf",
+    name: "worksheet.exe",
+    mimeType: "application/octet-stream",
     buffer: Buffer.from("not supported"),
   });
   await expect(page.getByRole("alert")).toHaveText(
-    "目前仅支持 Markdown 和 TXT 文件",
+    "支持 Markdown、TXT、PDF、Word、PPT 和图片",
   );
   await expect(
-    page.getByRole("button", { name: "移除材料：worksheet.pdf" }),
+    page.getByRole("button", { name: "移除材料：worksheet.exe" }),
   ).toHaveCount(0);
 
   await input.setInputFiles({
@@ -3172,6 +3179,12 @@ test("a student attaches new teaching material inside an existing course convers
   await page.route("https://storage.test/materials/loops", (route) =>
     route.fulfill({ status: 200, contentType: "text/plain", body: content }),
   );
+  await page.route("**/api/courses/existing-attachment/materials/loops-notes/content?*", route =>
+    route.fulfill({ json: { material, revision: 1, excerpt: {
+      status: "ready", warnings: [], totalLines: 1,
+      lines: [{ number: 1, text: content, kind: "text", source: {} }],
+    } } }),
+  );
   await page.route(
     "**/api/courses/existing-attachment/conversation",
     (route) => route.fulfill({ json: { ok: true } }),
@@ -3293,7 +3306,7 @@ test("a failed conversation attachment remains available to retry", async ({
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect(page.getByRole("alert")).toHaveText(
-    "教学材料上传失败，请重试",
+    "教学材料上传或解析失败，请重试",
   );
   await expect(input).toHaveValue("根据新材料继续");
   await expect(
@@ -3405,6 +3418,12 @@ test("a student starts a course conversation with teaching material from the cou
   );
   await page.route("https://storage.test/materials/overview-loops", (route) =>
     route.fulfill({ status: 200, contentType: "text/markdown", body: content }),
+  );
+  await page.route("**/api/courses/overview-attachment/materials/loops-overview-notes/content?*", route =>
+    route.fulfill({ json: { material, revision: 1, excerpt: {
+      status: "ready", warnings: [], totalLines: 1,
+      lines: [{ number: 1, text: content, kind: "text", source: {} }],
+    } } }),
   );
   await page.route(
     "**/api/courses/overview-attachment/conversation",
@@ -4701,6 +4720,13 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   await page.route("https://storage.test/materials/notes", (route) =>
     route.fulfill({ status: 200, contentType: "text/markdown", body: "# 变量\n变量保存数据。" }),
   );
+  await page.route("**/api/courses/material-course/materials/notes/content?*", route =>
+    route.fulfill({ json: { material: materials[0], revision: 1, excerpt: {
+      status: "ready", warnings: [], totalLines: 2,
+      lines: [{ number: 1, text: "# 变量", kind: "text", source: {} },
+        { number: 2, text: "变量保存数据。", kind: "text", source: {} }],
+    } } }),
+  );
   await page.route("**/api/learning/course/model", async (route: Route) => {
     const request = route.request().postDataJSON() as {
       agent: "teacher" | "slides";
@@ -4735,15 +4761,15 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   const rejectedTransfer = await page.evaluateHandle(() => {
     const transfer = new DataTransfer();
     transfer.items.add(
-      new File(["not supported"], "notes.pdf", {
-        type: "application/pdf",
+      new File(["not supported"], "notes.exe", {
+        type: "application/octet-stream",
       }),
     );
     return transfer;
   });
   await uploadArea.dispatchEvent("drop", { dataTransfer: rejectedTransfer });
   await expect(page.getByRole("alert")).toHaveText(
-    "目前仅支持 Markdown 和 TXT 文件",
+    "支持 Markdown、TXT、PDF、Word、PPT 和图片",
   );
   expect(uploadRequests).toBe(0);
 

@@ -32,6 +32,7 @@ func (a *application) Routes() http.Handler {
 	handle("PUT /courses/{id}/outline-reorganizations/{reorganizationId}/assignments/{conversationId}", (*requestHandler).assignCourseOutlineConversation)
 	handle("POST /courses/{id}/sections/{sectionId}/conversations", (*requestHandler).createCourseConversation)
 	handle("GET /courses/{id}/materials", (*requestHandler).listCourseMaterials)
+	handle("GET /courses/{id}/materials/{materialId}/content", (*requestHandler).readCourseMaterial)
 	handle("GET /courses/{id}/materials/{materialId}/download", (*requestHandler).downloadCourseMaterial)
 	handle("POST /courses/{id}/image-generations", (*requestHandler).createIllustration)
 	handle("GET /courses/{id}/image-generations/{generationId}", (*requestHandler).getIllustration)

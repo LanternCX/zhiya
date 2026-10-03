@@ -239,3 +239,16 @@ func (a *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
 	err := a.courseService().Delete(r.Context(), userAuthorization(r), r.PathValue("id"))
 	a.http().RespondOK(w, err)
 }
+
+func (a *application) readCourseMaterial(w http.ResponseWriter, r *http.Request) {
+	a.http().ReadMaterial(w, r, a.courseService(), userAuthorization(r))
+}
+
+func (a *application) retryCourseMaterial(w http.ResponseWriter, r *http.Request) {
+	revision, err := a.courseService().RetryMaterial(r.Context(), userAuthorization(r), r.PathValue("id"), r.PathValue("materialId"))
+	if err != nil {
+		a.http().RespondError(w, err)
+		return
+	}
+	transport.WriteJSON(w, http.StatusAccepted, map[string]any{"revision": revision})
+}

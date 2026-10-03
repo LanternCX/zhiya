@@ -1,17 +1,39 @@
 import type { ChatComposerAttachmentOptions } from "../../components/ChatComposer";
 
+export const courseMaterialTypes = {
+  "text/markdown": [".md"],
+  "text/plain": [".txt"],
+  "application/pdf": [".pdf"],
+  "application/msword": [".doc"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "application/vnd.ms-powerpoint": [".ppt"],
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
+  "image/png": [".png"],
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/webp": [".webp"],
+  "image/bmp": [".bmp"],
+  "image/tiff": [".tif", ".tiff"],
+};
+const extensions = Object.values(courseMaterialTypes).flat();
+export const courseMaterialFormatHint = "支持 Markdown、TXT、PDF、Word、PPT 和图片";
+export const courseMaterialMaxSize = 3 * 1024 * 1024;
+
+export function acceptsCourseMaterial(name: string) {
+  return extensions.some(extension => name.toLowerCase().endsWith(extension));
+}
+
 export const courseMaterialAttachments: ChatComposerAttachmentOptions = {
-  accept: "text/markdown,text/plain",
+  accept: extensions.join(","),
   addLabel: "添加教学材料",
-  dropHint: "支持 Markdown、TXT，单个文件不超过 3 MB",
+  dropHint: `${courseMaterialFormatHint}，单个文件不超过 3 MB`,
   dropLabel: "松开以添加教学材料",
   errorMessage: (code) =>
     code === "max_file_size"
       ? "单个课程材料不能超过 3 MB"
       : code === "accept"
-        ? "目前仅支持 Markdown 和 TXT 文件"
+        ? courseMaterialFormatHint
         : "附带的课程材料过多",
-  maxFileSize: 3 * 1024 * 1024,
+  maxFileSize: courseMaterialMaxSize,
   multiple: true,
   removeLabel: (filename) => `移除材料：${filename}`,
 };

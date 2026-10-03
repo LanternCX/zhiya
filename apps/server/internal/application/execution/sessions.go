@@ -19,6 +19,13 @@ func (s *Service) Claim(ctx context.Context, user, id string) (domain.AgentSessi
 	err := s.models.Transaction(ctx, data.StandardTransaction, func(m data.Models) error {
 		var err error
 		result, err = m.Agents.Claim(ctx, user, id)
+		if err == nil && result.Kind == "course" && result.CourseID != "" {
+			course, loadErr := m.Courses.Get(ctx, user, result.CourseID)
+			if loadErr != nil {
+				return loadErr
+			}
+			result.State, err = courseProjection(result.State, course, result.ConversationID)
+		}
 		return err
 	})
 	return result, err
@@ -54,7 +61,11 @@ func (s *Service) Save(ctx context.Context, id, grant string, raw json.RawMessag
 				return err
 			}
 			if state.Course == nil && conversation.CourseID != "" {
-				return appservice.Invalid("课程归属不能被清除")
+				// Course binding belongs to the server. A pre-creation snapshot may arrive late.
+				if conversation.CourseID != session.CourseID || state.ConversationID != session.ConversationID {
+					return appservice.Unauthorized("对话不在执行范围内")
+				}
+				state.Course = &domain.Course{ID: conversation.CourseID}
 			}
 			if state.Course != nil && conversation.CourseID != "" && conversation.CourseID != state.Course.ID {
 				return appservice.Unauthorized("对话不在课程范围内")
@@ -79,17 +90,7 @@ func (s *Service) Save(ctx context.Context, id, grant string, raw json.RawMessag
 			if err != nil {
 				return err
 			}
-			course.ConversationID = state.ConversationID
-			course.State = state.Lesson
-			var projection map[string]json.RawMessage
-			if err = json.Unmarshal(raw, &projection); err != nil {
-				return err
-			}
-			projection["course"], err = json.Marshal(course)
-			if err != nil {
-				return err
-			}
-			raw, err = json.Marshal(projection)
+			raw, err = courseProjection(raw, course, state.ConversationID)
 			if err != nil {
 				return err
 			}
@@ -102,6 +103,21 @@ func (s *Service) Save(ctx context.Context, id, grant string, raw json.RawMessag
 		session.State = raw
 		return m.Agents.Save(ctx, session)
 	})
+}
+
+func courseProjection(raw json.RawMessage, course domain.Course, conversationID string) (json.RawMessage, error) {
+	var projection map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &projection); err != nil {
+		return nil, err
+	}
+	course.ConversationID = conversationID
+	course.State = projection["lesson"]
+	bound, err := json.Marshal(course)
+	if err != nil {
+		return nil, err
+	}
+	projection["course"] = bound
+	return json.Marshal(projection)
 }
 
 func (s *Service) Open(ctx context.Context, token, claimedUser, kind, courseID, conversationID string) (domain.AgentSession, error) {

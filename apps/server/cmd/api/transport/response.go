@@ -76,7 +76,11 @@ func ErrorResponse(err error) (int, string) {
 	return status, message
 }
 func (a Responder) ReadJSON(w http.ResponseWriter, r *http.Request, value any) error {
-	r.Body = http.MaxBytesReader(w, r.Body, int64(a.Config.Server.MaxBodyBytes))
+	return a.ReadJSONWithLimit(w, r, value, int64(a.Config.Server.MaxBodyBytes))
+}
+
+func (a Responder) ReadJSONWithLimit(w http.ResponseWriter, r *http.Request, value any, limit int64) error {
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(value); err != nil {

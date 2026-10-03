@@ -24,6 +24,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
+	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -84,7 +85,23 @@ func main() {
 		os.Exit(1)
 	}
 	accountService := accounts.New(models, cfg.Account, send)
-	courseService := courses.New(models, objects, cfg.Server.MaxBodyBytes, cfg.Storage.URLTTLSeconds)
+	materialParser := materialparse.New(cfg.MaterialParser.Endpoint, cfg.VisionModel.Endpoint, cfg.VisionModel.ID, cfg.VisionModel.APIKey, http.DefaultClient)
+	courseService := courses.New(models, objects, cfg.Server.MaxBodyBytes, cfg.Storage.URLTTLSeconds, materialParser)
+	go func() {
+		for ctx.Err() == nil {
+			worked, err := courseService.ProcessNextMaterial(ctx, materialParser)
+			if err != nil && ctx.Err() == nil {
+				logger.Error("material parsing worker failed", "error", err)
+			}
+			if !worked || err != nil {
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(2 * time.Second):
+				}
+			}
+		}
+	}()
 	illustrationService := illustrations.New(models, objects, imagegen.New(cfg.ImageModel.Endpoint, cfg.ImageModel.ID, cfg.ImageModel.APIKey, http.DefaultClient), cfg.ImageModel.ID, cfg.Storage.URLTTLSeconds)
 	server := &http.Server{
 		Addr:              cfg.Server.Listen,

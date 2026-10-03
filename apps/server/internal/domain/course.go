@@ -71,13 +71,15 @@ type OutlineReorganization struct {
 }
 
 type CourseMaterial struct {
-	ID        string    `json:"id"`
-	CourseID  string    `json:"-"`
-	Name      string    `json:"name"`
-	MediaType string    `json:"mediaType"`
-	ObjectKey string    `json:"-"`
-	SizeBytes int64     `json:"sizeBytes"`
-	CreatedAt time.Time `json:"createdAt"`
+	ParseRevision int       `json:"parseRevision"`
+	ParseStatus   string    `json:"parseStatus"`
+	ID            string    `json:"id"`
+	CourseID      string    `json:"-"`
+	Name          string    `json:"name"`
+	MediaType     string    `json:"mediaType"`
+	ObjectKey     string    `json:"-"`
+	SizeBytes     int64     `json:"sizeBytes"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type CourseMaterialUpload struct {

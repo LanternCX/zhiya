@@ -31,6 +31,10 @@ func (s *Service) CreateCourse(ctx context.Context, grant Grant, title, topic st
 			}
 		}
 		session.CourseID = course.ID
+		session.State, err = courseProjection(session.State, course, session.ConversationID)
+		if err != nil {
+			return err
+		}
 		return models.Agents.Save(ctx, session)
 	})
 	return course, err
