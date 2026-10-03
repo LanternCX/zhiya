@@ -1,0 +1,51 @@
+/*
+ * 课件栏布局修复（不修改原 course.css / workspace.css）
+ *
+ * 问题：
+ *   1. 课件栏右边与浏览器边缘有空隙。
+ *   2. 课件栏最小宽度过大，窄视口下网格溢出。
+ *   3. 课件内容不随窗口铺满。
+ *
+ * 根因：
+ *   - .workspace 是 display:flex，但 .workspace-body 的 flex-grow:0，
+ *     不填充右侧剩余空间，导致课件栏右边留空。
+ *   - .workspace-content 默认 padding: 0 32px 20px。
+ *   - .course-room 网格最小宽度之和过大，窄视口下溢出。
+ *
+ * 方案（全部在本文件，不改动原 CSS）：
+ *   1. 让 .workspace-body 填充 flex 剩余空间。
+ *   2. 课堂模式下去掉 .workspace-content 内边距。
+ *   3. 调小网格两列最小宽度，防止溢出。
+ *
+ * 引入：CourseRoom.tsx 中 import "./course-room-layout-fix.css";
+ */
+
+/* 1. 让 workspace-body 填充 flex 剩余空间（右侧不再留空） */
+.workspace-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 2. 去掉课堂模式下工作区的内边距 */
+.workspace-content:has(.course-room) {
+  padding: 0 !important;
+}
+
+/* 3. 调小网格最小宽度，防止溢出；对话栏和课件栏最小都设为 280px */
+.course-room {
+  grid-template-columns: minmax(280px, var(--course-conversation-width, 420px)) 12px minmax(280px, 1fr) !important;
+}
+
+/* 4. 没有课件时，对话占满整个右侧（去掉课件列和分隔条） */
+.course-room[data-has-slides="false"] {
+  grid-template-columns: minmax(280px, 1fr) !important;
+}
+.course-room[data-has-slides="false"] > .resize-handle {
+  display: none !important;
+}
+
+/* 5. "我"的消息气泡不要占满整行，限制最大宽度并靠右 */
+.course-message.user {
+  max-width: 30%;
+  margin-left: auto !important;
+}

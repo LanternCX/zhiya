@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import "./course.css";
+import "./course-room-layout-fix.css";
 import { createCourseSession } from "./runtime";
 import type {
   CourseActivity,
@@ -62,7 +63,7 @@ import { emptyCourseState, uploadCourseMaterials } from "./courses";
 type RenderedCourseMessage = CourseMessage;
 
 const CodingPage = lazy(() => import("./CodingPage"));
-const SlideCanvas = lazy(() => import("./SlideCanvas"));
+const SlideCanvas = lazy(() => import("./SlideCanvasCover"));
 
 const conversationControls = {
   code: { copy: true, download: false },
