@@ -105,6 +105,11 @@ class ParsingTests(unittest.TestCase):
                                 "--headless", "--convert-to", extension + ":" + filter_name,
                                 "--outdir", temp, str(source)], check=True, timeout=60, capture_output=True)
                 raw = (directory / ("lesson." + extension)).read_bytes()
+                if extension == "ppt":
+                    from parser import convert_presentation
+                    converted = convert_presentation("lesson.ppt", raw)
+                    self.assertTrue(converted.startswith(b"PK"))
+                    self.assertIn("Variables store values", "\n".join(p["text"] for p in parse("converted.pptx", converted)["pages"]))
                 pages = parse("lesson." + extension, raw)["pages"]
                 text = "\n".join(p["text"] for p in pages)
                 self.assertIn("Variables store values", text)
