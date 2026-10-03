@@ -42,8 +42,8 @@ export class ToolAPI {
     }
     return response;
   }
-  async json<T>(path: string, method = "GET", body?: unknown): Promise<T> {
-    return (await this.request(path, method, body)).json() as Promise<T>;
+  async json<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
+    return (await this.request(path, method, body, signal)).json() as Promise<T>;
   }
   object(url: string, init?: RequestInit) {
     return fetch(url, init);

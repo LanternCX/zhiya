@@ -29,7 +29,7 @@ def image_url(image):
     return "data:image/jpeg;base64," + base64.b64encode(output.getvalue()).decode("ascii")
 
 
-def office_pdf(source, directory):
+def office_convert(source, directory, extension):
     # A separate profile prevents interference between conversions and disables macros.
     profile = directory / "profile"
     (profile / "user").mkdir(parents=True)
@@ -41,14 +41,28 @@ def office_pdf(source, directory):
     )
     subprocess.run(
         ["soffice", "-env:UserInstallation=" + profile.as_uri(), "--headless",
-         "--nologo", "--nodefault", "--norestore", "--convert-to", "pdf",
+         "--nologo", "--nodefault", "--norestore", "--convert-to", extension,
          "--outdir", str(directory), str(source)],
         check=True, timeout=90, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
-    result = source.with_suffix(".pdf")
+    result = source.with_suffix("." + extension)
     if not result.exists() or result.stat().st_size > MAX_BYTES:
         raise ValueError("Office conversion failed or exceeded size limit")
     return result.read_bytes()
+
+
+def office_pdf(source, directory):
+    return office_convert(source, directory, "pdf")
+
+
+def convert_presentation(name, data):
+    if Path(name).suffix.lower() != ".ppt" or not data or len(data) > MAX_BYTES:
+        raise ValueError("Invalid legacy presentation")
+    with tempfile.TemporaryDirectory(prefix="zhiya-presentation-") as temp:
+        directory = Path(temp)
+        source = directory / "source.ppt"
+        source.write_bytes(data)
+        return office_convert(source, directory, "pptx")
 
 
 def pdf_pages(data, slides=False):
@@ -113,7 +127,11 @@ def parse(name, data):
 
 if __name__ == "__main__":
     try:
-        result = parse(sys.argv[1], sys.stdin.buffer.read(MAX_BYTES + 1))
-        sys.stdout.write(json.dumps(result, ensure_ascii=False))
+        data = sys.stdin.buffer.read(MAX_BYTES + 1)
+        if len(sys.argv) > 2 and sys.argv[2] == "--presentation":
+            sys.stdout.buffer.write(convert_presentation(sys.argv[1], data))
+        else:
+            result = parse(sys.argv[1], data)
+            sys.stdout.write(json.dumps(result, ensure_ascii=False))
     except (ValueError, IndexError):
         sys.exit(1)

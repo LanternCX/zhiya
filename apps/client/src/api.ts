@@ -116,7 +116,8 @@ export async function api<T = { ok: boolean }>(
         method,
         credentials: "same-origin",
         signal: AbortSignal.timeout(
-          __ZHIYA_CLIENT_CONFIG__.requestTimeoutMilliseconds,
+          method === "POST" && /^\/courses\/[^/]+\/deliverables\/import$/.test(path)
+            ? 180000 : __ZHIYA_CLIENT_CONFIG__.requestTimeoutMilliseconds,
         ),
         headers: {
           "Content-Type": "application/json",

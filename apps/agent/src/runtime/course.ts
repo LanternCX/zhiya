@@ -257,6 +257,17 @@ export class CourseHost {
       case "selectPresentation":
         this.session.selectPresentation(String(args[0]));
         break;
+      case "selectDeliverable": {
+        const id = String(args[0] ?? "");
+        if (!id) this.state.deliverableSelection = null;
+        else {
+          const item = await this.courses.management.deliverables.read(id);
+          const blockId = String(args[1] ?? "");
+          if (blockId && !item.blocks.some(b => b.id === blockId)) throw new Error("找不到该页面或章节");
+          this.state.deliverableSelection = { id, blockId };
+        }
+        break;
+      }
       case "updateCodingExercise": {
         const changes = args[1] as Parameters<
           CourseSession["updateCodingExercise"]

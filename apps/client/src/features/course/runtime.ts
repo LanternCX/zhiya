@@ -83,7 +83,7 @@ export function createCourseSession(
       text: string,
       materials: string[] = [],
       mode: InputMode = "text",
-    ) => command("prompt", [text, materials, mode]),
+    ) => mutations.then(() => command("prompt", [text, materials, mode])),
     materials: async (files: File[]) =>
       command("materials", [
         await Promise.all(
@@ -109,6 +109,10 @@ export function createCourseSession(
     beginFromHandoff: (mode: InputMode) => command("beginFromHandoff", [mode]),
     selectPresentation: (id: string) => {
       void command("selectPresentation", [id]);
+    },
+    selectDeliverable: (id: string, blockId = "") => {
+      mutations = mutations.catch(() => {}).then(() => connection.command("selectDeliverable", [id, blockId]));
+      return mutations;
     },
     updateCodingExercise: (
       ...args: [string, Partial<Pick<CodingExercise, "code" | "stdin" | "result">>]

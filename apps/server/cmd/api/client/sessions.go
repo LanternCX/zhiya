@@ -43,7 +43,7 @@ func (a *application) commandAgentSession(w http.ResponseWriter, r *http.Request
 		allowed["run"] = true
 		allowed["endCorrection"] = true
 	} else {
-		for _, action := range []string{"prompt", "materials", "selectPresentation", "updateCodingExercise", "updateQuestion", "submitQuestion", "deferQuestion", "requestExerciseReview", "beginFromHandoff", "animationPlayback"} {
+		for _, action := range []string{"prompt", "materials", "selectPresentation", "selectDeliverable", "updateCodingExercise", "updateQuestion", "submitQuestion", "deferQuestion", "requestExerciseReview", "beginFromHandoff", "animationPlayback"} {
 			allowed[action] = true
 		}
 	}

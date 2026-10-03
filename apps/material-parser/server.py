@@ -22,7 +22,7 @@ class Handler(BaseHTTPRequestHandler):
         url = urlsplit(self.path)
         try:
             size = int(self.headers.get("Content-Length", "0"))
-            if url.path != "/parse" or not 0 < size <= MAX_BYTES:
+            if url.path not in {"/parse", "/presentation"} or not 0 < size <= MAX_BYTES:
                 raise ValueError("Invalid request")
             name = parse_qs(url.query).get("name", [""])[0]
             data = self.rfile.read(size)
@@ -31,13 +31,13 @@ class Handler(BaseHTTPRequestHandler):
             # Native converters run in a disposable process so a timeout or crash
             # cannot leave the HTTP service stuck on this document.
             output = subprocess.run(
-                [sys.executable, "parser.py", name], input=data, capture_output=True,
+                [sys.executable, "parser.py", name] + (["--presentation"] if url.path == "/presentation" else []), input=data, capture_output=True,
                 timeout=120, check=True,
             ).stdout
             if len(output) > 64 * 1024 * 1024:
                 raise ValueError("Result exceeds size limit")
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "application/octet-stream" if url.path == "/presentation" else "application/json")
             self.send_header("Content-Length", str(len(output)))
             self.end_headers()
             self.wfile.write(output)
