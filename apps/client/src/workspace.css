@@ -16,19 +16,21 @@
   background: var(--brand-green-soft);
 }
 .workspace {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  display: flex;
   height: 100dvh;
   background-color: var(--canvas-fill);
 }
 .workspace-sidebar {
   position: relative;
+  width: var(--workspace-sidebar-width, 220px);
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
   padding: 12px 10px 10px;
   border-right: 1px solid var(--line);
   background: var(--sidebar-fill);
+  transition: width 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .workspace-brand {
   display: flex;
@@ -345,10 +347,8 @@
   border-color: var(--brand-green);
   background: var(--brand-green);
 }
-.is-collapsed {
-  grid-template-columns: 72px minmax(0, 1fr);
-}
 .is-collapsed .workspace-sidebar {
+  width: 72px;
   padding-inline: 12px;
 }
 .is-collapsed .workspace-brand {
@@ -468,8 +468,8 @@
 .user-popover > button:hover { background: var(--surface-hover); }
 .workspace-toolbar { font-weight: 600; color: var(--text); }
 .onboarding-controls .icon-button { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); box-shadow: none; }
-.workspace.is-onboarding {
-  grid-template-columns: minmax(0, 1fr);
+.workspace.is-onboarding .workspace-sidebar {
+  display: none;
 }
 .onboarding-controls {
   display: flex;

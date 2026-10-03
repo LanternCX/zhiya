@@ -6,9 +6,11 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
 } from "react";
 import "./course.css";
 import "./course-room-layout-fix.css";
+import ResizeHandle from "../../components/ResizeHandle";
 import { createCourseSession } from "./runtime";
 import type {
   CourseActivity,
@@ -242,6 +244,11 @@ export default function CourseRoom({
   const [modelRetry, setModelRetry] = useState<ModelRetryStatus | null>(null);
   const [switchingSection, setSwitchingSection] = useState(false);
   const [course, setCourse] = useState<StoredCourse | null>(activeCourse);
+  const [conversationWidth, setConversationWidth] = useState(420);
+  const [resizingConversation, setResizingConversation] = useState(false);
+  const handleConversationResize = useCallback((delta: number) => {
+    setConversationWidth((width) => Math.max(320, Math.min(720, width + delta)));
+  }, []);
   const messagesRef = useRef<RenderedCourseMessage[]>(initialState.messages);
   const pagesRef = useRef<LessonPage[]>(initialState.pages);
   const presentedRef = useRef<LessonPresentation[]>([
@@ -371,6 +378,7 @@ export default function CourseRoom({
     },
     [],
   );
+
   useEffect(() => {
     if (!info?.available || !coursesReady) return;
     const seenAnimations = new Set<string>();
@@ -771,9 +779,12 @@ export default function CourseRoom({
 
   return (
     <section
-      className="course-room ai-elements"
+      className={`course-room ai-elements ${resizingConversation ? "is-resizing" : ""}`}
       aria-label="课堂"
       data-has-slides={Boolean(current)}
+      style={{
+        ["--course-conversation-width"]: `${conversationWidth}px`,
+      } as CSSProperties}
     >
       <section className="course-conversation" aria-label="教学对话">
         <div
@@ -956,6 +967,15 @@ export default function CourseRoom({
           submitLabel="发送"
         />
       </section>
+
+      {current && (
+        <ResizeHandle
+          direction="horizontal"
+          onResizeStart={() => setResizingConversation(true)}
+          onResize={handleConversationResize}
+          onResizeEnd={() => setResizingConversation(false)}
+        />
+      )}
 
       {current && (
         <section className="slide-stage" aria-label="课堂页面">

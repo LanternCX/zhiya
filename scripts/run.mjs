@@ -3,17 +3,14 @@ import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 import { loadClientConfig, root } from "./config.mjs";
 
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-
 const [command, ...extra] = process.argv.slice(2);
 const env = { ...process.env };
 let agent;
 if (command === "server") {
   env.ZHIYA_SERVER_AGENT_SECRET ||= randomBytes(32).toString("hex");
-  agent = spawn(npm, ["run", "dev:agent"], {
+  agent = spawn("npm", ["run", "dev:agent"], {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
     env: { ...env, ZHIYA_AGENT_SECRET: env.ZHIYA_SERVER_AGENT_SECRET },
   });
 }
@@ -80,7 +77,7 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
         ];
       } else {
         const websocketOrigin = config.api_origin.replace(/^http/, "ws");
-        executable = npm;
+        executable = "npm";
         args = [
           "run",
           "tauri",
@@ -127,7 +124,7 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
       throw new Error("Unknown development command");
   }
 }
-const child = spawn(executable, args, { cwd: root, env, stdio: "inherit", shell: process.platform === "win32" });
+const child = spawn(executable, args, { cwd: root, env, stdio: "inherit" });
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
     child.kill(signal);
