@@ -64,6 +64,9 @@ export async function open(input: Dispatch): Promise<Entry> {
     await api.json(`/sessions/${session.id}/heartbeat`, "POST", {});
     if (previous) await remove(session.id, previous);
     session.state.busy = false;
+    if (session.kind === "course") {
+      Object.assign(session.state, { running: false, generating: false, activity: null, retry: null });
+    }
     for (const receipt of Object.values(session.state.commands ?? {})) {
       if (receipt.status === "running") {
         receipt.status = "failed";

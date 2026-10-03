@@ -494,6 +494,12 @@ func TestCourseAssignmentKeepsOriginalDialogue(t *testing.T) {
 	request("POST", "/sessions/"+id+"/state", state)
 	created := request("POST", "/courses", map[string]any{"title": "编程入门", "topic": "循环", "cover": map[string]any{"motif": "code", "palette": "sprout", "label": "CODE"}})["course"].(map[string]any)
 	courseID := created["id"].(string)
+	// A save captured before create_course can arrive after its transaction commits.
+	request("POST", "/sessions/"+id+"/state", state)
+	bound := a.request(client, "GET", "/agent/sessions/"+id, nil, 200)["state"].(map[string]any)
+	if bound["course"].(map[string]any)["id"] != courseID {
+		t.Fatalf("late projection cleared the course binding: %v", bound)
+	}
 	outline := request("PUT", "/courses/"+courseID+"/outline", map[string]any{"sections": []any{map[string]any{"title": "循环", "objective": "理解重复", "status": "active"}}})["course"].(map[string]any)
 	section := outline["sections"].([]any)[0].(map[string]any)["id"].(string)
 	assigned := request("POST", "/courses/"+courseID+"/sections/"+section+"/conversations", map[string]any{"title": "认识循环"})["conversation"].(map[string]any)

@@ -59,16 +59,22 @@ export class CourseHost {
 
   async flush() {
     await this.ready;
+    this.state.busy = this.pendingPrompts > 0 || Boolean(this.session?.busy);
     this.state.running = this.running;
     clearTimeout(this.saveTimer);
     this.saveTimer = undefined;
-    const snapshot = JSON.parse(JSON.stringify(this.state));
-    this.saving = this.saving
+    const save = this.saving
       .then(() =>
-        this.api.json(`/sessions/${this.api.id}/state`, "POST", snapshot),
+        this.api.json(
+          `/sessions/${this.api.id}/state`,
+          "POST",
+          structuredClone(this.state),
+        ),
       )
       .then(() => {});
-    await this.saving;
+    // Report this failure to its caller, but leave the queue usable for terminal-state saves.
+    this.saving = save.catch(() => {});
+    await save;
   }
 
   private async createSession(handoff?: string) {

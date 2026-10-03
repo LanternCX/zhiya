@@ -77,8 +77,11 @@ test(
             presentations: [],
             currentPresentationId: "",
           },
-          busy: false,
-          generating: false,
+          busy: true,
+          running: true,
+          generating: true,
+          activity: { kind: "thinking", text: "interrupted", active: true },
+          commands: { interrupted: { status: "running" } },
         },
       },
       grant: "test-grant",
@@ -96,6 +99,16 @@ test(
         },
         body: JSON.stringify(input),
       });
+    const prompt = input.command;
+    input.command = { requestId: "reattach", action: "attach", args: [] };
+    assert.equal((await dispatch()).status, 202);
+    for (let i = 0; i < 200 && projection?.commands?.reattach?.status !== "complete"; i++) await delay(25);
+    assert.equal(projection.commands.reattach.status, "complete");
+    assert.equal(projection.running, false);
+    assert.equal(projection.generating, false);
+    assert.equal(projection.activity, null);
+    assert.equal(projection.commands.interrupted.status, "failed");
+    input.command = prompt;
     const accepted = await Promise.all([dispatch(), dispatch()]);
     for (const response of accepted) assert.equal(response.status, 202);
     // Both HTTP connections have closed while the independent model request remains open.
