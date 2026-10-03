@@ -101,6 +101,10 @@ func (m MaterialModel) CompleteUpload(ctx context.Context, user, courseID, uploa
 	) INSERT INTO course_materials(id,course_id,name,media_type,object_key,size_bytes)
 	 SELECT id,course_id,name,media_type,$2,size_bytes FROM removed
 	 RETURNING id,course_id,name,media_type,object_key,size_bytes,created_at`, upload.ID, objectKey).Scan(&material.ID, &material.CourseID, &material.Name, &material.MediaType, &material.ObjectKey, &material.SizeBytes, &material.CreatedAt)
+	if err == nil {
+		_, err = m.db.Exec(ctx, `INSERT INTO course_material_parses(material_id,revision) VALUES($1,1)`, material.ID)
+		material.ParseRevision, material.ParseStatus = 1, "pending"
+	}
 	return material, err
 }
 
@@ -112,7 +116,7 @@ func (m MaterialModel) List(ctx context.Context, user, courseID string) ([]Cours
 	if !exists {
 		return nil, ErrCourseNotFound
 	}
-	rows, err := m.db.Query(ctx, `SELECT id,course_id,name,media_type,object_key,size_bytes,created_at FROM course_materials WHERE course_id=$1 ORDER BY created_at DESC`, courseID)
+	rows, err := m.db.Query(ctx, `SELECT m.id,m.course_id,m.name,m.media_type,m.object_key,m.size_bytes,m.created_at,m.parse_revision,p.status FROM course_materials m JOIN course_material_parses p ON p.material_id=m.id AND p.revision=m.parse_revision WHERE m.course_id=$1 ORDER BY m.created_at DESC`, courseID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +124,7 @@ func (m MaterialModel) List(ctx context.Context, user, courseID string) ([]Cours
 	items := []CourseMaterial{}
 	for rows.Next() {
 		var item CourseMaterial
-		if err := rows.Scan(&item.ID, &item.CourseID, &item.Name, &item.MediaType, &item.ObjectKey, &item.SizeBytes, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.CourseID, &item.Name, &item.MediaType, &item.ObjectKey, &item.SizeBytes, &item.CreatedAt, &item.ParseRevision, &item.ParseStatus); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -130,7 +134,7 @@ func (m MaterialModel) List(ctx context.Context, user, courseID string) ([]Cours
 
 func (m MaterialModel) Get(ctx context.Context, user, courseID, materialID string) (CourseMaterial, error) {
 	var item CourseMaterial
-	err := m.db.QueryRow(ctx, `SELECT m.id,m.course_id,m.name,m.media_type,m.object_key,m.size_bytes,m.created_at FROM course_materials m JOIN courses c ON c.id=m.course_id WHERE m.id=$1 AND m.course_id=$2 AND c.user_id=$3`, materialID, courseID, user).Scan(&item.ID, &item.CourseID, &item.Name, &item.MediaType, &item.ObjectKey, &item.SizeBytes, &item.CreatedAt)
+	err := m.db.QueryRow(ctx, `SELECT m.id,m.course_id,m.name,m.media_type,m.object_key,m.size_bytes,m.created_at,m.parse_revision,p.status FROM course_materials m JOIN courses c ON c.id=m.course_id JOIN course_material_parses p ON p.material_id=m.id AND p.revision=m.parse_revision WHERE m.id=$1 AND m.course_id=$2 AND c.user_id=$3`, materialID, courseID, user).Scan(&item.ID, &item.CourseID, &item.Name, &item.MediaType, &item.ObjectKey, &item.SizeBytes, &item.CreatedAt, &item.ParseRevision, &item.ParseStatus)
 	if err == pgx.ErrNoRows {
 		return CourseMaterial{}, ErrMaterialNotFound
 	}

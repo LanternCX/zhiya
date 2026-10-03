@@ -152,6 +152,21 @@ CREATE TABLE IF NOT EXISTS course_materials (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS course_materials_course_created ON course_materials(course_id,created_at DESC);
+ALTER TABLE course_materials ADD COLUMN IF NOT EXISTS parse_revision integer NOT NULL DEFAULT 1;
+CREATE TABLE IF NOT EXISTS course_material_parses (
+ material_id uuid NOT NULL REFERENCES course_materials(id) ON DELETE CASCADE,
+ revision integer NOT NULL,
+ status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','ready','partial','failed')),
+ document jsonb,
+ error text NOT NULL DEFAULT '',
+ lease_token text,
+ lease_until timestamptz,
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(material_id,revision)
+);
+INSERT INTO course_material_parses(material_id,revision)
+ SELECT id,parse_revision FROM course_materials ON CONFLICT DO NOTHING;
+CREATE INDEX IF NOT EXISTS course_material_parses_pending ON course_material_parses(created_at) WHERE status IN ('pending','processing');
 CREATE TABLE IF NOT EXISTS course_material_uploads (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,

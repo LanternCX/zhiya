@@ -19,18 +19,20 @@ import (
 )
 
 type Config struct {
-	Agent       Agent    `yaml:"agent"`
-	Model       Model    `yaml:"model"`
-	Speech      Speech   `yaml:"speech"`
-	ImageModel  Model    `yaml:"image_model"`
-	Runner      Runner   `yaml:"runner"`
-	Logging     Logging  `yaml:"logging"`
-	Development bool     `yaml:"development"`
-	Server      Server   `yaml:"http"`
-	Database    Database `yaml:"database"`
-	Storage     Storage  `yaml:"storage"`
-	SMTP        SMTP     `yaml:"smtp"`
-	Account     Account  `yaml:"account"`
+	Agent          Agent    `yaml:"agent"`
+	Model          Model    `yaml:"model"`
+	Speech         Speech   `yaml:"speech"`
+	ImageModel     Model    `yaml:"image_model"`
+	VisionModel    Model    `yaml:"vision_model"`
+	MaterialParser Parser   `yaml:"material_parser"`
+	Runner         Runner   `yaml:"runner"`
+	Logging        Logging  `yaml:"logging"`
+	Development    bool     `yaml:"development"`
+	Server         Server   `yaml:"http"`
+	Database       Database `yaml:"database"`
+	Storage        Storage  `yaml:"storage"`
+	SMTP           SMTP     `yaml:"smtp"`
+	Account        Account  `yaml:"account"`
 }
 type Agent struct {
 	Endpoint       string `yaml:"endpoint"`
@@ -51,6 +53,9 @@ type Logging struct {
 	Format string `yaml:"format"`
 }
 type Runner struct {
+	Endpoint string `yaml:"endpoint"`
+}
+type Parser struct {
 	Endpoint string `yaml:"endpoint"`
 }
 type Model struct {
@@ -265,13 +270,21 @@ func (c Config) Validate() error {
 			return fmt.Errorf("model.id is required when model.endpoint is configured")
 		}
 	}
-	if c.ImageModel.Endpoint != "" {
-		u, err := url.Parse(c.ImageModel.Endpoint)
-		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
-			return fmt.Errorf("image_model.endpoint must be an HTTPS URL (loopback HTTP allowed in development)")
+	for name, model := range map[string]Model{"image_model": c.ImageModel, "vision_model": c.VisionModel} {
+		if model.Endpoint != "" {
+			u, err := url.Parse(model.Endpoint)
+			if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
+				return fmt.Errorf("%s.endpoint must be an HTTPS URL (loopback HTTP allowed in development)", name)
+			}
+			if model.ID == "" {
+				return fmt.Errorf("%s.id is required when its endpoint is configured", name)
+			}
 		}
-		if c.ImageModel.ID == "" {
-			return fmt.Errorf("image_model.id is required when image_model.endpoint is configured")
+	}
+	if c.MaterialParser.Endpoint != "" {
+		u, err := url.Parse(c.MaterialParser.Endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "http" && u.Scheme != "https") {
+			return fmt.Errorf("material_parser.endpoint must be a private HTTP(S) URL")
 		}
 	}
 	runner, err := url.Parse(c.Runner.Endpoint)

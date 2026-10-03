@@ -122,6 +122,32 @@ logging:
 
 Docker 基础设施配置由 [`dev-services.env`](../dev-services.env) 管理。若修改 PostgreSQL 或 Mailpit 的映射端口，需要同步调整服务端连接配置。
 
+## 材料解析服务的启动与测试
+
+`npm run dev:services` 会构建并启动 `material-parser`。在 `apps/server/config.local.yaml` 中设置 `vision_model.api_key`，或通过 `ZHIYA_SERVER_VISION_MODEL_API_KEY` 注入百炼北京地域凭证，然后重启 Go 服务。
+
+独立部署时，构建 `apps/material-parser/Dockerfile` 并运行容器，将 Go 的 `material_parser.endpoint` 指向转换服务的 8090 端口。容器运行约束可参考 `compose.yaml` 中的 `material-parser` 服务；该端口只向 Go 服务开放。
+
+完整转换测试（包括真实旧版 Office 转换）在容器中运行：
+
+```sh
+docker compose --env-file dev-services.env run --rm --no-deps material-parser uv run --no-sync python -m unittest -v
+```
+
+仅运行本机解析测试可使用 `uv run --directory apps/material-parser python -m unittest -v`，未安装 LibreOffice 时会跳过 Office 转换用例。Go 的材料行为测试包含在 `npm run test:accounts` 中。
+
+运行 Go 上传接口到实际转换容器的集成测试（视觉供应商使用本地测试响应）：
+
+```sh
+ZHIYA_TEST_MATERIAL_PARSER=http://127.0.0.1:8090 npm run test:accounts -- -run TestImageUploadThroughConverterAndVisionBecomesReadable
+```
+
+已配置本地视觉凭证并启动转换服务后，可显式选择不含敏感信息的测试 PNG，验证真实千问调用。此命令会产生模型调用费用，并输出该测试图的识别文字和描述：
+
+```sh
+ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./internal/materialparse -run TestLiveVisionParsesSelectedImage -count=1 -v
+```
+
 ## 常用命令
 
 | 命令 | 用途 |

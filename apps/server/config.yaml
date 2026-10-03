@@ -30,6 +30,17 @@ image_model:
   id: "qwen-image-3.0"
   api_key: ""
 
+# Private fixed document converter; development binds it to loopback.
+material_parser:
+  endpoint: "http://127.0.0.1:8090"
+
+# Official Beijing Image-to-Text API, used only by the material parsing worker.
+# Use an account-specific Beijing endpoint if required by your Model Studio workspace.
+vision_model:
+  endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+  id: "qwen3-vl-plus"
+  api_key: ""
+
 # The code runner is only reached by the Go server. Development binds it to loopback.
 runner:
   endpoint: "http://127.0.0.1:2358"

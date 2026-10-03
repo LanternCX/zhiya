@@ -73,6 +73,9 @@ func (a *application) limitUser(max int, next http.HandlerFunc) http.HandlerFunc
 }
 
 func isLongLivedAPIPath(path string) bool {
+	if strings.HasPrefix(path, "/api/courses/") && strings.Contains(path, "/material-uploads/") && strings.HasSuffix(path, "/complete") {
+		return true
+	}
 	if path == "/api/agent/socket" {
 		return true
 	}

@@ -52,6 +52,23 @@ func TestDefaultConfigurationLayersLocalFields(t *testing.T) {
 	}
 }
 
+func TestMaterialVisionConfigurationIsIndependentOfTeachingModel(t *testing.T) {
+	t.Setenv("ZHIYA_SERVER_VISION_MODEL_API_KEY", "private-vision-key")
+	t.Setenv("ZHIYA_SERVER_VISION_MODEL_ID", "qwen3-vl-plus-2025-12-19")
+	t.Setenv("ZHIYA_SERVER_MATERIAL_PARSER_ENDPOINT", "http://127.0.0.1:18090")
+	cfg, err := config.Load("../../config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.VisionModel.APIKey != "private-vision-key" || cfg.VisionModel.ID != "qwen3-vl-plus-2025-12-19" || cfg.MaterialParser.Endpoint != "http://127.0.0.1:18090" || cfg.Model.APIKey != "" {
+		t.Fatal("vision configuration leaked into teaching model")
+	}
+	t.Setenv("ZHIYA_SERVER_VISION_MODEL_ENDPOINT", "http://external.example/chat/completions")
+	if _, err := config.Load("../../config.yaml"); err == nil {
+		t.Fatal("insecure external vision endpoint accepted")
+	}
+}
+
 func TestEnvironmentOverridesFileAndPathsBelongToConfigDirectory(t *testing.T) {
 	raw, err := os.ReadFile("../../config.yaml")
 	if err != nil {

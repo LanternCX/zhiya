@@ -14,3 +14,5 @@ playwright-report/
 /dev-services.local.env
 
 /apps/agent/.workspaces/
+/apps/material-parser/.venv/
+/apps/material-parser/__pycache__/

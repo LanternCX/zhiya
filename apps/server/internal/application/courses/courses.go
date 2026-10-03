@@ -1,7 +1,6 @@
 package courses
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,13 +9,13 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	appfault "github.com/LanternCX/zhiya/apps/server/internal/application"
 	"github.com/LanternCX/zhiya/apps/server/internal/application/identity"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/identifier"
+	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 )
 
@@ -39,6 +38,7 @@ type Service struct {
 	objects      objectstore.Store
 	maxBodyBytes int
 	urlTTL       time.Duration
+	parser       MaterialParser
 }
 
 type Upload struct {
@@ -51,8 +51,8 @@ type OutlineResult struct {
 	Reorganization *domain.OutlineReorganization
 }
 
-func New(models data.Models, objects objectstore.Store, maxBodyBytes, urlTTLSeconds int) *Service {
-	return &Service{models: models, objects: objects, maxBodyBytes: maxBodyBytes, urlTTL: time.Duration(urlTTLSeconds) * time.Second}
+func New(models data.Models, objects objectstore.Store, maxBodyBytes, urlTTLSeconds int, parser MaterialParser) *Service {
+	return &Service{models: models, objects: objects, maxBodyBytes: maxBodyBytes, urlTTL: time.Duration(urlTTLSeconds) * time.Second, parser: parser}
 }
 
 func (s *Service) List(ctx context.Context, authorize identity.Authorize) ([]domain.Course, error) {
@@ -297,9 +297,9 @@ func (s *Service) StartUpload(ctx context.Context, authorize identity.Authorize,
 	}
 	filename := filepath.Base(name)
 	extension := strings.ToLower(filepath.Ext(filename))
-	mediaType := map[string]string{".md": "text/markdown", ".txt": "text/plain"}[extension]
+	mediaType := materialparse.MediaTypes[extension]
 	if mediaType == "" {
-		return Upload{}, appfault.Invalid("目前仅支持 Markdown 和 TXT 文件")
+		return Upload{}, appfault.Invalid("不支持该文件格式；支持文本、PDF、Word、PPT 和图片")
 	}
 	if filename == "." || size <= 0 || size > int64(s.maxBodyBytes) {
 		return Upload{}, appfault.Invalid("课程材料不能为空且不能超过大小限制")
@@ -355,7 +355,16 @@ func (s *Service) CompleteUpload(ctx context.Context, authorize identity.Authori
 		if err != nil {
 			return appfault.Invalid("课程材料尚未上传完成")
 		}
-		valid := metadata.SizeBytes == upload.SizeBytes && validUTF8(content)
+		valid := metadata.SizeBytes == upload.SizeBytes
+		var textDocument []byte
+		if strings.HasPrefix(upload.MediaType, "text/") {
+			raw, readErr := io.ReadAll(io.LimitReader(content, int64(s.maxBodyBytes)+1))
+			document, decodeErr := materialparse.New("", "", "", "", nil).Parse(ctx, upload.Name, raw)
+			valid = valid && readErr == nil && decodeErr == nil && int64(len(raw)) == upload.SizeBytes
+			if valid {
+				textDocument, _ = json.Marshal(document)
+			}
+		}
 		if closeErr := content.Close(); closeErr != nil && warn != nil {
 			warn("material validation stream close failed", closeErr, "upload_id", upload.ID)
 		}
@@ -366,7 +375,7 @@ func (s *Service) CompleteUpload(ctx context.Context, authorize identity.Authori
 			if err = models.Materials.CancelUpload(ctx, user.ID, courseID, upload.ID); err != nil {
 				return err
 			}
-			completionFailure = appfault.Invalid("课程材料必须是有效的 UTF-8 文本且大小必须与上传申请一致")
+			completionFailure = appfault.Invalid("课程材料大小必须与上传申请一致，文本须使用 UTF-8、带 BOM 的 UTF-16 或 GB18030 编码")
 			return nil
 		}
 		finalKey := "courses/" + upload.CourseID + "/materials/" + upload.ID + "/source" + strings.ToLower(filepath.Ext(upload.Name))
@@ -374,6 +383,10 @@ func (s *Service) CompleteUpload(ctx context.Context, authorize identity.Authori
 			return err
 		}
 		material, err = models.Materials.CompleteUpload(ctx, user.ID, courseID, upload.ID, finalKey)
+		if err == nil && textDocument != nil {
+			err = models.Materials.CompleteTextParse(ctx, material.ID, textDocument)
+			material.ParseStatus = "ready"
+		}
 		return err
 	})
 	if errors.Is(err, data.ErrMaterialUploadNotFound) {
@@ -383,7 +396,7 @@ func (s *Service) CompleteUpload(ctx context.Context, authorize identity.Authori
 			return getErr
 		})
 		if existingErr == nil {
-			return material, nil
+			return s.completeMaterialParse(ctx, material)
 		}
 	}
 	if err != nil {
@@ -395,7 +408,7 @@ func (s *Service) CompleteUpload(ctx context.Context, authorize identity.Authori
 	if deleteErr := s.objects.Delete(ctx, upload.ObjectKey); deleteErr != nil && warn != nil {
 		warn("temporary material object cleanup failed", deleteErr, "upload_id", upload.ID)
 	}
-	return material, nil
+	return s.completeMaterialParse(ctx, material)
 }
 
 func (s *Service) Download(ctx context.Context, authorize identity.Authorize, courseID, materialID string) (domain.CourseMaterial, objectstore.Request, error) {
@@ -492,17 +505,4 @@ func (s *Service) withUser(ctx context.Context, authorize identity.Authorize, mo
 		}
 		return action(models, user)
 	})
-}
-
-func validUTF8(content io.Reader) bool {
-	reader := bufio.NewReader(content)
-	for {
-		r, size, err := reader.ReadRune()
-		if err == io.EOF {
-			return true
-		}
-		if err != nil || (r == utf8.RuneError && size == 1) {
-			return false
-		}
-	}
 }

@@ -42,12 +42,25 @@ func TestCoursePresentationUpgradePreservesSavedWork(t *testing.T) {
 }
 
 func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, content string, status int) map[string]any {
+	completePath, started := a.stageMaterial(c, courseID, filename, content, status)
+	if completePath == "" {
+		return started
+	}
+	result := a.request(c, "POST", completePath, nil, http.StatusCreated)
+	retried := a.request(c, "POST", completePath, nil, http.StatusCreated)
+	if retried["material"].(map[string]any)["id"] != result["material"].(map[string]any)["id"] {
+		a.t.Fatalf("retried completion created another material: %v", retried)
+	}
+	return result
+}
+
+func (a *testApp) stageMaterial(c *http.Client, courseID, filename, content string, status int) (string, map[string]any) {
 	a.t.Helper()
 	started := a.request(c, "POST", "/courses/"+courseID+"/material-uploads", map[string]any{
 		"name": filename, "sizeBytes": len(content),
 	}, status)
 	if status != http.StatusCreated {
-		return started
+		return "", started
 	}
 	upload := started["upload"].(map[string]any)
 	listed := a.request(c, "GET", "/courses/"+courseID+"/materials", nil, http.StatusOK)["materials"].([]any)
@@ -68,12 +81,7 @@ func (a *testApp) uploadMaterial(c *http.Client, courseID, filename, content str
 		a.t.Fatalf("direct upload %s = %d %s", filename, res.StatusCode, raw)
 	}
 	completePath := "/courses/" + courseID + "/material-uploads/" + upload["id"].(string) + "/complete"
-	result := a.request(c, "POST", completePath, nil, http.StatusCreated)
-	retried := a.request(c, "POST", completePath, nil, http.StatusCreated)
-	if retried["material"].(map[string]any)["id"] != result["material"].(map[string]any)["id"] {
-		a.t.Fatalf("retried completion created another material: %v", retried)
-	}
-	return result
+	return completePath, started
 }
 
 func TestCourseCreationStartsWithoutLearningStructure(t *testing.T) {
@@ -216,7 +224,7 @@ func TestCourseMaterialsUploadListReadAndStayPrivate(t *testing.T) {
 
 	a.request(other, "GET", "/courses/"+courseID+"/materials", nil, http.StatusNotFound)
 	a.request(other, "GET", "/courses/"+courseID+"/materials/"+materialID+"/download", nil, http.StatusNotFound)
-	a.uploadMaterial(owner, courseID, "讲义.pdf", "%PDF", http.StatusBadRequest)
+	a.uploadMaterial(owner, courseID, "程序.exe", "executable", http.StatusBadRequest)
 	a.request(owner, "DELETE", "/courses/"+courseID+"/materials/"+materialID, map[string]any{}, http.StatusOK)
 	a.request(owner, "GET", "/courses/"+courseID+"/materials/"+materialID+"/download", nil, http.StatusNotFound)
 }
