@@ -452,11 +452,15 @@ func (s *Service) DeleteMaterial(ctx context.Context, authorize identity.Authori
 func (s *Service) Delete(ctx context.Context, authorize identity.Authorize, courseID string) error {
 	var materials []domain.CourseMaterial
 	var uploads []domain.CourseMaterialUpload
+	var images []string
 	err := s.withUser(ctx, authorize, data.StandardTransaction, func(models data.Models, user domain.User) error {
 		var err error
 		materials, err = models.Materials.List(ctx, user.ID, courseID)
 		if err == nil {
 			uploads, err = models.Materials.ListUploads(ctx, user.ID, courseID)
+		}
+		if err == nil {
+			images, err = models.Deliverables.ImageKeys(ctx, courseID)
 		}
 		return err
 	})
@@ -468,6 +472,13 @@ func (s *Service) Delete(ctx context.Context, authorize identity.Authorize, cour
 		}
 		for _, upload := range uploads {
 			if err = s.objects.Delete(ctx, upload.ObjectKey); err != nil {
+				break
+			}
+		}
+	}
+	if err == nil && s.objects != nil {
+		for _, key := range images {
+			if err = s.objects.Delete(ctx, key); err != nil {
 				break
 			}
 		}

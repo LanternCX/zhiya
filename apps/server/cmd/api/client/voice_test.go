@@ -14,7 +14,7 @@ import (
 )
 
 func TestVoiceSocketsSkipRequestTimeout(t *testing.T) {
-	for _, path := range []string{"/api/learning/socket", "/api/learning/model", "/api/speech/stream", "/api/voice/session", "/api/courses/course/material-uploads/upload/complete"} {
+	for _, path := range []string{"/api/learning/socket", "/api/learning/model", "/api/speech/stream", "/api/voice/session", "/api/courses/course/material-uploads/upload/complete", "/api/courses/course/deliverables/import"} {
 		if !isLongLivedAPIPath(path) {
 			t.Fatalf("%s was not marked long-lived", path)
 		}
