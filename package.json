@@ -3,6 +3,7 @@
   "private": true,
   "workspaces": ["apps/client", "apps/website", "apps/agent", "packages/learning"],
   "engines": { "node": ">=22.19.0" },
+  "overrides": { "image-size": "2.0.4" },
   "scripts": {
     "dev": "node scripts/run.mjs client-dev",
     "dev:desktop": "node scripts/run.mjs desktop-dev",

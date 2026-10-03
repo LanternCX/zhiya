@@ -10,6 +10,7 @@ export async function mockAgent(
   current: () => any,
   action: (value: any) => Promise<any> | any,
 ) {
+  await router.route("**/api/courses/*/deliverables", route => route.fulfill({ json: { deliverables: [] } }));
   const sessions = new Map<string, any>();
   const createdConversations = new Map<string, any[]>();
   const responses = new Set<Promise<void>>();

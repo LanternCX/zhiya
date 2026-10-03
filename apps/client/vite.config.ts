@@ -9,6 +9,7 @@ const web = new URL(config.dev_origin);
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: { include: ["pptxgenjs", "docx"] },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   clearScreen: false,
   define: {
