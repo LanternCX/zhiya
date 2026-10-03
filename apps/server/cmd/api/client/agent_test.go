@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,6 +45,40 @@ func TestAgentSessionSurvivesClientDepartureAndRejectsOtherUsers(t *testing.T) {
 	if response.StatusCode != http.StatusNotFound {
 		t.Fatalf("internal route exposed: %d", response.StatusCode)
 	}
+}
+
+func TestBinaryMaterialCommandFitsUploadLimit(t *testing.T) {
+	a := setupAccountTest(t)
+	client := a.register("binary-command@example.com")
+	opened := a.request(client, "POST", "/agent/sessions", map[string]any{"kind": "course"}, 201)
+	original := bytes.Repeat([]byte{0xff}, a.config.Server.MaxBodyBytes)
+	var received []byte
+	worker := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var input struct {
+			Command struct {
+				Args [][]struct {
+					Base64 string `json:"base64"`
+				} `json:"args"`
+			} `json:"command"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			t.Error(err)
+		}
+		received, _ = base64.StdEncoding.DecodeString(input.Command.Args[0][0].Base64)
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = io.WriteString(w, `{"ok":true}`)
+	}))
+	defer worker.Close()
+	a.app.config.Agent.Endpoint = worker.URL
+	a.request(client, "POST", "/agent/sessions/"+opened["id"].(string)+"/commands", map[string]any{
+		"requestId": "binary", "action": "materials", "args": []any{[]any{map[string]any{"name": "lesson.docx", "base64": base64.StdEncoding.EncodeToString(original)}}},
+	}, http.StatusAccepted)
+	if !bytes.Equal(received, original) {
+		t.Fatal("binary attachment changed in dispatch")
+	}
+	a.request(client, "POST", "/agent/sessions/"+opened["id"].(string)+"/commands", map[string]any{
+		"requestId": "oversized-prompt", "action": "prompt", "args": []any{strings.Repeat("a", a.config.Server.MaxBodyBytes+1)},
+	}, http.StatusBadRequest)
 }
 
 func TestConversationHistoryOnlyReordersWhenContentChanges(t *testing.T) {

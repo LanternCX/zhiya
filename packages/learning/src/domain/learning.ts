@@ -137,7 +137,15 @@ export type CourseMessage = {
   questionEvent?: { action: "submitted" | "deferred"; pageId: string };
 };
 
+export type MaterialPreparationProgress = {
+  total: number;
+  completed: number;
+  fileName: string;
+  phase: "uploading" | "parsing" | "complete" | "failed";
+};
+
 export type CourseActivity =
+  | { kind: "materials"; progress: MaterialPreparationProgress }
   | { kind: "thinking"; text: string; active: boolean }
   | {
       kind: "tool";

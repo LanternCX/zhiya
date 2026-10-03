@@ -1,19 +1,33 @@
 import { ToolAPI, ToolAPIError } from "./api";
 import type { CourseManagement } from "../pi/tool";
 import type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
-import type { StoredCourse, StoredCourseConversation, CourseCover, CourseMaterial, MaterialContent, OutlineReorganization } from "../../../../packages/learning/src/domain/learning";
+import type {
+  StoredCourse,
+  StoredCourseConversation,
+  CourseCover,
+  CourseMaterial,
+  MaterialContent,
+  MaterialPreparationProgress,
+  PendingCourseMaterial,
+  OutlineReorganization,
+} from "../../../../packages/learning/src/domain/learning";
 
-type OutlineResult = { course?: StoredCourse; reorganization?: OutlineReorganization };
+type OutlineResult = {
+  course?: StoredCourse;
+  reorganization?: OutlineReorganization;
+};
 
 /** Adapt course tools to Go; execution and teaching stay in Pi. */
 export class CourseAPI {
   readonly management: CourseManagement;
-  materials: Array<{ name: string; content: string }> = [];
+  materials: PendingCourseMaterial[] = [];
+  private preparing?: Promise<boolean>;
   constructor(
     private api: ToolAPI,
     readonly state: CourseProjection,
     private changed: () => void,
     private flush: () => Promise<void>,
+    private materialProgress: (progress: MaterialPreparationProgress) => void,
   ) {
     const host = this;
     this.management = {
@@ -30,29 +44,7 @@ export class CourseAPI {
           { title, topic, cover },
         );
         await this.accept(course);
-        for (const file of this.materials.splice(0)) {
-          const { upload } = await this.api.json<{
-            upload: {
-              id: string;
-              url: string;
-              headers: Record<string, string>;
-            };
-          }>(`/courses/${course.id}/material-uploads`, "POST", {
-            name: file.name,
-            sizeBytes: Buffer.byteLength(file.content),
-          });
-          const response = await this.api.object(upload.url, {
-            method: "PUT",
-            headers: upload.headers,
-            body: file.content,
-          });
-          if (!response.ok) throw new Error("课程材料上传失败");
-          await this.api.json(
-            `/courses/${course.id}/material-uploads/${upload.id}/complete`,
-            "POST",
-            {},
-          );
-        }
+        await this.uploadPendingMaterials(course.id);
         return course;
       },
       rename: async (title, topic) =>
@@ -191,6 +183,71 @@ export class CourseAPI {
     return this.accept(result.course);
   }
 
+  prepareMaterials(request: string): Promise<boolean> {
+    if (this.preparing) return this.preparing;
+    if (!this.materials.length) return Promise.resolve(false);
+    this.preparing = this.prepareMaterialsOnce(request).finally(() => {
+      this.preparing = undefined;
+    });
+    return this.preparing;
+  }
+
+  private async prepareMaterialsOnce(request: string): Promise<boolean> {
+    if (!this.state.course) {
+      const title =
+        [...this.materials[0].name.replace(/\.[^.]+$/, "")]
+          .slice(0, 80)
+          .join("") || "文件学习";
+      await this.management.create(
+        title,
+        [...request.trim()].slice(0, 240).join("") || "学习上传的教学材料",
+        { motif: "abstract", palette: "sprout", label: "资料" },
+      );
+    } else {
+      await this.uploadPendingMaterials(this.state.course.id);
+    }
+    return true;
+  }
+
+  private async uploadPendingMaterials(courseId: string) {
+    const total = this.materials.length;
+    let completed = 0;
+    while (this.materials.length) {
+      const file = this.materials[0];
+      const report = (phase: MaterialPreparationProgress["phase"]) =>
+        this.materialProgress({ total, completed, fileName: file.name, phase });
+      report("uploading");
+      try {
+        const bytes = Buffer.from(file.base64, "base64");
+        if (!bytes.length || bytes.toString("base64") !== file.base64)
+          throw new Error("教学材料数据无效，请重新上传");
+        const { upload } = await this.api.json<{
+          upload: { id: string; url: string; headers: Record<string, string> };
+        }>(`/courses/${courseId}/material-uploads`, "POST", {
+          name: file.name,
+          sizeBytes: bytes.length,
+        });
+        const response = await this.api.object(upload.url, {
+          method: "PUT",
+          headers: upload.headers,
+          body: bytes,
+        });
+        if (!response.ok) throw new Error("课程材料上传失败");
+        report("parsing");
+        await this.api.json(
+          `/courses/${courseId}/material-uploads/${upload.id}/complete`,
+          "POST",
+          {},
+        );
+        this.materials.shift();
+        completed++;
+        if (completed === total) report("complete");
+      } catch (error) {
+        report("failed");
+        throw error;
+      }
+    }
+  }
 
   private async createConversation(sectionId: string, title: string) {
     const { conversation } = await this.api.json<{
@@ -214,5 +271,4 @@ export class CourseAPI {
     });
     return conversation;
   }
-
 }

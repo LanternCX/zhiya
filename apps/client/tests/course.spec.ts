@@ -2978,15 +2978,15 @@ test("the course composer validates and removes teaching materials before sendin
   const input = page.locator('input[type="file"]');
 
   await input.setInputFiles({
-    name: "worksheet.pdf",
-    mimeType: "application/pdf",
+    name: "worksheet.exe",
+    mimeType: "application/octet-stream",
     buffer: Buffer.from("not supported"),
   });
   await expect(page.getByRole("alert")).toHaveText(
-    "目前仅支持 Markdown 和 TXT 文件",
+    "支持 Markdown、TXT、PDF、Word、PPT 和图片",
   );
   await expect(
-    page.getByRole("button", { name: "移除材料：worksheet.pdf" }),
+    page.getByRole("button", { name: "移除材料：worksheet.exe" }),
   ).toHaveCount(0);
 
   await input.setInputFiles({
@@ -3306,7 +3306,7 @@ test("a failed conversation attachment remains available to retry", async ({
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect(page.getByRole("alert")).toHaveText(
-    "教学材料上传失败，请重试",
+    "教学材料上传或解析失败，请重试",
   );
   await expect(input).toHaveValue("根据新材料继续");
   await expect(
@@ -4761,15 +4761,15 @@ test("a student uploads, reads, and confirms deletion of a flat course material"
   const rejectedTransfer = await page.evaluateHandle(() => {
     const transfer = new DataTransfer();
     transfer.items.add(
-      new File(["not supported"], "notes.pdf", {
-        type: "application/pdf",
+      new File(["not supported"], "notes.exe", {
+        type: "application/octet-stream",
       }),
     );
     return transfer;
   });
   await uploadArea.dispatchEvent("drop", { dataTransfer: rejectedTransfer });
   await expect(page.getByRole("alert")).toHaveText(
-    "目前仅支持 Markdown 和 TXT 文件",
+    "支持 Markdown、TXT、PDF、Word、PPT 和图片",
   );
   expect(uploadRequests).toBe(0);
 

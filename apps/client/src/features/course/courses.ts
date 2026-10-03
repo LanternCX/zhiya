@@ -3,6 +3,7 @@ import type {
   CourseConversationState,
   StoredCourse,
   CourseMaterial,
+  MaterialPreparationProgress,
   StoredCourseConversation,
 } from "../../../../../packages/learning/src/domain/learning";
 import {
@@ -68,7 +69,12 @@ export async function listCourseMaterials(courseId: string) {
   ).materials;
 }
 
-export async function uploadCourseMaterial(courseId: string, file: File) {
+export async function uploadCourseMaterial(
+  courseId: string,
+  file: File,
+  onPhase?: (phase: "uploading" | "parsing") => void,
+) {
+  onPhase?.("uploading");
   const { upload } = await api<{
     upload: {
       id: string;
@@ -92,6 +98,7 @@ export async function uploadCourseMaterial(courseId: string, file: File) {
     }
     throw error;
   }
+  onPhase?.("parsing");
   return (
     await api<{ material: CourseMaterial }>(
       `/courses/${courseId}/material-uploads/${upload.id}/complete`,
@@ -100,14 +107,37 @@ export async function uploadCourseMaterial(courseId: string, file: File) {
   ).material;
 }
 
+export async function uploadCourseMaterials(
+  courseId: string,
+  files: File[],
+  onProgress: (progress: MaterialPreparationProgress) => void,
+) {
+  const materials: CourseMaterial[] = [];
+  for (const file of files) {
+    const report = (phase: MaterialPreparationProgress["phase"]) =>
+      onProgress({
+        total: files.length,
+        completed: materials.length,
+        fileName: file.name,
+        phase,
+      });
+    try {
+      materials.push(await uploadCourseMaterial(courseId, file, report));
+      if (materials.length === files.length) report("complete");
+    } catch (error) {
+      report("failed");
+      throw error;
+    }
+  }
+  return materials;
+}
+
 export async function getCourseMaterial(courseId: string, materialId: string) {
   const download = await api<{
     material: CourseMaterial;
     url: string;
     headers?: Record<string, string>;
-  }>(
-    `/courses/${courseId}/materials/${materialId}/download`,
-  );
+  }>(`/courses/${courseId}/materials/${materialId}/download`);
   const content = await readObjectText(download);
   return { material: download.material, content };
 }
