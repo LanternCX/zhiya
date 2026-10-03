@@ -21,7 +21,7 @@ import type {
   StoredCourse,
   CourseSection,
 } from "../../../../../packages/learning/src/domain/learning";
-import { MessageResponse } from "../../components/ai-elements/message";
+import { CourseMessageResponse } from "./MaterialReference";
 import {
   Reasoning,
   ReasoningContent,
@@ -824,7 +824,8 @@ export default function CourseRoom({
                 >
                   <span>{message.role === "user" ? "我" : "知芽"}</span>
                   {message.role === "assistant" ? (
-                    <MessageResponse
+                    <CourseMessageResponse
+                      courseId={course?.id}
                       className="course-message-body"
                       controls={conversationControls}
                       isAnimating={message.streaming}
@@ -839,7 +840,7 @@ export default function CourseRoom({
                       )
                         ? voicePlaybackText[message.id]
                         : message.text}
-                    </MessageResponse>
+                    </CourseMessageResponse>
                   ) : (
                     <>
                       <p>{message.text}</p>

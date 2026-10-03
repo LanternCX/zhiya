@@ -195,9 +195,29 @@ export type OutlineClassification =
 export type CourseMaterial = {
   id: string;
   name: string;
-  mediaType: "text/markdown" | "text/plain";
+  mediaType: string;
   sizeBytes: number;
   createdAt: string;
+};
+
+export type PendingCourseMaterial = { name: string; base64: string };
+
+export type MaterialRange = { startLine?: number; endLine?: number; revision?: number };
+export type MaterialContent = {
+  material: CourseMaterial;
+  revision: number;
+  excerpt: {
+    status: "ready" | "partial";
+    warnings: string[];
+    totalLines: number;
+    nextLine?: number;
+    lines: Array<{
+      number: number;
+      text: string;
+      kind: "text" | "transcription" | "description";
+      source: { page?: number; slide?: number; image?: string };
+    }>;
+  };
 };
 
 export type CourseCover = {

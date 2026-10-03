@@ -11,7 +11,7 @@ export function listCourseMaterialsTool(
     name: "list_course_materials",
     label: activityLabel,
     description:
-      "List the shared Markdown and text materials available in the active course. Inspect the list before choosing a relevant material; do not assume every material must be read.",
+      "List shared course materials and their parseStatus and parseRevision. Text, Office, PDF and image materials all have a parsed copy. Read ready or partial materials as needed; partial means content may be missing. Pending/processing materials are not yet readable. Do not repeatedly poll or assume every material must be read.",
     parameters: Type.Object({}),
     executionMode: "sequential",
     execute: async () => {

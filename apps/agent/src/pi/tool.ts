@@ -3,6 +3,8 @@ import type {
   CodingExercise,
   CourseCover,
   CourseMaterial,
+  MaterialContent,
+  MaterialRange,
   StoredCourseConversation,
   StoredCourse,
   OutlineClassification,
@@ -88,7 +90,8 @@ export type CourseManagement = {
   listMaterials: () => Promise<CourseMaterial[]>;
   readMaterial: (
     materialId: string,
-  ) => Promise<{ material: CourseMaterial; content: string }>;
+    range?: MaterialRange,
+  ) => Promise<MaterialContent>;
 };
 
 export type SlideTools = {

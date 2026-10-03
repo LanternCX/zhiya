@@ -1,7 +1,7 @@
 import { ToolAPI, ToolAPIError } from "./api";
 import type { CourseManagement } from "../pi/tool";
 import type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
-import type { StoredCourse, StoredCourseConversation, CourseCover, CourseMaterial, OutlineReorganization } from "../../../../packages/learning/src/domain/learning";
+import type { StoredCourse, StoredCourseConversation, CourseCover, CourseMaterial, MaterialContent, OutlineReorganization } from "../../../../packages/learning/src/domain/learning";
 
 type OutlineResult = { course?: StoredCourse; reorganization?: OutlineReorganization };
 
@@ -128,20 +128,16 @@ export class CourseAPI {
             `/courses/${this.courseId()}/materials`,
           )
         ).materials,
-      readMaterial: async (id) => {
-        const download = await this.api.json<{
-          material: CourseMaterial;
-          url: string;
-          headers: Record<string, string>;
-        }>(`/courses/${this.courseId()}/materials/${id}/download`);
-        const response = await this.api.object(download.url, {
-          headers: download.headers,
-        });
-        if (!response.ok) throw new Error("无法读取课程材料");
-        return { material: download.material, content: await response.text() };
+      readMaterial: async (id, range = {}) => {
+        const query = new URLSearchParams();
+        for (const [key, value] of Object.entries(range)) {
+          if (value !== undefined) query.set(key, String(value));
+        }
+        return this.api.json<MaterialContent>(
+          `/courses/${this.courseId()}/materials/${encodeURIComponent(id)}/content?${query}`,
+        );
       },
     };
-
   }
   private courseId() {
     if (!this.state.course) throw new Error("课程尚未建立");
