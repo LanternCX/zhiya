@@ -1,35 +1,3 @@
-/*
- * 课件栏布局修复（不修改原 course.css / workspace.css）
- *
- * 引入：CourseRoom.tsx 中 import "./course-room-layout-fix.css";
- */
-
-/* 1. 让 workspace-body 填充 flex 剩余空间（右侧不再留空） */
-.workspace-body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* 2. 去掉课堂模式下工作区的内边距 */
-.workspace-content:has(.course-room) {
-  padding: 0 !important;
-}
-
-/* 3. 没有课件时，对话占满整个宽度，留一点左右空隙 */
-.course-room[data-has-slides="false"] {
-  grid-template-columns: minmax(0, 1fr) !important;
-  justify-content: stretch !important;
-}
-.course-room[data-has-slides="false"] .course-thread {
-  padding-left: 20px !important;
-  padding-right: 20px !important;
-}
-.course-room[data-has-slides="false"] .course-message.assistant,
-.course-room[data-has-slides="false"] .course-message-body {
-  width: 100%;
-  max-width: none !important;
-}
-.course-room[data-has-slides="false"] .course-message.user {
-  max-width: 30%;
-  margin-left: auto !important;
+.workspace-content:has(.course-room[data-has-slides="true"]) {
+  padding: 0;
 }

@@ -974,6 +974,15 @@ export default function CourseRoom({
         />
       </section>
 
+      {(course || current) && (
+        <ResizeHandle
+          direction="horizontal"
+          onResizeStart={() => setResizingConversation(true)}
+          onResize={handleConversationResize}
+          onResizeEnd={() => setResizingConversation(false)}
+        />
+      )}
+
       {(course || current) && <DeliverableWorkspace
         courseId={course?.id}
         changed={deliverablesChanged}
@@ -992,15 +1001,6 @@ export default function CourseRoom({
         selection={deliverableSelection}
         onSelect={async (id, blockId) => { await session.current?.selectDeliverable(id, blockId); }}
       >
-      {current && (
-        <ResizeHandle
-          direction="horizontal"
-          onResizeStart={() => setResizingConversation(true)}
-          onResize={handleConversationResize}
-          onResizeEnd={() => setResizingConversation(false)}
-        />
-      )}
-
       {current && (
         <section className="slide-stage" aria-label="课堂页面">
           {pages

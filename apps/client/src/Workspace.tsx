@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
   type ReactNode,
-  type CSSProperties,
 } from "react";
 import type { useAccount } from "./features/account/useAccount";
 import AccountProfile from "./features/account/Profile";
@@ -17,7 +16,6 @@ import Mark from "./components/Mark";
 import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon from "./components/Icon";
 import ThemeToggle from "./components/ThemeToggle";
-import ResizeHandle from "./components/ResizeHandle";
 import LearningNavigation from "./components/LearningNavigation";
 import {
   subscribeAgentStatuses,
@@ -84,10 +82,6 @@ export default function Workspace({
   const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(220);
-  const handleSidebarResize = useCallback((delta: number) => {
-    setSidebarWidth((width) => Math.max(180, Math.min(360, width + delta)));
-  }, []);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
@@ -467,11 +461,6 @@ export default function Workspace({
   return (
     <div
       className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
-      style={{
-        ["--workspace-sidebar-width"]: collapsed
-          ? undefined
-          : `${sidebarWidth}px`,
-      } as CSSProperties}
     >
       <SidebarDialog.Root
         open={mobileNavigationOpen && !onboarding}
@@ -567,12 +556,6 @@ export default function Workspace({
             </div>
           </div>
         </aside>
-        {!collapsed && !onboarding && (
-          <ResizeHandle
-            direction="horizontal"
-            onResize={handleSidebarResize}
-          />
-        )}
         <div className="workspace-body">
           <header hidden={onboarding} className="workspace-toolbar">
             <SidebarDialog.Trigger asChild>
@@ -696,7 +679,7 @@ export default function Workspace({
               !routeError &&
               (!courseId || coursesReady) && (
                 <section
-                  className={`course-surface ${courseLevel === "conversation" ? "course-surface--conversation" : ""}`}
+                  className="course-surface"
                   data-hidden={!learningPage}
                   aria-label="学习空间"
                 >
