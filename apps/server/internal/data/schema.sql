@@ -80,6 +80,24 @@ CREATE TABLE IF NOT EXISTS courses (
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS courses_user_updated ON courses(user_id,updated_at DESC);
+CREATE TABLE IF NOT EXISTS deliverables (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ content jsonb NOT NULL
+);
+CREATE INDEX IF NOT EXISTS deliverables_course ON deliverables(course_id);
+CREATE TABLE IF NOT EXISTS deliverable_requests (
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ request_id text NOT NULL,
+ fingerprint text NOT NULL,
+ result jsonb NOT NULL,
+ PRIMARY KEY(course_id, request_id)
+);
+CREATE TABLE IF NOT EXISTS deliverable_images (
+ id uuid PRIMARY KEY,
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ object_key text NOT NULL
+);
 CREATE TABLE IF NOT EXISTS course_sections (
  id uuid PRIMARY KEY,
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,

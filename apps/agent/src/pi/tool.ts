@@ -17,6 +17,7 @@ import type {
   QuestionPage,
 } from "../../../../packages/learning/src/domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
+import type { DeliverableTools } from "./tools/deliverables";
 
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import type { ToolResultMessage } from "@earendil-works/pi-ai";
@@ -45,6 +46,7 @@ export function bindPersistedTool(
 }
 
 export type CourseManagement = {
+  deliverables: DeliverableTools;
   course: StoredCourse | null;
   currentConversationId: string | null;
   create: (
@@ -145,6 +147,8 @@ export type LessonPageState = {
 
 export type LessonPageTools = {
   read: () => LessonPageState;
+  readPage: (pageId: string) => { page: LessonPage; version: string; editableFields: string[] };
+  patch: (pageId: string, version: string, changes: Array<{ field: string; oldText: string; newText: string }>) => { page: LessonPage; version: string; diff: Array<{ field: string; oldText: string; newText: string }> };
   show: (
     id: string,
     pageId: string,

@@ -12,6 +12,8 @@ import "./course.css";
 import "./course-room-layout-fix.css";
 import ResizeHandle from "../../components/ResizeHandle";
 import { createCourseSession } from "./runtime";
+import DeliverableWorkspace from "../deliverables/DeliverableWorkspace";
+import type { DeliverableSelection } from "../../../../../packages/learning/src/domain/deliverable";
 import type {
   CourseActivity,
   MaterialPreparationProgress,
@@ -224,6 +226,8 @@ export default function CourseRoom({
       "",
   );
   const [busy, setBusy] = useState(false);
+  const [deliverablesChanged, setDeliverablesChanged] = useState(0);
+  const [deliverableSelection, setDeliverableSelection] = useState<DeliverableSelection | null>(null);
   const [agentRunning, setAgentRunning] = useState(false);
   const [syncStatus, setSyncStatus] = useState<
     "connecting" | "live" | "reconnecting"
@@ -435,6 +439,8 @@ export default function CourseRoom({
         setPresented(snapshot.lesson.presentations);
         setCurrentPresentationId(snapshot.lesson.currentPresentationId);
         setBusy(snapshot.busy);
+        setDeliverablesChanged(snapshot.deliverablesChanged ?? 0);
+        setDeliverableSelection(snapshot.deliverableSelection ?? null);
         setAgentRunning(
           snapshot.running ?? (snapshot.busy || snapshot.generating),
         );
@@ -781,7 +787,7 @@ export default function CourseRoom({
     <section
       className={`course-room ai-elements ${resizingConversation ? "is-resizing" : ""}`}
       aria-label="课堂"
-      data-has-slides={Boolean(current)}
+      data-has-slides={Boolean(current || course)}
       style={{
         ["--course-conversation-width"]: `${conversationWidth}px`,
       } as CSSProperties}
@@ -968,6 +974,24 @@ export default function CourseRoom({
         />
       </section>
 
+      {(course || current) && <DeliverableWorkspace
+        courseId={course?.id}
+        changed={deliverablesChanged}
+        sourceChanged={JSON.stringify({
+          title: course?.title,
+          topic: course?.topic,
+          pages: pages.map((page) => {
+            if (page.kind === "coding") return { ...page, code: page.starterCode, stdin: "", result: undefined };
+            if (page.kind === "question") return { ...page, selected: [], answerText: "" };
+            return page;
+          }),
+          order: [...new Set(presented.map(({ pageId }) => pageId))],
+          ready: !agentRunning,
+          sections: course?.sections?.map(({ id, title, objective, status }) => ({ id, title, objective, status })),
+        })}
+        selection={deliverableSelection}
+        onSelect={async (id, blockId) => { await session.current?.selectDeliverable(id, blockId); }}
+      >
       {current && (
         <ResizeHandle
           direction="horizontal"
@@ -1142,6 +1166,7 @@ export default function CourseRoom({
           </footer>
         </section>
       )}
+      </DeliverableWorkspace>}
     </section>
   );
 }

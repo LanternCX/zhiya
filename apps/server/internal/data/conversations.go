@@ -36,6 +36,23 @@ func (m ConversationModel) Get(ctx context.Context, user, id string) (domain.Lea
 	return scanConversation(m.db.QueryRow(ctx, conversationSelect+` WHERE user_id=$1 AND id=$2`, user, id))
 }
 
+func (m ConversationModel) InCourse(ctx context.Context, user, course string) ([]domain.LearningConversation, error) {
+	rows, err := m.db.Query(ctx, conversationSelect+` WHERE user_id=$1 AND course_id=$2 ORDER BY created_at,id`, user, course)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []domain.LearningConversation{}
+	for rows.Next() {
+		conversation, err := scanConversation(rows)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, conversation)
+	}
+	return items, rows.Err()
+}
+
 func (m ConversationModel) List(ctx context.Context, user string) ([]domain.ConversationSummary, error) {
 	rows, err := m.db.Query(ctx, `SELECT id,COALESCE(course_id::text,''),COALESCE(section_id::text,''),title,updated_at FROM course_conversations WHERE user_id=$1 AND (jsonb_array_length(COALESCE(state->'messages','[]'))>0 OR jsonb_array_length(COALESCE(state->'pages','[]'))>0) ORDER BY updated_at DESC,id`, user)
 	if err != nil {

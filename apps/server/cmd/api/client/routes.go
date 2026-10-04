@@ -7,6 +7,7 @@ import (
 
 	"github.com/LanternCX/zhiya/apps/server/cmd/api/transport"
 	"github.com/LanternCX/zhiya/apps/server/internal/application/accounts"
+	"github.com/LanternCX/zhiya/apps/server/internal/application/deliverables"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 )
 
@@ -14,6 +15,7 @@ func (a *application) Routes() http.Handler {
 	storageURL, _ := url.Parse(a.config.Storage.PublicEndpoint)
 	storageOrigin := storageURL.Scheme + "://" + storageURL.Host
 	api := http.NewServeMux()
+	a.http().Deliverables(api, "/api", deliverables.New(a.models, a.objects), userAuthorization)
 	api.HandleFunc("GET /api/agent/socket", a.agentStatusSocket)
 	api.HandleFunc("GET /api/conversations", a.listConversations)
 	api.HandleFunc("POST /api/agent/sessions", a.limitUser(300, a.openAgentSession))

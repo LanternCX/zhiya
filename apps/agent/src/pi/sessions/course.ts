@@ -36,6 +36,7 @@ import type {
   CourseManagement,
 } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
+import { readEditablePage, patchClassroomPage } from "../tools/edit_classroom_page";
 export type IllustrationGateway = {
   create(
     courseId: string,
@@ -253,6 +254,20 @@ export class CourseSession {
       },
       pages: {
         read: () => this.readLessonPages(),
+        readPage: (id) => {
+          const page = this.pageStore.find((page) => page.id === id);
+          if (!page) throw new Error("当前对话中找不到该课堂页面，请先打开它所属的对话");
+          return readEditablePage(page);
+        },
+        patch: (id, version, changes) => {
+          const index = this.pageStore.findIndex((page) => page.id === id);
+          if (index < 0) throw new Error("当前对话中找不到该课堂页面");
+          const result = patchClassroomPage(this.pageStore[index], version, changes);
+          this.pageStore[index] = result.updated;
+          this.onPages([...this.pageStore], this.hasRunningVisualTask());
+          this.onSequence([...this.presentations], this.currentPresentationId);
+          return { page: result.page, version: result.version, diff: result.diff };
+        },
         show: (id, pageId, signal) => this.showPage(id, pageId, signal),
       },
       tasks: {
@@ -813,6 +828,7 @@ export class CourseSession {
       pageId: page.id,
       kind: page.kind,
       title: page.title,
+      ...(page.kind === "illustration" ? { assetId: page.assetId } : {}),
     });
     return {
       pages: this.pageStore.map(summarize),

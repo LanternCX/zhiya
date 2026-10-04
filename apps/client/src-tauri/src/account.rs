@@ -71,9 +71,35 @@ fn allowed(method: &str, path: &str) -> bool {
             if !id.is_empty() && !material.is_empty()
     ) || matches!(
         (method, segments.as_slice()),
+        ("GET", ["courses", id, "deliverables"]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("GET", ["courses", id, "deliverables" | "deliverable-images", item])
+            if !id.is_empty() && !item.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
+        ("POST", ["courses", id, "deliverables", "import"]) if !id.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
         ("DELETE", ["courses", id, "materials", material])
             if !id.is_empty() && !material.is_empty()
     )
+}
+
+#[test]
+fn deliverable_bridge_allows_review_import_and_images() {
+    assert!(allowed("GET", "/courses/course-id/deliverables"));
+    assert!(allowed("GET", "/courses/course-id/deliverables/deck-id"));
+    assert!(allowed("POST", "/courses/course-id/deliverables/import"));
+    assert!(allowed(
+        "GET",
+        "/courses/course-id/deliverable-images/image-id"
+    ));
+    assert!(!allowed(
+        "DELETE",
+        "/courses/course-id/deliverables/deck-id"
+    ));
+    assert!(!allowed("PATCH", "/courses/course-id/deliverables/deck-id"));
 }
 
 #[test]
@@ -141,7 +167,13 @@ fn request(
         Err(_) => return Err("Unable to read secure storage".into()),
     };
     let client = Client::builder()
-        .timeout(Duration::from_secs(configured_request_timeout_seconds()))
+        .timeout(Duration::from_secs(
+            if path.ends_with("/deliverables/import") {
+                180
+            } else {
+                configured_request_timeout_seconds()
+            },
+        ))
         .redirect(reqwest::redirect::Policy::none())
         .build()
         .map_err(|_| "Network unavailable")?;

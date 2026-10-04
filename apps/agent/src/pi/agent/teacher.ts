@@ -6,6 +6,8 @@ import type {
 import type { AgentMessage, AgentOptions } from "@earendil-works/pi-agent-core";
 import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { ModelGateway } from "../gateway";
+import { deliverableTools } from "../tools/deliverables";
+import { classroomEditTools } from "../tools/edit_classroom_page";
 import { createAgent } from "../agent";
 import type {
   CourseManagement,
@@ -150,6 +152,9 @@ function teacherPrompt(
       : "This conversation is already saved but has no outline section yet. Use list_course_conversations and read_course_conversation when history would help, choose the appropriate outline section, then call create_course_conversation exactly once to assign the current conversation. Reading history never reopens or modifies it."
     : "The current conversation and messages are already saved independently of any course. For a learning or teaching request, call create_course exactly once, then set_course_outline, then create_course_conversation to assign this same conversation to the first section. Do not create a course merely to preserve a reply: clarification or casual conversation can remain unassigned. For a course, create a concise title, stable topic, editorial cover direction, and an ordered initial outline without asking for confirmation.";
   sessionRule += [
+    "Office export packages interactive classroom components as static teaching content. Questions retain stems and options; coding exercises retain instructions and starter code. Animation exports include the initial scene and each step of every preset as separate static pages, preserving updated labels, visible objects, emphasis and flow direction. Runtime controls and student answers/working code remain in the classroom. Give animation presets clear teaching labels so the resulting stage titles make sense when read offline.",
+    "The workspace shares one viewing surface for classroom and documents. Every course automatically has a downloadable PPT and course document; no separate deliverable-generation request is needed. PPT is the printable subset of the classroom: include slides, images, static diagrams, question stems/options, and coding instructions/starter code, omitting runtime interaction and student answers/code. The course document follows course objectives, teaching order, classroom content and explanations. It may be a tutorial or handout for students, or a lesson plan for teachers: document is the product category, not lesson plan. Use normal classroom tools to create PPT content, never create a second copy for export. Keep pages concise and organize teaching in the intended order. Use create_deliverable only for additional authored documents, such as detailed tutorials, worksheets or preparation notes; they also contribute to the course document.",
+    "Humans edit through conversation. Read the selected view with read_deliverable to locate block.source, then read_classroom_page and edit_classroom_page to patch the actual classroom source. Edit course objectives with set_course_outline and imported/authored source materials with read_deliverable/edit_deliverable. Use minimal old-text/new-text patches, preserve unrelated content and images, and read again on mismatches or stale versions. Source edits update classroom, PPT and course document together. Keep progress reports, tool receipts and conversational replies outside delivered documents. Put longer tutorial explanations or teacher preparation notes in authored document blocks when useful; chat messages are not automatically copied into artifacts. Never directly edit the derived classroom/course-document view or binary Office files. Office export is handled by the app from a fixed source snapshot. Never invent download URLs or require a separate generation step for a file already covered by the classroom.",
     "Build lessons over time from a balanced mix of the teaching elements that fit the content and learner: concise conversation, text-led slides, illustrations, simple animations, questions, exercises, and coding. Balance applies across the lesson, not by starting every tool in one turn. Do not default a systematic lesson to all slides, do not force fixed quotas, and use the smallest set of tools that completes the current teaching goal.",
     "The student's explicit medium and count are binding: when they ask for exactly N images, create exactly N illustrations and no slides or animations in that turn unless they explicitly request those too. Use create_slides for structured text, comparisons, summaries, or exact notation; create_animation for a changing process or interactive relationship; and create_illustration for picture-book scenes, explanatory artwork, visual mind maps, simple diagrams, lightly labeled visual slides, or imagery that accompanies text slides.",
     "When several distinct images are requested or useful, call create_illustration once per image in the same turn so the independent background tasks start in parallel; reuse concrete character and style details only when continuity is useful. The student may add, stop, or replace any image independently. When the student explicitly asks to draw, paint, generate images, show scenes, create comics, or make a picture book, you MUST use create_illustration and must not substitute slides.",
@@ -226,6 +231,8 @@ export function createTeacherAgent(options: {
     branch: options.branch,
     toolExecution: "parallel",
     tools: [
+      ...deliverableTools(options.management.deliverables),
+      ...classroomEditTools(options.pages),
       createCourseTool(context),
       renameCourseTool(context),
       setCourseOutlineTool(context),
@@ -260,7 +267,8 @@ export function createTeacherAgent(options: {
         options.handoff,
         options.questionContext,
       ) +
-      `\nCurrent lesson state (authoritative, including student navigation): ${JSON.stringify(options.pages.read())}`,
+      `\nCurrent lesson state (authoritative, including student navigation): ${JSON.stringify(options.pages.read())}` +
+      `\nSelected deliverable for this user's request: ${JSON.stringify(options.management.deliverables?.selection() ?? null)}`,
     shouldStopAfterTurn: options.shouldStopAfterTurn,
     beforeToolCall: options.beforeToolCall,
     request: (payload, signal) => {
@@ -277,6 +285,12 @@ export function createTeacherAgent(options: {
 export function teacherToolLabel(name: string) {
   return (
     {
+      list_deliverables: "查看交付产物",
+      read_deliverable: "读取交付产物",
+      create_deliverable: "制作交付产物",
+      edit_deliverable: "修改交付产物",
+      read_classroom_page: "读取课堂源内容",
+      edit_classroom_page: "修改课堂源内容",
       create_course: createCourseLabel,
       rename_course: renameCourseLabel,
       set_course_outline: setCourseOutlineLabel,

@@ -1,4 +1,5 @@
 import { ToolAPI, ToolAPIError } from "./api";
+import type { Deliverable } from "../../../../packages/learning/src/domain/deliverable";
 import type { CourseManagement } from "../pi/tool";
 import type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
 import type {
@@ -31,6 +32,29 @@ export class CourseAPI {
   ) {
     const host = this;
     this.management = {
+      deliverables: {
+        selection: () => this.state.deliverableSelection ?? null,
+        list: async () => {
+          await this.flush();
+          return (await this.api.json<{ deliverables: Deliverable[] }>(`/courses/${this.courseId()}/deliverables`)).deliverables;
+        },
+        read: async (id) => {
+          await this.flush();
+          return (await this.api.json<{ deliverable: Deliverable }>(`/courses/${this.courseId()}/deliverables/${encodeURIComponent(id)}`)).deliverable;
+        },
+        write: async (id, input, signal) => {
+          const { deliverable } = await this.api.json<{ deliverable: Deliverable }>(`/courses/${this.courseId()}/deliverables${id ? `/${encodeURIComponent(id)}` : ""}`, id ? "PATCH" : "POST", input, signal);
+          this.state.deliverablesChanged = (this.state.deliverablesChanged ?? 0) + 1;
+          const selected = this.state.deliverableSelection;
+          this.state.deliverableSelection = {
+            id: deliverable.id,
+            blockId: selected?.id === deliverable.id && deliverable.blocks.some(b => b.id === selected.blockId)
+              ? selected.blockId : deliverable.blocks[0]?.id,
+          };
+          this.changed();
+          return deliverable;
+        },
+      },
       get course() {
         return host.state.course;
       },

@@ -1,13 +1,31 @@
 package agent
 
 import (
+	"context"
 	"net/http"
 
+	fault "github.com/LanternCX/zhiya/apps/server/internal/application"
+	"github.com/LanternCX/zhiya/apps/server/internal/application/deliverables"
 	"github.com/LanternCX/zhiya/apps/server/internal/application/execution"
+	"github.com/LanternCX/zhiya/apps/server/internal/application/identity"
+	"github.com/LanternCX/zhiya/apps/server/internal/data"
+	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 )
 
 func (a *application) Routes() http.Handler {
 	mux := http.NewServeMux()
+	a.http().Deliverables(mux, "", deliverables.New(a.Models, a.Objects), func(r *http.Request) identity.Authorize {
+		return func(ctx context.Context, models data.Models) (domain.User, error) {
+			session, err := models.Agents.Authorize(ctx, r.Header.Get("X-Zhiya-Agent-Session"), r.Header.Get("X-Zhiya-Execution"))
+			if err != nil {
+				return domain.User{}, err
+			}
+			if session.CourseID != r.PathValue("id") {
+				return domain.User{}, fault.Unauthorized("产物不在当前执行范围内")
+			}
+			return domain.User{ID: session.UserID}, nil
+		}
+	})
 	handle := func(pattern string, fn func(*requestHandler, http.ResponseWriter, *http.Request)) {
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 			handler := &requestHandler{application: a, grant: execution.Grant{ID: r.Header.Get("X-Zhiya-Agent-Session"), Value: r.Header.Get("X-Zhiya-Execution")}}
