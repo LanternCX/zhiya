@@ -17,18 +17,40 @@
 }
 .workspace {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: var(--workspace-sidebar-width, 220px) 12px minmax(0, 1fr);
+  position: relative;
   height: 100dvh;
   background-color: var(--canvas-fill);
+}
+.workspace:not(.is-collapsed):not(.is-onboarding) .workspace-sidebar {
+  border-right: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.workspace-sidebar-resize {
+  z-index: 6;
 }
 .workspace-sidebar {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  container-type: inline-size;
   padding: 12px 10px 10px;
   border-right: 1px solid var(--line);
   background: var(--sidebar-fill);
+}
+.workspace-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  height: 48px;
+  margin: -12px -10px 0;
+  padding: 0 10px;
+}
+.workspace-sidebar-header .sidebar-toggle {
+  flex-shrink: 0;
 }
 .workspace-brand {
   display: flex;
@@ -42,6 +64,9 @@
 .workspace-brand svg {
   color: var(--brand-ink);
   flex-shrink: 0;
+}
+.workspace-brand span {
+  white-space: nowrap;
 }
 .workspace-nav {
   display: flex;
@@ -68,6 +93,7 @@
   color: var(--muted);
   font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 .recent-conversations p {
   padding: 0 10px;
@@ -142,6 +168,9 @@
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 450;
+}
+.workspace-nav button span {
+  white-space: nowrap;
 }
 .workspace-nav button:hover {
   background: var(--surface-hover);
@@ -346,13 +375,16 @@
   background: var(--brand-green);
 }
 .is-collapsed {
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 72px 12px minmax(0, 1fr);
 }
 .is-collapsed .workspace-sidebar {
-  padding-inline: 12px;
+  padding-inline: 10px;
 }
 .is-collapsed .workspace-brand {
-  padding: 0 10px;
+  display: none;
+}
+.is-collapsed .workspace-sidebar-header {
+  justify-content: center;
 }
 .is-collapsed .workspace-brand span,
 .is-collapsed .recent-conversations,
@@ -361,8 +393,35 @@
 .is-collapsed .user-trigger > .ui-icon {
   display: none;
 }
-.is-collapsed .user-trigger {
-  justify-content: center;
+/* 侧栏拖窄到容不下完整账号行时，提前收掉用户名与三点图标，
+   使头像钉在原位，避免临界点切换时图标来回滑动 */
+@container (max-width: 112px) {
+  .user-name,
+  .user-trigger > .ui-icon {
+    display: none;
+  }
+}
+@media (min-width: 721px) {
+  .workspace.is-sidebar-blinking-out .workspace-sidebar > * {
+    animation: sidebar-blink-out 130ms ease-in forwards;
+  }
+  .workspace.is-sidebar-blinking-in .workspace-sidebar > * {
+    animation: sidebar-blink-in 150ms ease-out;
+  }
+  /* 展开的淡出阶段布局仍是收起态，但宽度要跟随鼠标 */
+  .workspace.is-collapsed.is-sidebar-blinking-out {
+    grid-template-columns: var(--workspace-sidebar-width, 72px) 12px
+      minmax(0, 1fr);
+  }
+}
+/* 闭眼：旧内容淡出至全空 */
+@keyframes sidebar-blink-out {
+  to { opacity: 0; }
+}
+/* 睁眼：新内容（图标或图标+文字）一起淡入 */
+@keyframes sidebar-blink-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .mobile-sidebar-toggle { display: none; }
 .navigation-overlay {
@@ -403,6 +462,7 @@
     display: contents;
     border-right: 0;
   }
+  .workspace-sidebar-header,
   .workspace-brand,
   .workspace-sidebar > .learning-navigation {
     display: none;

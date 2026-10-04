@@ -1,0 +1,3 @@
+.workspace-content:has(.course-room[data-has-slides="true"]) {
+  padding: 0;
+}

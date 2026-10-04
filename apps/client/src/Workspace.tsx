@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import type { useAccount } from "./features/account/useAccount";
@@ -15,6 +16,7 @@ import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
 import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon from "./components/Icon";
+import ResizeHandle from "./components/ResizeHandle";
 import ThemeToggle from "./components/ThemeToggle";
 import LearningNavigation from "./components/LearningNavigation";
 import {
@@ -82,6 +84,73 @@ export default function Workspace({
   const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
+  const collapsedRef = useRef(false);
+  const [sidebarWidth, setSidebarWidth] = useState(220);
+  const sidebarWidthRef = useRef(220);
+  const [sidebarBlinkPhase, setSidebarBlinkPhase] = useState<
+    "out" | "in" | null
+  >(null);
+  const blinkPhaseRef = useRef<"out" | "in" | null>(null);
+  const blinkTimersRef = useRef<number[]>([]);
+  const lastBlinkAtRef = useRef(0);
+  const SIDEBAR_COLLAPSE_AT = 72;
+  const clearBlinkTimers = useCallback(() => {
+    blinkTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    blinkTimersRef.current = [];
+  }, []);
+  const setBlinkPhase = useCallback((phase: "out" | "in" | null) => {
+    blinkPhaseRef.current = phase;
+    setSidebarBlinkPhase(phase);
+  }, []);
+  useEffect(() => clearBlinkTimers, [clearBlinkTimers]);
+  const applyCollapsed = useCallback(
+    (next: boolean) => {
+      if (next === collapsedRef.current) return;
+      const reversingMidBlink = blinkPhaseRef.current !== null;
+      collapsedRef.current = next;
+      clearBlinkTimers();
+      const now = performance.now();
+      // 动画进行中反向拖动，或距上次眨眼不足一帧周期：直接落定不播动画
+      if (reversingMidBlink || now - lastBlinkAtRef.current < 290) {
+        setCollapsed(next);
+        setBlinkPhase(null);
+        return;
+      }
+      lastBlinkAtRef.current = now;
+      // 第一阶段：旧内容（展开时是图标、收起时是完整内容）淡出
+      setBlinkPhase("out");
+      const outTimer = window.setTimeout(() => {
+        // 侧栏已全空，此刻才切换布局（文字在这里才进入 DOM）
+        setCollapsed(next);
+        setBlinkPhase("in");
+        const inTimer = window.setTimeout(() => setBlinkPhase(null), 150);
+        blinkTimersRef.current.push(inTimer);
+      }, 130);
+      blinkTimersRef.current.push(outTimer);
+    },
+    [clearBlinkTimers, setBlinkPhase],
+  );
+  const handleSidebarResizeStart = useCallback(() => {
+    if (collapsedRef.current) {
+      sidebarWidthRef.current = 72;
+      setSidebarWidth(72);
+    }
+  }, []);
+  const handleSidebarResize = useCallback(
+    (delta: number) => {
+      const next = Math.min(360, Math.max(72, sidebarWidthRef.current + delta));
+      sidebarWidthRef.current = next;
+      setSidebarWidth(next);
+      applyCollapsed(next <= SIDEBAR_COLLAPSE_AT);
+    },
+    [applyCollapsed],
+  );
+  const handleSidebarResizeEnd = useCallback(() => {
+    if (sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT) {
+      sidebarWidthRef.current = 220;
+      setSidebarWidth(220);
+    }
+  }, []);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
@@ -460,7 +529,14 @@ export default function Workspace({
   );
   return (
     <div
-      className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
+      className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""} ${sidebarBlinkPhase ? `is-sidebar-blinking-${sidebarBlinkPhase}` : ""}`}
+      style={
+        onboarding || (collapsed && collapsedRef.current)
+          ? undefined
+          : ({
+              ["--workspace-sidebar-width"]: `${sidebarWidth}px`,
+            } as CSSProperties)
+      }
     >
       <SidebarDialog.Root
         open={mobileNavigationOpen && !onboarding}
@@ -471,9 +547,19 @@ export default function Workspace({
           className="workspace-sidebar"
           aria-label="侧栏"
         >
-          <div className="workspace-brand">
-            <Mark />
-            <span>知芽</span>
+          <div className="workspace-sidebar-header">
+            <div className="workspace-brand">
+              <Mark />
+              <span>知芽</span>
+            </div>
+            <button
+              className="icon-button sidebar-toggle"
+              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
+              aria-expanded={!collapsed}
+              onClick={() => applyCollapsed(!collapsedRef.current)}
+            >
+              <Icon name="sidebar" />
+            </button>
           </div>
           {navigation}
           <div className="workspace-account">
@@ -556,6 +642,14 @@ export default function Workspace({
             </div>
           </div>
         </aside>
+        {!onboarding && (
+          <ResizeHandle
+            className="workspace-sidebar-resize"
+            onResizeStart={handleSidebarResizeStart}
+            onResize={handleSidebarResize}
+            onResizeEnd={handleSidebarResizeEnd}
+          />
+        )}
         <div className="workspace-body">
           <header hidden={onboarding} className="workspace-toolbar">
             <SidebarDialog.Trigger asChild>
@@ -566,14 +660,6 @@ export default function Workspace({
                 <Icon name="sidebar" />
               </button>
             </SidebarDialog.Trigger>
-            <button
-              className="icon-button sidebar-toggle"
-              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
-              aria-expanded={!collapsed}
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              <Icon name="sidebar" />
-            </button>
             {(view !== "home" || memoryOpen || courseOpen) && (
               <button
                 className="icon-button"

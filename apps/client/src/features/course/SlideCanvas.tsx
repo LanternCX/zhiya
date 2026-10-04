@@ -39,19 +39,14 @@ export default function SlideCanvas({ slide }: { slide: Slide }) {
           appColors.getPropertyValue(`--${appColor}`).trim(),
         );
       }
-      const scale = Math.min(
-        iframe.clientWidth / 1280,
-        iframe.clientHeight / 720,
-      );
-      root.style.setProperty(
-        "--slide-scale",
-        String(scale),
-      );
+      const scale = iframe.clientWidth / 1280;
+      root.style.setProperty("--slide-scale", String(scale));
     };
 
     iframe.addEventListener("load", syncFrame);
     const resize = new ResizeObserver(syncFrame);
     resize.observe(iframe);
+    if (iframe.parentElement) resize.observe(iframe.parentElement);
     const theme = new MutationObserver(syncFrame);
     theme.observe(window.document.documentElement, {
       attributes: true,
