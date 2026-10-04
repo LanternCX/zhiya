@@ -120,17 +120,6 @@ export default function Workspace({
       // 第一阶段：旧内容（展开时是图标、收起时是完整内容）淡出
       setBlinkPhase("out");
       const outTimer = window.setTimeout(() => {
-        // 交换前再校验一次宽度，防止临界点抖动导致误切换
-        const widthMatches = collapsedRef.current
-          ? sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT
-          : sidebarWidthRef.current > SIDEBAR_COLLAPSE_AT;
-        if (!widthMatches) {
-          const actual = sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT;
-          collapsedRef.current = actual;
-          setCollapsed(actual);
-          setBlinkPhase(null);
-          return;
-        }
         // 侧栏已全空，此刻才切换布局（文字在这里才进入 DOM）
         setCollapsed(next);
         setBlinkPhase("in");
@@ -558,9 +547,19 @@ export default function Workspace({
           className="workspace-sidebar"
           aria-label="侧栏"
         >
-          <div className="workspace-brand">
-            <Mark />
-            <span>知芽</span>
+          <div className="workspace-sidebar-header">
+            <div className="workspace-brand">
+              <Mark />
+              <span>知芽</span>
+            </div>
+            <button
+              className="icon-button sidebar-toggle"
+              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
+              aria-expanded={!collapsed}
+              onClick={() => applyCollapsed(!collapsedRef.current)}
+            >
+              <Icon name="sidebar" />
+            </button>
           </div>
           {navigation}
           <div className="workspace-account">
@@ -661,14 +660,6 @@ export default function Workspace({
                 <Icon name="sidebar" />
               </button>
             </SidebarDialog.Trigger>
-            <button
-              className="icon-button sidebar-toggle"
-              aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
-              aria-expanded={!collapsed}
-              onClick={() => applyCollapsed(!collapsedRef.current)}
-            >
-              <Icon name="sidebar" />
-            </button>
             {(view !== "home" || memoryOpen || courseOpen) && (
               <button
                 className="icon-button"
