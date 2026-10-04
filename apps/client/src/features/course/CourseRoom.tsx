@@ -67,7 +67,7 @@ import { emptyCourseState, uploadCourseMaterials } from "./courses";
 type RenderedCourseMessage = CourseMessage;
 
 const CodingPage = lazy(() => import("./CodingPage"));
-const SlideCanvas = lazy(() => import("./SlideCanvasCover"));
+const SlideCanvas = lazy(() => import("./SlideCanvas"));
 
 const conversationControls = {
   code: { copy: true, download: false },
