@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import type { useAccount } from "./features/account/useAccount";
@@ -15,6 +16,7 @@ import Profile from "./features/profile/Profile";
 import Mark from "./components/Mark";
 import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon from "./components/Icon";
+import ResizeHandle from "./components/ResizeHandle";
 import ThemeToggle from "./components/ThemeToggle";
 import LearningNavigation from "./components/LearningNavigation";
 import {
@@ -82,6 +84,27 @@ export default function Workspace({
   const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(220);
+  const sidebarWidthRef = useRef(220);
+  const SIDEBAR_COLLAPSE_AT = 72;
+  const handleSidebarResizeStart = useCallback(() => {
+    if (collapsed) {
+      sidebarWidthRef.current = 72;
+      setSidebarWidth(72);
+    }
+  }, [collapsed]);
+  const handleSidebarResize = useCallback((delta: number) => {
+    const next = Math.min(360, Math.max(72, sidebarWidthRef.current + delta));
+    sidebarWidthRef.current = next;
+    setSidebarWidth(next);
+    setCollapsed(next <= SIDEBAR_COLLAPSE_AT);
+  }, []);
+  const handleSidebarResizeEnd = useCallback(() => {
+    if (sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT) {
+      sidebarWidthRef.current = 220;
+      setSidebarWidth(220);
+    }
+  }, []);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
@@ -461,6 +484,13 @@ export default function Workspace({
   return (
     <div
       className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
+      style={
+        collapsed || onboarding
+          ? undefined
+          : ({
+              ["--workspace-sidebar-width"]: `${sidebarWidth}px`,
+            } as CSSProperties)
+      }
     >
       <SidebarDialog.Root
         open={mobileNavigationOpen && !onboarding}
@@ -556,6 +586,14 @@ export default function Workspace({
             </div>
           </div>
         </aside>
+        {!onboarding && (
+          <ResizeHandle
+            className="workspace-sidebar-resize"
+            onResizeStart={handleSidebarResizeStart}
+            onResize={handleSidebarResize}
+            onResizeEnd={handleSidebarResizeEnd}
+          />
+        )}
         <div className="workspace-body">
           <header hidden={onboarding} className="workspace-toolbar">
             <SidebarDialog.Trigger asChild>

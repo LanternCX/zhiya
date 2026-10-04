@@ -40,7 +40,10 @@
   justify-content: center;
 }
 .course-home {
-  --course-panel-center-x: calc(220px + (100vw - 220px) / 2);
+  --course-panel-center-x: calc(
+    var(--workspace-sidebar-width, 220px) + 12px +
+      (100vw - var(--workspace-sidebar-width, 220px) - 12px) / 2
+  );
   --course-panel-width: min(720px, calc(100vw - 300px));
   width: min(100%, 980px);
   margin: 0 auto;
@@ -120,8 +123,8 @@
   transition: border-color 160ms ease;
 }
 .workspace.is-collapsed .course-home {
-  --course-panel-center-x: calc(72px + (100vw - 72px) / 2);
-  --course-panel-width: min(720px, calc(100vw - 152px));
+  --course-panel-center-x: calc(84px + (100vw - 84px) / 2);
+  --course-panel-width: min(720px, calc(100vw - 164px));
 }
 .course-home-composer > [data-slot="input-group"]:focus-within {
   border-color: color-mix(in srgb, var(--accent) 56%, var(--line));
