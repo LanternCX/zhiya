@@ -64,6 +64,28 @@ export type IllustrationPage = {
   assetId: string;
 };
 
+export type BilibiliVideo = {
+  bvid: string;
+  title: string;
+  description: string;
+  author: string;
+  duration: string;
+  playCount: number;
+  publishedAt: number;
+};
+
+export type BilibiliSearchResult = {
+  page: number;
+  totalPages: number;
+  videos: BilibiliVideo[];
+};
+
+export type VideoPage = BilibiliVideo & {
+  kind: "video";
+  id: string;
+  topic: string;
+};
+
 export type AnimationPlaybackCommand =
   | { action: "play"; buttonId: string }
   | { action: "pause" }
@@ -103,7 +125,7 @@ export type QuestionPage = {
 };
 
 export type LessonPage =
-  Slide | AnimationPage | IllustrationPage | CodingExercise | QuestionPage;
+  Slide | AnimationPage | IllustrationPage | CodingExercise | QuestionPage | VideoPage;
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {

@@ -77,7 +77,7 @@ func (a *application) Routes() http.Handler {
 	mux.Handle("/api/", protected)
 	mux.Handle("/health", protected)
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' "+storageOrigin+"; img-src 'self' data: blob:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' "+storageOrigin+"; img-src 'self' data: blob:; frame-src 'self' https://player.bilibili.com; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		http.FileServer(http.Dir(a.config.Server.WebDir)).ServeHTTP(w, r)
 	}))

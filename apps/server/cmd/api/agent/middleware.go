@@ -37,7 +37,7 @@ func (a *application) protect(next http.Handler) http.Handler {
 			a.http().RespondError(w, appfault.Unauthorized("建档不在执行范围内"))
 			return
 		}
-		if (r.URL.Path == "/course/model" || r.URL.Path == "/code/languages") && session.Kind != "course" {
+		if (r.URL.Path == "/course/model" || r.URL.Path == "/code/languages" || r.URL.Path == "/bilibili/search") && session.Kind != "course" {
 			a.http().RespondError(w, appfault.Unauthorized("课堂不在执行范围内"))
 			return
 		}

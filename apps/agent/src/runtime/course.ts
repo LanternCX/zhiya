@@ -6,6 +6,7 @@ import type {
   CodeLanguage,
   InputMode,
   AnimationPlaybackState,
+  BilibiliSearchResult,
 } from "../../../../packages/learning/src/domain/learning";
 import { CourseAPI } from "../adapters/course";
 import { ToolAPI } from "../adapters/api";
@@ -144,6 +145,8 @@ export class CourseHost {
         this.changed();
       },
       (presentations, currentPresentationId) => {
+        if (this.state.lesson.currentPresentationId !== currentPresentationId)
+          this.state.deliverableSelection = null;
         Object.assign(this.state.lesson, {
           presentations,
           currentPresentationId,
@@ -204,6 +207,9 @@ export class CourseHost {
           ),
       },
       branch && session ? { branch, messages, session } : undefined,
+      (query, page, signal) => this.api.json<BilibiliSearchResult>(
+        "/bilibili/search", "POST", { query, page }, signal,
+      ),
     );
   }
   async command(action: string, args: unknown[]) {

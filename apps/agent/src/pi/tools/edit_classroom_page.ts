@@ -10,6 +10,7 @@ const fields = {
   question: ["title", "text"],
   coding: ["title", "instructions", "starterCode"],
   animation: ["title"],
+  video: ["topic"],
 } as const;
 
 export function readEditablePage(page: LessonPage) {

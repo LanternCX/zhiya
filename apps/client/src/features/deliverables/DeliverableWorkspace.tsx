@@ -123,6 +123,8 @@ export default function DeliverableWorkspace({
   sourceChanged,
   selection,
   onSelect,
+  onClassroomVisibilityChange,
+  classroomPresentationId,
   children,
 }: {
   courseId?: string;
@@ -130,9 +132,14 @@ export default function DeliverableWorkspace({
   sourceChanged?: string;
   selection: DeliverableSelection | null;
   onSelect: (id: string, blockId?: string) => Promise<void>;
+  onClassroomVisibilityChange?: (visible: boolean) => void;
+  classroomPresentationId?: string;
   children: ReactNode;
 }) {
   const [area, setArea] = useState<Area>("classroom");
+  useEffect(() => {
+    onClassroomVisibilityChange?.(area === "classroom");
+  }, [area, onClassroomVisibilityChange]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [items, setItems] = useState<Deliverable[]>([]);
   const [selected, setSelected] = useState<DeliverableSelection | null>(null);
@@ -184,6 +191,15 @@ export default function DeliverableWorkspace({
       setArea(item.source === "classroom" ? "classroom" : item.kind);
     }
   }, [selection?.id, selection?.blockId, items]);
+  const previousPresentation = useRef(classroomPresentationId);
+  useEffect(() => {
+    if (previousPresentation.current === classroomPresentationId) return;
+    previousPresentation.current = classroomPresentationId;
+    if (classroomPresentationId) {
+      setSelected(null);
+      setArea("classroom");
+    }
+  }, [classroomPresentationId]);
   const item = items.find(
     (item) => item.id === selected?.id && item.kind === (area === "classroom" ? "presentation" : area),
   ) ?? items.find((item) => item.source === (area === "document" ? "course-document" : "classroom"));
