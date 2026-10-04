@@ -387,14 +387,26 @@
   }
 }
 @media (min-width: 721px) {
-  .workspace.is-collapsed .workspace-sidebar > * {
-    animation: sidebar-collapse-blink 280ms ease-in-out;
+  .workspace.is-sidebar-blinking-out .workspace-sidebar > * {
+    animation: sidebar-blink-out 130ms ease-in forwards;
+  }
+  .workspace.is-sidebar-blinking-in .workspace-sidebar > * {
+    animation: sidebar-blink-in 150ms ease-out;
+  }
+  /* 展开的淡出阶段布局仍是收起态，但宽度要跟随鼠标 */
+  .workspace.is-collapsed.is-sidebar-blinking-out {
+    grid-template-columns: var(--workspace-sidebar-width, 72px) 12px
+      minmax(0, 1fr);
   }
 }
-@keyframes sidebar-collapse-blink {
-  0%,
-  100% { opacity: 1; }
-  45% { opacity: 0; }
+/* 闭眼：旧内容淡出至全空 */
+@keyframes sidebar-blink-out {
+  to { opacity: 0; }
+}
+/* 睁眼：新内容（图标或图标+文字）一起淡入 */
+@keyframes sidebar-blink-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .mobile-sidebar-toggle { display: none; }
 .navigation-overlay {

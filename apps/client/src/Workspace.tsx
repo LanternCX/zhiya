@@ -84,21 +84,78 @@ export default function Workspace({
   const { courseId, conversationId } = learningMatch?.params ?? {};
   const { user, view, navigate, busy, logout } = account;
   const [collapsed, setCollapsed] = useState(false);
+  const collapsedRef = useRef(false);
   const [sidebarWidth, setSidebarWidth] = useState(220);
   const sidebarWidthRef = useRef(220);
+  const [sidebarBlinkPhase, setSidebarBlinkPhase] = useState<
+    "out" | "in" | null
+  >(null);
+  const blinkPhaseRef = useRef<"out" | "in" | null>(null);
+  const blinkTimersRef = useRef<number[]>([]);
+  const lastBlinkAtRef = useRef(0);
   const SIDEBAR_COLLAPSE_AT = 72;
+  const clearBlinkTimers = useCallback(() => {
+    blinkTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    blinkTimersRef.current = [];
+  }, []);
+  const setBlinkPhase = useCallback((phase: "out" | "in" | null) => {
+    blinkPhaseRef.current = phase;
+    setSidebarBlinkPhase(phase);
+  }, []);
+  useEffect(() => clearBlinkTimers, [clearBlinkTimers]);
+  const applyCollapsed = useCallback(
+    (next: boolean) => {
+      if (next === collapsedRef.current) return;
+      const reversingMidBlink = blinkPhaseRef.current !== null;
+      collapsedRef.current = next;
+      clearBlinkTimers();
+      const now = performance.now();
+      // 动画进行中反向拖动，或距上次眨眼不足一帧周期：直接落定不播动画
+      if (reversingMidBlink || now - lastBlinkAtRef.current < 290) {
+        setCollapsed(next);
+        setBlinkPhase(null);
+        return;
+      }
+      lastBlinkAtRef.current = now;
+      // 第一阶段：旧内容（展开时是图标、收起时是完整内容）淡出
+      setBlinkPhase("out");
+      const outTimer = window.setTimeout(() => {
+        // 交换前再校验一次宽度，防止临界点抖动导致误切换
+        const widthMatches = collapsedRef.current
+          ? sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT
+          : sidebarWidthRef.current > SIDEBAR_COLLAPSE_AT;
+        if (!widthMatches) {
+          const actual = sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT;
+          collapsedRef.current = actual;
+          setCollapsed(actual);
+          setBlinkPhase(null);
+          return;
+        }
+        // 侧栏已全空，此刻才切换布局（文字在这里才进入 DOM）
+        setCollapsed(next);
+        setBlinkPhase("in");
+        const inTimer = window.setTimeout(() => setBlinkPhase(null), 150);
+        blinkTimersRef.current.push(inTimer);
+      }, 130);
+      blinkTimersRef.current.push(outTimer);
+    },
+    [clearBlinkTimers, setBlinkPhase],
+  );
   const handleSidebarResizeStart = useCallback(() => {
-    if (collapsed) {
+    if (collapsedRef.current) {
       sidebarWidthRef.current = 72;
       setSidebarWidth(72);
     }
-  }, [collapsed]);
-  const handleSidebarResize = useCallback((delta: number) => {
-    const next = Math.min(360, Math.max(72, sidebarWidthRef.current + delta));
-    sidebarWidthRef.current = next;
-    setSidebarWidth(next);
-    setCollapsed(next <= SIDEBAR_COLLAPSE_AT);
   }, []);
+  const handleSidebarResize = useCallback(
+    (delta: number) => {
+      const next = Math.min(360, Math.max(72, sidebarWidthRef.current + delta));
+      sidebarWidthRef.current = next;
+      setSidebarWidth(next);
+      applyCollapsed(next <= SIDEBAR_COLLAPSE_AT);
+    },
+    [applyCollapsed],
+  );
   const handleSidebarResizeEnd = useCallback(() => {
     if (sidebarWidthRef.current <= SIDEBAR_COLLAPSE_AT) {
       sidebarWidthRef.current = 220;
@@ -483,9 +540,9 @@ export default function Workspace({
   );
   return (
     <div
-      className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""}`}
+      className={`workspace ${collapsed ? "is-collapsed" : ""} ${onboarding ? "is-onboarding" : ""} ${sidebarBlinkPhase ? `is-sidebar-blinking-${sidebarBlinkPhase}` : ""}`}
       style={
-        collapsed || onboarding
+        onboarding || (collapsed && collapsedRef.current)
           ? undefined
           : ({
               ["--workspace-sidebar-width"]: `${sidebarWidth}px`,
@@ -608,7 +665,7 @@ export default function Workspace({
               className="icon-button sidebar-toggle"
               aria-label={collapsed ? "展开侧栏" : "收起侧栏"}
               aria-expanded={!collapsed}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => applyCollapsed(!collapsedRef.current)}
             >
               <Icon name="sidebar" />
             </button>
