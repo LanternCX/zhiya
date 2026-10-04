@@ -157,6 +157,20 @@ test("course content blends into the workspace canvas", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "今天想学什么？" })).toBeVisible();
   const sidebar = await page.locator(".workspace-sidebar").boundingBox();
   expect(sidebar?.width).toBe(220);
+  const separator = page.locator(".workspace-sidebar-resize");
+  const lineColor = await separator.evaluate((element) =>
+    getComputedStyle(element).getPropertyValue("--line").trim(),
+  );
+  const expectedColor = await page.evaluate((color) => {
+    const element = document.createElement("div");
+    element.style.color = color;
+    document.body.append(element);
+    const result = getComputedStyle(element).color;
+    element.remove();
+    return result;
+  }, lineColor);
+  expect(await separator.evaluate((element) => getComputedStyle(element, "::after").backgroundColor)).toBe(expectedColor);
+  expect(await separator.evaluate((element) => getComputedStyle(element, "::after").width)).toBe("1px");
   await page.getByRole("button", { name: "收起侧栏" }).click();
   await expect(page.locator(".workspace-sidebar")).toHaveCSS("width", "72px");
   await page.getByRole("button", { name: "展开侧栏" }).click();
