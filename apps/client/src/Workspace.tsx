@@ -743,6 +743,7 @@ export default function Workspace({
                   {(!activeCourse || courseLevel === "conversation") && (
                     <CourseRoom
                       key={courseRoomToken}
+                      visible={learningPage && view === "home"}
                       info={learningContext.model}
                       memory={learningContext.memory}
                       courses={courses}

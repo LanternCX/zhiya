@@ -9,6 +9,7 @@ import type {
   Slide,
   AnimationPage,
   IllustrationPage,
+  VideoPage,
   LessonPage,
   LessonPresentation,
   CodingExercise,
@@ -36,6 +37,7 @@ import type {
   CourseManagement,
 } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
+import type { BilibiliSearch } from "../tools/search_bilibili";
 import { readEditablePage, patchClassroomPage } from "../tools/edit_classroom_page";
 export type IllustrationGateway = {
   create(
@@ -171,6 +173,7 @@ export class CourseSession {
       branch: Branch;
       session: Session;
     },
+    private searchBilibili?: BilibiliSearch,
   ) {
     this.pageStore = [...initial.pages];
     this.presentations = [...initial.presentations];
@@ -251,6 +254,23 @@ export class CourseSession {
       },
       illustrations: {
         start: (request) => this.startIllustration(courseManagement, request),
+      },
+      searchBilibili: async (query, page, signal) => {
+        if (!this.searchBilibili) throw new Error("B站检索服务不可用");
+        const operation = this.cancellation;
+        const result = await this.searchBilibili(query, page, signal);
+        if (signal?.aborted || this.stopped || this.teachingInterrupted || operation !== this.cancellation)
+          throw new Error("当前检索已中断");
+        const videos = result.videos.map((video) => {
+          const existing = this.pageStore.find(
+            (item): item is VideoPage => item.kind === "video" && item.bvid === video.bvid,
+          );
+          const pageId = existing?.id ?? `video-${crypto.randomUUID()}`;
+          if (!existing) this.pageStore.push({ ...video, kind: "video", id: pageId, topic: query });
+          return { ...video, pageId };
+        });
+        this.onPages([...this.pageStore], this.hasRunningVisualTask());
+        return { ...result, videos };
       },
       pages: {
         read: () => this.readLessonPages(),

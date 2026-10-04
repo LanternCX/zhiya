@@ -90,7 +90,7 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
             build: { devUrl: config.dev_origin },
             app: {
               security: {
-                csp: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ${websocketOrigin} https: http://127.0.0.1:* http://localhost:*`,
+                csp: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self' https://player.bilibili.com; connect-src 'self' ipc: http://ipc.localhost ${websocketOrigin} https: http://127.0.0.1:* http://localhost:*`,
               },
             },
           }),

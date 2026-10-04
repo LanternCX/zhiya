@@ -41,6 +41,7 @@ func (a *application) Routes() http.Handler {
 	handle("POST /course/model", (*requestHandler).courseModelProxy)
 	handle("POST /courses", (*requestHandler).createCourse)
 	handle("GET /code/languages", (*requestHandler).codeLanguages)
+	handle("POST /bilibili/search", (*requestHandler).searchBilibili)
 	handle("POST /courses/{id}/material-uploads", (*requestHandler).startCourseMaterialUpload)
 	handle("POST /courses/{id}/material-uploads/{uploadId}/complete", (*requestHandler).completeCourseMaterialUpload)
 	handle("GET /courses/{id}", (*requestHandler).getCourse)

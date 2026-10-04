@@ -46,6 +46,7 @@ import { useSpeechPreference } from "../voice/useSpeechPreference";
 import { Spinner } from "../../components/ui/spinner";
 import AnimationCanvas, { type AnimationController } from "./AnimationCanvas";
 import IllustrationCanvas from "./IllustrationCanvas";
+import VideoCanvas from "./VideoCanvas";
 import QuestionPage from "./QuestionPage";
 import { runCode } from "./code";
 import CourseLibrary from "./CourseLibrary";
@@ -137,6 +138,7 @@ function ToolActivity({
 }
 
 export default function CourseRoom({
+  visible = true,
   info,
   courses,
   activeCourse,
@@ -154,6 +156,7 @@ export default function CourseRoom({
   onCourseUpdated,
   onEnterNextSection,
 }: {
+  visible?: boolean;
   info: ModelInfo | null;
   memory: string;
   courses: StoredCourse[];
@@ -188,6 +191,7 @@ export default function CourseRoom({
     request?: string,
   ) => Promise<void>;
 }) {
+  const [classroomVisible, setClassroomVisible] = useState(true);
   // Long-running sessions must notify the current page, not the route that
   // happened to be visible when generation started.
   const courseCallbacks = useRef<{
@@ -963,6 +967,8 @@ export default function CourseRoom({
       </section>
 
       {(course || current) && <DeliverableWorkspace
+        onClassroomVisibilityChange={setClassroomVisible}
+        classroomPresentationId={currentPresentationId}
         courseId={course?.id}
         changed={deliverablesChanged}
         sourceChanged={JSON.stringify({
@@ -1018,6 +1024,8 @@ export default function CourseRoom({
             >
               <SlideCanvas key={current.id} slide={current} />
             </Suspense>
+          ) : current.kind === "video" ? (
+            visible && classroomVisible ? <VideoCanvas key={current.id} page={current} /> : null
           ) : current.kind === "illustration" ? (
             course ? (
               <IllustrationCanvas
