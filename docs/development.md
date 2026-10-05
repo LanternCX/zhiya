@@ -173,7 +173,7 @@ npx --workspace @zhiya/client playwright install chromium
 
 浏览器测试自动构建客户端，大部分用例使用构建产物；依赖源码模块或 Vite 行为的用例使用独立开发服务器。两个 worker 并行运行，失败时保留 trace、截图和 HTML 报告，CI 将这些诊断文件保存为 artifact。Node 测试使用独立命令运行，不参与 Playwright 用例收集。
 
-GitHub CI 将浏览器用例分成两个并行分片，每个分片使用独立 runner 和两个 worker，共四个浏览器并行执行。所有分片通过后，汇总检查 `Client tests` 才通过。可用 `npm run test:e2e -- --shard=1/2` 或 `--shard=2/2` 单独复现某个分片。
+GitHub CI 将浏览器用例交替分配到两个并行分片，使同一文件中的用例分散到两个 runner，避免较慢的课程与播放测试集中在一片。每个分片使用独立 runner 和两个 worker，共四个浏览器并行执行。所有分片通过后，汇总检查 `Client tests` 才通过。可用 `npm run test:e2e -- --shard=1/2` 或 `--shard=2/2` 单独复现某个分片；该命令先收集用例，再通过 Playwright 的测试清单执行所选分片。
 
 CI 为较慢的 runner 将普通断言等待设为 10 秒、单项测试上限设为 60 秒（本机分别为 5 秒、30 秒）。等待在条件满足时立即结束，不固定延迟每项测试，也不自动重试失败用例。
 

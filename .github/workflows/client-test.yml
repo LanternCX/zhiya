@@ -69,7 +69,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run client unit and proxy tests
-        run: npm run test:unit --workspace @zhiya/client
+        run: |
+          npm run test:unit --workspace @zhiya/client
+          node --test scripts/client-tests.test.mjs
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run client tests
