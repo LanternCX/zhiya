@@ -56,6 +56,7 @@ def validate(root):
             require(metadata.get('slide_count') == doc['page_count'] and doc['page_count'] is not None,
                     f'PPT page count mismatch: {doc["document_id"]}')
     chunks = {}
+    fingerprints = {}
     modalities = Counter()
     for row in parquet_rows(root / 'data/chunks.parquet'):
         ident = row['chunk_id']
@@ -63,18 +64,38 @@ def validate(root):
         require(row['document_id'] in docmap, f'Unknown document: {ident}')
         modality = row['modality']
         require(modality in ('text', 'image', 'video'), f'Unknown modality: {ident}')
+        route = row['embedding_route']
+        require(route in ('text', 'visual', 'review', 'none'), f'Invalid embedding route: {ident}')
+        require(row['default_embedding_candidate'] == (route in ('text', 'visual')),
+                f'Embedding candidate/route mismatch: {ident}')
+        require(route != 'text' or modality == 'text', f'Non-text in text embedding route: {ident}')
+        require(route != 'visual' or modality in ('image', 'video'), f'Text in visual embedding route: {ident}')
+        require(not row['is_hidden_slide'] or route == 'none', f'Hidden slide selected: {ident}')
         modalities[modality] += 1
         if modality == 'text':
             require(row['text'] and row['text'].strip(), f'Empty text: {ident}')
+            fingerprints[ident] = hashlib.sha256(row['text'].encode()).hexdigest()
         else:
             payload = row[modality]
-            require(payload and payload.get('bytes'), f'Missing media payload: {ident}')
-            require(hashlib.sha256(payload['bytes']).hexdigest() == file_sha256(asset(root, row['asset_path'])),
+            source_hash = file_sha256(asset(root, row['asset_path']))
+            if manifest.get('media_storage') == 'external_relative_paths':
+                require(row.get('asset_sha256') == source_hash, f'Asset checksum mismatch: {ident}')
+                fingerprints[ident] = source_hash
+            else:
+                require(payload and payload.get('bytes'), f'Missing media payload: {ident}')
+                require(hashlib.sha256(payload['bytes']).hexdigest() == source_hash,
                     f'Asset checksum mismatch: {ident}')
+                fingerprints[ident] = source_hash
         for frame in row['sampled_frame_paths']:
             asset(root, frame)
         chunks[ident] = {key: value for key, value in row.items() if key not in ('image', 'video', 'text')}
     for ident, row in chunks.items():
+        representative = row['embedding_duplicate_of']
+        if representative:
+            target = chunks.get(representative)
+            require(target and target['default_embedding_candidate'] and not row['default_embedding_candidate']
+                    and target['modality'] == row['modality'] and fingerprints[representative] == fingerprints[ident],
+                    f'Invalid embedding alias: {ident} -> {representative}')
         links = row['associated_text_chunk_ids'] + [row[key] for key in (
             'previous_text_chunk_id', 'next_text_chunk_id') if row[key]]
         for linked in links:

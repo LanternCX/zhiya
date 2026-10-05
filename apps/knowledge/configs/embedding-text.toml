@@ -1,0 +1,19 @@
+# Text corpus model; match this model when generating online query vectors.
+data_dir = "data/knowledge"
+output_dir = "data/embeddings/qwen3-text-8b"
+model_cache = "data/models"
+
+model_id = "Qwen/Qwen3-Embedding-8B"
+model_revision = "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af"
+device = "cuda"
+dtype = "bfloat16"
+dimension = 4096
+batch_size = 1
+view = "text"
+# Documents are encoded without a query instruction.
+instruction = ""
+max_length = 8192
+# These media settings are unused by the text encoder.
+image_max_pixels = 1843200
+video_max_pixels = 7864320
+video_num_frames = 16

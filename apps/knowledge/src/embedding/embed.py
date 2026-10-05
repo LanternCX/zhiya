@@ -24,7 +24,7 @@ DEFAULT_CONFIG = PROJECT / 'configs' / 'embedding.toml'
 
 def read_config(path, args):
     config = tomllib.loads(path.read_text())
-    for key in ('data_dir', 'output_dir'):
+    for key in ('data_dir', 'output_dir', 'model_cache'):
         override = getattr(args, key, None)
         if override is not None:
             config[key] = str(override.resolve())
@@ -32,6 +32,8 @@ def read_config(path, args):
         config[key] = str((REPO / Path(config[key]).expanduser()).resolve())
     if config['view'] not in ('visual', 'text'):
         raise ValueError('view must be visual or text')
+    if config['model_id'].startswith('Qwen/Qwen3-Embedding-') and config['view'] != 'text':
+        raise ValueError('A pure text embedding model requires view = "text"')
     if config['batch_size'] < 1 or config['dimension'] < 64:
         raise ValueError('batch_size must be positive and dimension must be at least 64')
     if config['dtype'] not in ('bfloat16', 'float16', 'float32'):
@@ -44,8 +46,9 @@ def read_config(path, args):
 
 
 def selected(row, config):
-    return (row['modality'] == 'text' if config['view'] == 'text'
-            else bool(row['default_embedding_candidate']))
+    return bool(row['default_embedding_candidate']) and (
+        row['modality'] == 'text' if config['view'] == 'text'
+        else row['modality'] in ('image', 'video'))
 
 
 def inspect_input(config):
@@ -66,7 +69,10 @@ def inspect_input(config):
     checksum = file_sha256(source)
     manifest = Path(config['data_dir']) / 'manifest.json'
     if manifest.exists():
-        expected = json.loads(manifest.read_text()).get('parquet_sha256', {}).get('chunks.parquet')
+        metadata = json.loads(manifest.read_text())
+        if metadata.get('default_embedding_view') != 'text_first':
+            raise ValueError('Run consolidate and export_parquet with text-first routing before embedding')
+        expected = metadata.get('parquet_sha256', {}).get('chunks.parquet')
         if expected and checksum != expected:
             raise ValueError('Input Parquet checksum does not match the dataset manifest')
     return {'selected': sum(counts.values()), 'modalities': dict(counts),
@@ -91,14 +97,32 @@ class QwenEncoder:
         if config['device'] == 'cuda' and config['dtype'] == 'bfloat16' and not torch.cuda.is_bf16_supported():
             raise ValueError('This GPU does not support bfloat16; use dtype = "float16"')
         self.config = config
+        self.text_model = config['model_id'].startswith('Qwen/Qwen3-Embedding-')
         self.model = SentenceTransformer(
             model_path(config), device=config['device'],
             model_kwargs={'torch_dtype': getattr(torch, config['dtype']), 'attn_implementation': 'sdpa'},
         )
         if config['dimension'] > self.model.get_sentence_embedding_dimension():
             raise ValueError('Requested dimension exceeds the model embedding dimension')
+        if self.text_model:
+            self.model.max_seq_length = config['max_length']
 
     def __call__(self, inputs):
+        if self.text_model:
+            if any(set(item) != {'text'} for item in inputs):
+                raise ValueError('Pure text embedding inputs must contain text only')
+            texts = [item['text'] for item in inputs]
+            features = self.model.tokenizer(
+                [self.config['instruction'] + text for text in texts],
+                padding=False, truncation=False,
+            )
+            if any(len(ids) + 1 > self.config['max_length'] for ids in features['input_ids']):
+                raise ValueError('Input exceeds max_length; split the text instead of silently truncating it')
+            return self.model.encode(
+                texts, batch_size=len(texts), prompt=self.config['instruction'],
+                truncate_dim=self.config['dimension'], normalize_embeddings=True,
+                convert_to_numpy=True, show_progress_bar=False,
+            )
         from transformers.video_utils import load_video
 
         prepared = []
@@ -130,6 +154,19 @@ def atomic_json(path, value):
     temporary = path.with_suffix('.json.tmp')
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding='utf-8')
     temporary.replace(path)
+
+
+def media_bytes(row, root):
+    payload = row.get(row['modality'])
+    if payload and payload.get('bytes'):
+        return payload['bytes']
+    path = (root / row['asset_path']).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError('Media path escapes dataset directory')
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() != row.get('asset_sha256'):
+        raise ValueError('Media checksum mismatch: ' + row['chunk_id'])
+    return data
 
 
 def run_job(config, encode=None, limit=None):
@@ -201,13 +238,13 @@ def _run_locked(config, report, encode, limit):
                             raise ValueError(f'Empty text: {row["chunk_id"]}')
                         inputs.append({'text': row['text']})
                     elif row['modality'] == 'image':
-                        with Image.open(io.BytesIO(row['image']['bytes'])) as source:
+                        with Image.open(io.BytesIO(media_bytes(row, Path(config['data_dir'])))) as source:
                             image = source.convert('RGB')
                         images.append(image)
                         inputs.append({'image': image})
                     elif row['modality'] == 'video':
                         path = Path(temp) / f'{len(inputs)}.mp4'
-                        path.write_bytes(row['video']['bytes'])
+                        path.write_bytes(media_bytes(row, Path(config['data_dir'])))
                         inputs.append({'video': str(path)})
                     else:
                         raise ValueError(f'Unsupported modality: {row["modality"]}')
@@ -267,6 +304,7 @@ def main():
     parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG)
     parser.add_argument('--data-dir', type=Path)
     parser.add_argument('--output-dir', type=Path)
+    parser.add_argument('--model-cache', type=Path)
     parser.add_argument('--limit', type=int, help='Embed only this many inputs, using a separate output directory')
     args = parser.parse_args()
     try:
