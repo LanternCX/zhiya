@@ -9,6 +9,14 @@ import (
 )
 
 func (a *application) sharingRoutes(mux *http.ServeMux, service *deliverables.Service) {
+	mux.HandleFunc("GET /api/classes/{id}/shares", func(w http.ResponseWriter, r *http.Request) {
+		items, err := service.ClassShares(r.Context(), userAuthorization(r), r.PathValue("id"))
+		if err != nil {
+			a.http().RespondError(w, err)
+			return
+		}
+		transport.WriteJSON(w, http.StatusOK, map[string]any{"shares": items})
+	})
 	mux.HandleFunc("GET /api/shares/{token}/images/{imageId}", func(w http.ResponseWriter, r *http.Request) {
 		reader, err := service.SharedImage(r.Context(), userAuthorization(r), r.PathValue("token"), r.PathValue("imageId"))
 		if err != nil {
@@ -34,18 +42,16 @@ func (a *application) sharingRoutes(mux *http.ServeMux, service *deliverables.Se
 	})
 	base := "/api/courses/{id}/deliverables/{deliverableId}/share"
 	settings := func(w http.ResponseWriter, r *http.Request) {
-		var visibility *string
+		var input *deliverables.ShareAccess
 		if r.Method == "PUT" {
-			var input struct {
-				Visibility string `json:"visibility"`
-			}
-			if err := a.http().ReadJSON(w, r, &input); err != nil {
+			var value deliverables.ShareAccess
+			if err := a.http().ReadJSON(w, r, &value); err != nil {
 				a.http().RespondError(w, err)
 				return
 			}
-			visibility = &input.Visibility
+			input = &value
 		}
-		result, err := service.Sharing(r.Context(), userAuthorization(r), r.PathValue("id"), r.PathValue("deliverableId"), visibility)
+		result, err := service.Sharing(r.Context(), userAuthorization(r), r.PathValue("id"), r.PathValue("deliverableId"), input)
 		if err != nil {
 			a.http().RespondError(w, err)
 			return

@@ -7,14 +7,16 @@ import {
   Download,
   Globe,
   Lock,
+  Users,
   Share2,
   X,
 } from "lucide-react";
 import { api } from "../../api";
 import type { Deliverable } from "../../domain/deliverable";
+import { listClasses, type Classroom } from "../classes/classes";
 import "./sharing.css";
 
-type Settings = { token: string; visibility: "private" | "public" };
+type Settings = { token: string; visibility: "private" | "public" | "class"; classIds?: string[] };
 
 function shareURL(token: string): string {
   const origin = isTauri()
@@ -34,6 +36,11 @@ function ShareSettings({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [classes, setClasses] = useState<Classroom[]>([]);
+  const [classLoading, setClassLoading] = useState(true);
+  const [classError, setClassError] = useState("");
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [visibility, setVisibility] = useState<Settings["visibility"]>("private");
   const active = useRef(false);
   const link = useRef<HTMLInputElement>(null);
   const path = `/courses/${courseId}/deliverables/${item.id}/share`;
@@ -42,7 +49,11 @@ function ShareSettings({
     let cancelled = false;
     void api<Settings>(path).then(
       (result) => {
-        if (!cancelled) setSettings(result);
+        if (!cancelled) {
+          setSettings(result);
+          setSelectedClasses(result.classIds ?? []);
+          setVisibility(result.visibility);
+        }
       },
       (reason) => {
         if (!cancelled)
@@ -51,23 +62,31 @@ function ShareSettings({
           );
       },
     );
+    void listClasses().then(
+      result => { if (!cancelled) setClasses(result); },
+      () => { if (!cancelled) setClassError("班级列表加载失败，请重新打开分享设置。其他分享权限仍可使用。"); },
+    ).finally(() => { if (!cancelled) setClassLoading(false); });
     return () => {
       cancelled = true;
       active.current = false;
     };
   }, [path]);
-  const change = async (visibility: Settings["visibility"]) => {
-    if (saving || !settings || settings.visibility === visibility) return;
+  const change = async (visibility: Settings["visibility"], classIds: string[] = []) => {
+    if (saving || !settings) return;
     setSaving(true);
     setError("");
     setNotice("");
     try {
-      const result = await api<Settings>(path, "PUT", { visibility });
+      const result = await api<Settings>(path, "PUT", { visibility, classIds });
       if (active.current) {
         setSettings(result);
+        setVisibility(result.visibility);
+        setSelectedClasses(result.classIds ?? []);
         setNotice(
           visibility === "public"
             ? "已开放分享，可复制链接。"
+            : visibility === "class"
+              ? "已分享给所选班级，成员登录后可查看。"
             : "已关闭外部访问，链接保持不变。",
         );
       }
@@ -123,13 +142,13 @@ function ShareSettings({
             <label
               key={value}
               className="share-option"
-              data-selected={settings.visibility === value}
+              data-selected={visibility === value}
             >
               <input
                 type="radio"
                 name="share-visibility"
                 value={value}
-                checked={settings.visibility === value}
+                checked={visibility === value}
                 onChange={() => void change(value)}
               />
               <Icon size={20} aria-hidden="true" />
@@ -139,6 +158,26 @@ function ShareSettings({
               </span>
             </label>
           ))}
+          <label className="share-option" data-selected={visibility === "class"}>
+            <input type="radio" name="share-visibility" value="class" checked={visibility === "class"}
+              onChange={() => { setVisibility("class"); setNotice(""); setError(""); }} />
+            <Users size={20} aria-hidden="true" />
+            <span><strong>分享到班级</strong><small>任一所选班级的当前成员登录后可查看</small></span>
+          </label>
+          {visibility === "class" && <fieldset className="share-class-choice" disabled={classLoading || !!classError}>
+            <legend>分享到哪些班级</legend>
+            {classes.map(classroom => <label key={classroom.id} className="share-class-option">
+              <input type="checkbox" checked={selectedClasses.includes(classroom.id)} onChange={event => {
+                setNotice("");
+                setSelectedClasses(current => event.target.checked ? [...current, classroom.id] : current.filter(id => id !== classroom.id));
+              }} />
+              <span>{classroom.name}</span>
+            </label>)}
+            <small>{classLoading ? "正在读取班级…" : classError || (classes.length ? "可多选，保存后生效；未保存时保持原权限。" : "先加入或创建班级，即可使用班级分享。")}</small>
+            {selectedClasses.some(id => !classes.some(classroom => classroom.id === id)) && !classLoading && !classError && <small>部分原班级已不可用，保存时将移除这些班级。</small>}
+            <button type="button" className="primary share-done" disabled={saving || !selectedClasses.some(id => classes.some(classroom => classroom.id === id))}
+              onClick={() => void change("class", selectedClasses.filter(id => classes.some(classroom => classroom.id === id)))}>保存班级分享</button>
+          </fieldset>}
         </fieldset>
       )}
       {url && (
@@ -153,6 +192,7 @@ function ShareSettings({
               onFocus={(event) => event.target.select()}
             />
             <button
+              className="secondary"
               onClick={() => void copy()}
               disabled={saving}
               aria-label="复制分享链接"
@@ -168,7 +208,7 @@ function ShareSettings({
       )}
       {!url && settings && (
         <p className="share-description">
-          选择“获得链接的任何人可见”后生成分享链接。
+          选择班级分享或公开分享后生成分享链接。
         </p>
       )}
       {error && (
@@ -179,7 +219,7 @@ function ShareSettings({
       <p className="share-status" role="status">
         {saving ? "正在保存权限…" : notice}
       </p>
-      <Dialog.Close className="share-done">完成</Dialog.Close>
+      <Dialog.Close className="secondary share-done">完成</Dialog.Close>
     </>
   );
 }
@@ -201,7 +241,7 @@ export default function ShareActions({
     <Dialog.Root open={sharing} onOpenChange={setSharing}>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
-          className="share-actions-trigger"
+          className="secondary share-actions-trigger"
           disabled={working || !item || !courseId}
         >
           <Download size={16} aria-hidden="true" />
@@ -249,7 +289,7 @@ export default function ShareActions({
               item={item}
             />
           )}
-          <Dialog.Close className="share-close" aria-label="关闭分享设置">
+          <Dialog.Close className="icon-button share-close" aria-label="关闭分享设置">
             <X size={18} />
           </Dialog.Close>
         </Dialog.Content>

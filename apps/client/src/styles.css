@@ -854,6 +854,22 @@ textarea:focus-visible {
 }
 
 /* Shared Border-style surface and control treatments. */
+.primary,
+.secondary,
+.danger,
+.icon-button,
+.text-button {
+  border-radius: var(--radius-sm);
+}
+a.primary,
+a.secondary,
+a.text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  text-decoration: none;
+}
 .panel,
 .account-surface,
 .confirmation,

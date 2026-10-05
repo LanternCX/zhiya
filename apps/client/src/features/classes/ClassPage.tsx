@@ -6,9 +6,10 @@ import { createClass, getClass, joinClass, leaveClass, listClasses, classPath, r
 import { ClassDialog, errorText } from "./ClassDialog";
 import ClassManagement from "./ClassManagement";
 import MemberCard from "./MemberCard";
+import ClassShares from "./ClassShares";
 import "./classes.css";
 
-export default function ClassPage({ user, management = false }: { user: User; management?: boolean }) {
+export default function ClassPage({ user, management = false, materials = false }: { user: User; management?: boolean; materials?: boolean }) {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [all, setAll] = useState<Classroom[]>([]);
@@ -63,14 +64,15 @@ export default function ClassPage({ user, management = false }: { user: User; ma
   const title = dialog === "create" ? "创建班级" : dialog === "join" ? "加入班级" : "退出班级？";
 
   return <div className="classes-page">
-    {classId && (management ? <Link className="class-back text-button" to={classPath(classId)}><Icon name="back" />返回班级面板</Link> : <button className="class-back text-button" onClick={() => void navigate("/classes")}><Icon name="back" />返回班级</button>)}
+    {classId && (management || materials ? <Link className="class-back text-button" to={classPath(classId)}><Icon name="back" />返回班级面板</Link> : <button className="class-back text-button" onClick={() => void navigate("/classes")}><Icon name="back" />返回班级</button>)}
     {loading ? <p role="status" className="class-empty">正在读取班级…</p> : error ? <div className="class-empty"><Icon name="classroom" /><p role="alert">{error}</p><button className="secondary" onClick={() => setReload(value => value + 1)}>重新读取</button></div> : current ? (
-      management ? head ? <ClassManagement classroom={current} onChange={setCurrent} /> : <div className="class-empty"><Icon name="shield" /><p role="alert">只有本班班主任可以管理班级</p></div> : <>
+      materials ? <ClassShares key={`${user.id}:${current.id}`} classId={current.id} className={current.name} /> : management ? head ? <ClassManagement classroom={current} onChange={setCurrent} /> : <div className="class-empty"><Icon name="shield" /><p role="alert">只有本班班主任可以管理班级</p></div> : <>
         <header className="class-detail-header">
           <div className="class-emblem"><Icon name="classroom" /></div>
           <div className="class-heading"><p className="class-eyebrow">一起探索，一起成长</p><h1>{current.name}</h1><p>{current.headTeacherName} · 班主任<span aria-hidden="true"> / </span>{current.memberCount} 位成员</p></div>
           {head && <Link className="secondary class-manage-link" to={`${classPath(current.id)}/manage`}><Icon name="settings" />管理班级</Link>}
         </header>
+        <ClassShares key={`${user.id}:${current.id}`} classId={current.id} className={current.name} preview />
         <div className="class-member-sections">
           {(["head_teacher", "teacher", "student"] as const).map(role => {
             const members = (current.members ?? []).filter(member => member.role === role);

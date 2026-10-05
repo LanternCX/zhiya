@@ -114,8 +114,15 @@ CREATE TABLE IF NOT EXISTS deliverable_shares (
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
  deliverable_id text NOT NULL,
  token text NOT NULL UNIQUE,
- visibility text NOT NULL CHECK (visibility IN ('private', 'public')),
+ visibility text NOT NULL,
  PRIMARY KEY(course_id, deliverable_id)
+);
+ALTER TABLE deliverable_shares DROP CONSTRAINT IF EXISTS deliverable_shares_visibility_check;
+ALTER TABLE deliverable_shares ADD CONSTRAINT deliverable_shares_visibility_check CHECK (visibility IN ('private', 'public', 'class'));
+CREATE TABLE IF NOT EXISTS deliverable_share_classes (
+ token text NOT NULL REFERENCES deliverable_shares(token) ON DELETE CASCADE,
+ class_id uuid NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+ PRIMARY KEY(token, class_id)
 );
 CREATE TABLE IF NOT EXISTS deliverable_requests (
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,

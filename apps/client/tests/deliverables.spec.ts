@@ -44,12 +44,14 @@ test("classroom and document support edits, export files and retain independent 
     }
     return route.fulfill({ json: { deliverable: files().find((i) => route.request().url().endsWith(i.id)) } });
   });
-  const shares = new Map<string, { token: string; visibility: string }>();
+  await page.route("**/api/classes", route => route.fulfill({json:{classes:[{id:"class-one",name:"探索班"},{id:"class-two",name:"实践班"}]}}));
+  const shares = new Map<string, { token: string; visibility: string; classIds?: string[] }>();
   await page.route("**/api/courses/course/deliverables/*/share", (route) => {
     const id = route.request().url().split("/").at(-2)!;
     const saved = shares.get(id) ?? { token: "", visibility: "private" };
     if (route.request().method() === "PUT") {
       saved.visibility = route.request().postDataJSON().visibility;
+      saved.classIds = route.request().postDataJSON().classIds;
       saved.token ||= `share-${id}`;
       shares.set(id, saved);
     }
@@ -105,9 +107,20 @@ test("classroom and document support edits, export files and retain independent 
   await expect(sharing.getByRole("radio", { name: /获得链接的任何人可见/ })).toBeChecked();
   await expect(sharing.getByLabel("固定分享链接")).toHaveValue(/#\/shares\/share-course-document$/);
   const fixedLink = await sharing.getByLabel("固定分享链接").inputValue();
+  await expect(sharing.getByRole("checkbox")).toHaveCount(0);
+  await sharing.getByRole("radio", {name:/分享到班级/}).click();
+  await sharing.getByRole("checkbox", {name:"探索班"}).check();
+  await sharing.getByRole("checkbox", {name:"实践班"}).check();
+  expect(shares.get("course-document")?.visibility).toBe("public");
+  await sharing.getByRole("button", {name:"保存班级分享"}).click();
+  await expect(sharing.getByRole("status")).toContainText("已分享给所选班级");
+  await expect(sharing.getByRole("radio", {name:/分享到班级/})).toBeChecked();
+  expect(shares.get("course-document")?.classIds).toEqual(["class-one", "class-two"]);
+  await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
   await page.screenshot({ path: testInfo.outputPath("document-sharing.png") });
   await sharing.getByRole("radio", { name: /仅自己可见/ }).click();
   await expect(sharing.getByRole("status")).toContainText("已关闭外部访问");
+  await expect(sharing.getByRole("checkbox")).toHaveCount(0);
   await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
   await sharing.getByRole("button", { name: "完成", exact: true }).click();
   await page.getByRole("button", { name: "导出与分享" }).click();

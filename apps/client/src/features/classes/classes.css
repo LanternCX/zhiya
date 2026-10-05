@@ -119,3 +119,18 @@
   .class-management-tabs>button { gap: 5px; font-size: 13px; }
   .class-management-tabs .ui-icon { display: none; }
 }
+.class-materials-entry { display: flex; align-items: center; gap: 12px; padding: 18px 20px; margin: 24px 0; border: 1px solid var(--panel-edge); border-radius: var(--radius-md); color: var(--text); text-decoration: none; background: var(--surface); }
+.class-materials-entry>svg { color: var(--accent); flex-shrink: 0; }
+.class-materials-entry>svg:last-child { margin-left: auto; }
+.class-materials-entry small { color: var(--muted); }
+.class-materials-entry:hover,.class-material-card:hover { border-color: var(--accent); }
+.class-material-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,230px),1fr)); gap: 20px; list-style: none; margin: 0; padding: 0; }
+.class-material-grid>li { min-width: 0; }
+.class-material-card { display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid var(--panel-edge); border-radius: var(--radius-md); background: var(--surface); color: var(--text); text-decoration: none; }
+.class-material-cover { min-height: 136px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--accent); background: color-mix(in srgb,var(--accent) 7%,var(--surface)); border-bottom: 1px solid var(--panel-edge); }
+.class-material-cover[data-kind="document"] { background: var(--panel-fill); color: var(--muted); }
+.class-material-cover span { font-size: 12px; font-weight: 600; }
+.class-material-info { padding: 18px; }
+.class-material-info h2 { font-size: 16px; line-height: 1.6; margin: 0 0 14px; overflow-wrap: anywhere; }
+.class-material-info p { margin: 0 0 5px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.class-material-info time { font-size: 12px; color: var(--muted); }
