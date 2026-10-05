@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2] / 'data' / 'knowledge'
+ROOT = Path(__file__).resolve().parents[4] / 'data' / 'knowledge'
 SOURCE = None
 
 def dump(path, obj):

@@ -4,12 +4,29 @@
 
 本工具处理平台预备的教学资料，支持预处理和自部署模型的离线 embedding，不改变学生上传材料的格式支持，也不负责学生长期记忆、数据库导入或在线检索。
 
+## 目录结构
+
+```text
+apps/knowledge/
+├── pyproject.toml
+├── uv.lock
+├── README.md
+├── configs/                  # 模型及处理参数
+├── src/
+│   ├── preparation/          # 数据准备、导出与校验
+│   └── embedding/            # 离线向量生成
+├── scripts/                  # 计算云启动脚本
+└── tests/                    # 行为与回归测试
+```
+
+`uv` 将 `src/` 下的 Python 包安装到项目虚拟环境；命令通过 `python -m` 调用，不直接执行源码文件。默认数据路径与配置路径按项目位置确定，不依赖当前工作目录。
+
 ## 环境
 
 从项目根目录运行。Python 3.12 和依赖由 `uv` 管理：
 
 ```sh
-uv sync --locked --project apps/knowledge-pipeline
+uv sync --locked --project apps/knowledge
 ```
 
 Office 页面转换还需要 LibreOffice，视频处理需要 PATH 中的 `ffmpeg` 和 `ffprobe`。它们不是 Python 依赖。`--soffice` 可指定 LibreOffice 的可执行文件；省略时从 PATH 查找。字体安装和 LibreOffice 版本会影响排版，批量 embedding 前应抽查页面。
@@ -17,7 +34,7 @@ Office 页面转换还需要 LibreOffice，视频处理需要 PATH 中的 `ffmpe
 ## 使用现有数据
 
 ```sh
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/validate.py
+uv run --locked --project apps/knowledge python -m preparation.validate
 ```
 
 默认读取 `data/knowledge/`。所有命令支持 `--data-dir /absolute/path/to/dataset`，可以直接操作仓库外的数据目录。
@@ -27,12 +44,12 @@ uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline
 输入与输出目录应分开。处理不会修改输入资料；输出目录属于本工具的工作目录，其中的派生文件会被更新。
 
 ```sh
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/prepare.py prepare --source-dir /absolute/path/to/extracted
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/prepare.py render --soffice /absolute/path/to/soffice
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/prepare.py repair-slides --soffice /absolute/path/to/soffice
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/prepare.py pages
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/prepare.py consolidate
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/export_parquet.py
+uv run --locked --project apps/knowledge python -m preparation.prepare prepare --source-dir /absolute/path/to/extracted
+uv run --locked --project apps/knowledge python -m preparation.prepare render --soffice /absolute/path/to/soffice
+uv run --locked --project apps/knowledge python -m preparation.prepare repair-slides --soffice /absolute/path/to/soffice
+uv run --locked --project apps/knowledge python -m preparation.prepare pages
+uv run --locked --project apps/knowledge python -m preparation.prepare consolidate
+uv run --locked --project apps/knowledge python -m preparation.export_parquet
 ```
 
 按上述顺序执行：提取与去重、Office 转换、隐藏幻灯片校正、页面渲染、内容块汇总、Parquet 导出与验证。恢复中断处理时，先检查报告；部分步骤复用已有输出。重新生成不同来源的资料集应使用新的输出目录，避免混入旧文档。
@@ -79,37 +96,37 @@ chunks = chunks.cast_column("video", Video(decode=False))
 ## 测试
 
 ```sh
-uv run --locked --project apps/knowledge-pipeline python -m unittest discover -s apps/knowledge-pipeline
+uv run --locked --project apps/knowledge python -m unittest discover -s apps/knowledge/tests
 ```
 
 ## 计算云上运行千问 embedding
 
 默认采用 [Qwen3-VL-Embedding-2B](https://huggingface.co/Qwen/Qwen3-VL-Embedding-2B) 的多模态模型，以 [Sentence Transformers](https://sbert.net/docs/input_formats.html) 在自有 GPU 上离线推理。模型文件从 Hugging Face 下载，推理不调用托管模型 API，也无需启动 HTTP 服务。
 
-所有设置位于 [`embedding.toml`](embedding.toml)：模型固定到 Hugging Face commit，输出 2048 维 L2 归一化向量，默认使用单张 NVIDIA GPU、bfloat16、SDPA、batch size 1。依赖锁定在 `uv.lock`，embedding 依赖是可选项，普通数据预处理无需安装 PyTorch。
+所有设置位于 [`configs/embedding.toml`](configs/embedding.toml)：模型固定到 Hugging Face commit，输出 2048 维 L2 归一化向量，默认使用单张 NVIDIA GPU、bfloat16、SDPA、batch size 1。依赖锁定在 `uv.lock`，embedding 依赖是可选项，普通数据预处理无需安装 PyTorch。
 
 先准备 Linux NVIDIA GPU 实例及兼容的驱动、`uv`、当前仓库代码与数据。锁定的 PyTorch 2.8.0 Linux wheel 使用 CUDA 12.8；CUDA 运行库由 Python 依赖安装，宿主机仍需要兼容的 NVIDIA 驱动。不要求另外编译 Flash Attention。显存需求尚未实测，应先试跑并观察实际占用，再调整批量大小。
 
 仅做输入检查时，不下载模型，也不需要 GPU：
 
 ```sh
-uv run --locked --project apps/knowledge-pipeline python apps/knowledge-pipeline/embed.py check
+uv run --locked --project apps/knowledge python -m embedding.embed check
 ```
 
 在计算云上，从仓库根目录执行：
 
 ```sh
 # 自动安装锁定的 embedding 依赖，检查 GPU 与 bfloat16 支持。
-bash apps/knowledge-pipeline/cloud.sh doctor
+bash apps/knowledge/scripts/cloud.sh doctor
 
 # 下载固定版本模型，缓存到 data/models/。
-bash apps/knowledge-pipeline/cloud.sh download-model
+bash apps/knowledge/scripts/cloud.sh download-model
 
 # 先试跑三个候选，使用独立输出目录。
-bash apps/knowledge-pipeline/cloud.sh run --limit 3 --output-dir data/embeddings/smoke
+bash apps/knowledge/scripts/cloud.sh run --limit 3 --output-dir data/embeddings/smoke
 
 # 全量处理；重复此命令可恢复中断的任务。
-bash apps/knowledge-pipeline/cloud.sh run
+bash apps/knowledge/scripts/cloud.sh run
 ```
 
 `cloud.sh` 可从任意目录调用，配置中的相对路径按仓库根目录解析。`--data-dir`、`--output-dir` 覆盖目录时，相对路径按调用者当前目录解析。用 `--config /path/to/config.toml` 指定另一份配置。

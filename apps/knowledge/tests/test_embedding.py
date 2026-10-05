@@ -1,5 +1,4 @@
 import json
-import importlib.util
 import io
 import subprocess
 import sys
@@ -9,20 +8,16 @@ from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+from embedding import embed
 
 
-SCRIPT = Path(__file__).with_name('embed.py')
-CONFIG = Path(__file__).with_name('embedding.toml')
+CONFIG = Path(__file__).resolve().parents[1] / 'configs' / 'embedding.toml'
 
 
 class EmbeddingTests(unittest.TestCase):
     def test_interrupted_job_resumes_and_rejects_changed_instruction(self):
         from PIL import Image
 
-        spec = importlib.util.spec_from_file_location('embedding_job', SCRIPT)
-        assert spec is not None and spec.loader is not None
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / 'data').mkdir()
@@ -34,7 +29,7 @@ class EmbeddingTests(unittest.TestCase):
                  'video': None, 'text': None}
                 for ident in ('image1', 'image2')
             ]), root / 'data/chunks.parquet')
-            config = module.read_config(CONFIG, type('Args', (), {
+            config = embed.read_config(CONFIG, type('Args', (), {
                 'data_dir': root, 'output_dir': root / 'output',
             })())
             config['dimension'] = 64
@@ -47,14 +42,14 @@ class EmbeddingTests(unittest.TestCase):
                 return [[3.0, 4.0] + [0.0] * 62]
 
             with self.assertRaisesRegex(RuntimeError, 'GPU interrupted'):
-                module.run_job(config, encode=interrupted)
+                embed.run_job(config, encode=interrupted)
             resumed = []
 
             def encode(inputs):
                 resumed.extend(inputs)
                 return [[3.0, 4.0] + [0.0] * 62]
 
-            result = module.run_job(config, encode=encode)
+            result = embed.run_job(config, encode=encode)
             self.assertEqual(result['completed'], 2)
             self.assertEqual(len(resumed), 1)
             rows = [row for file in (root / 'output').glob('*.parquet')
@@ -64,7 +59,7 @@ class EmbeddingTests(unittest.TestCase):
             self.assertAlmostEqual(rows[0]['embedding'][1], 0.8)
             config['instruction'] = 'A different task.'
             with self.assertRaisesRegex(ValueError, 'different'):
-                module.run_job(config, encode=encode)
+                embed.run_job(config, encode=encode)
 
     def test_check_selects_candidates_without_loading_model_or_external_assets(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -81,9 +76,9 @@ class EmbeddingTests(unittest.TestCase):
                  'default_embedding_candidate': True},
             ]), root / 'data/chunks.parquet')
             result = subprocess.run([
-                sys.executable, str(SCRIPT), 'check', '--config', str(CONFIG),
+                sys.executable, '-m', 'embedding.embed', 'check',
                 '--data-dir', str(root),
-            ], capture_output=True, text=True)
+            ], cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             report = json.loads(result.stdout)
             self.assertEqual(report['selected'], 2)

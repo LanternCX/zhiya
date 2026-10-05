@@ -14,11 +14,12 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from PIL import Image
 
-from validate import file_sha256
+from preparation.validate import file_sha256
 
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_CONFIG = Path(__file__).with_name('embedding.toml')
+PROJECT = Path(__file__).resolve().parents[2]
+REPO = PROJECT.parents[1]
+DEFAULT_CONFIG = PROJECT / 'configs' / 'embedding.toml'
 
 
 def read_config(path, args):
@@ -152,7 +153,7 @@ def _run_locked(config, report, encode, limit):
                 if key not in ('data_dir', 'output_dir', 'model_cache', 'device', 'batch_size')}
     identity = {'settings': settings, 'chunks_sha256': report['chunks_sha256'], 'limit': limit,
                 'script_sha256': file_sha256(Path(__file__)),
-                'lock_sha256': file_sha256(Path(__file__).with_name('uv.lock'))}
+                'lock_sha256': file_sha256(PROJECT / 'uv.lock')}
     job_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     manifest = output / 'run.json'
     if manifest.exists():

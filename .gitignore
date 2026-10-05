@@ -1,7 +1,8 @@
 .DS_Store
 /data/
-/apps/knowledge-pipeline/.venv/
-/apps/knowledge-pipeline/__pycache__/
+/apps/knowledge/.venv/
+/apps/knowledge/**/__pycache__/
+/apps/knowledge/src/*.egg-info/
 /docs/design/screenshots/
 /docs/design/*.pdf
 node_modules/
