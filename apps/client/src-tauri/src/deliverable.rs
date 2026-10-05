@@ -9,6 +9,7 @@ pub async fn save_deliverable(
     let extension = match name.rsplit('.').next() {
         Some("pptx") => "pptx",
         Some("docx") => "docx",
+        Some("html") => "html",
         _ => return Err("不支持的文件格式".into()),
     };
     if name.contains(['/', '\\']) || bytes.is_empty() || bytes.len() > 128 * 1024 * 1024 {
@@ -19,7 +20,14 @@ pub async fn save_deliverable(
             .dialog()
             .file()
             .set_file_name(&name)
-            .add_filter("Office 文档", &[extension])
+            .add_filter(
+                if extension == "html" {
+                    "HTML 网页"
+                } else {
+                    "Office 文档"
+                },
+                &[extension],
+            )
             .blocking_save_file();
         let Some(selected) = selected else {
             return Ok(false);

@@ -28,6 +28,7 @@ func (a *application) Routes() http.Handler {
 	api.HandleFunc("DELETE /api/classes/{id}/removed-members/{memberId}", a.limitUser(60, a.allowClassMember))
 	api.HandleFunc("GET /api/classes/{id}/invitation", a.classInvitation)
 	api.HandleFunc("POST /api/classes/{id}/invitation", a.limitUser(60, a.classInvitation))
+	a.sharingRoutes(api, deliverables.New(a.models, a.objects))
 	a.http().Deliverables(api, "/api", deliverables.New(a.models, a.objects), userAuthorization)
 	api.HandleFunc("GET /api/agent/socket", a.agentStatusSocket)
 	api.HandleFunc("GET /api/conversations", a.listConversations)

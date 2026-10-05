@@ -1,9 +1,10 @@
 import { expect, test, type WebSocketRoute } from "@playwright/test";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { pathToFileURL } from "node:url";
 import { completedOnboarding } from "./completed-onboarding";
 
-test("classroom and document share source, support chat edits and download Office files", async ({ page }, testInfo) => {
+test("classroom and document support edits, export files and retain independent share settings", async ({ page, context }, testInfo) => {
   await completedOnboarding(page);
   await page.route("**/api/me", (route) => route.fulfill({ json: { id: "student", nickname: "小芽", email: "student@example.com", avatar: "" } }));
   await page.route("**/api/learning/model", (route) => route.fulfill({ json: { id: "test", available: true } }));
@@ -15,9 +16,12 @@ test("classroom and document share source, support chat edits and download Offic
     sections: [{ id: "section", title: "第一课", objective: "认识 AI", position: 0, status: "active", conversations: [conversation] }], createdAt: "2026-10-03", updatedAt: "2026-10-03",
   };
   const materialBlocks = [
-    { id: "intro", title: "认识人工智能", markdown: "语音助手帮助我们查询天气。\n\n从生活中的例子认识人工智能。", imageIds: [] },
+    { id: "intro", title: "认识人工智能", markdown: "语音助手帮助我们查询天气。\n\n从生活中的例子认识人工智能。", imageIds: ["picture"] },
     { id: "examples", title: "生活中的例子", markdown: "寻找身边的人工智能。", imageIds: [] },
   ];
+  const picture = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAAJklEQVR4nGP0ro1ioCVgoqnpoxaMWjBqwagFoxaMWjBqwagFVAMALtoBUr9C5zIAAAAASUVORK5CYII=", "base64");
+  await page.route("**/api/courses/course/deliverable-images/picture", (route) => route.fulfill({ json: { url: new URL("/test-picture.png", route.request().url()).href, headers: {} } }));
+  await page.route("**/test-picture.png", (route) => route.fulfill({ contentType: "image/png", body: picture }));
   const materials = [{ id: "handout", kind: "document", title: "补充阅读", source: "", revision: 1, blocks: materialBlocks, updatedAt: "2026-10-03" }];
   let contentVersion = 1;
   const files = () => {
@@ -39,6 +43,17 @@ test("classroom and document share source, support chat edits and download Offic
       return route.fulfill({ status: 201, json: { deliverable: imported } });
     }
     return route.fulfill({ json: { deliverable: files().find((i) => route.request().url().endsWith(i.id)) } });
+  });
+  const shares = new Map<string, { token: string; visibility: string }>();
+  await page.route("**/api/courses/course/deliverables/*/share", (route) => {
+    const id = route.request().url().split("/").at(-2)!;
+    const saved = shares.get(id) ?? { token: "", visibility: "private" };
+    if (route.request().method() === "PUT") {
+      saved.visibility = route.request().postDataJSON().visibility;
+      saved.token ||= `share-${id}`;
+      shares.set(id, saved);
+    }
+    return route.fulfill({ json: saved });
   });
   let revision = 1;
   const state: any = { course, conversationId: "lesson", lesson, busy: false, generating: false, commands: {} };
@@ -67,7 +82,7 @@ test("classroom and document share source, support chat edits and download Offic
   });
   await page.goto("/#/courses/course/conversations/lesson");
   await expect(page.getByRole("region", { name: "课堂页面" })).toContainText(question.text);
-  await expect(page.getByRole("button", { name: "下载 PPTX" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "导出与分享" })).toBeEnabled();
   await expect(page.getByRole("navigation", { name: "工作区区域" }).getByRole("button")).toHaveCount(2);
   await expect(page.getByRole("button", { name: "展开交付产物侧栏" })).toHaveAttribute("aria-expanded", "false");
   await page.getByRole("button", { name: "文档", exact: true }).click();
@@ -81,8 +96,31 @@ test("classroom and document share source, support chat edits and download Offic
   await page.getByRole("button", { name: "发送", exact: true }).click();
   await expect(documentPreview).toContainText("校园里的人工智能可以识别图片吗");
   await page.screenshot({ path: testInfo.outputPath("course-document-collapsed.png") });
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "分享设置" }).click();
+  const sharing = page.getByRole("dialog", { name: "分享设置" });
+  await expect(sharing.getByRole("radio", { name: /仅自己可见/ })).toBeChecked();
+  await expect(sharing.getByLabel("固定分享链接")).toHaveCount(0);
+  await sharing.getByRole("radio", { name: /获得链接的任何人可见/ }).click();
+  await expect(sharing.getByRole("radio", { name: /获得链接的任何人可见/ })).toBeChecked();
+  await expect(sharing.getByLabel("固定分享链接")).toHaveValue(/#\/shares\/share-course-document$/);
+  const fixedLink = await sharing.getByLabel("固定分享链接").inputValue();
+  await page.screenshot({ path: testInfo.outputPath("document-sharing.png") });
+  await sharing.getByRole("radio", { name: /仅自己可见/ }).click();
+  await expect(sharing.getByRole("status")).toContainText("已关闭外部访问");
+  await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
+  await sharing.getByRole("button", { name: "完成", exact: true }).click();
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "分享设置" }).click();
+  await expect(sharing.getByRole("radio", { name: /仅自己可见/ })).toBeChecked();
+  await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
+  await sharing.getByRole("radio", { name: /获得链接的任何人可见/ }).click();
+  await expect(sharing.getByRole("status")).toContainText("已开放分享");
+  await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
+  await sharing.getByRole("button", { name: "完成", exact: true }).click();
   const wordEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "下载 Word" }).click();
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "下载 Word" }).click();
   const word = await wordEvent;
   expect(word.suggestedFilename()).toBe("人工智能 · 课程文档.docx");
   const wordPath = testInfo.outputPath("course.docx");
@@ -101,8 +139,14 @@ test("classroom and document share source, support chat edits and download Offic
   expect((await documentPreview.boundingBox())!.width).toBeGreaterThan(expandedPreview.width + 80);
   await page.getByRole("button", { name: "课堂展示", exact: true }).click();
   await expect(page.getByRole("region", { name: "课堂页面" })).toContainText(question.text);
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "分享设置" }).click();
+  await expect(sharing.getByRole("radio", { name: /仅自己可见/ })).toBeChecked();
+  await expect(sharing.getByLabel("固定分享链接")).toHaveCount(0);
+  await sharing.getByRole("button", { name: "完成", exact: true }).click();
   const pptEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "下载 PPTX" }).click();
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "下载 PPTX" }).click();
   const ppt = await pptEvent;
   expect(ppt.suggestedFilename()).toBe("人工智能.pptx");
   const pptPath = testInfo.outputPath("course.pptx");
@@ -115,15 +159,40 @@ test("classroom and document share source, support chat edits and download Offic
   await expect(page.getByRole("heading", { name: "已有课件", exact: true })).toBeVisible();
   await expect(page.frameLocator('iframe[title="课件页面：认识人工智能"]').locator("body")).toContainText("语音助手");
   const importedEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "下载 PPTX" }).click();
-  const combinedPath = testInfo.outputPath("combined-classroom.pptx");
-  await (await importedEvent).saveAs(combinedPath);
-  const combinedXml = (await unzip("unzip", ["-p", combinedPath, "ppt/slides/*.xml"])).stdout;
-  expect(combinedXml).toContain("语音助手帮助我们查询天气");
-  expect(combinedXml).toContain("校园里的人工智能");
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "下载 PPTX" }).click();
+  const importedDownload = await importedEvent;
+  expect(importedDownload.suggestedFilename()).toBe("已有课件.pptx");
+  const importedPath = testInfo.outputPath("imported.pptx");
+  await importedDownload.saveAs(importedPath);
+  const importedXml = (await unzip("unzip", ["-p", importedPath, "ppt/slides/*.xml"])).stdout;
+  expect(importedXml).toContain("语音助手帮助我们查询天气");
+  expect(importedXml).not.toContain("校园里的人工智能");
+  const htmlEvent = page.waitForEvent("download");
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "下载 HTML 单文件" }).click();
+  const htmlDownload = await htmlEvent;
+  expect(htmlDownload.suggestedFilename()).toBe("已有课件.html");
+  const htmlPath = testInfo.outputPath("presentation.html");
+  await htmlDownload.saveAs(htmlPath);
+  const offline = await context.newPage();
+  await offline.goto(pathToFileURL(htmlPath).href);
+  await context.setOffline(true);
+  await offline.reload();
+  await expect(offline.getByRole("img", { name: "认识人工智能", exact: true })).toBeVisible();
+  expect(await offline.getByRole("img", { name: "认识人工智能", exact: true }).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 32)).toBe(true);
+  await expect(offline.getByText("语音助手帮助我们查询天气。")).toBeVisible();
+  await expect(offline.getByText("寻找身边的人工智能。")).toBeHidden();
+  await offline.getByRole("button", { name: "下一页", exact: true }).click();
+  await expect(offline.getByText("寻找身边的人工智能。")).toBeVisible();
+  await offline.getByRole("button", { name: "阅读全部", exact: true }).click();
+  await expect(offline.getByText("语音助手帮助我们查询天气。")).toBeVisible();
+  await offline.screenshot({ path: testInfo.outputPath("offline-html.png") });
+  await offline.close();
+  await context.setOffline(false);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "下载 PPTX" }).scrollIntoViewIfNeeded();
-  await expect(page.getByRole("button", { name: "下载 PPTX" })).toBeVisible();
+  await page.getByRole("button", { name: "导出与分享" }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: "导出与分享" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole("button", { name: "收起交付产物侧栏" }).click();
   const mobileSidebar = (await sidebar.boundingBox())!;

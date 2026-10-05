@@ -78,6 +78,10 @@ fn allowed(method: &str, path: &str) -> bool {
             if !id.is_empty() && !item.is_empty()
     ) || matches!(
         (method, segments.as_slice()),
+        ("GET" | "PUT", ["courses", id, "deliverables", item, "share"])
+            if !id.is_empty() && !item.is_empty()
+    ) || matches!(
+        (method, segments.as_slice()),
         ("POST", ["courses", id, "deliverables", "import"]) if !id.is_empty()
     ) || matches!(
         (method, segments.as_slice()),
@@ -88,6 +92,18 @@ fn allowed(method: &str, path: &str) -> bool {
 
 #[test]
 fn deliverable_bridge_allows_review_import_and_images() {
+    assert!(allowed(
+        "GET",
+        "/courses/course-id/deliverables/deck-id/share"
+    ));
+    assert!(allowed(
+        "PUT",
+        "/courses/course-id/deliverables/deck-id/share"
+    ));
+    assert!(!allowed(
+        "DELETE",
+        "/courses/course-id/deliverables/deck-id/share"
+    ));
     assert!(allowed("GET", "/courses/course-id/deliverables"));
     assert!(allowed("GET", "/courses/course-id/deliverables/deck-id"));
     assert!(allowed("POST", "/courses/course-id/deliverables/import"));

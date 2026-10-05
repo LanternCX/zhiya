@@ -1,0 +1,211 @@
+.reader-page {
+  --reader-paper: #fffefa;
+  --reader-ink: #243c30;
+  --reader-muted: #68746c;
+  --reader-rule: #dce3da;
+  --reader-tint: #eef2e9;
+  margin: 0;
+  padding: 40px 24px 110px;
+  background: #f3f4ee;
+  color: var(--reader-ink);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.8;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.reader-page *,
+.reader-page *::before,
+.reader-page *::after {
+  box-sizing: border-box;
+}
+.reader-header,
+.reader-content {
+  max-width: 980px;
+  margin: auto;
+}
+.reader-header {
+  margin-bottom: 30px;
+}
+.reader-header h1 {
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.3;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.reader-brand,
+.reader-kicker {
+  color: var(--reader-muted);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.reader-header p {
+  color: var(--reader-muted);
+}
+.reader-section {
+  background: var(--reader-paper);
+  border: 1px solid var(--reader-rule);
+  border-radius: 16px;
+  padding: clamp(20px, 5vw, 56px);
+  margin-bottom: 24px;
+  overflow-wrap: anywhere;
+  box-shadow: 0 8px 30px #23372805;
+}
+.reader-section[hidden] {
+  display: none;
+}
+.reader-section h2 {
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.4;
+  margin: 0 0 28px;
+}
+.reader-section img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 24px auto;
+  border-radius: 8px;
+}
+.reader-section pre {
+  background: var(--reader-tint);
+  padding: 20px;
+  overflow: auto;
+  border-radius: 8px;
+}
+.reader-section code {
+  font-family: "SFMono-Regular", Consolas, monospace;
+}
+.reader-section table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.reader-section th,
+.reader-section td {
+  padding: 10px;
+  border: 1px solid var(--reader-rule);
+  text-align: start;
+}
+.reader-section th {
+  background: var(--reader-tint);
+}
+.reader-section blockquote {
+  margin: 20px 0;
+  padding: 4px 20px;
+  border-left: 3px solid #6c8b5e;
+  color: var(--reader-muted);
+}
+.reader-section a {
+  color: #35724a;
+  text-decoration: underline;
+}
+.reader-diagram {
+  margin: 20px 0;
+}
+.reader-diagram svg {
+  width: 100%;
+  height: auto;
+  color: #7a907c;
+}
+.reader-diagram rect,
+.reader-diagram ellipse,
+.reader-diagram polygon {
+  fill: var(--reader-tint, #eef2e9);
+  stroke: #7a907c;
+  stroke-width: 2;
+}
+.reader-diagram text {
+  fill: var(--reader-ink, #243c30);
+  font-size: 16px;
+}
+.reader-diagram .emphasized {
+  color: #277447;
+}
+.reader-diagram .emphasized rect,
+.reader-diagram .emphasized ellipse,
+.reader-diagram .emphasized polygon {
+  stroke: #277447;
+  stroke-width: 4;
+}
+.reader-diagram figcaption {
+  font-size: 14px;
+}
+.reader-controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--reader-rule);
+  border-radius: 14px;
+  background: var(--reader-paper);
+  box-shadow: 0 8px 30px #23372818;
+  white-space: nowrap;
+  max-width: calc(100vw - 24px);
+}
+.reader-page button,
+.reader-page .reader-link {
+  padding: 8px 14px;
+  border: 1px solid var(--reader-rule);
+  border-radius: 8px;
+  background: var(--reader-paper);
+  color: var(--reader-ink);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.reader-page button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.reader-page button:focus-visible,
+.reader-page a:focus-visible {
+  outline: 2px solid #35724a;
+  outline-offset: 3px;
+}
+@media (max-width: 540px) {
+  .reader-page {
+    padding: 24px 12px 110px;
+  }
+  .reader-controls {
+    gap: 6px;
+    padding: 8px;
+    font-size: 13px;
+  }
+  .reader-page button {
+    padding: 8px;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .reader-page {
+    --reader-paper: #202923;
+    --reader-ink: #e0e8df;
+    --reader-muted: #afbbaf;
+    --reader-rule: #3e4c41;
+    --reader-tint: #2b392f;
+    background: #17201a;
+  }
+  .reader-section a {
+    color: #9bcba7;
+  }
+}
+@media print {
+  .reader-page {
+    padding: 0;
+    background: white;
+    color: black;
+  }
+  .reader-section,
+  .reader-section[hidden] {
+    display: block;
+    break-after: page;
+    box-shadow: none;
+    border: 0;
+  }
+  .reader-controls {
+    display: none;
+  }
+}

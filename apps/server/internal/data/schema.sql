@@ -110,6 +110,13 @@ CREATE TABLE IF NOT EXISTS deliverables (
  content jsonb NOT NULL
 );
 CREATE INDEX IF NOT EXISTS deliverables_course ON deliverables(course_id);
+CREATE TABLE IF NOT EXISTS deliverable_shares (
+ course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ deliverable_id text NOT NULL,
+ token text NOT NULL UNIQUE,
+ visibility text NOT NULL CHECK (visibility IN ('private', 'public')),
+ PRIMARY KEY(course_id, deliverable_id)
+);
 CREATE TABLE IF NOT EXISTS deliverable_requests (
  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
  request_id text NOT NULL,
