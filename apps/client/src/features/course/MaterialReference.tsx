@@ -6,11 +6,11 @@ import {
   type MessageResponseProps,
 } from "../../components/ai-elements/message";
 import { api } from "../../api";
-import type { MaterialContent } from "../../../../../packages/learning/src/domain/learning";
+import type { MaterialContent } from "../../domain/learning";
 import {
   parseMaterialReference,
   type MaterialReference,
-} from "../../../../../packages/learning/src/domain/material-reference";
+} from "./material-reference";
 
 function Citation({
   courseId,

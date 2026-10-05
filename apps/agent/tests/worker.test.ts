@@ -19,6 +19,7 @@ test(
     const workspace = await mkdtemp(join(tmpdir(), "zhiya-worker-"));
     t.after(() => rm(workspace, { recursive: true, force: true }));
     let projection: any;
+    const payloads: any[] = [];
     let models = 0;
     let release!: () => void;
     let gate = new Promise<void>((resolve) => (release = resolve));
@@ -27,6 +28,7 @@ test(
       for await (const part of req) parts.push(part);
       if (req.url === "/course/model") {
         models++;
+        payloads.push(JSON.parse(Buffer.concat(parts).toString()).payload);
         res.writeHead(200, { "Content-Type": "text/event-stream" });
         res.write(chunk("开始"));
         await gate;
@@ -87,7 +89,11 @@ test(
       grant: "test-grant",
       memory: "",
       model: { id: "test", available: true },
-      command: { requestId: "message-1", action: "prompt", args: ["解释一下"] },
+      command: {
+        requestId: "message-1",
+        action: "prompt",
+        args: ["  解释一下  ", ["notes.md"], "speech"],
+      },
     };
     const dispatch = () =>
       fetch(url, {
@@ -125,6 +131,17 @@ test(
       JSON.stringify(projection) + errors,
     );
     assert.equal(models, 1);
+    assert.deepEqual(projection.lesson.messages[0], {
+      id: 1,
+      role: "user",
+      text: "解释一下",
+      input_mode: "speech",
+      materials: ["notes.md"],
+    });
+    const speechRequest = JSON.stringify(payloads[0].messages.at(-1));
+    assert.match(speechRequest, /自然、简洁、口语化/);
+    assert.match(speechRequest, /不要逐字朗读代码/);
+    assert.match(speechRequest, /notes\.md/);
     assert.match(JSON.stringify(projection.lesson.messages), /生成完成/);
     assert.equal(projection.busy, false);
     gate = new Promise<void>((resolve) => (release = resolve));
@@ -136,6 +153,9 @@ test(
     assert.equal((await dispatch()).status, 202);
     for (let i = 0; i < 200 && models < 2; i++) await delay(25);
     assert.equal(models, 2);
+    const textRequest = JSON.stringify(payloads[1].messages.at(-1));
+    assert.match(textRequest, /普通文字模式/);
+    assert.match(textRequest, /不要因为历史语音对话而刻意口语化/);
     input.command = { requestId: "stop-2", action: "stop", args: [] };
     assert.equal((await dispatch()).status, 202);
     for (

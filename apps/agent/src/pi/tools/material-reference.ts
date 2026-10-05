@@ -4,7 +4,7 @@ export type MaterialReference = {
   ranges: Array<{ startLine: number; endLine: number }>;
 };
 
-export function parseMaterialReference(href: string): MaterialReference | null {
+function parseMaterialReference(href: string): MaterialReference | null {
   const match = /^#material\/([\w-]+)\/([1-9]\d*)\/([\d,-]+)$/.exec(href);
   if (!match) return null;
   const revision = Number(match[2]);

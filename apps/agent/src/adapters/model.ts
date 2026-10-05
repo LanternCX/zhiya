@@ -1,7 +1,7 @@
 import type {
   ModelRetryListener,
   ModelRetryStatus,
-} from "../../../../packages/learning/src/domain/learning";
+} from "../domain/learning";
 
 export function observeModelRetries(
   response: Response,

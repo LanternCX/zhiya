@@ -12,7 +12,7 @@ import type {
   InputMode,
   StoredCourse,
   StoredCourseConversation,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import CourseCover from "./CourseCover";
 import SectionHistory from "./SectionHistory";
 import {

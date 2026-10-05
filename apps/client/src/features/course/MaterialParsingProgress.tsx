@@ -1,4 +1,4 @@
-import type { MaterialPreparationProgress } from "../../../../../packages/learning/src/domain/learning";
+import type { MaterialPreparationProgress } from "../../domain/learning";
 import { Spinner } from "../../components/ui/spinner";
 import "./material-parsing-progress.css";
 

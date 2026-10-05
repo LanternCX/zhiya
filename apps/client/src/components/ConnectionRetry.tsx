@@ -1,4 +1,4 @@
-import type { ModelRetryStatus } from "../../../../packages/learning/src/domain/learning";
+import type { ModelRetryStatus } from "../domain/learning";
 import "./connection-retry.css";
 
 export default function ConnectionRetry({

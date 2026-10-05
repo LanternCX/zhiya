@@ -57,7 +57,7 @@ npm run dev:desktop
 
 通过 `ZHIYA_AGENT_WORKSPACES` 指定工作空间根目录，默认是 Pi 进程工作目录下的 `.workspaces`。部署时应配置固定的绝对路径并挂载持久化磁盘，同时备份 Pi 会话与 PostgreSQL。
 
-Agent 开发集中在 `apps/agent/src/pi`：`agent/` 定义各 Agent，`tools/` 定义工具，`sessions/` 保留教学与建档编排，`session.ts` 接入 Pi 原生会话。HTTP 入口在 `server.ts`，实例生命周期和状态同步在 `runtime/`，Go API 适配在 `adapters/`。`packages/learning` 只提供共享数据类型和展示转换。
+Agent 开发集中在 `apps/agent/src/pi`：`agent/` 定义各 Agent，`tools/` 定义工具，`sessions/` 保留教学与建档编排，`session.ts` 接入 Pi 原生会话。HTTP 入口在 `server.ts`，实例生命周期和状态同步在 `runtime/`，Go API 适配在 `adapters/`。Go 后端维护业务规则与 JSON 接口；`apps/client` 和 `apps/agent` 各自在 `src/domain` 手动维护所需类型，不引用彼此的源码。接口变更时同步检查两端类型，并通过相关行为测试验证通信与展示。界面转换与 Agent 执行辅助逻辑分别放在所属应用内。
 
 当前使用 OpenAI-compatible Chat Completions 流式接口。可以在 [`apps/server/config.yaml`](../apps/server/config.yaml) 中配置，也可以使用环境变量覆盖：
 

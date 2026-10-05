@@ -1,6 +1,6 @@
 import { expect, test, type WebSocketRoute } from "@playwright/test";
 import { completedOnboarding } from "./completed-onboarding";
-import type { CourseProjection } from "../../../packages/learning/src/domain/agent";
+import type { CourseProjection } from "../src/domain/agent";
 import type { AgentSnapshot } from "../src/transport/agent";
 
 test("running conversations stay visible and resume live updates after navigation, reload and reconnect", async ({

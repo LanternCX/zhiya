@@ -8,7 +8,7 @@ import type {
   ModelInfo,
   Question,
   AssistantOutput,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import { ProfileConnection } from "./runtime";
 import "./profile.css";
 import Mark from "../../components/Mark";

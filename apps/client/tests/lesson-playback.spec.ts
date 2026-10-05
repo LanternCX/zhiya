@@ -3,7 +3,7 @@ import { completedOnboarding } from "./completed-onboarding";
 import type {
   CourseConversationState,
   LessonPage,
-} from "../../../packages/learning/src/domain/learning";
+} from "../src/domain/learning";
 
 function response(
   text: string,

@@ -13,7 +13,7 @@ import "./course-room-layout-fix.css";
 import ResizeHandle from "../../components/ResizeHandle";
 import { createCourseSession } from "./runtime";
 import DeliverableWorkspace from "../deliverables/DeliverableWorkspace";
-import type { DeliverableSelection } from "../../../../../packages/learning/src/domain/deliverable";
+import type { DeliverableSelection } from "../../domain/deliverable";
 import type {
   CourseActivity,
   MaterialPreparationProgress,
@@ -26,7 +26,7 @@ import type {
   StoredCourseConversation,
   StoredCourse,
   CourseSection,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import { CourseMessageResponse } from "./MaterialReference";
 import MaterialParsingProgress from "./MaterialParsingProgress";
 import {
@@ -61,8 +61,8 @@ import { useElapsedSeconds } from "../../lib/use-elapsed-seconds";
 import { takeCompletedSentences } from "../../transport/speech";
 import { VoiceSessionController } from "../voice/VoiceSessionController";
 import { replaceVoicePlaybackText } from "../voice/VoicePlaybackText";
-import type { InputMode } from "../../../../../packages/learning/src/domain/learning";
-import { ResponsePresenter } from "../../../../../packages/learning/src/conversation/ResponsePresenter";
+import type { InputMode } from "../../domain/learning";
+import { ResponsePresenter } from "../voice/ResponsePresenter";
 import { emptyCourseState, uploadCourseMaterials } from "./courses";
 
 type RenderedCourseMessage = CourseMessage;

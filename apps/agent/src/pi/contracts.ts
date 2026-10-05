@@ -1,7 +1,7 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ToolResultMessage } from "@earendil-works/pi-ai";
-import type { Conversation } from "../../../../packages/learning/src/domain/conversation";
-export type { Conversation } from "../../../../packages/learning/src/domain/conversation";
+import type { Conversation } from "../domain/conversation";
+export type { Conversation } from "../domain/conversation";
 
 /** Persisted transcript operations supplied by the server host. */
 export interface ConversationStore {

@@ -1,4 +1,4 @@
-import type { VideoPage } from "../../../../../packages/learning/src/domain/learning";
+import type { VideoPage } from "../../domain/learning";
 
 export default function VideoCanvas({ page }: { page: VideoPage }) {
   if (!/^BV[0-9A-Za-z]{10}$/.test(page.bvid))

@@ -1,4 +1,4 @@
-import type { Conversation } from "../domain/conversation";
+import type { Conversation } from "../../domain/conversation";
 
 // Derive correction progress from acknowledged tools, not generated prose.
 // Keeping this in the transcript also lets another device resume the same flow.

@@ -1,7 +1,7 @@
 {
   "name": "zhiya",
   "private": true,
-  "workspaces": ["apps/client", "apps/website", "apps/agent", "packages/learning"],
+  "workspaces": ["apps/client", "apps/website", "apps/agent"],
   "engines": { "node": ">=22.19.0" },
   "overrides": { "image-size": "2.0.4" },
   "scripts": {

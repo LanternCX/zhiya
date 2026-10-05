@@ -7,12 +7,12 @@ import type {
   InputMode,
   AnimationPlaybackState,
   BilibiliSearchResult,
-} from "../../../../packages/learning/src/domain/learning";
+} from "../domain/learning";
 import { CourseAPI } from "../adapters/course";
 import { ToolAPI } from "../adapters/api";
 
-import type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
-export type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
+import type { CourseProjection } from "../domain/agent";
+export type { CourseProjection } from "../domain/agent";
 
 export class CourseHost {
   get running() {

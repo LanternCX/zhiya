@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "../../components/Icon";
 import CourseCover from "./CourseCover";
-import type { StoredCourse } from "../../../../../packages/learning/src/domain/learning";
+import type { StoredCourse } from "../../domain/learning";
 
 export default function CourseLibrary({
   courses,

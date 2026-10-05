@@ -3,7 +3,7 @@ import type {
   ModelInfo,
   ModelRetryListener,
   Slide,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import { publishSlideTool } from "../tools/publish_slide";

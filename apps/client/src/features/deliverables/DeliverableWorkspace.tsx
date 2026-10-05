@@ -26,7 +26,7 @@ import {
 import type {
   Deliverable,
   DeliverableSelection,
-} from "../../../../../packages/learning/src/domain/deliverable";
+} from "../../domain/deliverable";
 import type { ExportImage } from "./export";
 import { saveDeliverable } from "./download";
 import "./deliverables.css";

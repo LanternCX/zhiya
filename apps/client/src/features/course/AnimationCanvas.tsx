@@ -5,7 +5,7 @@ import type {
   AnimationPage,
   AnimationPlaybackCommand,
   AnimationPlaybackState,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 
 const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));

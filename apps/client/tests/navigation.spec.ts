@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { completedOnboarding } from "./completed-onboarding";
-import type { StoredCourse } from "../../../packages/learning/src/domain/learning";
+import type { StoredCourse } from "../src/domain/learning";
 
 function historyCourses(): StoredCourse[] {
   return ["甲", "乙"].map((name, courseIndex) => {

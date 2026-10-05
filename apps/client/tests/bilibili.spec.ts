@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { completedOnboarding } from "./completed-onboarding";
-import type { CourseConversationState } from "../../../packages/learning/src/domain/learning";
+import type { CourseConversationState } from "../src/domain/learning";
 
 test("video pages restore, use the official player, and unload when leaving the page or classroom", async ({ page }) => {
   await completedOnboarding(page);

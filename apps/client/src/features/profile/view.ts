@@ -1,5 +1,5 @@
-import type { ConversationView } from "../domain/learning";
-import type { Conversation } from "../domain/conversation";
+import type { ConversationView } from "../../domain/learning";
+import type { Conversation } from "../../domain/conversation";
 import { correctionProgress } from "./progress";
 
 /** Keep PI transcript details out of rendering and application state. */

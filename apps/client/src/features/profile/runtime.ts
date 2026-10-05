@@ -1,12 +1,12 @@
-import { conversationView } from "../../../../../packages/learning/src/conversation/view";
+import { conversationView } from "./view";
 import type {
   Answer,
   AssistantOutput,
   ConversationView,
   ModelInfo,
   ModelRetryListener,
-} from "../../../../../packages/learning/src/domain/learning";
-import type { ProfileProjection } from "../../../../../packages/learning/src/domain/agent";
+} from "../../domain/learning";
+import type { ProfileProjection } from "../../domain/agent";
 import { ConversationChannel } from "./channel";
 import { AgentConnection } from "../../transport/agent";
 

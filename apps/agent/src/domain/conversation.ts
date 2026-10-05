@@ -1,5 +1,5 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import type { Question } from "../domain/learning";
+import type { Question } from "./learning";
 
 export type Conversation = {
   id: string;

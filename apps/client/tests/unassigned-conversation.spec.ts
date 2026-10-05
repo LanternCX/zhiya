@@ -1,8 +1,8 @@
 import { expect, test, type WebSocketRoute } from "@playwright/test";
 import { completedOnboarding } from "./completed-onboarding";
 import type { AgentSnapshot } from "../src/transport/agent";
-import type { CourseProjection } from "../../../packages/learning/src/domain/agent";
-import type { StoredCourse } from "../../../packages/learning/src/domain/learning";
+import type { CourseProjection } from "../src/domain/agent";
+import type { StoredCourse } from "../src/domain/learning";
 
 for (const withinCourse of [false, true]) {
   test(`a reply without a course tool remains in history and resumes after reload (${withinCourse ? "course without section" : "without course"})`, async ({

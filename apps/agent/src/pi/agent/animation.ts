@@ -3,7 +3,7 @@ import type {
   ModelInfo,
   ModelRetryListener,
   AnimationPage,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import {

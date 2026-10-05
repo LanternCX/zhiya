@@ -1,7 +1,7 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { TeachingToolContext } from "../tool";
-import { materialCitation } from "../../../../../packages/learning/src/domain/material-reference";
+import { materialCitation } from "./material-reference";
 
 export const activityLabel = "读取课程材料";
 

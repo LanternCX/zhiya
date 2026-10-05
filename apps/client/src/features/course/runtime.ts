@@ -1,11 +1,11 @@
 import { AgentConnection, type SyncStatus } from "../../transport/agent";
-import type { CourseProjection } from "../../../../../packages/learning/src/domain/agent";
+import type { CourseProjection } from "../../domain/agent";
 import type {
   InputMode,
   CodingExercise,
   QuestionPage,
   AnimationPlaybackState,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 
 export function createCourseSession(
   input: { courseId?: string; conversationId?: string },
