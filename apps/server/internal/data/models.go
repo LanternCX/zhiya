@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	ErrClassMemberBusy               = errors.New("成员正在进行其他操作，请稍后重试")
 	ErrNotFound                      = errors.New("record not found")
 	ErrCourseNotFound                = errors.New("course not found")
 	ErrMaterialNotFound              = errors.New("material not found")

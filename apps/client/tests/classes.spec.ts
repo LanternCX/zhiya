@@ -52,11 +52,16 @@ for (const role of ["teacher", "student"] as const) {
     await expect(page.getByRole("article",{name:"小芽"})).toBeVisible();
     await expect(page.getByText("private@example.com")).toHaveCount(0);
     if(role==="teacher"){
+      await expect(page.getByRole("button",{name:"邀请成员",exact:true})).toHaveCount(0);
+      await page.getByRole("link",{name:"管理班级",exact:true}).click();
+      await expect(page.getByRole("heading",{name:"班级管理",exact:true})).toBeVisible();
       await page.getByRole("button",{name:"邀请成员",exact:true}).click();
       await expect(page.getByText(code,{exact:true})).toBeVisible();
       await page.getByRole("button",{name:"重置邀请码",exact:true}).click();
       await page.getByRole("dialog",{name:"重置邀请码？"}).getByRole("button",{name:"重置",exact:true}).click();
       await expect(page.getByText("QRSTUVWXYZABCDEF",{exact:true})).toBeVisible();
+      await page.getByRole("button",{name:"关闭",exact:true}).click();
+      await page.getByRole("link",{name:"返回班级面板",exact:true}).click();
     } else {
       await expect(page.getByRole("button",{name:"邀请成员",exact:true})).toHaveCount(0);
     }

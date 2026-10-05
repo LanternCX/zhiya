@@ -30,3 +30,12 @@ export async function joinClass(code: string) {
 export async function invitation(id: string, reset = false) {
   return (await api<{ code: string }>(`/classes/${encodeURIComponent(id)}/invitation`, reset ? "POST" : "GET")).code;
 }
+
+export function classPath(id: string) { return `/classes/${encodeURIComponent(id)}`; }
+export function renameClass(id: string, name: string) { return api(classPath(id), "PATCH", { name }); }
+export function dissolveClass(id: string, name: string) { return api(classPath(id), "DELETE", { name }); }
+export function leaveClass(id: string) { return api(`${classPath(id)}/leave`, "POST"); }
+export function transferClass(id: string, memberId: string) { return api(`${classPath(id)}/transfer`, "POST", { memberId }); }
+export function removeMember(id: string, memberId: string) { return api(`${classPath(id)}/members/${encodeURIComponent(memberId)}`, "DELETE"); }
+export function allowMember(id: string, memberId: string) { return api(`${classPath(id)}/removed-members/${encodeURIComponent(memberId)}`, "DELETE"); }
+export async function removedMembers(id: string) { return (await api<{members: ClassMember[]}>(`${classPath(id)}/removed-members`)).members; }

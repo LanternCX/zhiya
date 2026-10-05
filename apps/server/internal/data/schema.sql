@@ -29,6 +29,12 @@ CREATE TABLE IF NOT EXISTS class_members (
  PRIMARY KEY(class_id,user_id)
 );
 CREATE INDEX IF NOT EXISTS class_members_user ON class_members(user_id);
+CREATE TABLE IF NOT EXISTS class_removed_members (
+ class_id uuid NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+ user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ removed_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(class_id,user_id)
+);
 CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
 CREATE TABLE IF NOT EXISTS socket_tickets (
  token_hash text PRIMARY KEY,

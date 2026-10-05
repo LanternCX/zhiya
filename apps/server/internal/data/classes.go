@@ -3,10 +3,96 @@ package data
 import (
 	"context"
 	"encoding/base64"
+	"errors"
+
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type ClassModel struct{ db database }
+
+// Do not wait on another member's account lock while holding the class lock:
+// that member may be joining/leaving this class. Also protects transfer against account deletion.
+func (m ClassModel) ProtectMember(ctx context.Context, user string) error {
+	var id string
+	err := m.db.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 FOR KEY SHARE NOWAIT`, user).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil
+	}
+	var pgerr *pgconn.PgError
+	if errors.As(err, &pgerr) && pgerr.Code == "55P03" {
+		return ErrClassMemberBusy
+	}
+	return err
+}
+
+func (m ClassModel) HasHeadClasses(ctx context.Context, user string) (bool, error) {
+	var exists bool
+	err := m.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM classes WHERE head_teacher_id=$1)`, user).Scan(&exists)
+	return exists, err
+}
+
+// Lock serializes membership and management changes for a class.
+func (m ClassModel) Lock(ctx context.Context, id string) (head, name string, err error) {
+	err = m.db.QueryRow(ctx, `SELECT head_teacher_id,name FROM classes WHERE id::text=$1 FOR UPDATE`, id).Scan(&head, &name)
+	return
+}
+
+func (m ClassModel) Rename(ctx context.Context, id, name string) error {
+	_, err := m.db.Exec(ctx, `UPDATE classes SET name=$2 WHERE id::text=$1`, id, name)
+	return err
+}
+
+func (m ClassModel) IsRemoved(ctx context.Context, id, user string) (bool, error) {
+	var removed bool
+	err := m.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM class_removed_members WHERE class_id::text=$1 AND user_id=$2)`, id, user).Scan(&removed)
+	return removed, err
+}
+
+func (m ClassModel) RemoveMember(ctx context.Context, id, user string) error {
+	_, err := m.db.Exec(ctx, `WITH removed AS (DELETE FROM class_members WHERE class_id::text=$1 AND user_id=$2 RETURNING class_id,user_id)
+	 INSERT INTO class_removed_members(class_id,user_id) SELECT class_id,user_id FROM removed ON CONFLICT DO NOTHING`, id, user)
+	return err
+}
+
+func (m ClassModel) AllowMember(ctx context.Context, id, user string) error {
+	_, err := m.db.Exec(ctx, `DELETE FROM class_removed_members WHERE class_id::text=$1 AND user_id=$2`, id, user)
+	return err
+}
+
+func (m ClassModel) RemovedMembers(ctx context.Context, id string) ([]domain.ClassMember, error) {
+	rows, err := m.db.Query(ctx, `SELECT u.id,u.nickname,u.role FROM class_removed_members cm JOIN users u ON u.id=cm.user_id WHERE cm.class_id::text=$1 ORDER BY cm.removed_at DESC,u.id`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	members := []domain.ClassMember{}
+	for rows.Next() {
+		var member domain.ClassMember
+		if err := rows.Scan(&member.ID, &member.Nickname, &member.Role); err != nil {
+			return nil, err
+		}
+		members = append(members, member)
+	}
+	return members, rows.Err()
+}
+
+func (m ClassModel) Leave(ctx context.Context, id, user string) error {
+	_, err := m.db.Exec(ctx, `DELETE FROM class_members WHERE class_id::text=$1 AND user_id=$2`, id, user)
+	return err
+}
+
+func (m ClassModel) Transfer(ctx context.Context, id, user, code string) (bool, error) {
+	tag, err := m.db.Exec(ctx, `UPDATE classes SET head_teacher_id=$2,invitation_code=$3 WHERE id::text=$1
+	 AND EXISTS(SELECT 1 FROM class_members cm JOIN users u ON u.id=cm.user_id WHERE cm.class_id=classes.id AND u.id=$2 AND u.role='teacher')`, id, user, code)
+	return tag.RowsAffected() == 1, err
+}
+
+func (m ClassModel) Delete(ctx context.Context, id string) error {
+	_, err := m.db.Exec(ctx, `DELETE FROM classes WHERE id::text=$1`, id)
+	return err
+}
 
 const classSelect = `SELECT c.id::text,c.name,c.head_teacher_id,h.nickname,
  (SELECT count(*) FROM class_members cm WHERE cm.class_id=c.id)

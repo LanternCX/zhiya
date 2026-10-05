@@ -24,6 +24,7 @@ export const pageRoutes = [
   { id: "learning", path: "learn" },
   { id: "classes", path: "classes" },
   { id: "class", path: "classes/:classId" },
+  { id: "class-management", path: "classes/:classId/manage" },
   { id: "independent-conversation", path: "conversations/:conversationId" },
   { id: "course", path: "courses/:courseId" },
   {

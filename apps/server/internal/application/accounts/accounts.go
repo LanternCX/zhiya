@@ -300,6 +300,13 @@ func (s *Service) Delete(ctx context.Context, token, claimedUser, currentPasswor
 		if !user.PasswordMatches(currentPassword) {
 			return appfault.Invalid("当前密码不正确")
 		}
+		hasClasses, err := models.Classes.HasHeadClasses(ctx, user.ID)
+		if err != nil {
+			return err
+		}
+		if hasClasses {
+			return appfault.Forbidden("请先转交或解散你担任班主任的班级，再注销账号")
+		}
 		if err := models.Tokens.Revoke(ctx, user.ID, user.Email); err != nil {
 			return err
 		}
