@@ -1,0 +1,19 @@
+[project]
+name = "zhiya-knowledge-pipeline"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "datasets==5.0.1",
+    "pyarrow==25.0.1",
+    "markitdown[docx,pptx]>=0.1,<0.2",
+    "pypdfium2>=4.30,<6",
+    "pillow>=11,<13",
+]
+
+[project.optional-dependencies]
+embedding = [
+    "sentence-transformers[image]==6.1.0",
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "av>=16,<17",
+]

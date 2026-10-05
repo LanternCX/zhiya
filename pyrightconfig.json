@@ -1,0 +1,5 @@
+{
+  "venvPath": "apps/knowledge-pipeline",
+  "venv": ".venv",
+  "pythonVersion": "3.12"
+}

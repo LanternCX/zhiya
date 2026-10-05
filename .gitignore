@@ -1,4 +1,7 @@
 .DS_Store
+/data/
+/apps/knowledge-pipeline/.venv/
+/apps/knowledge-pipeline/__pycache__/
 /docs/design/screenshots/
 /docs/design/*.pdf
 node_modules/
