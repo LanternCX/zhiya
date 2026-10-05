@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import { RefreshCw } from "lucide-react";
 import { api, APIError } from "../../api";
 import type { Deliverable } from "../../domain/deliverable";
 import { renderBlock } from "./html";
@@ -94,7 +95,9 @@ export default function SharedDeliverable() {
         <button
           onClick={() => setRefresh((value) => value + 1)}
           disabled={!item && !error}
+          aria-busy={!item && !error}
         >
+          <RefreshCw size={16} aria-hidden="true" />
           刷新内容
         </button>
       </header>

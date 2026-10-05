@@ -73,12 +73,12 @@ for (const role of ["teacher", "student"] as const) {
     await expect(page.getByRole("link",{name:sharedTitle,exact:true})).toBeVisible();
     await page.setViewportSize({width:390,height:844});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-    await page.screenshot({path:testInfo.outputPath("class-shares-mobile.png")});
+    await page.screenshot({path:testInfo.outputPath("class-shares-mobile.png"), animations:"disabled"});
     await page.setViewportSize({width:1440,height:1000});
     materialCount = 30;
     await page.getByRole("button",{name:"刷新材料",exact:true}).click();
     await expect(page.getByRole("list",{name:"分享材料"}).getByRole("listitem")).toHaveCount(30);
-    await page.screenshot({path:testInfo.outputPath("class-share-cards.png")});
+    await page.screenshot({path:testInfo.outputPath("class-share-cards.png"), animations:"disabled"});
     await page.reload();
     await expect(page.getByRole("heading",{name:"教师分享",exact:true})).toBeVisible();
     shared = false;

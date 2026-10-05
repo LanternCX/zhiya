@@ -1,5 +1,59 @@
 /* Motion decorates state changes; content stays visible without animation support. */
+@keyframes interaction-enter {
+  from { opacity: 0; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes surface-exit {
+  from { opacity: 1; translate: 0 0; }
+  to { opacity: 0; translate: 0 4px; }
+}
+
+@keyframes overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes refresh-turn {
+  to { rotate: 360deg; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .class-dialog[data-state="open"],
+  .share-dialog[data-state="open"] {
+    animation: interaction-enter 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .class-dialog[data-state="closed"],
+  .share-dialog[data-state="closed"] {
+    animation: surface-exit 160ms ease-in;
+    pointer-events: none;
+  }
+  .class-dialog-overlay[data-state="open"],
+  .share-overlay[data-state="open"] {
+    animation: overlay-enter 240ms ease-out;
+  }
+  .class-dialog-overlay[data-state="closed"],
+  .share-overlay[data-state="closed"] {
+    animation: overlay-exit 160ms ease-in;
+  }
+  .class-menu,
+  .share-menu {
+    transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  }
+  .class-menu[data-state="open"],
+  .share-menu[data-state="open"] {
+    animation: interaction-enter 160ms ease-out;
+  }
+  .class-menu[data-state="closed"],
+  .share-menu[data-state="closed"] {
+    animation: surface-exit 120ms ease-in;
+    pointer-events: none;
+  }
   .workspace:not(.is-onboarding) {
     transition: grid-template-columns 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }

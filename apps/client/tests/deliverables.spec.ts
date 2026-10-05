@@ -4,7 +4,9 @@ import { promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 import { completedOnboarding } from "./completed-onboarding";
 
-test("classroom and document support edits, export files and retain independent share settings", async ({ page, context }, testInfo) => {
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+test(`classroom and document retain export and sharing behavior with motion ${reducedMotion}`, async ({ page, context }, testInfo) => {
+  await page.emulateMedia({ reducedMotion });
   await completedOnboarding(page);
   await page.route("**/api/me", (route) => route.fulfill({ json: { id: "student", nickname: "小芽", email: "student@example.com", avatar: "" } }));
   await page.route("**/api/learning/model", (route) => route.fulfill({ json: { id: "test", available: true } }));
@@ -109,6 +111,7 @@ test("classroom and document support edits, export files and retain independent 
   const fixedLink = await sharing.getByLabel("固定分享链接").inputValue();
   await expect(sharing.getByRole("checkbox")).toHaveCount(0);
   await sharing.getByRole("radio", {name:/分享到班级/}).click();
+  expect(await sharing.evaluate(element => element.getAnimations({ subtree: true }).length > 0)).toBe(reducedMotion === "no-preference");
   await sharing.getByRole("checkbox", {name:"探索班"}).check();
   await sharing.getByRole("checkbox", {name:"实践班"}).check();
   expect(shares.get("course-document")?.visibility).toBe("public");
@@ -117,12 +120,14 @@ test("classroom and document support edits, export files and retain independent 
   await expect(sharing.getByRole("radio", {name:/分享到班级/})).toBeChecked();
   expect(shares.get("course-document")?.classIds).toEqual(["class-one", "class-two"]);
   await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
-  await page.screenshot({ path: testInfo.outputPath("document-sharing.png") });
+  await page.screenshot({ path: testInfo.outputPath("document-sharing.png"), animations: "disabled" });
   await sharing.getByRole("radio", { name: /仅自己可见/ }).click();
   await expect(sharing.getByRole("status")).toContainText("已关闭外部访问");
   await expect(sharing.getByRole("checkbox")).toHaveCount(0);
   await expect(sharing.getByLabel("固定分享链接")).toHaveValue(fixedLink);
   await sharing.getByRole("button", { name: "完成", exact: true }).click();
+  await expect(sharing).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "导出与分享" })).toBeFocused();
   await page.getByRole("button", { name: "导出与分享" }).click();
   await page.getByRole("menuitem", { name: "分享设置" }).click();
   await expect(sharing.getByRole("radio", { name: /仅自己可见/ })).toBeChecked();
@@ -211,4 +216,14 @@ test("classroom and document support edits, export files and retain independent 
   const mobileSidebar = (await sidebar.boundingBox())!;
   expect(mobileSidebar.x + mobileSidebar.width).toBeCloseTo(390, 0);
   await page.screenshot({ path: testInfo.outputPath("classroom-mobile.png") });
+  await page.getByRole("button", { name: "导出与分享" }).click();
+  await page.getByRole("menuitem", { name: "分享设置" }).click();
+  await expect(sharing.getByRole("radio", { name: /仅自己可见/ })).toBeVisible();
+  await page.emulateMedia({ colorScheme: "dark" });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("sharing-mobile-dark.png"), animations: "disabled" });
+  await page.keyboard.press("Escape");
+  await expect(sharing).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "导出与分享" })).toBeFocused();
 });
+}
