@@ -1,6 +1,6 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
-import type { BilibiliSearchResult } from "../../../../../packages/learning/src/domain/learning";
+import type { BilibiliSearchResult } from "../../domain/learning";
 
 export type BilibiliSearch = (
   query: string,

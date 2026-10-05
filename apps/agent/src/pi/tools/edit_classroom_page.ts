@@ -1,7 +1,7 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import { createHash } from "node:crypto";
-import type { LessonPage } from "../../../../../packages/learning/src/domain/learning";
+import type { LessonPage } from "../../domain/learning";
 import type { LessonPageTools } from "../tool";
 
 const fields = {

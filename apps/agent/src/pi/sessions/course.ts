@@ -22,9 +22,7 @@ import type {
   StoredCourse,
   StoredCourseConversation,
   InputMode,
-} from "../../../../../packages/learning/src/domain/learning";
-import { ConversationManager } from "../../../../../packages/learning/src/conversation/ConversationManager";
-import { ResponsePresenter } from "../../../../../packages/learning/src/conversation/ResponsePresenter";
+} from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createTeacherAgent, teacherToolLabel } from "../agent/teacher";
 import { createSlidesAgent } from "../agent/slides";
@@ -60,6 +58,11 @@ export type IllustrationGateway = {
   }>;
   cancel(courseId: string, generationId: string): Promise<unknown>;
 };
+
+function responseModePrompt(inputMode: InputMode) {
+  if (inputMode === "text") return "当前用户正在通过文字与你交流。请按普通文字模式回答，保留适合阅读的完整结构、必要的标题和列表；不要因为历史语音对话而刻意口语化，也不要省略文字模式需要的细节。";
+  return "当前用户正在通过语音与你交流。请使用自然、简洁、口语化的方式回答。普通问题优先控制在 1～3 句话。不要像文章一样回答，避免大量标题、Markdown 和长列表。除非用户明确要求，否则不要输出英文。代码、表格、URL 或其他不适合朗读的内容，只进行简要说明，不要逐字朗读代码、表格或 URL。";
+}
 
 export class CourseSession {
   private teacher: Agent;
@@ -370,28 +373,24 @@ export class CourseSession {
         .filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("");
-      const presented = ResponsePresenter.present(
-        text,
-        this.teacherMessageMode,
-      );
       if (
         reasoning ||
-        (event.type === "message_update" && !presented.display_text)
+        (event.type === "message_update" && !text)
       ) {
         this.onActivity({
           kind: "thinking",
           text: reasoning,
           active: event.type === "message_update",
         });
-      } else if (presented.display_text) {
+      } else if (text) {
         this.onActivity(null);
       }
-      if (presented.display_text.trim()) {
+      if (text.trim()) {
         this.ensureNarrationPlayback(this.teacherMessageId);
         const nextMessage: CourseMessage = {
           id: this.teacherMessageId,
           role: "assistant",
-          text: presented.display_text,
+          text,
           input_mode: this.teacherMessageMode,
           streaming: event.type === "message_update",
           pageId: this.presentations.find(
@@ -435,7 +434,12 @@ export class CourseSession {
       id: ++this.messageSequence,
       ...(questionEvent
         ? { role: "user" as const, text: "", questionEvent }
-        : ConversationManager.userMessage(text, inputMode, materialNames)),
+        : {
+            role: "user" as const,
+            text: text.trim(),
+            input_mode: inputMode,
+            ...(materialNames.length ? { materials: materialNames } : {}),
+          }),
     });
     const studentText = materialNames.length
       ? `${text}\n\nThe student attached these files as course materials for this request: ${JSON.stringify(materialNames)}. Upload and parsing have completed before this turn. List and read the relevant course materials before planning or teaching from them. A course established for these attachments may initially use the first filename as its title; use rename_course if the request and parsed contents suggest a better title.`
@@ -447,7 +451,7 @@ export class CourseSession {
     const agentTextWithNotices = taskNotices.length
       ? `${taskNotices.join("\n\n")}\n\n${studentText}`
       : studentText;
-    const agentText = `${agentTextWithNotices}\n\n${ResponsePresenter.modePrompt(inputMode)}`;
+    const agentText = `${agentTextWithNotices}\n\n${responseModePrompt(inputMode)}`;
     if (this.busy) {
       this.teacher.steer({
         role: "user",
@@ -495,7 +499,7 @@ export class CourseSession {
     const operation = this.cancellation;
     try {
       await this.teacher.prompt(
-        `Begin teaching in this conversation using the application handoff context.\n\n${ResponsePresenter.modePrompt(inputMode)}`,
+        `Begin teaching in this conversation using the application handoff context.\n\n${responseModePrompt(inputMode)}`,
       );
       if (await this.finishHandoff()) return;
       await this.waitForNarrationPlayback();

@@ -5,7 +5,7 @@ import type {
   DeliverableBlock,
   DeliverableChange,
   DeliverableSelection,
-} from "../../../../../packages/learning/src/domain/deliverable";
+} from "../../domain/deliverable";
 
 export type DeliverableTools = {
   list(): Promise<Deliverable[]>;

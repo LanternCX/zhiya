@@ -15,7 +15,7 @@ import type {
   LessonPage,
   LessonPresentation,
   QuestionPage,
-} from "../../../../packages/learning/src/domain/learning";
+} from "../domain/learning";
 import type { SlideRequest } from "./tools/create_slides";
 import type { DeliverableTools } from "./tools/deliverables";
 

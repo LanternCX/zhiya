@@ -1,7 +1,7 @@
 import { ToolAPI, ToolAPIError } from "./api";
-import type { Deliverable } from "../../../../packages/learning/src/domain/deliverable";
+import type { Deliverable } from "../domain/deliverable";
 import type { CourseManagement } from "../pi/tool";
-import type { CourseProjection } from "../../../../packages/learning/src/domain/agent";
+import type { CourseProjection } from "../domain/agent";
 import type {
   StoredCourse,
   StoredCourseConversation,
@@ -11,7 +11,7 @@ import type {
   MaterialPreparationProgress,
   PendingCourseMaterial,
   OutlineReorganization,
-} from "../../../../packages/learning/src/domain/learning";
+} from "../domain/learning";
 
 type OutlineResult = {
   course?: StoredCourse;

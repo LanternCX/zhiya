@@ -5,7 +5,7 @@ import type {
   CourseMaterial,
   MaterialPreparationProgress,
   StoredCourseConversation,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import {
   ObjectStorageError,
   readObjectText,

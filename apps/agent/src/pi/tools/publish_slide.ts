@@ -1,6 +1,6 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
-import type { Slide } from "../../../../../packages/learning/src/domain/learning";
+import type { Slide } from "../../domain/learning";
 
 function validateSlide(title: string, markdown: string) {
   const lines = markdown.trim().split(/\r?\n/);

@@ -41,7 +41,7 @@ import type {
   ModelInfo,
   StoredCourse,
   StoredCourseConversation,
-} from "../../../packages/learning/src/domain/learning";
+} from "./domain/learning";
 import "./workspace.css";
 import { matchRoutes, useLocation, useNavigate } from "react-router";
 import {

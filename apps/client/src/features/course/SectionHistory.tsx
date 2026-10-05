@@ -3,7 +3,7 @@ import Icon from "../../components/Icon";
 import type {
   CourseSection,
   StoredCourseConversation,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 
 export default function SectionHistory({
   section,

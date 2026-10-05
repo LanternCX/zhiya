@@ -2,7 +2,7 @@ import { openSession } from "../pi/session";
 import { CourseHost, type CourseProjection } from "./course";
 import { ProfileHost, type ProfileProjection } from "./profile";
 import { ToolAPI } from "../adapters/api";
-import type { ModelInfo } from "../../../../packages/learning/src/domain/learning";
+import type { ModelInfo } from "../domain/learning";
 
 type Receipt = { status: "running" | "complete" | "failed"; error?: string };
 export type State = (CourseProjection | ProfileProjection) & {

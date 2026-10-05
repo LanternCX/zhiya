@@ -1,6 +1,6 @@
 import { APIError, api, retryRateLimited } from "../../api";
-import type { Conversation } from "../../../../../packages/learning/src/domain/conversation";
-import type { Answer } from "../../../../../packages/learning/src/domain/learning";
+import type { Conversation } from "../../domain/conversation";
+import type { Answer } from "../../domain/learning";
 
 type Pending = {
   action: object;

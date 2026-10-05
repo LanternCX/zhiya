@@ -4,11 +4,11 @@ import { ProfileSession } from "../pi/sessions/profile";
 import type {
   Conversation,
 } from "../pi/contracts";
-import type { ModelInfo } from "../../../../packages/learning/src/domain/learning";
+import type { ModelInfo } from "../domain/learning";
 import { ToolAPI } from "../adapters/api";
 
-import type { ProfileProjection } from "../../../../packages/learning/src/domain/agent";
-export type { ProfileProjection } from "../../../../packages/learning/src/domain/agent";
+import type { ProfileProjection } from "../domain/agent";
+export type { ProfileProjection } from "../domain/agent";
 
 export class ProfileHost {
   get running() {

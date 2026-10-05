@@ -1,7 +1,7 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { CodingTools } from "../tool";
-import type { CodingExercise } from "../../../../../packages/learning/src/domain/learning";
+import type { CodingExercise } from "../../domain/learning";
 
 export const activityLabel = "展示编程练习";
 

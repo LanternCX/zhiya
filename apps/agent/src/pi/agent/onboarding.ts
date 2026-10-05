@@ -3,7 +3,7 @@ import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type {
   ModelInfo,
   ModelRetryListener,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import type { ModelGateway } from "../gateway";
 import { createAgent } from "../agent";
 import { askStudentTool } from "../tools/ask_student";

@@ -8,7 +8,7 @@ import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import { persistAgent } from "./session";
 import type { Model } from "@earendil-works/pi-ai";
 import { streamSimple } from "@earendil-works/pi-ai/api/openai-completions";
-import type { ModelInfo } from "../../../../packages/learning/src/domain/learning";
+import type { ModelInfo } from "../domain/learning";
 
 type AgentSetup = {
   model: ModelInfo;

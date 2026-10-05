@@ -11,7 +11,7 @@ import {
 } from "../../components/ai-elements/message";
 import { Shimmer } from "../../components/ai-elements/shimmer";
 import { BrainIcon } from "lucide-react";
-import type { AssistantOutput } from "../../../../../packages/learning/src/domain/learning";
+import type { AssistantOutput } from "../../domain/learning";
 import { useElapsedSeconds } from "../../lib/use-elapsed-seconds";
 
 export default function AssistantResponse({

@@ -7,7 +7,7 @@ import type {
   OutlineClassification,
   OutlineReorganization,
   StoredCourseConversation,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import { createAgent } from "../agent";
 import type { ModelGateway } from "../gateway";
 

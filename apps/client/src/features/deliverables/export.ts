@@ -12,7 +12,7 @@ import {
   WidthType,
   ImageRun,
 } from "docx";
-import type { Deliverable } from "../../../../../packages/learning/src/domain/deliverable";
+import type { Deliverable } from "../../domain/deliverable";
 
 export type ExportImage = { data: string; width: number; height: number };
 type Content =

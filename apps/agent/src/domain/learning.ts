@@ -140,13 +140,6 @@ export type CodeRunResult = {
 
 export type InputMode = "text" | "speech";
 
-export type UserMessage = {
-  role: "user";
-  text: string;
-  input_mode: InputMode;
-  materials?: string[];
-};
-
 export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
@@ -278,18 +271,3 @@ export type StoredCourse = {
 
 export type ModelRetryStatus = { attempt: number; maxRetries: number };
 export type ModelRetryListener = (status: ModelRetryStatus | null) => void;
-
-export type ConversationView = {
-  id: string;
-  question: Question | null;
-  completed: boolean;
-  correctionEnded: boolean;
-  memory: string;
-  revision: number;
-  status: "idle" | "running" | "waiting";
-  leaseUntil: string;
-  messageCount: number;
-  lastAssistant: boolean;
-  output: AssistantOutput;
-  correction: { answered: boolean; saved: boolean } | null;
-};

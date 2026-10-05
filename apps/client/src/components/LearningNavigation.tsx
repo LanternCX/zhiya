@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import type { StoredCourse } from "../../../../packages/learning/src/domain/learning";
+import type { StoredCourse } from "../domain/learning";
 import { conversationPath, independentConversationPath } from "../routes";
 import Icon from "./Icon";
 import { Spinner } from "./ui/spinner";

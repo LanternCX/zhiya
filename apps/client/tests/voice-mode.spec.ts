@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ConversationManager } from "../../../packages/learning/src/conversation/ConversationManager";
-import { ResponsePresenter } from "../../../packages/learning/src/conversation/ResponsePresenter";
+import { ResponsePresenter } from "../src/features/voice/ResponsePresenter";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/socket-ticket", (route) =>
@@ -221,34 +220,6 @@ test("voice reducer exits from speaking", async ({ page }) => {
   expect(result.status).toBe("ended");
 });
 
-test("conversation manager creates unified text and speech user messages", () => {
-  const result = [
-    ConversationManager.userMessage("  打字问题  ", "text"),
-    ConversationManager.userMessage("  语音问题  ", "speech", ["notes.md"]),
-  ];
-  expect(result).toEqual([
-    { role: "user", text: "打字问题", input_mode: "text" },
-    {
-      role: "user",
-      text: "语音问题",
-      input_mode: "speech",
-      materials: ["notes.md"],
-    },
-  ]);
-});
-
-test("legacy course user messages default to text input mode", () => {
-  const result = ConversationManager.normalizeUserMessage({
-    role: "user",
-    text: "历史消息",
-  });
-  expect(result).toEqual({
-    role: "user",
-    text: "历史消息",
-    input_mode: "text",
-  });
-});
-
 test("response presenter keeps display text and simplifies voice text", () => {
   const result = [
     ResponsePresenter.present("结论在这里。", "text"),
@@ -294,18 +265,6 @@ test("voice responses keep code and links visible while using a spoken summary",
       speech_text: "链接我已经放在屏幕上了。",
     },
   ]);
-});
-
-test("response presenter provides a voice style prompt without replacing the core prompt", () => {
-  const result = {
-    text: ResponsePresenter.modePrompt("text"),
-    speech: ResponsePresenter.modePrompt("speech"),
-  };
-  expect(result.text).toContain("普通文字模式");
-  expect(result.text).toContain("不要因为历史语音对话而刻意口语化");
-  expect(result.speech).toContain("自然、简洁、口语化");
-  expect(result.speech).toContain("不要逐字朗读代码");
-  expect(result.speech).toContain("不要输出英文");
 });
 
 test("playback controller owns one audio queue and clears it on stop", async ({

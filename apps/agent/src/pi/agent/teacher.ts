@@ -2,7 +2,7 @@ import type {
   ModelInfo,
   ModelRetryListener,
   QuestionPage,
-} from "../../../../../packages/learning/src/domain/learning";
+} from "../../domain/learning";
 import type { AgentMessage, AgentOptions } from "@earendil-works/pi-agent-core";
 import type { Branch } from "@earendil-works/pi-agent-core/harness/session";
 import type { ModelGateway } from "../gateway";
