@@ -6,9 +6,9 @@ import tempfile
 from pathlib import Path
 from collections import Counter
 import datasets
-from validate import file_sha256, validate
+from preparation.validate import file_sha256, validate
 
-ROOT = Path(__file__).resolve().parents[2] / 'data' / 'knowledge'
+ROOT = Path(__file__).resolve().parents[4] / 'data' / 'knowledge'
 
 def rows(name):
     with (ROOT/name).open(encoding='utf-8') as file:

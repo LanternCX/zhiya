@@ -1,5 +1,9 @@
 {
-  "venvPath": "apps/knowledge-pipeline",
+  "venvPath": "apps/knowledge",
   "venv": ".venv",
-  "pythonVersion": "3.12"
+  "pythonVersion": "3.12",
+  "executionEnvironments": [
+    { "root": "apps/knowledge", "extraPaths": ["apps/knowledge/src"] },
+    { "root": "." }
+  ]
 }

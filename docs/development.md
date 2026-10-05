@@ -150,7 +150,7 @@ ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./inte
 
 ## 教学知识库资料处理
 
-离线资料管线位于 [`apps/knowledge-pipeline`](../apps/knowledge-pipeline/README.md)，使用 `uv` 管理 Python 依赖，生成和验证 Hugging Face Dataset 格式的 Parquet。原始资料、派生素材和向量结果放在被 Git 忽略的根目录 `data/`；默认数据集路径为 `data/knowledge/`。这套工具独立于在线材料解析服务，运行步骤及计算云加载方式见该目录的说明。
+离线资料工具位于 [`apps/knowledge`](../apps/knowledge/README.md)，使用 `uv` 管理 Python 依赖，生成和验证 Hugging Face Dataset 格式的 Parquet。原始资料、派生素材和向量结果放在被 Git 忽略的根目录 `data/`；默认数据集路径为 `data/knowledge/`。这套工具独立于在线材料解析服务，运行步骤及计算云加载方式见该目录的说明。
 
 ## 常用命令
 

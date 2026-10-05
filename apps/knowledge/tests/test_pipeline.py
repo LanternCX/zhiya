@@ -6,14 +6,11 @@ import unittest
 from pathlib import Path
 
 
-SCRIPTS = Path(__file__).resolve().parent
-
-
 class PipelineTests(unittest.TestCase):
     def test_prepare_rejects_output_inside_source(self):
         with tempfile.TemporaryDirectory() as folder:
             result = subprocess.run([
-                sys.executable, str(SCRIPTS / 'prepare.py'), 'prepare',
+                sys.executable, '-m', 'preparation.prepare', 'prepare',
                 '--source-dir', folder, '--data-dir', str(Path(folder) / 'output'),
             ], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
@@ -45,13 +42,13 @@ class PipelineTests(unittest.TestCase):
             (root / 'chunks.jsonl').write_text(json.dumps(chunk) + '\n')
             (root / 'manifest.json').write_text('{"schema_version": 1}')
             result = subprocess.run([
-                sys.executable, str(SCRIPTS / 'export_parquet.py'), '--data-dir', str(root),
+                sys.executable, '-m', 'preparation.export_parquet', '--data-dir', str(root),
             ], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             loaded = load_dataset('parquet', data_files=str(root / 'data/chunks.parquet'), split='train')
             loaded = loaded.cast_column('image', DatasetImage(decode=False))
             self.assertEqual(loaded[0]['image']['bytes'], (root / 'image.png').read_bytes())
-            validator = [sys.executable, str(SCRIPTS / 'validate.py'), '--data-dir', str(root)]
+            validator = [sys.executable, '-m', 'preparation.validate', '--data-dir', str(root)]
             valid = subprocess.run(validator, capture_output=True, text=True)
             self.assertEqual(valid.returncode, 0, valid.stderr)
             (root / 'image.png').write_bytes(b'changed')
@@ -76,7 +73,7 @@ class PipelineTests(unittest.TestCase):
                  'source_location': {'kind': 'heading'}, 'content_sha256': 'hash1'},
             ]))
             result = subprocess.run([
-                sys.executable, str(SCRIPTS / 'prepare.py'), 'consolidate',
+                sys.executable, '-m', 'preparation.prepare', 'consolidate',
                 '--data-dir', str(root), '--source-dir', str(root / 'source'),
             ], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

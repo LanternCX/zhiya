@@ -8,7 +8,7 @@ from pathlib import Path
 import pyarrow.parquet as pq
 
 
-DEFAULT_DATA_DIR = Path(__file__).resolve().parents[2] / 'data' / 'knowledge'
+DEFAULT_DATA_DIR = Path(__file__).resolve().parents[4] / 'data' / 'knowledge'
 
 
 def file_sha256(path):
