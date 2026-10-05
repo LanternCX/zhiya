@@ -16,6 +16,11 @@ export default defineConfig({
     __ZHIYA_CLIENT_CONFIG__: JSON.stringify(publicBuildConfig(config)),
   },
   envDir: false,
+  preview: {
+    host: web.hostname.replace(/^\[|\]$/g, ""),
+    port: Number(web.port || 80),
+    strictPort: true,
+  },
   server: {
     host: web.hostname.replace(/^\[|\]$/g, ""),
     port: Number(web.port || (web.protocol === "https:" ? 443 : 80)),

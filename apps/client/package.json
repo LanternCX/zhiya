@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:unit": "node --experimental-strip-types --test tests-unit/*.test.ts",
+    "test:unit": "node --experimental-strip-types --test tests-unit/*.test.ts tests/*.test.mjs",
     "dev": "vite",
+    "preview": "vite preview",
     "check": "tsc --noEmit",
-    "test:e2e": "playwright test",
+    "test:e2e": "node ../../scripts/client-tests.mjs",
     "build": "npm run check && vite build",
     "tauri": "tauri"
   },

@@ -54,7 +54,9 @@ test("a saved conversation opens directly and returns through its course without
     return route.fulfill({
       json: route.request().url().endsWith("/materials")
         ? { materials: [] }
-        : { courses: [course] },
+        : route.request().url().endsWith("/deliverables")
+          ? { deliverables: [] }
+          : { courses: [course] },
     });
   });
   await page.goto("/#/courses/course-1/conversations/chat-1");

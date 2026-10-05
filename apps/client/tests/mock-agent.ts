@@ -153,6 +153,14 @@ export async function mockAgent(
       signal?.addEventListener(
         "abort",
         () => {
+          const stream = streams.get(id);
+          if (stream) {
+            // Response bodies supplied by browser fixtures do not abort themselves.
+            const error = new DOMException("The request was aborted", "AbortError");
+            stream.controller?.error(error);
+            stream.reject(error);
+            streams.delete(id);
+          }
           void page
             .evaluate(
               (id) => (window as any).agentTestRequests?.get(id)?.abort(),

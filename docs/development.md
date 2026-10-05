@@ -158,7 +158,7 @@ ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./inte
 | --- | --- |
 | `npm run check` | TypeScript 类型检查 |
 | `npm run test:agent` | 验证 Pi 后台执行、重复请求与主动停止 |
-| `npm run test:unit --workspace @zhiya/client` | 验证 PPTX／DOCX 文件内容与图片嵌入 |
+| `npm run test:unit --workspace @zhiya/client` | 验证 PPTX／DOCX 文件内容、图片嵌入与开发代理的 WebSocket 转发 |
 | `npm run check:client-config` | 校验客户端配置 |
 | `npm run check:server-config` | 校验服务端配置，不连接数据库或发送邮件 |
 | `npm test` | Go 行为测试和仓库规则测试 |
@@ -175,7 +175,13 @@ ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./inte
 npx --workspace @zhiya/client playwright install chromium
 ```
 
-端口被已有开发服务占用时，可以为端到端测试选择其他端口：
+浏览器测试自动构建客户端，大部分用例使用构建产物；依赖源码模块或 Vite 行为的用例使用独立开发服务器。两个 worker 并行运行，失败时保留 trace、截图和 HTML 报告，CI 将这些诊断文件保存为 artifact。Node 测试使用独立命令运行，不参与 Playwright 用例收集。
+
+GitHub CI 将浏览器用例交替分配到两个并行分片，使同一文件中的用例分散到两个 runner，避免较慢的课程与播放测试集中在一片。每个分片使用独立 runner 和两个 worker，共四个浏览器并行执行。所有分片通过后，汇总检查 `Client tests` 才通过。可用 `npm run test:e2e -- --shard=1/2` 或 `--shard=2/2` 单独复现某个分片；该命令先收集用例，再通过 Playwright 的测试清单执行所选分片。
+
+CI 为较慢的 runner 将普通断言等待设为 10 秒、单项测试上限设为 60 秒（本机分别为 5 秒、30 秒）。等待在条件满足时立即结束，不固定延迟每项测试，也不自动重试失败用例。
+
+测试会占用客户端端口及其后一端口（默认 `1420` 和 `1421`）。端口被已有开发服务占用时，可以为端到端测试选择其他端口：
 
 ```sh
 ZHIYA_CLIENT_API_ORIGIN=http://127.0.0.1:18080 \
