@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from preparation.routing import route_document
+
 ROOT = Path(__file__).resolve().parents[4] / 'data' / 'knowledge'
 SOURCE = None
 
@@ -366,7 +368,8 @@ def repair_slides(soffice):
             (base/'page_chunks.json').unlink(missing_ok=True)
         print('REPAIRED',min(start+10,len(pending)),'/',len(pending),flush=True)
 
-def consolidate():
+def consolidate(overrides=None):
+    overrides = overrides or {}
     docs, chunks = [], []
     for meta in sorted((ROOT/'documents').glob('*/document.json')):
         doc = json.loads(meta.read_text())
@@ -380,21 +383,20 @@ def consolidate():
                     chunk['material_type'] = doc['material_type']
                     chunk['document_title'] = doc['title']
                     chunk['alternative_view_group'] = doc['document_id']
-                    # Default visual corpus is complete across document formats.
-                    # Text is an alternative representation, not a second mandatory embedding.
-                    chunk['default_embedding_candidate'] = chunk['representation'] == 'visual' and not chunk.get('is_hidden_slide',False)
                     chunks.append(chunk)
     bydoc = defaultdict(list)
     for c in chunks:
         bydoc[c['document_id']].append(c)
-    for group in bydoc.values():
+    unknown = set(overrides) - {c['chunk_id'] for c in chunks}
+    if unknown:
+        raise ValueError('Unknown embedding override IDs: ' + ', '.join(sorted(unknown)))
+    for doc in docs:
+        group = bydoc[doc['document_id']]
         texts = [c for c in group if c['modality']=='text']
         for i,c in enumerate(texts):
             c['previous_text_chunk_id'] = texts[i-1]['chunk_id'] if i else None
             c['next_text_chunk_id'] = texts[i+1]['chunk_id'] if i+1<len(texts) else None
-        for c in group:
-            if c['representation']=='visual' and c['source_location']['kind']=='slide':
-                c['associated_text_chunk_ids'] = [t['chunk_id'] for t in texts if t['source_location'].get('page')==c['source_location']['page']]
+        route_document(ROOT, doc, group, overrides)
     for name,records in [('documents.jsonl',docs),('chunks.jsonl',chunks)]:
         with (ROOT/name).open('w',encoding='utf-8') as f:
             for row in records:
@@ -418,18 +420,23 @@ def consolidate():
               'chunks':len(chunks), 'modalities':dict(Counter(c['modality'] for c in chunks)),
               'rendered_pages':sum(d.get('page_count',0) for d in docs),
               'default_embedding_candidates':sum(c['default_embedding_candidate'] for c in chunks),
+              'embedding_candidates_by_route':dict(Counter(c['embedding_route'] for c in chunks if c['default_embedding_candidate'])),
+              'embedding_selection_reasons':dict(Counter(c['embedding_reason'] for c in chunks)),
+              'visual_review_chunk_ids':[c['chunk_id'] for c in chunks if c['embedding_route']=='review'],
+              'selected_text_characters':sum(len(c['text']) for c in chunks if c['embedding_route']=='text'),
               'processing_errors':[d['document_id'] for d in docs if d['processing_status']=='error'],
               'pending_office_renders':[d['document_id'] for d in docs if 'office_page_render_pending' in d['warnings']],
               'missing_assets':missing, 'exact_duplicate_text_groups':len(repeated),
               'embedding_generated':False, 'manual_content_review_completed':False}
     dump(ROOT/'report.json',report)
-    dump(ROOT/'manifest.json',{'schema_version':1,'source_directory':str(SOURCE) if SOURCE else None,
+    dump(ROOT/'manifest.json',{'schema_version':2,'source_directory':str(SOURCE) if SOURCE else None,
                               'path_base':'directory_containing_manifest', 'documents':'documents.jsonl',
                               'chunks':'chunks.jsonl', 'embedding_model':None,
                               'text_chunk_target_max_characters':2400,
                               'text_length_unit':'characters_not_tokens',
-                              'default_embedding_view':'visual',
-                              'note':'Text and visual chunks are alternative views; choose per use case. Model-specific token limits must be checked before embedding.'})
+                              'default_embedding_view':'text_first',
+                              'embedding_routes':['text','visual'],
+                              'note':'Embed text and selected visual chunks separately with their corresponding models. Review uncertain layouts before visual embedding. Model-specific token limits must be checked before embedding.'})
     print(json.dumps(report,ensure_ascii=False,indent=2),flush=True)
 
 if __name__ == '__main__':
@@ -438,6 +445,8 @@ if __name__ == '__main__':
     parser.add_argument('--data-dir', type=Path, default=ROOT)
     parser.add_argument('--source-dir', type=Path)
     parser.add_argument('--soffice')
+    parser.add_argument('--embedding-overrides', type=Path,
+                        help='JSON object mapping chunk IDs to text, visual or none; used by consolidate')
     args = parser.parse_args()
     ROOT = args.data_dir.expanduser().resolve()
     SOURCE = args.source_dir.expanduser().resolve() if args.source_dir else None
@@ -449,4 +458,8 @@ if __name__ == '__main__':
     elif args.stage=='render': render(args.soffice)
     elif args.stage=='repair-slides': repair_slides(args.soffice)
     elif args.stage=='pages': pages()
-    else: consolidate()
+    else:
+        overrides = json.loads(args.embedding_overrides.read_text()) if args.embedding_overrides else {}
+        if not isinstance(overrides, dict):
+            parser.error('--embedding-overrides must contain a JSON object')
+        consolidate(overrides)

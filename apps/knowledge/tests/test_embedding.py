@@ -15,6 +15,47 @@ CONFIG = Path(__file__).resolve().parents[1] / 'configs' / 'embedding.toml'
 
 
 class EmbeddingTests(unittest.TestCase):
+    def test_dataset_output_and_model_cache_can_be_independently_selected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            args = type('Args', (), {'data_dir': root / 'datasets/lesson',
+                                     'output_dir': root / 'results/lesson/text',
+                                     'model_cache': root / 'models'})()
+            config = embed.read_config(CONFIG.with_name('embedding-text.toml'), args)
+            self.assertEqual(config['data_dir'], str(root / 'datasets/lesson'))
+            self.assertEqual(config['output_dir'], str(root / 'results/lesson/text'))
+            self.assertEqual(config['model_cache'], str(root / 'models'))
+
+    def test_text_job_embeds_selected_text_without_media_or_hidden_text(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'data').mkdir()
+            pq.write_table(pa.Table.from_pylist([
+                {'chunk_id': 'text1', 'document_id': 'doc1', 'modality': 'text',
+                 'default_embedding_candidate': True, 'text': 'Learning from examples.'},
+                {'chunk_id': 'hidden-text', 'document_id': 'doc1', 'modality': 'text',
+                 'default_embedding_candidate': False, 'text': 'Hidden lesson.'},
+                {'chunk_id': 'image1', 'document_id': 'doc1', 'modality': 'image',
+                 'default_embedding_candidate': True},
+            ]), root / 'data/chunks.parquet')
+            config = embed.read_config(CONFIG.with_name('embedding-text.toml'), type('Args', (), {
+                'data_dir': root, 'output_dir': root / 'text-output',
+            })())
+            config.update(view='text', dimension=64)
+            inputs = []
+            def encode(batch):
+                inputs.extend(batch)
+                return [[1.0] + [0.0] * 63]
+            result = embed.run_job(config, encode=encode)
+            self.assertEqual(result['completed'], 1)
+            self.assertEqual(inputs, [{'text': 'Learning from examples.'}])
+            rows = [row for file in (root / 'text-output').glob('*.parquet')
+                    for row in pq.read_table(file).to_pylist()]
+            self.assertEqual([row['chunk_id'] for row in rows], ['text1'])
+            (root / 'manifest.json').write_text('{"default_embedding_view":"visual"}')
+            with self.assertRaisesRegex(ValueError, 'consolidate'):
+                embed.inspect_input(config)
+
     def test_interrupted_job_resumes_and_rejects_changed_instruction(self):
         from PIL import Image
 
@@ -71,7 +112,7 @@ class EmbeddingTests(unittest.TestCase):
                 {'chunk_id': 'hidden1', 'document_id': 'doc1', 'modality': 'image',
                  'default_embedding_candidate': False},
                 {'chunk_id': 'text1', 'document_id': 'doc1', 'modality': 'text',
-                 'default_embedding_candidate': False},
+                 'default_embedding_candidate': True},
                 {'chunk_id': 'video1', 'document_id': 'doc2', 'modality': 'video',
                  'default_embedding_candidate': True},
             ]), root / 'data/chunks.parquet')
