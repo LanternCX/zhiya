@@ -15,6 +15,12 @@ func (a *application) Routes() http.Handler {
 	storageURL, _ := url.Parse(a.config.Storage.PublicEndpoint)
 	storageOrigin := storageURL.Scheme + "://" + storageURL.Host
 	api := http.NewServeMux()
+	api.HandleFunc("GET /api/classes", a.listClasses)
+	api.HandleFunc("POST /api/classes", a.limitUser(60, a.createClass))
+	api.HandleFunc("POST /api/classes/join", a.limitUser(60, a.joinClass))
+	api.HandleFunc("GET /api/classes/{id}", a.getClass)
+	api.HandleFunc("GET /api/classes/{id}/invitation", a.classInvitation)
+	api.HandleFunc("POST /api/classes/{id}/invitation", a.limitUser(60, a.classInvitation))
 	a.http().Deliverables(api, "/api", deliverables.New(a.models, a.objects), userAuthorization)
 	api.HandleFunc("GET /api/agent/socket", a.agentStatusSocket)
 	api.HandleFunc("GET /api/conversations", a.listConversations)

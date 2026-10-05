@@ -1,4 +1,7 @@
 import { api } from "../../api";
+import { useState } from "react";
+import Icon from "../../components/Icon";
+import "./identity.css";
 import { CodeField, Field, Form, NewPasswordFields, Password } from "./Form";
 import type { AccountController } from "./useAccount";
 import { useVerification, VerificationActions, VerificationHelp } from "./Verification";
@@ -34,6 +37,21 @@ export default function AuthForms({
   login,
 }: Props) {
   const verification = useVerification(flow);
+  const [role, setRole] = useState<"teacher" | "student" | "">("");
+  const identity = (
+    <fieldset className="identity-choice">
+      <legend>你是老师还是学生？</legend>
+      <div className="identity-options">
+        {(["student", "teacher"] as const).map(value => (
+          <label key={value} className={role === value ? "is-selected" : ""}>
+            <input type="radio" name="role" value={value} checked={role === value} onChange={() => setRole(value)} required />
+            <Icon name={value} />
+            <span>{value === "teacher" ? "我是老师" : "我是学生"}<small>{value === "teacher" ? "备课教学 · 建立班级" : "探索知识 · 加入班级"}</small></span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
   return (
     <>
       {view === "login" && (
@@ -73,8 +91,9 @@ export default function AuthForms({
           {!flow ? (
             <Form
               busy={busy}
-              submit={(data) => sendCode(view, String(data.get("email")))}
+              submit={(data) => sendCode(view, String(data.get("email")), role || undefined)}
             >
+              {view === "register" && identity}
               <Field
                 label="邮箱"
                 name="email"
@@ -94,6 +113,7 @@ export default function AuthForms({
                     flow: flow.id,
                     code: data.get("code"),
                     password: data.get("password"),
+                    ...(view === "register" ? { role: flow.role } : {}),
                   });
                   setView("login");
                   setEmail(flow.email);
@@ -106,6 +126,7 @@ export default function AuthForms({
                 })
               }
             >
+              {view === "register" && <p className="registration-identity"><Icon name={flow.role === "teacher" ? "teacher" : "student"} />{flow.role === "teacher" ? "老师账号" : "学生账号"}</p>}
               <CodeField key={flow.id} />
               <VerificationHelp {...verification} />
               <NewPasswordFields />

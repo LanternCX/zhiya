@@ -34,6 +34,7 @@ type ValidationError string
 func (e ValidationError) Error() string { return string(e) }
 
 type User struct {
+	Role         string `json:"role"`
 	ID           string `json:"id"`
 	Email        string `json:"email"`
 	Nickname     string `json:"nickname"`

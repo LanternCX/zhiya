@@ -45,6 +45,7 @@ test("an obsolete verification response cannot restore a flow after the session 
   });
   await page.goto("/");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByLabel("邮箱", { exact: true }).fill("old@example.com");
   const started = page.waitForRequest("**/api/auth/register/start");
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();

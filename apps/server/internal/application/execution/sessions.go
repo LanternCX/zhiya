@@ -161,7 +161,7 @@ func (s *Service) Open(ctx context.Context, token, claimedUser, kind, courseID, 
 				}
 				conversationID = conversation.ID
 			}
-			initial = map[string]any{"course": course, "conversationId": conversationID, "lesson": state, "busy": false, "generating": false}
+			initial = map[string]any{"role": user.Role, "course": course, "conversationId": conversationID, "lesson": state, "busy": false, "generating": false}
 		case "profile":
 			if courseID != "" || conversationID != "" {
 				return appservice.Invalid("建档会话无效")
@@ -171,7 +171,7 @@ func (s *Service) Open(ctx context.Context, token, claimedUser, kind, courseID, 
 				return err
 			}
 			conversationID = conversation.ID
-			initial = map[string]any{"conversation": conversation, "busy": false}
+			initial = map[string]any{"role": user.Role, "conversation": conversation, "busy": false}
 		default:
 			return appservice.Invalid("Agent 类型无效")
 		}

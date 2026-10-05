@@ -38,6 +38,7 @@ export default function Profile({
   return (
     <>
       <p className="description">设置你在知芽使用的名字和头像。</p>
+      <p className="registration-identity">账号身份：{user.role === "teacher" ? "老师" : "学生"}</p>
       <section className="avatar-section" aria-label="头像设置">
         <div className="avatar">
           {(avatarDraft ?? user.avatar) ? (

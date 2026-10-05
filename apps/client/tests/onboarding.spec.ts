@@ -58,7 +58,7 @@ test("Pi resumes a persisted question across devices and saves memory before com
     (
       await context.request.post("/api/auth/register/complete", {
         headers,
-        data: { flow, code, password },
+        data: { flow, code, password, role: "student" },
       })
     ).ok(),
   ).toBeTruthy();

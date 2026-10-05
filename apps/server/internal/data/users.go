@@ -36,8 +36,8 @@ func (m UserModel) GetByChallenge(ctx context.Context, flow string) (string, err
 	}
 	return id, err
 }
-func (m UserModel) Insert(ctx context.Context, email, passwordHash, nickname string) error {
-	tag, err := m.db.Exec(ctx, "INSERT INTO users(id,email,password_hash,nickname) VALUES($1,$2,$3,$4) ON CONFLICT(email) DO NOTHING", randomToken(), email, passwordHash, nickname)
+func (m UserModel) Insert(ctx context.Context, email, passwordHash, nickname, role string) error {
+	tag, err := m.db.Exec(ctx, "INSERT INTO users(id,email,password_hash,nickname,role) VALUES($1,$2,$3,$4,$5) ON CONFLICT(email) DO NOTHING", randomToken(), email, passwordHash, nickname, role)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (m UserModel) Delete(ctx context.Context, id string) error {
 func (m UserModel) GetBySession(ctx context.Context, token, expected string) (User, error) {
 	var u User
 	var avatar []byte
-	err := m.db.QueryRow(ctx, `SELECT u.id,u.email,u.nickname,u.password_hash,u.avatar FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=$1 AND s.expires_at>now() FOR UPDATE OF u`, digest(token)).Scan(&u.ID, &u.Email, &u.Nickname, &u.PasswordHash, &avatar)
+	err := m.db.QueryRow(ctx, `SELECT u.id,u.email,u.nickname,u.password_hash,u.avatar,u.role FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=$1 AND s.expires_at>now() FOR UPDATE OF u`, digest(token)).Scan(&u.ID, &u.Email, &u.Nickname, &u.PasswordHash, &avatar, &u.Role)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return u, ErrInvalidSession
 	}

@@ -42,6 +42,7 @@ test("password fields use one reveal control and preserve the value when toggled
 
   await checkPassword("密码");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByLabel("邮箱", { exact: true }).fill("learner@example.com");
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await checkPassword("密码");
@@ -66,6 +67,7 @@ test("verification can expire and be resent without losing the chosen password",
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
   await page.getByLabel("邮箱", { exact: true }).fill("learner@example.com");
   await page.clock.install();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await page.getByLabel("密码", { exact: true }).fill("my-password");
   await page.getByLabel("确认密码", { exact: true }).fill("my-password");
@@ -173,6 +175,7 @@ test("email and verification errors appear beside fields and clear after correct
   await page.goto("/");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
   const email = page.getByLabel("邮箱", { exact: true });
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await expect(email).not.toHaveAttribute("aria-invalid", "true");
   await email.fill("learner@");
   await email.press("Tab");
@@ -210,6 +213,7 @@ test("registration explains password rules and requires matching passwords befor
   });
   await page.goto("/");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByLabel("邮箱", { exact: true }).fill("learner@example.com");
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await expect(page.getByText("至少 8 个字符", { exact: true })).toBeVisible();
@@ -237,5 +241,5 @@ test("registration explains password rules and requires matching passwords befor
   await expect(page.getByRole("img", { name: "两次输入一致" })).toBeVisible();
   await page.getByRole("button", { name: "完成注册", exact: true }).click();
   await expect(page.getByRole("heading", { name: "登录知芽" })).toBeVisible();
-  expect(submissions).toEqual([{ flow: "registration", code: "12345678", password: "🌱".repeat(64) }]);
+  expect(submissions).toEqual([{ flow: "registration", code: "12345678", password: "🌱".repeat(64), role: "student" }]);
 });

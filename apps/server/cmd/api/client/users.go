@@ -8,6 +8,7 @@ import (
 
 func (a *application) completeRegistration(w http.ResponseWriter, r *http.Request) {
 	var in struct {
+		Role     string `json:"role"`
 		Flow     string `json:"flow"`
 		Code     string `json:"code"`
 		Password string `json:"password"`
@@ -16,7 +17,7 @@ func (a *application) completeRegistration(w http.ResponseWriter, r *http.Reques
 		a.http().RespondError(w, err)
 		return
 	}
-	err := a.accountService().CompleteRegistration(r.Context(), in.Flow, in.Code, in.Password)
+	err := a.accountService().CompleteRegistration(r.Context(), in.Flow, in.Code, in.Password, in.Role)
 	a.http().RespondOK(w, err)
 }
 func (a *application) completePasswordReset(w http.ResponseWriter, r *http.Request) {

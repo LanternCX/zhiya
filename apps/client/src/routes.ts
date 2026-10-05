@@ -22,6 +22,8 @@ export const pageRoutes = [
   { id: "reset", path: "reset-password" },
   { id: "onboarding", path: "onboarding" },
   { id: "learning", path: "learn" },
+  { id: "classes", path: "classes" },
+  { id: "class", path: "classes/:classId" },
   { id: "independent-conversation", path: "conversations/:conversationId" },
   { id: "course", path: "courses/:courseId" },
   {

@@ -181,7 +181,10 @@ func (s *Service) StartEmailChange(ctx context.Context, sessionToken, claimedUse
 	return flow, err
 }
 
-func (s *Service) CompleteRegistration(ctx context.Context, flow, code, password string) error {
+func (s *Service) CompleteRegistration(ctx context.Context, flow, code, password, role string) error {
+	if role != "teacher" && role != "student" {
+		return appfault.Invalid("请选择老师或学生身份")
+	}
 	if err := passwordLength(password); err != nil {
 		return err
 	}
@@ -193,7 +196,7 @@ func (s *Service) CompleteRegistration(ctx context.Context, flow, code, password
 		if err != nil {
 			return err
 		}
-		if err = models.Users.Insert(ctx, challenge.Email, domain.HashPassword(password), domain.DefaultNickname); err != nil {
+		if err = models.Users.Insert(ctx, challenge.Email, domain.HashPassword(password), domain.DefaultNickname, role); err != nil {
 			return err
 		}
 		return models.Tokens.DeleteRegistrationChallenges(ctx, challenge.Email)
