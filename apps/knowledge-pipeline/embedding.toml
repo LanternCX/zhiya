@@ -1,0 +1,17 @@
+# Paths are relative to the repository root, independent of the shell directory.
+data_dir = "data/knowledge"
+output_dir = "data/embeddings/qwen3-vl-2b"
+model_cache = "data/models"
+
+model_id = "Qwen/Qwen3-VL-Embedding-2B"
+model_revision = "9f2f7e710d6d81056aa5c0a4f04764fec6bb7bda"
+device = "cuda"
+dtype = "bfloat16"
+dimension = 2048
+batch_size = 1
+view = "visual"
+instruction = "Represent the user's input."
+max_length = 8192
+image_max_pixels = 1843200
+video_max_pixels = 7864320
+video_num_frames = 16
