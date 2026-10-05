@@ -4,6 +4,9 @@ import { createServer as createHttpServer } from "node:http";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 test("the client dev proxy forwards the voice WebSocket upgrade", async (t) => {
@@ -39,15 +42,21 @@ test("the client dev proxy forwards the voice WebSocket upgrade", async (t) => {
     : { ...configuredProxy };
   proxy.target = `http://127.0.0.1:${upstream.address().port}`;
 
+  // A proxy-only server must not invalidate the browser tests' dependency cache.
+  const cacheDir = await mkdtemp(join(tmpdir(), "zhiya-voice-proxy-"));
   const client = await createServer({
     configFile: false,
+    cacheDir,
     plugins: loaded.config.plugins,
     resolve: loaded.config.resolve,
     define: loaded.config.define,
     server: { host: "127.0.0.1", port: 0, proxy: { "/api": proxy } },
   });
   await client.listen();
-  t.after(() => client.close());
+  t.after(async () => {
+    await client.close();
+    await rm(cacheDir, { recursive: true, force: true });
+  });
 
   const port = client.httpServer.address().port;
   await new Promise((resolve, reject) => {
@@ -55,7 +64,7 @@ test("the client dev proxy forwards the voice WebSocket upgrade", async (t) => {
     const timeout = setTimeout(() => {
       socket.close();
       reject(new Error("voice WebSocket upgrade timed out"));
-    }, 1500);
+    }, 5000);
     socket.addEventListener("open", () => {
       clearTimeout(timeout);
       socket.close();

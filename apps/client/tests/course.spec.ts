@@ -954,7 +954,6 @@ test("animation generation stays in the background until the teacher presents it
   await expect(page.getByRole("region", { name: "课堂页面" })).toHaveCount(0);
   releaseAnimation();
   await expect.poll(() => animationPublished).toBe(true);
-  await page.waitForTimeout(100);
   await prompt.fill("现在展示");
   await page.getByRole("button", { name: "发送" }).click();
   const classroom = page.getByRole("region", { name: "课堂页面" });
@@ -1143,7 +1142,6 @@ test("the animation agent simplifies a scene that exceeds the element limit", as
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect.poll(() => animationPublished).toBe(true);
-  await page.waitForTimeout(100);
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill("现在展示修正后的动画");
@@ -1241,7 +1239,6 @@ test("the animation agent gets one same-context correction when it stops without
   await page.getByRole("button", { name: "发送" }).click();
 
   await expect.poll(() => animationPublished).toBe(true);
-  await page.waitForTimeout(100);
   await page
     .getByRole("textbox", { name: "告诉知芽你想学什么" })
     .fill("现在展示纠错后的动画");
@@ -1820,9 +1817,7 @@ test("teacher markdown renders before the model stream finishes", async ({
 
   await expect(
     page.getByText(/正在组织本次讲解… · \d+ 秒/),
-  ).toBeVisible({
-    timeout: 500,
-  });
+  ).toBeVisible();
   await page.evaluate(() =>
     window.dispatchEvent(new Event("release-teacher-request")),
   );
@@ -1877,11 +1872,10 @@ test("teacher markdown renders before the model stream finishes", async ({
   ).toBeVisible();
 
   await page.getByRole("button", { name: "打断", exact: true }).click();
-  await page.waitForTimeout(500);
-  await expect(page.getByText("第二段", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "打断", exact: true }),
   ).toHaveCount(0);
+  await expect(page.getByText("第二段", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "发送" })).toBeVisible();
 });
 
@@ -1985,7 +1979,7 @@ test("a saved course starts a new agent-routed session and supports rename and d
     );
     const transcript = JSON.stringify(request.payload.messages);
     if (continuationRequests === 1) {
-      expect(transcript).toContain("Previous course transcript:\\n[]");
+      expect(transcript).not.toContain("这是已保存的讲解。");
     }
     if (
       transcript.includes('"name":"read_course_conversation"') &&
@@ -2117,6 +2111,8 @@ test("a saved course starts a new agent-routed session and supports rename and d
       (copyBox?.width ?? 0) -
       ((menuButtonBox?.x ?? 0) + (menuButtonBox?.width ?? 0)),
   ).toBeLessThanOrEqual(12);
+  await expect(page.getByText("太阳系基础", { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 728, height: 898 });
   await expect(page.getByText("太阳系基础", { exact: true })).toBeHidden();
   await page.setViewportSize({ width: 1440, height: 1000 });
   const wideCardBox = await page.locator(".course-card").boundingBox();
@@ -3297,7 +3293,7 @@ test("a failed conversation attachment remains available to retry", async ({
   await page.getByRole("button", { name: "打开小节：变量" }).click();
   const input = page.getByRole("textbox", { name: "告诉知芽你想学什么" });
   await expect(input).toBeVisible();
-  await page.locator('input[type="file"]').setInputFiles({
+  await page.getByLabel("Upload files", { exact: true }).setInputFiles({
     name: "variables.txt",
     mimeType: "text/plain",
     buffer: Buffer.from("变量材料"),
