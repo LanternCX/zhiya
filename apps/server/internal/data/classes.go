@@ -12,6 +12,11 @@ import (
 
 type ClassModel struct{ db database }
 
+func (m ClassModel) IsMember(ctx context.Context, class, user string) (member bool, err error) {
+	err = m.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM class_members WHERE class_id::text=$1 AND user_id=$2)`, class, user).Scan(&member)
+	return
+}
+
 // Do not wait on another member's account lock while holding the class lock:
 // that member may be joining/leaving this class. Also protects transfer against account deletion.
 func (m ClassModel) ProtectMember(ctx context.Context, user string) error {

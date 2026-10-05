@@ -140,7 +140,7 @@
   gap: 12px;
   padding: 12px 16px;
   border: 1px solid var(--reader-rule);
-  border-radius: 14px;
+  border-radius: var(--radius-md, 8px);
   background: var(--reader-paper);
   box-shadow: 0 8px 30px #23372818;
   white-space: nowrap;
@@ -150,12 +150,20 @@
 .reader-page .reader-link {
   padding: 8px 14px;
   border: 1px solid var(--reader-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-sm, 5px);
   background: var(--reader-paper);
   color: var(--reader-ink);
   font: inherit;
   cursor: pointer;
   text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.reader-page button:not(:disabled):hover,
+.reader-page .reader-link:hover {
+  background: var(--brand-green-soft, var(--reader-tint));
 }
 .reader-page button:disabled {
   opacity: 0.4;

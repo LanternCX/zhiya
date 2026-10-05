@@ -36,6 +36,7 @@ fn allowed(method: &str, path: &str) -> bool {
             | ("POST", "/me/email/start")
             | ("POST", "/me/email/complete")
             | ("GET", "/courses")
+            | ("GET", "/classes")
             | ("GET", "/conversations")
             | ("POST", "/courses")
     );
@@ -44,6 +45,9 @@ fn allowed(method: &str, path: &str) -> bool {
     }
     let segments: Vec<_> = path.trim_matches('/').split('/').collect();
     matches!(
+        (method, segments.as_slice()),
+        ("GET", ["classes", id] | ["classes", id, "shares"]) if !id.is_empty()
+    ) || matches!(
         (method, segments.as_slice()),
         ("GET", ["agent", "sessions", id]) if !id.is_empty()
     ) || matches!(
@@ -120,6 +124,10 @@ fn deliverable_bridge_allows_review_import_and_images() {
 
 #[test]
 fn learning_bridge_accepts_only_fixed_learning_routes() {
+    assert!(allowed("GET", "/classes"));
+    assert!(allowed("GET", "/classes/class-id"));
+    assert!(allowed("GET", "/classes/class-id/shares"));
+    assert!(!allowed("PUT", "/classes/class-id/shares"));
     assert!(allowed("POST", "/socket-ticket"));
     assert!(!allowed("GET", "/learning"));
     assert!(!allowed("POST", "/learning/action"));

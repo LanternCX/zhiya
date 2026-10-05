@@ -18,6 +18,7 @@ async function setup(page: Page, role: "head" | "teacher" | "student" = "head") 
   await page.route("**/api/classes**", async route => {
     const path = new URL(route.request().url()).pathname;
     const method = route.request().method();
+    if (path.endsWith("/shares")) return route.fulfill({json:{shares:[]}});
     if (path.endsWith("/removed-members")) return route.fulfill({ json: { members: state.removed } });
     if (path.includes("/removed-members/")) {
       state.removed = state.removed.filter(member => member.id !== path.split("/").at(-1));

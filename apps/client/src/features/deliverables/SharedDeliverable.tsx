@@ -52,7 +52,7 @@ export default function SharedDeliverable() {
         if (active)
           setError(
             reason instanceof APIError && reason.status === 404
-              ? "分享未开放、已关闭或内容不存在。仅自己可见的内容需要所有者登录后查看。"
+              ? "分享未开放、已关闭、内容不存在或你没有查看权限。班级分享需使用班级成员账号登录，仅自己可见的内容需由所有者登录查看。"
               : reason instanceof Error
                 ? reason.message
                 : "分享内容加载失败，请重试",

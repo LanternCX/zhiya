@@ -156,7 +156,7 @@ export default function Workspace({
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
   const memoryOpen = page === "learning-profile";
-  const classesOpen = page === "classes" || page === "class" || page === "class-management";
+  const classesOpen = page === "classes" || page === "class" || page === "class-management" || page === "class-shares";
   const [editingMemory, setEditingMemory] = useState(true);
   const [endingMemory, setEndingMemory] = useState(false);
   const [onboarding, setOnboarding] = useState(true);
@@ -763,7 +763,7 @@ export default function Workspace({
                 </button>
               </section>
             )}
-            {!onboarding && classesOpen && <ClassPage key={location.pathname} user={user} management={page === "class-management"} />}
+            {!onboarding && classesOpen && <ClassPage key={location.pathname} user={user} management={page === "class-management"} materials={page === "class-shares"} />}
             {!onboarding && learningPage && courseId && !coursesReady && (
               <p role="status">正在读取课程…</p>
             )}

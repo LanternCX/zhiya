@@ -59,17 +59,45 @@ func readSharedItem(ctx context.Context, m data.Models, owner, course, id string
 	return domain.Deliverable{}, missing(pgx.ErrNoRows)
 }
 
-// A nil visibility reads settings without creating or publishing a link.
-func (s *Service) Sharing(ctx context.Context, auth identity.Authorize, course, id string, visibility *string) (result data.DeliverableShare, err error) {
-	if visibility != nil && *visibility != "private" && *visibility != "public" {
-		return result, fault.Invalid("请选择仅自己可见或获得链接的任何人可见")
+type ShareAccess struct {
+	Visibility string   `json:"visibility"`
+	ClassIDs   []string `json:"classIds"`
+}
+
+// A nil input reads settings without creating or publishing a link.
+func (s *Service) Sharing(ctx context.Context, auth identity.Authorize, course, id string, input *ShareAccess) (result data.DeliverableShare, err error) {
+	if input != nil && input.Visibility != "private" && input.Visibility != "public" && input.Visibility != "class" {
+		return result, fault.Invalid("请选择仅自己可见、班级内可见或获得链接的任何人可见")
 	}
 	err = s.within(ctx, auth, course, func(m data.Models, user domain.User) error {
 		if _, e := readSharedItem(ctx, m, user.ID, course, id); e != nil {
 			return e
 		}
-		if visibility != nil {
-			result, err = m.Deliverables.SetShare(ctx, course, id, rand.Text(), *visibility)
+		if input != nil {
+			classes := []string{}
+			if input.Visibility == "class" {
+				if len(input.ClassIDs) == 0 {
+					return fault.Invalid("请选择自己所在的班级")
+				}
+				classes = slices.Clone(input.ClassIDs)
+				slices.Sort(classes)
+				classes = slices.Compact(classes)
+				for _, class := range classes {
+					if _, _, e := m.Classes.Lock(ctx, class); errors.Is(e, pgx.ErrNoRows) {
+						return fault.Invalid("所选班级不存在")
+					} else if e != nil {
+						return e
+					}
+					member, e := m.Classes.IsMember(ctx, class, user.ID)
+					if e != nil {
+						return e
+					}
+					if !member {
+						return fault.Invalid("只能分享给自己所在的班级")
+					}
+				}
+			}
+			result, err = m.Deliverables.SetShare(ctx, course, id, rand.Text(), input.Visibility, classes)
 			return err
 		}
 		result, err = m.Deliverables.Share(ctx, course, id)
@@ -115,8 +143,39 @@ func (s *Service) shared(ctx context.Context, auth identity.Authorize, token str
 			return missing(err)
 		}
 		if share.Visibility != "public" {
-			if authErr != nil || user.ID != share.OwnerID {
+			if authErr != nil {
 				return missing(pgx.ErrNoRows)
+			}
+			if user.ID != share.OwnerID {
+				if share.Visibility != "class" || len(share.ClassIDs) == 0 {
+					return missing(pgx.ErrNoRows)
+				}
+				allowed := false
+				for _, class := range share.ClassIDs {
+					if _, _, e := m.Classes.Lock(ctx, class); errors.Is(e, pgx.ErrNoRows) {
+						continue
+					} else if e != nil {
+						return missing(e)
+					}
+					both := true
+					for _, id := range []string{user.ID, share.OwnerID} {
+						member, e := m.Classes.IsMember(ctx, class, id)
+						if e != nil {
+							return e
+						}
+						if !member {
+							both = false
+							break
+						}
+					}
+					if both {
+						allowed = true
+						break
+					}
+				}
+				if !allowed {
+					return missing(pgx.ErrNoRows)
+				}
 			}
 		}
 		item, err := readSharedItem(ctx, m, share.OwnerID, share.CourseID, share.DeliverableID)
