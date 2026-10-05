@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	ErrClassMemberBusy               = errors.New("成员正在进行其他操作，请稍后重试")
 	ErrNotFound                      = errors.New("record not found")
 	ErrCourseNotFound                = errors.New("course not found")
 	ErrMaterialNotFound              = errors.New("material not found")
@@ -93,6 +94,7 @@ func (m Models) ListenConversationChanges(ctx context.Context, ready chan<- erro
 }
 
 type Models struct {
+	Classes       ClassModel
 	Deliverables  DeliverableModel
 	Conversations ConversationModel
 	Agents        AgentModel
@@ -106,7 +108,7 @@ type Models struct {
 }
 
 func NewModels(pool *pgxpool.Pool, policy config.Account) Models {
-	return Models{Deliverables: DeliverableModel{db: pool}, Conversations: ConversationModel{db: pool}, Agents: AgentModel{db: pool}, Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, Illustrations: IllustrationModel{db: pool}, pool: pool}
+	return Models{Classes: ClassModel{db: pool}, Deliverables: DeliverableModel{db: pool}, Conversations: ConversationModel{db: pool}, Agents: AgentModel{db: pool}, Courses: CourseModel{db: pool}, Materials: MaterialModel{db: pool}, Learning: LearningModel{db: pool}, Users: UserModel{db: pool}, Tokens: TokenModel{db: pool, policy: policy}, Illustrations: IllustrationModel{db: pool}, pool: pool}
 }
 
 type TransactionMode bool
@@ -129,7 +131,7 @@ func (m Models) Transaction(ctx context.Context, mode TransactionMode, action fu
 			return err
 		}
 	}
-	err = action(Models{Deliverables: DeliverableModel{db: tx}, Conversations: ConversationModel{db: tx}, Agents: AgentModel{db: tx}, Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}, Illustrations: IllustrationModel{db: tx}})
+	err = action(Models{Classes: ClassModel{db: tx}, Deliverables: DeliverableModel{db: tx}, Conversations: ConversationModel{db: tx}, Agents: AgentModel{db: tx}, Courses: CourseModel{db: tx}, Materials: MaterialModel{db: tx}, Learning: LearningModel{db: tx}, Users: UserModel{db: tx}, Tokens: TokenModel{db: tx, policy: m.Tokens.policy}, Illustrations: IllustrationModel{db: tx}})
 	var failedAttempt failedVerificationAttempt
 	if errors.As(err, &failedAttempt) {
 		// A rejected code must still consume an attempt. Verify before making other changes.

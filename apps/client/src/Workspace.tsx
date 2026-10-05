@@ -13,6 +13,7 @@ import Security from "./features/account/Security";
 import CourseRoom from "./features/course/CourseRoom";
 import CourseOverview from "./features/course/CourseOverview";
 import Profile from "./features/profile/Profile";
+import ClassPage from "./features/classes/ClassPage";
 import Mark from "./components/Mark";
 import type { ComposerInputMode } from "./components/ChatComposer";
 import Icon from "./components/Icon";
@@ -155,6 +156,7 @@ export default function Workspace({
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechReplies, setSpeechReplies] = useSpeechPreference();
   const memoryOpen = page === "learning-profile";
+  const classesOpen = page === "classes" || page === "class" || page === "class-management";
   const [editingMemory, setEditingMemory] = useState(true);
   const [endingMemory, setEndingMemory] = useState(false);
   const [onboarding, setOnboarding] = useState(true);
@@ -525,6 +527,10 @@ export default function Workspace({
         setMobileNavigationOpen(false);
       }}
       onLearn={goLearn}
+      onClasses={() => {
+        learningNavigationIntent.current = false;
+        setMobileNavigationOpen(false);
+      }}
     />
   );
   return (
@@ -713,7 +719,7 @@ export default function Workspace({
                 : memoryOpen
                   ? "学习档案"
                   : view === "home"
-                    ? onboarding
+                    ? classesOpen ? "我的班级" : onboarding
                       ? "初次见面"
                       : "学习地图"
                     : titles[view]}
@@ -757,6 +763,7 @@ export default function Workspace({
                 </button>
               </section>
             )}
+            {!onboarding && classesOpen && <ClassPage key={location.pathname} user={user} management={page === "class-management"} />}
             {!onboarding && learningPage && courseId && !coursesReady && (
               <p role="status">正在读取课程…</p>
             )}

@@ -8,4 +8,9 @@ export type View =
   | "password"
   | "email"
   | "delete";
-export type Flow = { id: string; email: string; sentAt: number };
+export type Flow = {
+  id: string;
+  email: string;
+  sentAt: number;
+  role?: "teacher" | "student";
+};

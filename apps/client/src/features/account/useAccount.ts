@@ -261,14 +261,23 @@ export function useAccount() {
       },
     );
   }
-  function sendCode(purpose: "register" | "reset", target: string) {
+  function sendCode(
+    purpose: "register" | "reset",
+    target: string,
+    role?: "teacher" | "student",
+  ) {
     return run(async () => {
       const result = await api<{ flow: string }>(
         `/auth/${purpose}/start`,
         "POST",
         { email: target },
       );
-      setFlow({ id: result.flow, email: target, sentAt: Date.now() });
+      setFlow({
+        id: result.flow,
+        email: target,
+        sentAt: Date.now(),
+        role: purpose === "register" ? role ?? flow?.role : undefined,
+      });
       setEmail(target);
     });
   }

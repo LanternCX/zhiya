@@ -155,7 +155,7 @@
 .recent-conversations a:has(.recent-conversation-progress) {
   padding-right: 32px;
 }
-.workspace-nav button {
+.workspace-nav :is(button,a) {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -168,14 +168,15 @@
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 450;
+  text-decoration: none;
 }
-.workspace-nav button span {
+.workspace-nav :is(button,a) span {
   white-space: nowrap;
 }
-.workspace-nav button:hover {
+.workspace-nav :is(button,a):hover {
   background: var(--surface-hover);
 }
-.workspace-nav button[aria-current] {
+.workspace-nav :is(button,a)[aria-current] {
   background: var(--surface-active);
   color: var(--text);
   border-color: color-mix(in srgb, var(--accent) 18%, transparent);
@@ -450,7 +451,7 @@
 }
 .navigation-drawer-header h2 { font-size: 16px; font-weight: 600; margin: 0; }
 .navigation-drawer .workspace-nav { margin-top: 16px; }
-.navigation-drawer .workspace-nav button { min-height: 44px; }
+.navigation-drawer .workspace-nav :is(button,a) { min-height: 44px; }
 @media (max-width: 720px) {
   .workspace,
   .workspace.is-collapsed {

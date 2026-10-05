@@ -10,6 +10,7 @@ import type { Conversation } from "./conversation";
 import type { DeliverableSelection } from "./deliverable";
 
 export type CourseProjection = {
+  role: "teacher" | "student";
   deliverableSelection?: DeliverableSelection | null;
   deliverablesChanged?: number;
   course: StoredCourse | null;
@@ -29,6 +30,7 @@ export type CourseProjection = {
 };
 
 export type ProfileProjection = {
+  role: "teacher" | "student";
   busy: boolean;
   conversation: Conversation;
   output?: AssistantOutput;

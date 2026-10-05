@@ -22,6 +22,7 @@ test("account forms use the server's current public rules", async ({ page }) => 
   await expect(password).toHaveValue("🌱".repeat(33));
   await expect(page.getByText("密码太长，请缩短后重试", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByLabel("邮箱", { exact: true }).fill("policy@example.com");
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await expect(page.getByText("至少 16 个字符", { exact: true })).toBeVisible();

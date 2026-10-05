@@ -63,6 +63,7 @@ func ErrorResponse(err error) (int, string) {
 		status = map[appservice.ErrorCode]int{
 			appservice.ErrorInvalid:      http.StatusBadRequest,
 			appservice.ErrorUnauthorized: http.StatusUnauthorized,
+			appservice.ErrorForbidden:    http.StatusForbidden,
 			appservice.ErrorConflict:     http.StatusConflict,
 			appservice.ErrorNotFound:     http.StatusNotFound,
 			appservice.ErrorRateLimited:  http.StatusTooManyRequests,

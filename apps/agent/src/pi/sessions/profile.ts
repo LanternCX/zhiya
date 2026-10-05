@@ -61,6 +61,7 @@ export class ProfileSession {
     private update: (state: Conversation) => void,
     private output: (value: AssistantOutput) => void,
     private onRetry: ModelRetryListener,
+    private role: "teacher" | "student",
     private transcript?: Session,
   ) {}
   get isStopped() {
@@ -201,6 +202,7 @@ export class ProfileSession {
         context: () => {
           const progress = correctionProgress(state);
           return {
+            role: this.role,
             memory: state.memory,
             memoryVersion: state.memoryVersion,
             answered: Boolean(progress?.answered),

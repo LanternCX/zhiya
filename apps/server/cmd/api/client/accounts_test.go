@@ -179,11 +179,7 @@ func TestDuplicateRegistrationOffersAccountRecovery(t *testing.T) {
 
 func (a *testApp) register(email string) *http.Client {
 	a.t.Helper()
-	c := a.client()
-	flow := a.request(c, "POST", "/auth/register/start", map[string]string{"email": email}, 200)["flow"].(string)
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": a.mail[email+":register"], "password": testPassword}, 200)
-	a.request(c, "POST", "/auth/login", map[string]string{"email": email, "password": testPassword}, 200)
-	return c
+	return a.registerRole(email, "student")
 }
 
 func TestVerifiedRegistrationAndLogin(t *testing.T) {
@@ -192,10 +188,10 @@ func TestVerifiedRegistrationAndLogin(t *testing.T) {
 	a.request(c, "GET", "/me", nil, 401)
 	flow := a.request(c, "POST", "/auth/register/start", map[string]string{"email": "learner@example.com"}, 200)["flow"].(string)
 	a.request(c, "POST", "/auth/login", map[string]string{"email": "learner@example.com", "password": testPassword}, 401)
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": "wrong", "password": testPassword}, 400)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": "wrong", "password": testPassword, "role": "student"}, 400)
 	code := a.mail["learner@example.com:register"]
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword}, 200)
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword}, 400)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword, "role": "student"}, 200)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword, "role": "student"}, 400)
 	a.request(c, "POST", "/auth/login", map[string]string{"email": "learner@example.com", "password": testPassword}, 200)
 	me := a.request(c, "GET", "/me", nil, 200)
 	if me["email"] != "learner@example.com" || me["nickname"] != "学习者" {
@@ -295,15 +291,15 @@ func TestVerificationAttemptsAndPurposeAreEnforced(t *testing.T) {
 	flow := a.request(c, "POST", "/auth/register/start", map[string]string{"email": "attempts@example.com"}, 200)["flow"].(string)
 	code := a.mail["attempts@example.com:register"]
 	for i := 0; i < 5; i++ {
-		a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": "wrong", "password": testPassword}, 400)
+		a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": "wrong", "password": testPassword, "role": "student"}, 400)
 	}
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword}, 400)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": testPassword, "role": "student"}, 400)
 	c = a.register("owner@example.com")
 	other := a.register("outsider@example.com")
 	flow = a.request(c, "POST", "/me/email/start", map[string]string{"email": "replacement@example.com"}, 200)["flow"].(string)
 	codes := map[string]string{"flow": flow, "code": a.mail["owner@example.com:email"], "newCode": a.mail["replacement@example.com:email-new"]}
 	a.request(other, "POST", "/me/email/complete", codes, 400)
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": codes["code"], "password": testPassword}, 400)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": codes["code"], "password": testPassword, "role": "student"}, 400)
 	a.request(c, "POST", "/me/email/complete", codes, 200)
 }
 
@@ -357,7 +353,7 @@ func TestRegistrationCodeCanOnlyBeConsumedOnceConcurrently(t *testing.T) {
 	a := setupAccountTest(t)
 	c := a.client()
 	flow := a.request(c, "POST", "/auth/register/start", map[string]string{"email": "concurrent@example.com"}, 200)["flow"].(string)
-	payload, _ := json.Marshal(map[string]string{"flow": flow, "code": a.mail["concurrent@example.com:register"], "password": testPassword})
+	payload, _ := json.Marshal(map[string]string{"flow": flow, "code": a.mail["concurrent@example.com:register"], "password": testPassword, "role": "student"})
 	results := make(chan int, 2)
 	for i := 0; i < 2; i++ {
 		go func() {
@@ -513,16 +509,16 @@ func TestPublicAccountRulesMatchServerValidation(t *testing.T) {
 	if len(code) != int(rules["verification_code_digits"].(float64)) {
 		t.Fatal("code length disagrees with public rules")
 	}
-	short := a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": "1234567"}, 400)
+	short := a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": "1234567", "role": "student"}, 400)
 	if short["error"] != "密码至少需要 8 个字符" {
 		t.Fatalf("unexpected short password message: %v", short)
 	}
-	long := a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": strings.Repeat("芽", 86)}, 400)
+	long := a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": strings.Repeat("芽", 86), "role": "student"}, 400)
 	if long["error"] != "密码太长，请缩短后重试" {
 		t.Fatalf("unexpected long password message: %v", long)
 	}
 	password := strings.Repeat("a", minPassword)
-	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": password}, 200)
+	a.request(c, "POST", "/auth/register/complete", map[string]string{"flow": flow, "code": code, "password": password, "role": "student"}, 200)
 	a.request(c, "POST", "/auth/login", map[string]string{"email": "rules@example.com", "password": password}, 200)
 	maxNickname := int(rules["nickname_max_characters"].(float64))
 	a.request(c, "PATCH", "/me", map[string]string{"nickname": strings.Repeat("芽", maxNickname+1)}, 400)

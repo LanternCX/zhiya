@@ -11,6 +11,30 @@ CREATE TABLE IF NOT EXISTS sessions (
  user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
  expires_at timestamptz NOT NULL
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role text CHECK (role IN ('teacher','student'));
+-- Development accounts without a selected identity are discarded before making identity mandatory.
+DELETE FROM users WHERE role IS NULL;
+ALTER TABLE users ALTER COLUMN role SET NOT NULL;
+CREATE TABLE IF NOT EXISTS classes (
+ id uuid PRIMARY KEY,
+ name text NOT NULL,
+ head_teacher_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ invitation_code text NOT NULL UNIQUE,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS class_members (
+ class_id uuid NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+ user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ joined_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(class_id,user_id)
+);
+CREATE INDEX IF NOT EXISTS class_members_user ON class_members(user_id);
+CREATE TABLE IF NOT EXISTS class_removed_members (
+ class_id uuid NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+ user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ removed_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(class_id,user_id)
+);
 CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
 CREATE TABLE IF NOT EXISTS socket_tickets (
  token_hash text PRIMARY KEY,

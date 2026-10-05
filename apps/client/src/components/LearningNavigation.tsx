@@ -13,6 +13,7 @@ export default function LearningNavigation({
   loadError,
   onNavigate,
   onLearn,
+  onClasses,
 }: {
   courses: StoredCourse[];
   statuses: AgentStatus[];
@@ -21,6 +22,7 @@ export default function LearningNavigation({
   loadError: boolean;
   onNavigate: () => void;
   onLearn: () => void;
+  onClasses: () => void;
 }) {
   const { pathname } = useLocation();
   const running = new Set(
@@ -70,6 +72,9 @@ export default function LearningNavigation({
           <Icon name="learning" />
           <span>学习</span>
         </button>
+        <Link to="/classes" title="我的班级" aria-label="我的班级" aria-current={pathname.startsWith("/classes") ? "page" : undefined} onClick={onClasses}>
+          <Icon name="classroom" /><span>班级</span>
+        </Link>
       </nav>
       <nav
         className="recent-conversations"

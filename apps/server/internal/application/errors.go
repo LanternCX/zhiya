@@ -12,6 +12,7 @@ type ErrorCode string
 const (
 	ErrorInvalid      ErrorCode = "invalid"
 	ErrorUnauthorized ErrorCode = "unauthorized"
+	ErrorForbidden    ErrorCode = "forbidden"
 	ErrorConflict     ErrorCode = "conflict"
 	ErrorNotFound     ErrorCode = "not_found"
 	ErrorRateLimited  ErrorCode = "rate_limited"
@@ -34,6 +35,7 @@ func (e Error) Error() string {
 func (e Error) Unwrap() error { return e.Cause }
 
 func Invalid(message string) error      { return Error{Code: ErrorInvalid, Message: message} }
+func Forbidden(message string) error    { return Error{Code: ErrorForbidden, Message: message} }
 func Unauthorized(message string) error { return Error{Code: ErrorUnauthorized, Message: message} }
 func Conflict(message string) error     { return Error{Code: ErrorConflict, Message: message} }
 func Unavailable(message string, cause error) error {

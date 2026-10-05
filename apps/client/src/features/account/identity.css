@@ -1,0 +1,11 @@
+.identity-choice { border: 0; padding: 0; margin: 0 0 20px; min-width: 0; }
+.identity-choice legend { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
+.identity-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.identity-options label { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 16px 12px; border: 1px solid var(--panel-edge); border-radius: 8px; cursor: pointer; background: var(--surface); }
+.identity-options label.is-selected { border-color: var(--accent); background: var(--surface-active); }
+.identity-options label:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+.identity-options input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.identity-options .ui-icon { width: 24px; height: 24px; color: var(--accent); }
+.identity-options label span { flex-basis: 100%; font-weight: 500; }
+.identity-options small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.registration-identity { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }

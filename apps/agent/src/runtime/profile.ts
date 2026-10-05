@@ -115,6 +115,7 @@ export class ProfileHost {
         this.state.retry = retry;
         this.changed();
       },
+      this.state.role,
       this.transcript,
     );
     try {

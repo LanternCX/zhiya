@@ -2,6 +2,7 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { activeUser, sessionRevision } from "./transport/identity";
 
 export type User = {
+  role: "teacher" | "student";
   id: string;
   email: string;
   nickname: string;

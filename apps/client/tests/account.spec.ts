@@ -48,6 +48,7 @@ test("a learner can register, edit their profile, and permanently delete their a
   const email = `learner-${Date.now()}@example.com`;
   await page.goto("/");
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByLabel("邮箱", { exact: true }).fill(email);
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   const code = await emailCode(request, email, "注册账号");
@@ -71,6 +72,7 @@ test("a learner can register, edit their profile, and permanently delete their a
   await page.getByRole("button", { name: "完成注册", exact: true }).click();
   await expect(page.getByRole("heading", { name: "登录知芽" })).toBeVisible();
   await page.getByRole("button", { name: "注册账号", exact: true }).click();
+  await page.getByRole("radio", { name: /我是学生/ }).check();
   await page.getByRole("button", { name: "发送验证码", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("该邮箱已注册，请登录或找回密码");
   await expect(page.getByLabel("邮箱", { exact: true })).toHaveValue(email);
