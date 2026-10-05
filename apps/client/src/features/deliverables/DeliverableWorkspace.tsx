@@ -14,7 +14,6 @@ import {
   PanelTop,
   PanelRightClose,
   PanelRightOpen,
-  Download,
   Upload,
   RefreshCw,
 } from "lucide-react";
@@ -29,6 +28,7 @@ import type {
 } from "../../domain/deliverable";
 import type { ExportImage } from "./export";
 import { saveDeliverable } from "./download";
+import ShareActions from "./ShareActions";
 import "./deliverables.css";
 
 const SlideCanvas = lazy(() => import("../course/SlideCanvas"));
@@ -242,8 +242,8 @@ export default function DeliverableWorkspace({
       setError(reason instanceof Error ? reason.message : "选择失败"),
     );
   };
-  const download = async () => {
-    const target = area === "document" ? item : items.find((item) => item.source === "classroom");
+  const download = async (format: "office" | "html") => {
+    const target = item;
     if (!target || !courseId) return;
     setWorking(true);
     setError("");
@@ -252,14 +252,16 @@ export default function DeliverableWorkspace({
       const { deliverable } = await api<{ deliverable: Deliverable }>(
         `/courses/${courseId}/deliverables/${target.id}`,
       );
-      const { exportDeliverable } = await import("./export");
-      const blob = await exportDeliverable(deliverable, (id) =>
+      const exporter = format === "html"
+        ? (await import("./html")).exportHTML
+        : (await import("./export")).exportDeliverable;
+      const blob = await exporter(deliverable, (id) =>
         picture(courseId, id),
       );
       if (sourceCourse.current !== courseId) return;
       await saveDeliverable(
         blob,
-        `${deliverable.title.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")}.${deliverable.kind === "presentation" ? "pptx" : "docx"}`,
+        `${deliverable.title.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")}.${format === "html" ? "html" : deliverable.kind === "presentation" ? "pptx" : "docx"}`,
       );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "下载失败，请重试");
@@ -435,10 +437,7 @@ export default function DeliverableWorkspace({
               <span className="deliverable-kicker">课堂 · 图文与练习同步收录到 PPT</span>
               <h2>{item?.title ?? "课堂展示"}</h2>
             </div>
-            <button disabled={working || !item || !courseId} onClick={() => void download()}>
-              <Download size={16} />
-              {working ? "正在处理…" : "下载 PPTX"}
-            </button>
+            <ShareActions courseId={courseId} item={item} working={working} onDownload={(format) => void download(format)} />
           </header>
         )}
         <div className="deliverable-classroom" hidden={area !== "classroom"}>
@@ -461,14 +460,7 @@ export default function DeliverableWorkspace({
                   </span>
                   <h2>{item.title}</h2>
                 </div>
-                <button disabled={working} onClick={() => void download()}>
-                  <Download size={16} />
-                  {working
-                    ? "正在处理…"
-                    : item.kind === "presentation"
-                      ? "下载 PPTX"
-                      : "下载 Word"}
-                </button>
+                <ShareActions courseId={courseId} item={item} working={working} onDownload={(format) => void download(format)} />
               </header>
               <div className="deliverable-review-hint">
                 {item.source === "course-document" ? "文档随课程内容更新；在对话中提出修改要求。" : `已选中：${block.title} · 在对话中告诉知芽需要怎样修改。`}

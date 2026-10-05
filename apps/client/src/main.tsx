@@ -8,8 +8,10 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { createHashRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { pageRoutes } from "./routes";
+import SharedDeliverable from "./features/deliverables/SharedDeliverable";
 
 const router = createHashRouter([
+  { path: "/shares/:token", Component: SharedDeliverable },
   { path: "/", Component: App, children: pageRoutes },
 ]);
 

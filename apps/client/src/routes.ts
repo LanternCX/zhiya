@@ -53,6 +53,7 @@ export function isAuthPage(page: string) {
 export function returnPath(search: string) {
   const target = new URLSearchParams(search).get("returnTo");
   if (!target?.startsWith("/") || target.startsWith("//")) return "/learn";
+  if (/^\/shares\/[a-zA-Z0-9_-]+$/.test(target)) return target;
   const matches = matchRoutes(pageRoutes, target);
   const page = matches?.at(-1)?.route.id;
   return page &&
