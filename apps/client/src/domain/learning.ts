@@ -138,6 +138,7 @@ export type CourseMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  knowledgeSearches?: import("./knowledge").KnowledgeSearch[];
   input_mode?: InputMode;
   materials?: string[];
   streaming?: boolean;
@@ -154,6 +155,7 @@ export type MaterialPreparationProgress = {
 };
 
 export type CourseActivity =
+  | { kind: "knowledge"; searches: import("./knowledge").KnowledgeSearch[] }
   | { kind: "materials"; progress: MaterialPreparationProgress }
   | { kind: "thinking"; text: string; active: boolean }
   | {

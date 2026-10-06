@@ -18,7 +18,8 @@ services:
       timeout: 5s
       retries: 10
   postgres:
-    image: postgres:17-alpine
+    build:
+      context: apps/server/postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?Use npm run dev:services}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Use npm run dev:services}

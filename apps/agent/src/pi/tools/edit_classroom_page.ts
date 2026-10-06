@@ -3,6 +3,7 @@ import { Type } from "typebox";
 import { createHash } from "node:crypto";
 import type { LessonPage } from "../../domain/learning";
 import type { LessonPageTools } from "../tool";
+import { assertArtifactContent } from "./artifact_content";
 
 const fields = {
   slide: ["title", "markdown"],
@@ -30,6 +31,7 @@ export function patchClassroomPage(page: LessonPage, version: string, changes: A
   if (!changes.length || changes.length > 30) throw new Error("请提供 1–30 处局部修改");
   const groups = new Map<string, Array<{ start: number; end: number; newText: string }>>();
   for (const change of changes) {
+    assertArtifactContent(change.newText);
     if (!before.editableFields.includes(change.field)) throw new Error(`字段 ${change.field} 不可修改`);
     const source: string = Reflect.get(page, change.field);
     if (!change.oldText) throw new Error("oldText 不能为空；请提供能够唯一定位修改位置的原文");

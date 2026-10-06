@@ -18,7 +18,7 @@ export function createSlidesTool(start: SlideTools["start"]): AgentTool {
     description:
       "Generate presentation pages with a child agent. By default wait for the first usable page and return its content plus stable IDs for every requested page; remaining pages continue generating. Use show_lesson_page to teach each page, including a pending page: that tool waits until it is ready. Set background=true only for optional preparation you do not need to teach now. Generation never changes the visible page.",
     parameters: Type.Object({
-      goal: Type.String(),
+      goal: Type.String({ description: "Teaching goal and relevant supporting passages as background evidence. Tell the generator to produce self-contained content; knowledge citations, source IDs and review labels are for chat only and must not appear on slides." }),
       pageCount: Type.Integer({ minimum: 1, maximum: 10 }),
       replaceCurrent: Type.Boolean(),
       background: Type.Optional(Type.Boolean()),

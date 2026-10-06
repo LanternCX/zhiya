@@ -6,6 +6,23 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
+test("slide publication keeps internal knowledge references out of teaching artifacts", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "zhiya-slide-references-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const outfile = join(dir, "slides.mjs");
+  await build({ entryPoints: ["src/pi/tools/publish_slide.ts"], bundle: true, outfile, platform: "node", format: "esm" });
+  const { publishSlideTool } = await import(pathToFileURL(outfile).href);
+  const published: unknown[] = [];
+  const tool = publishSlideTool((_id: string, page: unknown) => published.push(page));
+  await assert.rejects(tool.execute("bad", {
+    title: "训练数据",
+    markdown: "# 训练数据\n训练数据提供学习样例。\n来源（未审核）：textbook\n#knowledge/version/segment-000220-text-0168",
+  }), /Knowledge references belong in chat/);
+  assert.equal(published.length, 0);
+  await tool.execute("good", { title: "训练数据", markdown: "# 训练数据\n训练数据提供学习样例。" });
+  assert.deepEqual(published, [{ title: "训练数据", markdown: "# 训练数据\n训练数据提供学习样例。" }]);
+});
+
 test("deliverable tools preserve targeted revisions and pass cancellation to storage", async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "zhiya-deliverable-tools-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
@@ -62,6 +79,28 @@ test("deliverable tools preserve targeted revisions and pass cancellation to sto
   assert.equal(saved.requestId, "call-1");
 });
 
+test("documents reject knowledge citations while edits can remove existing citations", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "zhiya-document-references-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const outfile = join(dir, "tools.mjs");
+  await build({ entryPoints: ["src/pi/tools/deliverables.ts"], bundle: true, outfile, platform: "node", format: "esm" });
+  const { deliverableTools } = await import(pathToFileURL(outfile).href);
+  const writes: unknown[] = [];
+  const tools = deliverableTools({
+    write: async (_id: string, input: unknown) => { writes.push(input); return { id: "doc", revision: 2 }; },
+    read: async () => ({ id: "doc", revision: 1 }),
+    list: async () => [],
+  });
+  const create = tools.find((tool: { name: string }) => tool.name === "create_deliverable");
+  const edit = tools.find((tool: { name: string }) => tool.name === "edit_deliverable");
+  const citation = "[来源](#knowledge/version/block)";
+  await assert.rejects(create.execute("bad-create", { kind: "document", title: "讲义", blocks: [{ id: "intro", title: "概念", markdown: citation, imageIds: [] }] }), /Knowledge references belong in chat/);
+  await assert.rejects(edit.execute("bad-edit", { id: "doc", revision: 1, changes: [{ action: "patch", blockId: "intro", field: "markdown", oldText: "概念", newText: citation }] }), /Knowledge references belong in chat/);
+  assert.equal(writes.length, 0);
+  await edit.execute("cleanup", { id: "doc", revision: 1, changes: [{ action: "patch", blockId: "intro", field: "markdown", oldText: citation, newText: "" }] });
+  assert.equal(writes.length, 1);
+});
+
 test("classroom edits match original source atomically and preserve student interaction", async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "zhiya-classroom-edits-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
@@ -92,4 +131,8 @@ test("classroom edits match original source atomically and preserve student inte
     { field: "instructions", oldText: "AAA", newText: "AAA" },
   ]), /不能重叠/);
   assert.throws(() => patchClassroomPage(page, before.version, [{ field: "code", oldText: page.code, newText: "overwrite answer" }]), /不可修改/);
+  assert.throws(() => patchClassroomPage(page, before.version, [{ field: "instructions", oldText: "first=AAA", newText: "#knowledge/version/block" }]), /Knowledge references belong in chat/);
+  const polluted = { id: "slide", kind: "slide", title: "概念", markdown: "# 概念\n内容。\n#knowledge/version/block" };
+  const cleaned = patchClassroomPage(polluted, readEditablePage(polluted).version, [{ field: "markdown", oldText: "\n#knowledge/version/block", newText: "" }]);
+  assert.equal(cleaned.updated.markdown, "# 概念\n内容。");
 });

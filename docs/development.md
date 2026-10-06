@@ -152,6 +152,47 @@ ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./inte
 
 离线资料工具位于 [`apps/knowledge`](../apps/knowledge/README.md)，使用 `uv` 管理 Python 依赖，生成和验证 Hugging Face Dataset 格式的 Parquet。原始资料、派生素材和向量结果放在被 Git 忽略的根目录 `data/`；默认数据集路径为 `data/knowledge/`。这套工具独立于在线材料解析服务，运行步骤及计算云加载方式见该目录的说明。
 
+在线知识库复用现有 PostgreSQL 和 RustFS 实例，分别使用独立数据库 `zhiya_knowledge` 和独立桶 `zhiya-knowledge`。开发 PostgreSQL 镜像包含 pgvector，原 `postgres-data` 卷继续保存业务数据。服务端通过 `knowledge_database`、`knowledge_storage` 配置独立连接；生产环境预先创建数据库并授予必要权限。文本 Embedding 使用 `knowledge_text_model`，视觉 Embedding 使用 `knowledge_visual_model`，分别配置 `endpoint`、`id` 和 `api_key`，查询路由按索引类型选择对应配置并核对模型。两路凭证独立读取，没有默认复用或回退。缺少任一启用索引的凭证时，在发送模型请求前报错。
+
+在 `apps/server/config.local.yaml` 中分别填写两路凭证：
+
+```yaml
+knowledge_text_model:
+  api_key: "文本 Embedding API Key"
+knowledge_visual_model:
+  api_key: "视觉 Embedding API Key"
+```
+
+文本查询使用硅基流动 `Qwen/Qwen3-Embedding-8B`，视觉查询使用 `Qwen/Qwen3-VL-Embedding-8B`，均请求原生 4096 维，分别匹配对应的离线模型。两路分别设置 `ZHIYA_SERVER_KNOWLEDGE_TEXT_MODEL_API_KEY` 和 `ZHIYA_SERVER_KNOWLEDGE_VISUAL_MODEL_API_KEY`。百炼页面内容识别凭证使用 `vision_model.api_key` 或 `ZHIYA_SERVER_VISION_MODEL_API_KEY`，与两路 Embedding 配置独立。
+
+导入命令从服务端目录加载配置，读取已准备好的资料、已上传对象的 `object-catalog.json` 和已完成的离线向量任务。沿用 `document_id`、`chunk_id` 及按 SHA-256 去重的对象位置。导入不调用模型 API、不上传重复资料；先校验资料、向量和桶中目录一致性，再事务提交。每套索引记录模型、版本、维度和处理配置；Query 按索引类型选择独立配置并校验模型与维度，调用硅基流动 `/v1/embeddings`。两路检索按排名融合，不比较跨模型原始相似度。pgvector 保存完整向量，通过二值 HNSW 索引召回后用完整向量重排。重复导入保持引用稳定。
+
+```sh
+go -C apps/server run ./cmd/knowledge --check-model --route visual
+go -C apps/server run ./cmd/knowledge --check-model --route text
+go -C apps/server run ./cmd/knowledge \
+  --data-dir /absolute/path/to/knowledge \
+  --catalog /absolute/path/to/object-catalog.json \
+  --embedding-dir /absolute/path/to/visual-embedding-results
+go -C apps/server run ./cmd/knowledge --query '什么是训练数据？'
+go -C apps/server run ./cmd/knowledge --replace-text \
+  --embedding-dir /absolute/path/to/text-embedding-results
+```
+
+`--embedding-dir` 接受已完成的 Qwen3-VL-Embedding-8B 视觉任务和 Qwen3-Embedding-8B 文本任务，可以重复传入以同时导入两路。缺少文本向量时只接通视觉索引，导入结果返回 `pendingText`，不会自动重新编码文本或把未导入文本当成可检索内容。
+
+`--replace-text` 流式读取一个已完成的文本任务，只替换当前资料集的文本索引。工具核对模型、维度、数量、来源 ID 和所有已选文本的覆盖情况，在单个事务中完成切换；失败时回滚。已有视觉向量、资料对象和引用保持稳定。被替换的文本向量不再参与检索，历史引用对应的资料内容仍可读取。此操作不重新生成向量。
+
+视频索引对应完整视频，不提供片段内容识别。托管 Query API 与离线模型的版本、指令处理一致性仍需通过真实检索验证；API 返回同名模型不能证明部署版本一致。
+
+Pi 使用 `search_knowledge` 和 `read_knowledge_block` 检索并读取依据，图片视觉读取复用材料解析能力并缓存结果。前端显示实际查询、候选资料与搜索失败状态，回答使用稳定的知识库引用，打开时获取页面和原文件访问地址。向量化或视觉解析不改变资料的审核状态。
+
+知识库集成测试使用独立临时数据库，不修改业务库或已导入知识库：
+
+```sh
+ZHIYA_KNOWLEDGE_TEST_URL='postgres://zhiya:zhiya-local@127.0.0.1:54329/postgres?sslmode=disable' go -C apps/server test ./internal/knowledge -v
+```
+
 ## 常用命令
 
 | 命令 | 用途 |

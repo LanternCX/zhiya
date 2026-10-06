@@ -36,7 +36,12 @@ import type {
 } from "../tool";
 import type { SlideRequest } from "../tools/create_slides";
 import type { BilibiliSearch } from "../tools/search_bilibili";
-import { readEditablePage, patchClassroomPage } from "../tools/edit_classroom_page";
+import type { KnowledgeGateway } from "../tools/knowledge";
+import type { KnowledgeSearch } from "../../domain/knowledge";
+import {
+  readEditablePage,
+  patchClassroomPage,
+} from "../tools/edit_classroom_page";
 export type IllustrationGateway = {
   create(
     courseId: string,
@@ -60,11 +65,13 @@ export type IllustrationGateway = {
 };
 
 function responseModePrompt(inputMode: InputMode) {
-  if (inputMode === "text") return "当前用户正在通过文字与你交流。请按普通文字模式回答，保留适合阅读的完整结构、必要的标题和列表；不要因为历史语音对话而刻意口语化，也不要省略文字模式需要的细节。";
+  if (inputMode === "text")
+    return "当前用户正在通过文字与你交流。请按普通文字模式回答，保留适合阅读的完整结构、必要的标题和列表；不要因为历史语音对话而刻意口语化，也不要省略文字模式需要的细节。";
   return "当前用户正在通过语音与你交流。请使用自然、简洁、口语化的方式回答。普通问题优先控制在 1～3 句话。不要像文章一样回答，避免大量标题、Markdown 和长列表。除非用户明确要求，否则不要输出英文。代码、表格、URL 或其他不适合朗读的内容，只进行简要说明，不要逐字朗读代码、表格或 URL。";
 }
 
 export class CourseSession {
+  private knowledgeSearches: KnowledgeSearch[] = [];
   private teacher: Agent;
   private slideAgents = new Map<
     string,
@@ -177,6 +184,7 @@ export class CourseSession {
       session: Session;
     },
     private searchBilibili?: BilibiliSearch,
+    private knowledge?: KnowledgeGateway,
   ) {
     this.pageStore = [...initial.pages];
     this.presentations = [...initial.presentations];
@@ -262,34 +270,65 @@ export class CourseSession {
         if (!this.searchBilibili) throw new Error("B站检索服务不可用");
         const operation = this.cancellation;
         const result = await this.searchBilibili(query, page, signal);
-        if (signal?.aborted || this.stopped || this.teachingInterrupted || operation !== this.cancellation)
+        if (
+          signal?.aborted ||
+          this.stopped ||
+          this.teachingInterrupted ||
+          operation !== this.cancellation
+        )
           throw new Error("当前检索已中断");
         const videos = result.videos.map((video) => {
           const existing = this.pageStore.find(
-            (item): item is VideoPage => item.kind === "video" && item.bvid === video.bvid,
+            (item): item is VideoPage =>
+              item.kind === "video" && item.bvid === video.bvid,
           );
           const pageId = existing?.id ?? `video-${crypto.randomUUID()}`;
-          if (!existing) this.pageStore.push({ ...video, kind: "video", id: pageId, topic: query });
+          if (!existing)
+            this.pageStore.push({
+              ...video,
+              kind: "video",
+              id: pageId,
+              topic: query,
+            });
           return { ...video, pageId };
         });
         this.onPages([...this.pageStore], this.hasRunningVisualTask());
         return { ...result, videos };
       },
+      knowledge: {
+        search: (query, signal) => {
+          if (!this.knowledge) throw new Error("知识库检索服务不可用");
+          return this.knowledge.search(query, signal);
+        },
+        read: (version, blockId, signal) => {
+          if (!this.knowledge) throw new Error("知识库读取服务不可用");
+          return this.knowledge.read(version, blockId, signal);
+        },
+      },
       pages: {
         read: () => this.readLessonPages(),
         readPage: (id) => {
           const page = this.pageStore.find((page) => page.id === id);
-          if (!page) throw new Error("当前对话中找不到该课堂页面，请先打开它所属的对话");
+          if (!page)
+            throw new Error("当前对话中找不到该课堂页面，请先打开它所属的对话");
           return readEditablePage(page);
         },
         patch: (id, version, changes) => {
           const index = this.pageStore.findIndex((page) => page.id === id);
           if (index < 0) throw new Error("当前对话中找不到该课堂页面");
-          const result = patchClassroomPage(this.pageStore[index], version, changes);
+          const result = patchClassroomPage(
+            this.pageStore[index],
+            version,
+            changes,
+          );
           this.pageStore[index] = result.updated;
           this.onPages([...this.pageStore], this.hasRunningVisualTask());
           this.onSequence([...this.presentations], this.currentPresentationId);
-          return { page: result.page, version: result.version, diff: result.diff };
+          return {
+            page: result.page,
+            version: result.version,
+            diff: result.diff,
+          };
         },
         show: (id, pageId, signal) => this.showPage(id, pageId, signal),
       },
@@ -328,6 +367,19 @@ export class CourseSession {
     this.teacher.subscribe((event) => {
       if (this.stopped) return;
       if (event.type === "tool_execution_start") {
+        if (event.toolName === "search_knowledge") {
+          this.knowledgeSearches.push({
+            id: event.toolCallId,
+            query: String(event.args.query),
+            status: "running",
+            sources: [],
+          });
+          this.onActivity({
+            kind: "knowledge",
+            searches: structuredClone(this.knowledgeSearches),
+          });
+          return;
+        }
         this.onActivity({
           kind: "tool",
           name: event.toolName,
@@ -337,6 +389,34 @@ export class CourseSession {
         return;
       }
       if (event.type === "tool_execution_end") {
+        if (event.toolName === "search_knowledge") {
+          const search = this.knowledgeSearches.find(
+            (item) => item.id === event.toolCallId,
+          );
+          if (search) {
+            search.status = event.isError ? "error" : "complete";
+            const result = event.result as {
+              details?: { sources?: KnowledgeSearch["sources"] };
+              content?: Array<{ type: string; text?: string }>;
+            };
+            search.sources = (result.details?.sources ?? []).map((source) => ({
+              ...source,
+              text: source.text.slice(0, 300),
+              visual: undefined,
+            }));
+            if (event.isError)
+              search.error =
+                result.content
+                  ?.filter((item) => item.type === "text")
+                  .map((item) => item.text)
+                  .join("\n") || "搜索失败";
+          }
+          this.onActivity({
+            kind: "knowledge",
+            searches: structuredClone(this.knowledgeSearches),
+          });
+          return;
+        }
         this.onActivity({
           kind: "tool",
           name: event.toolName,
@@ -373,10 +453,7 @@ export class CourseSession {
         .filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("");
-      if (
-        reasoning ||
-        (event.type === "message_update" && !text)
-      ) {
+      if (reasoning || (event.type === "message_update" && !text)) {
         this.onActivity({
           kind: "thinking",
           text: reasoning,
@@ -391,6 +468,9 @@ export class CourseSession {
           id: this.teacherMessageId,
           role: "assistant",
           text,
+          knowledgeSearches: this.knowledgeSearches.length
+            ? structuredClone(this.knowledgeSearches)
+            : undefined,
           input_mode: this.teacherMessageMode,
           streaming: event.type === "message_update",
           pageId: this.presentations.find(
@@ -429,6 +509,7 @@ export class CourseSession {
     if (this.teacher.signal?.aborted) await this.teacher.waitForIdle();
     if (this.stopped) return;
     this.currentInputMode = inputMode;
+    this.knowledgeSearches = [];
     this.activeQuestionEvent = questionEvent;
     this.onMessage({
       id: ++this.messageSequence,

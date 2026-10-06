@@ -15,18 +15,20 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
+	"github.com/LanternCX/zhiya/apps/server/internal/knowledge"
 	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/modelproxy"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 )
 
 type Dependencies struct {
-	Config  *config.Config
-	Logger  *slog.Logger
-	Models  data.Models
-	Objects objectstore.Store
-	Runner  coderunner.Runner
-	Hub     *transport.Hub
+	Config    *config.Config
+	Logger    *slog.Logger
+	Models    data.Models
+	Objects   objectstore.Store
+	Runner    coderunner.Runner
+	Hub       *transport.Hub
+	Knowledge *knowledge.Service
 }
 
 type application struct{ Dependencies }

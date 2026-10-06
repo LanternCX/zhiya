@@ -69,6 +69,28 @@ http:
 database:
   url: "postgres://zhiya:zhiya-local@127.0.0.1:54329/zhiya?sslmode=disable"
 
+# Independent corpus database and bucket; live model credentials stay local.
+knowledge_database:
+  url: "postgres://zhiya:zhiya-local@127.0.0.1:54329/zhiya_knowledge?sslmode=disable"
+knowledge_text_model:
+  endpoint: "https://api.siliconflow.cn/v1/embeddings"
+  id: "Qwen/Qwen3-Embedding-8B"
+  # Match offline text embeddings: native 4096 dimensions.
+  api_key: ""
+knowledge_visual_model:
+  endpoint: "https://api.siliconflow.cn/v1/embeddings"
+  id: "Qwen/Qwen3-VL-Embedding-8B"
+  # Independent visual embedding credentials; vision_model reads page content.
+  api_key: ""
+knowledge_storage:
+  endpoint: "http://127.0.0.1:9000"
+  public_endpoint: "http://127.0.0.1:9000"
+  region: "us-east-1"
+  bucket: "zhiya-knowledge"
+  access_key: "zhiya-local-access"
+  secret_key: "zhiya-local-secret-change-before-deploy"
+  url_ttl_seconds: 120
+
 # Local S3-compatible RustFS. Override credentials for every non-development deployment.
 storage:
   endpoint: "http://127.0.0.1:9000"

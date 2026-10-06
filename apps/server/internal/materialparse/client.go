@@ -57,7 +57,7 @@ func (p *Parser) parseDocument(ctx context.Context, name string, raw []byte) (Do
 			continue
 		}
 		page.Source.Image = fmt.Sprintf("page:%d", index+1)
-		text, description, uncertainties, err := p.describe(ctx, page.Image)
+		text, description, uncertainties, err := p.Describe(ctx, page.Image)
 		if err != nil {
 			d.Warnings = append(d.Warnings, fmt.Sprintf("第 %d 个页面/图片视觉解析失败：%s", index+1, err))
 			continue
@@ -84,7 +84,8 @@ func (p *Parser) parseDocument(ctx context.Context, name string, raw []byte) (Do
 	return d, nil
 }
 
-func (p *Parser) describe(ctx context.Context, image string) (string, string, []string, error) {
+// Describe reads an already rendered page without running document conversion.
+func (p *Parser) Describe(ctx context.Context, image string) (string, string, []string, error) {
 	if p.key == "" || p.visionEndpoint == "" {
 		return "", "", nil, fmt.Errorf("千问视觉模型未配置")
 	}

@@ -29,6 +29,7 @@ import type {
 } from "../../domain/learning";
 import { CourseMessageResponse } from "./MaterialReference";
 import MaterialParsingProgress from "./MaterialParsingProgress";
+import { KnowledgeSearchProgress } from "./KnowledgeReference";
 import {
   Reasoning,
   ReasoningContent,
@@ -84,6 +85,7 @@ const conversationControls = {
 
 function Activity({ activity }: { activity: CourseActivity | null }) {
   if (!activity) return null;
+  if (activity.kind === "knowledge") return <KnowledgeSearchProgress searches={activity.searches} />;
   if (activity.kind === "materials") return <MaterialParsingProgress progress={activity.progress} />;
   if (activity.kind === "thinking")
     return (
@@ -842,6 +844,7 @@ export default function CourseRoom({
                   data-presentation-id={message.presentationId}
                 >
                   <span>{message.role === "user" ? "我" : "知芽"}</span>
+                  {message.role === "assistant" && message.knowledgeSearches?.length ? <KnowledgeSearchProgress searches={message.knowledgeSearches} /> : null}
                   {message.role === "assistant" ? (
                     <CourseMessageResponse
                       courseId={course?.id}

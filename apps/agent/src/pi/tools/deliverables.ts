@@ -1,5 +1,6 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
+import { assertArtifactContent } from "./artifact_content";
 import type {
   Deliverable,
   DeliverableBlock,
@@ -33,7 +34,7 @@ const block = Type.Object({
   title: Type.String({ maxLength: 120 }),
   markdown: Type.String({
     description:
-      "Body Markdown, without a duplicate page title, front matter, HTML or slide separators. Use short readable text, lists, tables or fenced code. Insert pictures through imageIds, never Markdown image URLs.",
+      "Body Markdown, without a duplicate page title, front matter, HTML or slide separators. Use short readable text, lists, tables or fenced code. Insert pictures through imageIds, never Markdown image URLs. Retrieved evidence informs the content; citations belong in chat only. Omit internal reference links, source/block IDs, source banners and review labels.",
   }),
   imageIds: Type.Array(Type.String(), {
     maxItems: 4,
@@ -95,6 +96,12 @@ export function deliverableTools(storage: DeliverableTools): AgentTool[] {
       }),
       execute: async (id, params, signal) => {
         signal?.throwIfAborted();
+        const input = params as { title: string; blocks: DeliverableBlock[] };
+        assertArtifactContent(input.title);
+        for (const block of input.blocks) {
+          assertArtifactContent(block.title);
+          assertArtifactContent(block.markdown);
+        }
         return result(
           await storage.write(
             "",
@@ -138,6 +145,14 @@ export function deliverableTools(storage: DeliverableTools): AgentTool[] {
           title?: string;
           changes: DeliverableChange[];
         };
+        if (input.title !== undefined) assertArtifactContent(input.title);
+        for (const change of input.changes) {
+          if (change.action === "patch") assertArtifactContent(change.newText ?? "");
+          if (change.block) {
+            assertArtifactContent(change.block.title);
+            assertArtifactContent(change.block.markdown);
+          }
+        }
         const saved = await storage.write(target, { ...input, requestId: id }, signal);
         return result({ id: saved.id, title: saved.title, revision: saved.revision, diff: input.changes });
       },

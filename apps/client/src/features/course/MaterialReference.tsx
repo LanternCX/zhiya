@@ -6,6 +6,8 @@ import {
   type MessageResponseProps,
 } from "../../components/ai-elements/message";
 import { api } from "../../api";
+import { parseKnowledgeReference } from "../../domain/knowledge";
+import { KnowledgeCitation } from "./KnowledgeReference";
 import type { MaterialContent } from "../../domain/learning";
 import {
   parseMaterialReference,
@@ -171,6 +173,13 @@ export function CourseMessageResponse({
   const components = useMemo<MessageResponseProps["components"]>(
     () => ({
       a: ({ href, children, node: _node, ...attributes }) => {
+        const knowledge = href ? parseKnowledgeReference(href) : null;
+        if (knowledge)
+          return (
+            <KnowledgeCitation key={href} {...knowledge}>
+              {children}
+            </KnowledgeCitation>
+          );
         const reference = href ? parseMaterialReference(href) : null;
         if (reference && courseId)
           return (
