@@ -69,6 +69,22 @@ func TestMaterialVisionConfigurationIsIndependentOfTeachingModel(t *testing.T) {
 	}
 }
 
+func TestKnowledgeConfigurationUsesSeparateDatabaseAndBucket(t *testing.T) {
+	t.Setenv("ZHIYA_SERVER_KNOWLEDGE_TEXT_MODEL_API_KEY", "private-text-key")
+	t.Setenv("ZHIYA_SERVER_KNOWLEDGE_VISUAL_MODEL_API_KEY", "private-visual-key")
+	cfg, err := config.Load("../../config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.KnowledgeTextModel.APIKey != "private-text-key" || cfg.KnowledgeVisualModel.APIKey != "private-visual-key" || cfg.KnowledgeStorage.Bucket == cfg.Storage.Bucket || cfg.KnowledgeDatabase.URL == cfg.Database.URL {
+		t.Fatal("knowledge resources must be separate")
+	}
+	t.Setenv("ZHIYA_SERVER_KNOWLEDGE_STORAGE_BUCKET", cfg.Storage.Bucket)
+	if _, err = config.Load("../../config.yaml"); err == nil {
+		t.Fatal("shared business bucket accepted")
+	}
+}
+
 func TestEnvironmentOverridesFileAndPathsBelongToConfigDirectory(t *testing.T) {
 	raw, err := os.ReadFile("../../config.yaml")
 	if err != nil {

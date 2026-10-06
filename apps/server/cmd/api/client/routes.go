@@ -44,6 +44,8 @@ func (a *application) Routes() http.Handler {
 	api.HandleFunc("GET /api/code/languages", a.codeLanguages)
 	api.HandleFunc("POST /api/code/runs", a.runCode)
 	api.HandleFunc("GET /api/courses", a.listCourses)
+	api.HandleFunc("GET /api/knowledge/{version}/blocks/{blockId}", a.readKnowledge)
+	api.HandleFunc("GET /api/knowledge/{version}/blocks/{blockId}/{kind}", a.downloadKnowledge)
 	api.HandleFunc("POST /api/courses", a.createCourse)
 	api.HandleFunc("GET /api/courses/{id}", a.getCourse)
 	api.HandleFunc("PATCH /api/courses/{id}", a.updateCourse)

@@ -1,6 +1,7 @@
 import { agentBranch, branchMessages, type Session } from "../pi/session";
 import { CourseSession } from "../pi/sessions/course";
 import type { AnimationTools } from "../pi/tool";
+import type { KnowledgeSource } from "../domain/knowledge";
 import type {
   ModelInfo,
   CodeLanguage,
@@ -207,9 +208,29 @@ export class CourseHost {
           ),
       },
       branch && session ? { branch, messages, session } : undefined,
-      (query, page, signal) => this.api.json<BilibiliSearchResult>(
-        "/bilibili/search", "POST", { query, page }, signal,
-      ),
+      (query, page, signal) =>
+        this.api.json<BilibiliSearchResult>(
+          "/bilibili/search",
+          "POST",
+          { query, page },
+          signal,
+        ),
+      {
+        search: (query, signal) =>
+          this.api.json<{ query: string; sources: KnowledgeSource[] }>(
+            "/knowledge/search",
+            "POST",
+            { query },
+            signal,
+          ),
+        read: (version, blockId, signal) =>
+          this.api.json<KnowledgeSource>(
+            `/knowledge/${encodeURIComponent(version)}/blocks/${encodeURIComponent(blockId)}`,
+            "GET",
+            undefined,
+            signal,
+          ),
+      },
     );
   }
   async command(action: string, args: unknown[]) {

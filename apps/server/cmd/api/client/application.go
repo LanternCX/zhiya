@@ -15,6 +15,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/config"
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
+	"github.com/LanternCX/zhiya/apps/server/internal/knowledge"
 	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
 	"github.com/LanternCX/zhiya/apps/server/internal/objectstore"
 	"github.com/LanternCX/zhiya/apps/server/internal/speech"
@@ -34,6 +35,7 @@ type application struct {
 	learning      *learning.Service
 	images        imagegen.Generator
 	illustrations *illustrations.Service
+	knowledge     *knowledge.Service
 }
 
 func (a *application) illustrationService() *illustrations.Service {
@@ -76,17 +78,18 @@ func (a *application) learningService() *learning.Service {
 }
 
 type Dependencies struct {
-	Logger  *slog.Logger
-	Models  data.Models
-	Send    func(to, purpose, code string) error
-	Config  config.Config
-	Hub     *transport.Hub
-	Runner  coderunner.Runner
-	Objects objectstore.Store
+	Logger    *slog.Logger
+	Models    data.Models
+	Send      func(to, purpose, code string) error
+	Config    config.Config
+	Hub       *transport.Hub
+	Runner    coderunner.Runner
+	Objects   objectstore.Store
+	Knowledge *knowledge.Service
 }
 
 func New(d Dependencies) *application {
-	return &application{logger: d.Logger, models: d.Models, send: d.Send, config: d.Config, learningHub: d.Hub, runner: d.Runner, objects: d.Objects}
+	return &application{logger: d.Logger, models: d.Models, send: d.Send, config: d.Config, learningHub: d.Hub, runner: d.Runner, objects: d.Objects, knowledge: d.Knowledge}
 }
 
 func (a *application) http() transport.Responder {

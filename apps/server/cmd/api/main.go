@@ -22,6 +22,7 @@ import (
 	"github.com/LanternCX/zhiya/apps/server/internal/data"
 	"github.com/LanternCX/zhiya/apps/server/internal/domain"
 	"github.com/LanternCX/zhiya/apps/server/internal/imagegen"
+	"github.com/LanternCX/zhiya/apps/server/internal/knowledge"
 	"github.com/LanternCX/zhiya/apps/server/internal/logging"
 	"github.com/LanternCX/zhiya/apps/server/internal/mailer"
 	"github.com/LanternCX/zhiya/apps/server/internal/materialparse"
@@ -74,8 +75,21 @@ func main() {
 		objects, err = objectstore.New(startup, cfg.Storage)
 	}
 	hub := transport.NewHub()
-	clientAPI := client.New(client.Dependencies{Logger: logger, Models: models, Send: send, Config: cfg, Hub: hub, Runner: coderunner.New(cfg.Runner, http.DefaultClient, logger), Objects: objects})
-	agentAPI := agent.New(agent.Dependencies{Logger: logger, Config: &cfg, Models: models, Objects: objects, Hub: hub, Runner: coderunner.New(cfg.Runner, http.DefaultClient, logger)})
+	var corpus *knowledge.Service
+	if err == nil {
+		var repository *knowledge.Repository
+		repository, err = knowledge.OpenDatabase(startup, cfg.KnowledgeDatabase.URL)
+		if err == nil {
+			defer repository.Pool.Close()
+			var knowledgeObjects objectstore.Store
+			knowledgeObjects, err = objectstore.New(startup, cfg.KnowledgeStorage)
+			if err == nil {
+				corpus = &knowledge.Service{Repository: repository, Objects: knowledgeObjects, TextEncoder: knowledge.NewEncoder(cfg.KnowledgeTextModel.Endpoint, cfg.KnowledgeTextModel.ID, cfg.KnowledgeTextModel.APIKey, http.DefaultClient), VisualEncoder: knowledge.NewEncoder(cfg.KnowledgeVisualModel.Endpoint, cfg.KnowledgeVisualModel.ID, cfg.KnowledgeVisualModel.APIKey, http.DefaultClient), Parser: materialparse.New(cfg.MaterialParser.Endpoint, cfg.VisionModel.Endpoint, cfg.VisionModel.ID, cfg.VisionModel.APIKey, http.DefaultClient)}
+			}
+		}
+	}
+	clientAPI := client.New(client.Dependencies{Logger: logger, Models: models, Send: send, Config: cfg, Hub: hub, Runner: coderunner.New(cfg.Runner, http.DefaultClient, logger), Objects: objects, Knowledge: corpus})
+	agentAPI := agent.New(agent.Dependencies{Logger: logger, Config: &cfg, Models: models, Objects: objects, Hub: hub, Runner: coderunner.New(cfg.Runner, http.DefaultClient, logger), Knowledge: corpus})
 	if err == nil {
 		err = hub.Start(ctx, learning.New(models), logger)
 	}

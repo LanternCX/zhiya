@@ -1,8 +1,11 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { Slide } from "../../domain/learning";
+import { assertArtifactContent } from "./artifact_content";
 
 function validateSlide(title: string, markdown: string) {
+  assertArtifactContent(title);
+  assertArtifactContent(markdown);
   const lines = markdown.trim().split(/\r?\n/);
   if (lines[0] !== `# ${title}`)
     throw new Error("Start the slide with one # heading matching its title.");

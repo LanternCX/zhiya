@@ -16,6 +16,7 @@ export class ResponsePresenter {
     if (/```[\s\S]*```/.test(text)) return "代码我已经放在屏幕上了。";
     if (/https?:\/\/\S+/i.test(text)) return "链接我已经放在屏幕上了。";
     return text
+      .replace(/\[(?:\\.|[^\]\\])*\]\(#(?:knowledge|material)\/[^)]+\)/g, "")
       .replace(/`[^`]*`/g, "")
       .replace(/\*\*([^*]+)\*\*/g, "$1")
       .replace(/__([^_]+)__/g, "$1")

@@ -19,20 +19,24 @@ import (
 )
 
 type Config struct {
-	Agent          Agent    `yaml:"agent"`
-	Model          Model    `yaml:"model"`
-	Speech         Speech   `yaml:"speech"`
-	ImageModel     Model    `yaml:"image_model"`
-	VisionModel    Model    `yaml:"vision_model"`
-	MaterialParser Parser   `yaml:"material_parser"`
-	Runner         Runner   `yaml:"runner"`
-	Logging        Logging  `yaml:"logging"`
-	Development    bool     `yaml:"development"`
-	Server         Server   `yaml:"http"`
-	Database       Database `yaml:"database"`
-	Storage        Storage  `yaml:"storage"`
-	SMTP           SMTP     `yaml:"smtp"`
-	Account        Account  `yaml:"account"`
+	Agent                Agent    `yaml:"agent"`
+	Model                Model    `yaml:"model"`
+	Speech               Speech   `yaml:"speech"`
+	ImageModel           Model    `yaml:"image_model"`
+	VisionModel          Model    `yaml:"vision_model"`
+	KnowledgeTextModel   Model    `yaml:"knowledge_text_model"`
+	KnowledgeVisualModel Model    `yaml:"knowledge_visual_model"`
+	KnowledgeDatabase    Database `yaml:"knowledge_database"`
+	KnowledgeStorage     Storage  `yaml:"knowledge_storage"`
+	MaterialParser       Parser   `yaml:"material_parser"`
+	Runner               Runner   `yaml:"runner"`
+	Logging              Logging  `yaml:"logging"`
+	Development          bool     `yaml:"development"`
+	Server               Server   `yaml:"http"`
+	Database             Database `yaml:"database"`
+	Storage              Storage  `yaml:"storage"`
+	SMTP                 SMTP     `yaml:"smtp"`
+	Account              Account  `yaml:"account"`
 }
 type Agent struct {
 	Endpoint       string `yaml:"endpoint"`
@@ -270,7 +274,7 @@ func (c Config) Validate() error {
 			return fmt.Errorf("model.id is required when model.endpoint is configured")
 		}
 	}
-	for name, model := range map[string]Model{"image_model": c.ImageModel, "vision_model": c.VisionModel} {
+	for name, model := range map[string]Model{"image_model": c.ImageModel, "vision_model": c.VisionModel, "knowledge_text_model": c.KnowledgeTextModel, "knowledge_visual_model": c.KnowledgeVisualModel} {
 		if model.Endpoint != "" {
 			u, err := url.Parse(model.Endpoint)
 			if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
@@ -338,6 +342,28 @@ func (c Config) Validate() error {
 	db, err := url.Parse(c.Database.URL)
 	if err != nil || db.Hostname() == "" || (db.Scheme != "postgres" && db.Scheme != "postgresql") || db.Path == "" || db.Path == "/" {
 		return fmt.Errorf("database.url must be a PostgreSQL connection URL")
+	}
+	knowledgeDB, err := url.Parse(c.KnowledgeDatabase.URL)
+	if err != nil || knowledgeDB.Hostname() == "" || (knowledgeDB.Scheme != "postgres" && knowledgeDB.Scheme != "postgresql") || knowledgeDB.Path == "" || knowledgeDB.Path == "/" || knowledgeDB.Path == db.Path {
+		return fmt.Errorf("knowledge_database.url must name a separate PostgreSQL database")
+	}
+	if c.KnowledgeVisualModel.ID != "Qwen/Qwen3-VL-Embedding-8B" {
+		return fmt.Errorf("knowledge_visual_model.id must be Qwen/Qwen3-VL-Embedding-8B")
+	}
+	if c.KnowledgeTextModel.ID != "Qwen/Qwen3-Embedding-8B" {
+		return fmt.Errorf("knowledge_text_model.id must be Qwen/Qwen3-Embedding-8B")
+	}
+	if c.KnowledgeStorage.Bucket == c.Storage.Bucket {
+		return fmt.Errorf("knowledge_storage.bucket must be separate from business storage")
+	}
+	for _, endpoint := range []string{c.KnowledgeStorage.Endpoint, c.KnowledgeStorage.PublicEndpoint} {
+		u, err := url.Parse(endpoint)
+		if err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && !(c.Development && u.Scheme == "http" && loopback(u.Hostname()))) {
+			return fmt.Errorf("knowledge storage must use HTTPS (loopback HTTP allowed in development)")
+		}
+	}
+	if c.KnowledgeStorage.Region == "" || c.KnowledgeStorage.Bucket == "" || c.KnowledgeStorage.AccessKey == "" || c.KnowledgeStorage.SecretKey == "" {
+		return fmt.Errorf("knowledge storage settings are required")
 	}
 	storage, err := url.Parse(c.Storage.Endpoint)
 	if err != nil || storage.Host == "" || storage.User != nil || storage.RawQuery != "" || storage.Fragment != "" || (storage.Scheme != "https" && !(c.Development && storage.Scheme == "http" && loopback(storage.Hostname()))) {

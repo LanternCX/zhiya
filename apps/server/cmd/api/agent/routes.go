@@ -42,6 +42,8 @@ func (a *application) Routes() http.Handler {
 	handle("POST /courses", (*requestHandler).createCourse)
 	handle("GET /code/languages", (*requestHandler).codeLanguages)
 	handle("POST /bilibili/search", (*requestHandler).searchBilibili)
+	handle("POST /knowledge/search", (*requestHandler).searchKnowledge)
+	handle("GET /knowledge/{version}/blocks/{blockId}", (*requestHandler).readKnowledge)
 	handle("POST /courses/{id}/material-uploads", (*requestHandler).startCourseMaterialUpload)
 	handle("POST /courses/{id}/material-uploads/{uploadId}/complete", (*requestHandler).completeCourseMaterialUpload)
 	handle("GET /courses/{id}", (*requestHandler).getCourse)
