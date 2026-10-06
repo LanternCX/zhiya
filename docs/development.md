@@ -150,7 +150,9 @@ ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./inte
 
 ## 教学知识库资料处理
 
-离线资料工具位于 [`apps/knowledge`](../apps/knowledge/README.md)，使用 `uv` 管理 Python 依赖，生成和验证 Hugging Face Dataset 格式的 Parquet。原始资料、派生素材和向量结果放在被 Git 忽略的根目录 `data/`；默认数据集路径为 `data/knowledge/`。这套工具独立于在线材料解析服务，运行步骤及计算云加载方式见该目录的说明。
+完整资料和两路已完成向量发布在 [Hugging Face：LanternCX/zhiya-knowledge](https://huggingface.co/datasets/LanternCX/zhiya-knowledge)。导入步骤及操作确认说明见[知识库使用指南](../apps/knowledge/README.md#接入知识库)。本节说明部署前需要填写的服务端配置。
+
+数据默认下载到被 Git 忽略的根目录 `data/`，与代码分开保存。
 
 在线知识库复用现有 PostgreSQL 和 RustFS 实例，分别使用独立数据库 `zhiya_knowledge` 和独立桶 `zhiya-knowledge`。开发 PostgreSQL 镜像包含 pgvector，原 `postgres-data` 卷继续保存业务数据。服务端通过 `knowledge_database`、`knowledge_storage` 配置独立连接；生产环境预先创建数据库并授予必要权限。文本 Embedding 使用 `knowledge_text_model`，视觉 Embedding 使用 `knowledge_visual_model`，分别配置 `endpoint`、`id` 和 `api_key`，查询路由按索引类型选择对应配置并核对模型。两路凭证独立读取，没有默认复用或回退。缺少任一启用索引的凭证时，在发送模型请求前报错。
 
@@ -185,7 +187,7 @@ go -C apps/server run ./cmd/knowledge --replace-text \
 
 视频索引对应完整视频，不提供片段内容识别。托管 Query API 与离线模型的版本、指令处理一致性仍需通过真实检索验证；API 返回同名模型不能证明部署版本一致。
 
-Pi 使用 `search_knowledge` 和 `read_knowledge_block` 检索并读取依据，图片视觉读取复用材料解析能力并缓存结果。前端显示实际查询、候选资料与搜索失败状态，回答使用稳定的知识库引用，打开时获取页面和原文件访问地址。向量化或视觉解析不改变资料的审核状态。
+Pi 使用 `search_knowledge` 和 `read_knowledge_block` 检索并读取依据，图片视觉读取复用材料解析能力并缓存结果。前端显示实际查询、候选资料与搜索失败状态，引用用于对话，生成的 PPT 和文档不包含内部知识库链接。
 
 知识库集成测试使用独立临时数据库，不修改业务库或已导入知识库：
 
