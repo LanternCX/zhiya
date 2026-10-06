@@ -45,16 +45,24 @@ def validate(root):
                 f'Parquet checksum mismatch: {name}')
     docs = list(parquet_rows(root / 'data/documents.parquet'))
     docmap = {doc['document_id']: doc for doc in docs}
+    hidden_pages = {}
     require(len(docmap) == len(docs), 'Duplicate document IDs')
     for doc in docs:
         require(file_sha256(asset(root, doc['original_path'])) == doc['sha256'],
                 f'Original checksum mismatch: {doc["document_id"]}')
-        metadata = json.loads(doc['metadata'])
-        require(metadata.get('processing_status') != 'error', f'Processing failed: {doc["document_id"]}')
-        require('office_page_render_pending' not in doc['warnings'], f'Office render pending: {doc["document_id"]}')
-        if doc['extension'] == '.pptx':
-            require(metadata.get('slide_count') == doc['page_count'] and doc['page_count'] is not None,
-                    f'PPT page count mismatch: {doc["document_id"]}')
+        processing = root / 'documents' / doc['document_id'] / 'document.json'
+        if Path(doc['original_path']).suffix.lower() == '.pptx':
+            require(processing.is_file(), f'Missing PPT preparation record: {doc["document_id"]}')
+        if processing.is_file():
+            metadata = json.loads(processing.read_text())
+            hidden_pages[doc['document_id']] = set(metadata.get('hidden_slide_numbers', []))
+            require(metadata.get('processing_status') != 'error', f'Processing failed: {doc["document_id"]}')
+            require('office_page_render_pending' not in metadata.get('warnings', []),
+                    f'Office render pending: {doc["document_id"]}')
+            if metadata.get('extension') == '.pptx':
+                require(metadata.get('slide_count') == metadata.get('page_count')
+                        and metadata.get('page_count') is not None,
+                        f'PPT page count mismatch: {doc["document_id"]}')
     chunks = {}
     fingerprints = {}
     modalities = Counter()
@@ -64,31 +72,21 @@ def validate(root):
         require(row['document_id'] in docmap, f'Unknown document: {ident}')
         modality = row['modality']
         require(modality in ('text', 'image', 'video'), f'Unknown modality: {ident}')
-        route = row['embedding_route']
-        require(route in ('text', 'visual', 'review', 'none'), f'Invalid embedding route: {ident}')
-        require(row['default_embedding_candidate'] == (route in ('text', 'visual')),
-                f'Embedding candidate/route mismatch: {ident}')
-        require(route != 'text' or modality == 'text', f'Non-text in text embedding route: {ident}')
-        require(route != 'visual' or modality in ('image', 'video'), f'Text in visual embedding route: {ident}')
-        require(not row['is_hidden_slide'] or route == 'none', f'Hidden slide selected: {ident}')
+        require(isinstance(row['default_embedding_candidate'], bool), f'Invalid embedding selection: {ident}')
+        location = json.loads(row['source_location'])
+        require(not row['default_embedding_candidate']
+                or location.get('page') not in hidden_pages.get(row['document_id'], set()),
+                f'Hidden slide selected: {ident}')
         modalities[modality] += 1
         if modality == 'text':
             require(row['text'] and row['text'].strip(), f'Empty text: {ident}')
             fingerprints[ident] = hashlib.sha256(row['text'].encode()).hexdigest()
         else:
-            payload = row[modality]
             source_hash = file_sha256(asset(root, row['asset_path']))
-            if manifest.get('media_storage') == 'external_relative_paths':
-                require(row.get('asset_sha256') == source_hash, f'Asset checksum mismatch: {ident}')
-                fingerprints[ident] = source_hash
-            else:
-                require(payload and payload.get('bytes'), f'Missing media payload: {ident}')
-                require(hashlib.sha256(payload['bytes']).hexdigest() == source_hash,
-                    f'Asset checksum mismatch: {ident}')
-                fingerprints[ident] = source_hash
-        for frame in row['sampled_frame_paths']:
-            asset(root, frame)
-        chunks[ident] = {key: value for key, value in row.items() if key not in ('image', 'video', 'text')}
+            require(row.get('asset_sha256') == source_hash, f'Asset checksum mismatch: {ident}')
+            fingerprints[ident] = source_hash
+        chunks[ident] = {key: value for key, value in row.items() if key != 'text'}
+        chunks[ident]['source_location'] = location
     for ident, row in chunks.items():
         representative = row['embedding_duplicate_of']
         if representative:
@@ -96,17 +94,15 @@ def validate(root):
             require(target and target['default_embedding_candidate'] and not row['default_embedding_candidate']
                     and target['modality'] == row['modality'] and fingerprints[representative] == fingerprints[ident],
                     f'Invalid embedding alias: {ident} -> {representative}')
-        links = row['associated_text_chunk_ids'] + [row[key] for key in (
-            'previous_text_chunk_id', 'next_text_chunk_id') if row[key]]
-        for linked in links:
+        for linked in row['associated_text_chunk_ids']:
             target = chunks.get(linked)
             require(target and target['modality'] == 'text' and target['document_id'] == row['document_id'],
                     f'Invalid text reference: {ident} -> {linked}')
-        for linked in row['associated_text_chunk_ids']:
-            require(chunks[linked]['page_number'] == row['page_number'], f'PPT text page mismatch: {ident}')
+            require(target['source_location'].get('page') == row['source_location'].get('page'),
+                    f'Text page mismatch: {ident}')
     return {
         'parquet_roundtrip_verified': True, 'chunks': len(chunks), 'documents': len(docs),
-        'modalities': dict(modalities), 'binary_payloads_verified': True,
+        'modalities': dict(modalities), 'assets_sha256_verified': True,
         'unique_chunk_ids_verified': True, 'document_links_verified': True,
         'original_copies_sha256_verified': True, 'ppt_page_counts_verified': True,
         'ppt_text_page_links_verified': True,

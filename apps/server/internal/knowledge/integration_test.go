@@ -93,9 +93,9 @@ func TestOfflineImportRoutesQueriesAndPreservesReferences(t *testing.T) {
 	add("sources/collection/raw.txt", []byte("raw source"))
 	docs := []map[string]any{{"document_id": "doc", "title": "训练数据", "original_path": "documents/doc/original.txt", "source_paths": []string{"collection/source.md"}}}
 	blocks := []map[string]any{
-		{"chunk_id": "page-a", "document_id": "doc", "document_title": "训练数据", "modality": "image", "asset_path": "assets/a.png", "associated_text_chunk_ids": []string{"text-a"}, "default_embedding_candidate": true},
-		{"chunk_id": "page-b", "document_id": "doc", "document_title": "神经网络", "modality": "image", "asset_path": "assets/b.png", "default_embedding_candidate": true},
-		{"chunk_id": "text-a", "document_id": "doc", "document_title": "训练数据", "modality": "text", "text": "模型从训练样本学习。", "default_embedding_candidate": true},
+		{"chunk_id": "page-a", "document_id": "doc", "modality": "image", "asset_path": "assets/a.png", "associated_text_chunk_ids": []string{"text-a"}, "default_embedding_candidate": true},
+		{"chunk_id": "page-b", "document_id": "doc", "modality": "image", "asset_path": "assets/b.png", "default_embedding_candidate": true},
+		{"chunk_id": "text-a", "document_id": "doc", "modality": "text", "text": "模型从训练样本学习。", "default_embedding_candidate": true},
 	}
 	write := func(name string, rows []map[string]any) {
 		var output bytes.Buffer

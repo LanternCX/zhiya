@@ -157,9 +157,6 @@ def atomic_json(path, value):
 
 
 def media_bytes(row, root):
-    payload = row.get(row['modality'])
-    if payload and payload.get('bytes'):
-        return payload['bytes']
     path = (root / row['asset_path']).resolve()
     if not path.is_relative_to(root.resolve()):
         raise ValueError('Media path escapes dataset directory')

@@ -27,13 +27,11 @@ type Document struct {
 type Block struct {
 	ID         string         `json:"chunk_id"`
 	DocumentID string         `json:"document_id"`
-	Title      string         `json:"document_title"`
 	Modality   string         `json:"modality"`
 	Text       string         `json:"text"`
 	AssetPath  string         `json:"asset_path"`
 	Location   map[string]any `json:"source_location"`
 	Associated []string       `json:"associated_text_chunk_ids"`
-	Frames     []string       `json:"sampled_frame_paths"`
 	Warnings   []string       `json:"warnings"`
 	Candidate  bool           `json:"default_embedding_candidate"`
 }
@@ -75,8 +73,9 @@ func (s *Repository) Initialize(ctx context.Context) error {
 
 func (s *Repository) Read(ctx context.Context, version, id string) (Source, error) {
 	var block Block
+	var title string
 	var raw, description []byte
-	err := s.Pool.QueryRow(ctx, `SELECT b.metadata,b.visual_description FROM corpus_blocks b JOIN corpus_versions v ON v.id=b.version WHERE b.version=$1 AND b.id=$2 AND v.status IN ('ready','partial')`, version, id).Scan(&raw, &description)
+	err := s.Pool.QueryRow(ctx, `SELECT b.metadata,b.visual_description,d.metadata->>'title' FROM corpus_blocks b JOIN corpus_versions v ON v.id=b.version JOIN corpus_documents d ON d.version=b.version AND d.id=b.document_id WHERE b.version=$1 AND b.id=$2 AND v.status IN ('ready','partial')`, version, id).Scan(&raw, &description, &title)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Source{}, ErrNotFound
 	}
@@ -86,7 +85,7 @@ func (s *Repository) Read(ctx context.Context, version, id string) (Source, erro
 	if err = json.Unmarshal(raw, &block); err != nil {
 		return Source{}, err
 	}
-	source := Source{Version: version, ID: id, DocumentID: block.DocumentID, Title: block.Title, Modality: block.Modality, Location: block.Location, Text: block.Text, Warnings: block.Warnings, Citation: Citation(version, id, block.Title), HasAsset: block.AssetPath != ""}
+	source := Source{Version: version, ID: id, DocumentID: block.DocumentID, Title: title, Modality: block.Modality, Location: block.Location, Text: block.Text, Warnings: block.Warnings, Citation: Citation(version, id, title), HasAsset: block.AssetPath != ""}
 	if source.Warnings == nil {
 		source.Warnings = []string{}
 	}

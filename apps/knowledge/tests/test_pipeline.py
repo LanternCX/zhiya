@@ -88,7 +88,7 @@ class PipelineTests(unittest.TestCase):
     def test_export_is_portable_and_validation_rejects_changed_assets(self):
         import hashlib
         from PIL import Image
-        from datasets import Image as DatasetImage, load_dataset
+        from datasets import load_dataset
 
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -116,22 +116,29 @@ class PipelineTests(unittest.TestCase):
             ], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             loaded = load_dataset('parquet', data_files=str(root / 'data/chunks.parquet'), split='train')
-            loaded = loaded.cast_column('image', DatasetImage(decode=False))
-            self.assertEqual(loaded[0]['image']['bytes'], (root / 'image.png').read_bytes())
-            self.assertEqual(loaded[0]['embedding_route'], 'visual')
-            self.assertEqual(loaded[0]['embedding_reason'], 'standalone_image')
-            self.assertNotIn('review_status', loaded.column_names)
+            self.assertEqual(set(loaded.column_names), {
+                'chunk_id', 'document_id', 'modality', 'text', 'asset_path',
+                'asset_sha256', 'source_location', 'warnings',
+                'associated_text_chunk_ids', 'default_embedding_candidate',
+                'embedding_duplicate_of',
+            })
+            self.assertEqual(loaded[0]['chunk_id'], 'image1')
+            self.assertEqual(loaded[0]['asset_path'], 'image.png')
+            self.assertEqual(json.loads(loaded[0]['source_location']), {'kind': 'image'})
+            documents = load_dataset('parquet', data_files=str(root / 'data/documents.parquet'), split='train')
+            self.assertEqual(set(documents.column_names), {
+                'document_id', 'title', 'original_path', 'sha256', 'source_paths', 'handoff_sources',
+            })
+            published_chunk = json.loads((root / 'chunks.jsonl').read_text())
+            self.assertEqual(set(published_chunk), set(loaded.column_names))
+            self.assertEqual(published_chunk['source_location'], {'kind': 'image'})
+            published_doc = json.loads((root / 'documents.jsonl').read_text())
+            self.assertEqual(set(published_doc), set(documents.column_names))
             validator = [sys.executable, '-m', 'preparation.validate', '--data-dir', str(root)]
             valid = subprocess.run(validator, capture_output=True, text=True)
             self.assertEqual(valid.returncode, 0, valid.stderr)
-            external = subprocess.run([
-                sys.executable, '-m', 'preparation.export_parquet', '--data-dir', str(root),
-                '--external-media',
-            ], capture_output=True, text=True)
-            self.assertEqual(external.returncode, 0, external.stderr)
             import pyarrow.parquet as pq
             external_row = pq.read_table(root / 'data/chunks.parquet').to_pylist()[0]
-            self.assertIsNone(external_row['image'])
             self.assertEqual(external_row['asset_path'], 'image.png')
             from embedding.embed import media_bytes
             self.assertEqual(media_bytes(external_row, root), (root / 'image.png').read_bytes())
