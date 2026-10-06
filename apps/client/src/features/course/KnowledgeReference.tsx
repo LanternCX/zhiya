@@ -107,8 +107,7 @@ export function KnowledgeCitation({
               </div>
               {source && (
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {locationText(source)} ·{" "}
-                  {source.reviewStatus === "reviewed" ? "已审核" : "未审核"}
+                  {locationText(source)}
                 </div>
               )}
             </div>

@@ -25,7 +25,6 @@ test("knowledge tools search, read source evidence and preserve failure semantic
     text: "模型从样本学习",
     modality: "image",
     location: { page: 1 },
-    reviewStatus: "unreviewed",
     warnings: [],
     citation: `[训练数据](#knowledge/${"a".repeat(64)}/doc-page-1)`,
     score: 0.8,

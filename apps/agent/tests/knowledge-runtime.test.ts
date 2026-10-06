@@ -44,7 +44,6 @@ test(
       modality: "image",
       location: { page: 1 },
       text: "训练数据用于模型学习。",
-      reviewStatus: "unreviewed",
       warnings: [],
       citation,
       score: 0.9,

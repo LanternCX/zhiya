@@ -133,7 +133,7 @@ def finalize(root):
     report['embedding_selection_reasons'] = dict(Counter(r['embedding_reason'] for r in rows))
     report['embedding_input_aliases'] = sum('embedding_duplicate_of' in r for r in rows)
     report['selected_text_characters'] = sum(len(r['text']) for r in rows if r['embedding_route'] == 'text')
-    report['selection_method'] = 'source_slide_structure_and_pdf_objects; not_manual_semantic_audit'
+    report['selection_method'] = 'source_slide_structure_and_pdf_objects'
     prepare.dump(root / 'report.json', report)
     manifest = json.loads((root / 'manifest.json').read_text())
     manifest['embedding_selection_finalized'] = True

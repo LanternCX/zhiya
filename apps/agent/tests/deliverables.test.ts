@@ -16,7 +16,7 @@ test("slide publication keeps internal knowledge references out of teaching arti
   const tool = publishSlideTool((_id: string, page: unknown) => published.push(page));
   await assert.rejects(tool.execute("bad", {
     title: "训练数据",
-    markdown: "# 训练数据\n训练数据提供学习样例。\n来源（未审核）：textbook\n#knowledge/version/segment-000220-text-0168",
+    markdown: "# 训练数据\n训练数据提供学习样例。\n来源：textbook\n#knowledge/version/segment-000220-text-0168",
   }), /Knowledge references belong in chat/);
   assert.equal(published.length, 0);
   await tool.execute("good", { title: "训练数据", markdown: "# 训练数据\n训练数据提供学习样例。" });

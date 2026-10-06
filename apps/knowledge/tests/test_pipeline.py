@@ -105,7 +105,7 @@ class PipelineTests(unittest.TestCase):
                 'representation': 'visual', 'asset_path': 'image.png',
                 'document_title': 'Example', 'collection': 'examples',
                 'material_type': 'activity', 'source_location': {'kind': 'image'},
-                'review_status': 'unreviewed', 'default_embedding_candidate': True,
+                'default_embedding_candidate': True,
                 'embedding_route': 'visual', 'embedding_reason': 'standalone_image',
             }
             (root / 'documents.jsonl').write_text(json.dumps(doc) + '\n')
@@ -120,6 +120,7 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(loaded[0]['image']['bytes'], (root / 'image.png').read_bytes())
             self.assertEqual(loaded[0]['embedding_route'], 'visual')
             self.assertEqual(loaded[0]['embedding_reason'], 'standalone_image')
+            self.assertNotIn('review_status', loaded.column_names)
             validator = [sys.executable, '-m', 'preparation.validate', '--data-dir', str(root)]
             valid = subprocess.run(validator, capture_output=True, text=True)
             self.assertEqual(valid.returncode, 0, valid.stderr)
@@ -164,6 +165,7 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(chunk['document_title'], 'Activity')
             self.assertTrue(chunk['default_embedding_candidate'])
             self.assertEqual(chunk['embedding_route'], 'text')
+            self.assertNotIn('review_status', chunk)
             self.assertEqual(json.loads((root / 'report.json').read_text())['chunks'], 1)
 
 

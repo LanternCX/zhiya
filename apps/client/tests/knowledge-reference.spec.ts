@@ -16,7 +16,6 @@ test("knowledge search history and source citations survive reopening on desktop
     modality: "image",
     location: { page: 2 },
     text: "训练数据是供模型学习的样本。",
-    reviewStatus: "unreviewed",
     warnings: [],
     citation,
     score: 0.9,
@@ -71,6 +70,19 @@ test("knowledge search history and source citations survive reopening on desktop
     createdAt: conversation.createdAt,
     updatedAt: conversation.updatedAt,
   };
+  await page.route("**/api/account-rules", (route) =>
+    route.fulfill({
+      json: {
+        password_min_characters: 8,
+        password_max_bytes: 256,
+        nickname_max_characters: 40,
+        avatar_max_bytes: 2097152,
+        avatar_max_dimension: 2048,
+        verification_code_digits: 8,
+        verification_ttl_seconds: 60,
+      },
+    }),
+  );
   await page.route("**/api/me", (route) =>
     route.fulfill({
       json: {
@@ -104,7 +116,8 @@ test("knowledge search history and source citations survive reopening on desktop
   const panel = page.getByRole("dialog", { name: "知识库引用" });
   await expect(panel).toContainText("训练数据是供模型学习的样本");
   await expect(panel).toContainText("第 2 页");
-  await expect(panel).toContainText("未审核");
+  await expect(panel).not.toContainText("未审核");
+  await expect(panel).not.toContainText("已审核");
   await page.screenshot({ path: testInfo.outputPath("knowledge-desktop.png") });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(panel).toBeInViewport();
