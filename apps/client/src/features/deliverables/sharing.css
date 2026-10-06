@@ -206,3 +206,31 @@
 .share-class-option span { overflow-wrap: anywhere; }
 .share-dialog .share-class-choice input[type="checkbox"] { appearance: auto; width: 16px; height: 16px; min-width: 16px; margin: 0; padding: 0; accent-color: var(--accent); }
 .share-class-choice small { color: var(--muted); line-height: 1.5; }
+
+.share-class-container { display: contents; }
+.share-class-reveal { overflow: clip; }
+@media (prefers-reduced-motion: no-preference) {
+  .share-option,
+  .share-menu-item,
+  .share-dialog button,
+  .share-actions-trigger {
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+  .share-dialog button:not(:disabled):active,
+  .share-actions-trigger:not(:disabled):active { transform: scale(0.98); }
+  .share-actions-trigger > svg:last-child { transition: rotate 160ms ease; }
+  .share-actions-trigger[data-state="open"] > svg:last-child { rotate: 180deg; }
+  .share-class-reveal[data-state="open"] { animation: share-expand 240ms ease-out; }
+  .share-class-reveal[data-state="closed"] { animation: share-collapse 160ms ease-in; }
+  .share-link-row,
+  .share-error { animation: interaction-enter 160ms ease-out; }
+}
+
+@keyframes share-expand {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+@keyframes share-collapse {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}

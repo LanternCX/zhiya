@@ -160,6 +160,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 }
 .reader-page button:not(:disabled):hover,
 .reader-page .reader-link:hover {
@@ -200,7 +201,27 @@
     color: #9bcba7;
   }
 }
+@media (prefers-reduced-motion: no-preference) {
+  .reader-header,
+  .reader-section:not([hidden]) {
+    animation: reader-enter 240ms ease-out;
+  }
+  .reader-page button,
+  .reader-page .reader-link {
+    transition: background-color 160ms ease, opacity 160ms ease, transform 160ms ease;
+  }
+  .reader-page button:not(:disabled):active { transform: scale(0.97); }
+  .reader-header button[aria-busy="true"] > svg { animation: reader-refresh 800ms linear infinite; }
+}
+@keyframes reader-enter {
+  from { opacity: 0; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes reader-refresh {
+  to { rotate: 360deg; }
+}
 @media print {
+  .reader-page * { animation: none !important; transition: none !important; }
   .reader-page {
     padding: 0;
     background: white;

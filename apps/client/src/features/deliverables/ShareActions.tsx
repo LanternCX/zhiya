@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
-import { Dialog, DropdownMenu } from "radix-ui";
+import { Collapsible, Dialog, DropdownMenu } from "radix-ui";
 import {
   ChevronDown,
   Copy,
@@ -164,7 +164,9 @@ function ShareSettings({
             <Users size={20} aria-hidden="true" />
             <span><strong>分享到班级</strong><small>任一所选班级的当前成员登录后可查看</small></span>
           </label>
-          {visibility === "class" && <fieldset className="share-class-choice" disabled={classLoading || !!classError}>
+          <Collapsible.Root className="share-class-container" open={visibility === "class"}>
+          <Collapsible.Content className="share-class-reveal" inert={visibility !== "class"}>
+          <fieldset className="share-class-choice" disabled={classLoading || !!classError}>
             <legend>分享到哪些班级</legend>
             {classes.map(classroom => <label key={classroom.id} className="share-class-option">
               <input type="checkbox" checked={selectedClasses.includes(classroom.id)} onChange={event => {
@@ -177,7 +179,9 @@ function ShareSettings({
             {selectedClasses.some(id => !classes.some(classroom => classroom.id === id)) && !classLoading && !classError && <small>部分原班级已不可用，保存时将移除这些班级。</small>}
             <button type="button" className="primary share-done" disabled={saving || !selectedClasses.some(id => classes.some(classroom => classroom.id === id))}
               onClick={() => void change("class", selectedClasses.filter(id => classes.some(classroom => classroom.id === id)))}>保存班级分享</button>
-          </fieldset>}
+          </fieldset>
+          </Collapsible.Content>
+          </Collapsible.Root>
         </fieldset>
       )}
       {url && (
@@ -236,11 +240,13 @@ export default function ShareActions({
   onDownload: (format: "office" | "html") => void;
 }) {
   const [sharing, setSharing] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
   useEffect(() => setSharing(false), [courseId, item?.id]);
   return (
     <Dialog.Root open={sharing} onOpenChange={setSharing}>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
+          ref={trigger}
           className="secondary share-actions-trigger"
           disabled={working || !item || !courseId}
         >
@@ -253,6 +259,7 @@ export default function ShareActions({
             className="share-menu"
             align="end"
             sideOffset={6}
+            onCloseAutoFocus={event => { if (sharing) event.preventDefault(); }}
           >
             <DropdownMenu.Item
               className="share-menu-item"
@@ -281,8 +288,11 @@ export default function ShareActions({
       </DropdownMenu.Root>
       <Dialog.Portal>
         <Dialog.Overlay className="share-overlay" />
-        <Dialog.Content className="share-dialog">
-          {sharing && item && courseId && (
+        <Dialog.Content className="share-dialog" inert={!sharing} onCloseAutoFocus={event => {
+          event.preventDefault();
+          trigger.current?.focus();
+        }}>
+          {item && courseId && (
             <ShareSettings
               key={`${courseId}:${item.id}`}
               courseId={courseId}

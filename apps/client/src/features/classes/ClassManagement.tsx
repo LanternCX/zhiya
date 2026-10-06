@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { DropdownMenu, Tabs } from "radix-ui";
+import { Dialog, DropdownMenu, Tabs } from "radix-ui";
 import Icon from "../../components/Icon";
 import { ClassDialog, errorText } from "./ClassDialog";
 import MemberCard from "./MemberCard";
@@ -183,7 +183,7 @@ export default function ClassManagement({ classroom, onChange }: { classroom: Cl
       </div> : <form onSubmit={event => { event.preventDefault(); void run(confirm, true); }}>
         {action.kind === "transfer" && <><label htmlFor="class-transfer">新班主任</label><select id="class-transfer" required value={target} disabled={busy} onChange={event => setTarget(event.target.value)}><option value="">选择一位任课老师</option>{teachers.map(member => <option key={member.id} value={member.id}>{member.nickname}</option>)}</select></>}
         {action.kind === "dissolve" && <><p className="class-confirm-name">{classroom.name}</p><label htmlFor="class-confirmation">输入班级名称确认</label><input id="class-confirmation" value={confirmation} disabled={busy} onChange={event => setConfirmation(event.target.value)} autoComplete="off" /></>}
-        <div className="class-actions"><button type="button" className="secondary" disabled={busy} onClick={() => reset ? setReset(false) : close()}>取消</button><button className={`primary ${action.kind === "dissolve" || action.kind === "remove" ? "class-danger-button" : ""}`} disabled={busy || (action.kind === "transfer" && !target) || (action.kind === "dissolve" && confirmation !== classroom.name)}>{busy ? "正在处理…" : action.kind === "invite" ? "重置" : action.kind === "transfer" ? "确认转交" : action.kind === "dissolve" ? "确认解散" : action.kind === "remove" ? "确认移出" : "解除限制"}</button></div>
+        <div className="class-actions">{reset ? <button type="button" className="secondary" disabled={busy} onClick={() => setReset(false)}>取消</button> : <Dialog.Close type="button" className="secondary" disabled={busy}>取消</Dialog.Close>}<button className={`primary ${action.kind === "dissolve" || action.kind === "remove" ? "class-danger-button" : ""}`} disabled={busy || (action.kind === "transfer" && !target) || (action.kind === "dissolve" && confirmation !== classroom.name)}>{busy ? "正在处理…" : action.kind === "invite" ? "重置" : action.kind === "transfer" ? "确认转交" : action.kind === "dissolve" ? "确认解散" : action.kind === "remove" ? "确认移出" : "解除限制"}</button></div>
       </form>}
       {dialogError && <p className="class-feedback" role="alert">{dialogError}</p>}
       {dialogNotice && <p className="class-feedback class-success" role="status">{dialogNotice}</p>}

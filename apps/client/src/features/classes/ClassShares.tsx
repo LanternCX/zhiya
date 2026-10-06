@@ -37,7 +37,7 @@ export default function ClassShares({ classId, className, preview = false }: { c
   return <section className="class-materials-page">
     <header className="class-library-header">
       <div><p className="class-eyebrow">{className}</p><h1>教师分享</h1><p>本班的 PPT 与文档，打开查看最新内容{!loading && !error ? ` · ${shares.length} 份材料` : ""}</p></div>
-      <button className="icon-button" aria-label="刷新材料" title="刷新材料" disabled={loading} onClick={() => setReload(value => value + 1)}><RefreshCw size={18} aria-hidden="true" /></button>
+      <button className="icon-button" aria-label="刷新材料" aria-busy={loading} title="刷新材料" disabled={loading} onClick={() => setReload(value => value + 1)}><RefreshCw size={18} aria-hidden="true" /></button>
     </header>
     {loading ? <p role="status" className="class-empty">正在读取分享材料…</p> : error ? <p role="alert" className="class-feedback">{error}</p> : shares.length ? <ul className="class-material-grid" aria-label="分享材料">
       {shares.map(share => <li key={share.token}>

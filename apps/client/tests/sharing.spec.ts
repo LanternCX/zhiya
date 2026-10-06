@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("a guest reads a shared presentation, flips pages and sees updates on refresh", async ({
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+test(`a guest reads, flips and refreshes a shared presentation with motion ${reducedMotion}`, async ({
   page,
 }, testInfo) => {
+  await page.emulateMedia({ reducedMotion });
   let text = "公开的讲解内容";
   let available = true;
   await page.route("**/api/shares/public-link", (route) =>
@@ -42,6 +44,12 @@ test("a guest reads a shared presentation, flips pages and sees updates on refre
   await expect(page.getByText("下一页内容")).toBeHidden();
   await page.getByRole("button", { name: "下一页", exact: true }).click();
   await expect(page.getByText("下一页内容")).toBeVisible();
+  const slide = page.locator("section").filter({ has: page.getByRole("heading", { name: "第二张课件" }) });
+  expect(await slide.evaluate(element => element.getAnimations().length > 0)).toBe(reducedMotion === "no-preference");
+  await page.getByRole("button", { name: "上一页", exact: true }).click();
+  await page.getByRole("button", { name: "下一页", exact: true }).click();
+  await expect(page.getByText(text)).toBeHidden();
+  await expect(page.getByText("下一页内容")).toBeVisible();
   await page.getByRole("button", { name: "阅读全部", exact: true }).click();
   await expect(page.getByText(text)).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -52,12 +60,14 @@ test("a guest reads a shared presentation, flips pages and sees updates on refre
   ).toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("shared-presentation-mobile.png"),
+    animations: "disabled",
   });
   text = "更新后的讲解内容";
-  await page.reload();
+  await page.getByRole("button", { name: "刷新内容" }).click();
   await expect(page.getByText(text)).toBeVisible();
   available = false;
-  await page.reload();
+  await page.getByRole("button", { name: "刷新内容" }).click();
   await expect(page.getByRole("alert")).toContainText("分享");
   await expect(page.getByText(text)).toHaveCount(0);
 });
+}
