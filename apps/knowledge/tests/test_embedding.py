@@ -1,5 +1,6 @@
 import json
 import io
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -64,10 +65,11 @@ class EmbeddingTests(unittest.TestCase):
             (root / 'data').mkdir()
             image = io.BytesIO()
             Image.new('RGB', (8, 8), 'red').save(image, format='PNG')
+            (root / 'image.png').write_bytes(image.getvalue())
             pq.write_table(pa.Table.from_pylist([
                 {'chunk_id': ident, 'document_id': 'doc1', 'modality': 'image',
-                 'default_embedding_candidate': True, 'image': {'bytes': image.getvalue()},
-                 'video': None, 'text': None}
+                 'default_embedding_candidate': True, 'asset_path': 'image.png',
+                 'asset_sha256': hashlib.sha256(image.getvalue()).hexdigest(), 'text': None}
                 for ident in ('image1', 'image2')
             ]), root / 'data/chunks.parquet')
             config = embed.read_config(CONFIG, type('Args', (), {

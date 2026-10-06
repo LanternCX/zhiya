@@ -95,8 +95,8 @@ func Import(ctx context.Context, root string, repository *Repository, objects ob
 	docIDs := map[string]bool{}
 	byID := map[string]Block{}
 	for _, doc := range docs {
-		if doc.ID == "" || docIDs[doc.ID] {
-			return result, fmt.Errorf("文档 ID 缺失或重复")
+		if doc.ID == "" || strings.TrimSpace(doc.Title) == "" || docIDs[doc.ID] {
+			return result, fmt.Errorf("文档 ID 缺失或重复，或文档标题为空")
 		}
 		docIDs[doc.ID] = true
 	}
@@ -144,12 +144,8 @@ func Import(ctx context.Context, root string, repository *Repository, objects ob
 		}
 	}
 	for _, block := range blocks {
-		paths := append([]string{}, block.Frames...)
 		if block.AssetPath != "" {
-			paths = append(paths, block.AssetPath)
-		}
-		for _, path := range paths {
-			if _, ok := assets[path]; !ok {
+			if _, ok := assets[block.AssetPath]; !ok {
 				return result, fmt.Errorf("block 文件缺失：%s", block.ID)
 			}
 		}

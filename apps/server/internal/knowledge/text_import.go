@@ -83,7 +83,7 @@ func ReplaceTextEmbeddings(ctx context.Context, repository *Repository, reader i
  ) OR EXISTS (
  SELECT 1 FROM corpus_blocks b LEFT JOIN replacement_text_vectors t ON b.id=t.id
  WHERE b.version=$1 AND b.metadata->>'modality'='text'
- AND b.metadata->>'default_embedding_candidate'='true' AND NOT b.metadata ? 'handoff' AND t.id IS NULL
+ AND b.metadata->>'default_embedding_candidate'='true' AND t.id IS NULL
  )`, result.Version).Scan(&invalid); err != nil {
 		return result, err
 	}
