@@ -598,6 +598,14 @@ export default function Workspace({
                   style={(() => {
                     const rect = trigger.current?.getBoundingClientRect();
                     if (!rect) return {};
+                    if (window.matchMedia("(max-width: 720px)").matches) {
+                      return {
+                        position: "fixed",
+                        top: `${rect.bottom + 8}px`,
+                        right: `${window.innerWidth - rect.right}px`,
+                        width: "232px",
+                      };
+                    }
                     return {
                       position: "fixed",
                       bottom: `${window.innerHeight - rect.top + 8}px`,
