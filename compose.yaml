@@ -18,8 +18,7 @@ services:
       timeout: 5s
       retries: 10
   postgres:
-    build:
-      context: apps/server/postgres
+    image: pgvector/pgvector:0.8.2-pg17
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?Use npm run dev:services}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Use npm run dev:services}
