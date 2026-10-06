@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import type { useAccount } from "./features/account/useAccount";
 import AccountProfile from "./features/account/Profile";
 import Security from "./features/account/Security";
@@ -587,13 +588,32 @@ export default function Workspace({
               <span className="user-name">{user.nickname}</span>
               <Icon name="more" />
             </button>
-            <div
-              ref={menu}
-              hidden={!menuOpen}
-              id="user-menu"
-              className="user-popover"
-              aria-label="用户设置"
-            >
+            {createPortal(
+                <div
+                  ref={menu}
+                  hidden={!menuOpen}
+                  id="user-menu"
+                  className="user-popover"
+                  aria-label="用户设置"
+                  style={(() => {
+                    const rect = trigger.current?.getBoundingClientRect();
+                    if (!rect) return {};
+                    if (window.matchMedia("(max-width: 720px)").matches) {
+                      return {
+                        position: "fixed",
+                        top: `${rect.bottom + 8}px`,
+                        right: `${window.innerWidth - rect.right}px`,
+                        width: "232px",
+                      };
+                    }
+                    return {
+                      position: "fixed",
+                      bottom: `${window.innerHeight - rect.top + 8}px`,
+                      left: `${rect.left}px`,
+                      width: "232px",
+                    };
+                  })()}
+                >
               <button
                 onClick={async () => {
                   setMenuOpen(false);
@@ -645,7 +665,9 @@ export default function Workspace({
                 <Icon name="logout" />
                 退出登录
               </button>
-            </div>
+                </div>,
+                document.body
+              )}
           </div>
         </aside>
         {!onboarding && (
