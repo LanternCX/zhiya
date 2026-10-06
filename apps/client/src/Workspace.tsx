@@ -588,10 +588,10 @@ export default function Workspace({
               <span className="user-name">{user.nickname}</span>
               <Icon name="more" />
             </button>
-            {menuOpen &&
-              createPortal(
+            {createPortal(
                 <div
                   ref={menu}
+                  hidden={!menuOpen}
                   id="user-menu"
                   className="user-popover"
                   aria-label="用户设置"
