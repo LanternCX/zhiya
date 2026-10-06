@@ -104,7 +104,6 @@ def text_chunks(text, doc, locator=None):
         chunk['chunk_id'] = doc['document_id'] + '-text-' + str((locator or {}).get('page', 0)) + '-' + str(i+1).zfill(4)
         chunk['document_id'] = doc['document_id']
         chunk['representation'] = 'text'
-        chunk['review_status'] = 'unreviewed'
         chunk['content_sha256'] = digest(chunk['text'].encode())
     return result
 
@@ -165,7 +164,7 @@ def prepare_one(doc):
             mdpath.write_text('\n'.join(texts), encoding='utf-8')
             doc['extracted_text_path'] = rel(mdpath)
             doc['render_pdf_path'] = rel(original)
-            warnings.append('pdf_text_reading_order_not_manually_verified')
+            warnings.append('pdf_text_reading_order_may_differ')
         elif suffix in ('.jpg', '.png', '.jpeg'):
             with Image.open(original) as im:
                 im = ImageOps.exif_transpose(im).convert('RGB')
@@ -174,7 +173,7 @@ def prepare_one(doc):
                 doc['image_size'] = list(im.size)
             chunks.append({'chunk_id': ident+'-image', 'document_id': ident,
                            'modality': 'image', 'representation': 'visual', 'asset_path': rel(out),
-                           'source_location': {'kind': 'image'}, 'review_status': 'unreviewed',
+                           'source_location': {'kind': 'image'},
                            'warnings': ['no_ocr_or_generated_caption']})
         elif suffix == '.mp4':
             probe = json.loads(run(['ffprobe','-v','quiet','-show_format','-show_streams','-of','json',str(original)]).stdout)
@@ -190,7 +189,7 @@ def prepare_one(doc):
                            'modality': 'video', 'representation': 'visual', 'asset_path': rel(original),
                            'source_location': {'kind': 'time_range', 'start_seconds': 0, 'end_seconds': duration},
                            'sampled_frame_paths': frame_paths, 'sample_fps': 1,
-                           'review_status': 'unreviewed', 'warnings': ['audio_not_transcribed', 'frames_are_visual_preview_not_full_video'] if doc['has_audio'] else ['frames_are_visual_preview_not_full_video']})
+                           'warnings': ['audio_not_transcribed', 'frames_are_visual_preview_not_full_video'] if doc['has_audio'] else ['frames_are_visual_preview_not_full_video']})
         else:
             warnings.append('unsupported_format')
         doc['processing_status'] = 'prepared'
@@ -220,8 +219,7 @@ def prepare():
         groups[sha] = {'document_id': sha[:24], 'sha256': sha, 'source_paths': [path],
                        'title': p.stem, 'extension': p.suffix.lower(), 'bytes': p.stat().st_size,
                        'collection': path.split('/')[0], 'grade_label': 'Grade '+m[1] if m else None,
-                       'material_type': classify(p.name), 'classification_method': 'filename_and_directory_heuristic',
-                       'review_status': 'unreviewed'}
+                       'material_type': classify(p.name), 'classification_method': 'filename_and_directory_heuristic'}
     dump(ROOT/'source_inventory.json', list(groups.values()))
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(prepare_one, doc) for doc in groups.values()]
@@ -297,7 +295,7 @@ def pages():
                                'document_id': doc['document_id'], 'modality': 'image',
                                'representation': 'visual', 'asset_path': rel(asset),
                                'source_location': {'kind': 'slide' if doc['extension']=='.pptx' else 'rendered_page' if doc['extension']=='.docx' else 'page', 'page': n+1},
-                               'review_status': 'unreviewed', 'warnings': ['cross_page_context_not_merged']})
+                               'warnings': ['cross_page_context_not_merged']})
                 if doc['extension'] == '.pptx':
                     chunks[-1]['is_hidden_slide'] = n+1 in hidden
                     if n+1 in hidden:
@@ -427,7 +425,7 @@ def consolidate(overrides=None):
               'processing_errors':[d['document_id'] for d in docs if d['processing_status']=='error'],
               'pending_office_renders':[d['document_id'] for d in docs if 'office_page_render_pending' in d['warnings']],
               'missing_assets':missing, 'exact_duplicate_text_groups':len(repeated),
-              'embedding_generated':False, 'manual_content_review_completed':False}
+              'embedding_generated':False}
     dump(ROOT/'report.json',report)
     dump(ROOT/'manifest.json',{'schema_version':2,'source_directory':str(SOURCE) if SOURCE else None,
                               'path_base':'directory_containing_manifest', 'documents':'documents.jsonl',

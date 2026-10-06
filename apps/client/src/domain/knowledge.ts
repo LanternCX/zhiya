@@ -6,7 +6,6 @@ export type KnowledgeSource = {
   modality: string;
   location: { page?: number; start_seconds?: number; end_seconds?: number };
   text: string;
-  reviewStatus: string;
   warnings: string[];
   citation: string;
   score: number;

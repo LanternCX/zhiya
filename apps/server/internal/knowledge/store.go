@@ -25,35 +25,33 @@ type Document struct {
 }
 
 type Block struct {
-	ID           string         `json:"chunk_id"`
-	DocumentID   string         `json:"document_id"`
-	Title        string         `json:"document_title"`
-	Modality     string         `json:"modality"`
-	Text         string         `json:"text"`
-	AssetPath    string         `json:"asset_path"`
-	Location     map[string]any `json:"source_location"`
-	Associated   []string       `json:"associated_text_chunk_ids"`
-	Frames       []string       `json:"sampled_frame_paths"`
-	Warnings     []string       `json:"warnings"`
-	ReviewStatus string         `json:"review_status"`
-	Candidate    bool           `json:"default_embedding_candidate"`
+	ID         string         `json:"chunk_id"`
+	DocumentID string         `json:"document_id"`
+	Title      string         `json:"document_title"`
+	Modality   string         `json:"modality"`
+	Text       string         `json:"text"`
+	AssetPath  string         `json:"asset_path"`
+	Location   map[string]any `json:"source_location"`
+	Associated []string       `json:"associated_text_chunk_ids"`
+	Frames     []string       `json:"sampled_frame_paths"`
+	Warnings   []string       `json:"warnings"`
+	Candidate  bool           `json:"default_embedding_candidate"`
 }
 
 type Source struct {
-	Version      string         `json:"version"`
-	ID           string         `json:"blockId"`
-	DocumentID   string         `json:"documentId"`
-	Title        string         `json:"title"`
-	Modality     string         `json:"modality"`
-	Location     map[string]any `json:"location"`
-	Text         string         `json:"text"`
-	ReviewStatus string         `json:"reviewStatus"`
-	Warnings     []string       `json:"warnings"`
-	Citation     string         `json:"citation"`
-	Score        float64        `json:"score"`
-	HasAsset     bool           `json:"hasAsset"`
-	EvidenceKey  string         `json:"-"`
-	Visual       *Visual        `json:"visual,omitempty"`
+	Version     string         `json:"version"`
+	ID          string         `json:"blockId"`
+	DocumentID  string         `json:"documentId"`
+	Title       string         `json:"title"`
+	Modality    string         `json:"modality"`
+	Location    map[string]any `json:"location"`
+	Text        string         `json:"text"`
+	Warnings    []string       `json:"warnings"`
+	Citation    string         `json:"citation"`
+	Score       float64        `json:"score"`
+	HasAsset    bool           `json:"hasAsset"`
+	EvidenceKey string         `json:"-"`
+	Visual      *Visual        `json:"visual,omitempty"`
 }
 
 type Repository struct{ Pool *pgxpool.Pool }
@@ -88,7 +86,7 @@ func (s *Repository) Read(ctx context.Context, version, id string) (Source, erro
 	if err = json.Unmarshal(raw, &block); err != nil {
 		return Source{}, err
 	}
-	source := Source{Version: version, ID: id, DocumentID: block.DocumentID, Title: block.Title, Modality: block.Modality, Location: block.Location, Text: block.Text, ReviewStatus: block.ReviewStatus, Warnings: block.Warnings, Citation: Citation(version, id, block.Title), HasAsset: block.AssetPath != ""}
+	source := Source{Version: version, ID: id, DocumentID: block.DocumentID, Title: block.Title, Modality: block.Modality, Location: block.Location, Text: block.Text, Warnings: block.Warnings, Citation: Citation(version, id, block.Title), HasAsset: block.AssetPath != ""}
 	if source.Warnings == nil {
 		source.Warnings = []string{}
 	}

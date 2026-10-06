@@ -41,7 +41,6 @@ def generate_chunks():
             'end_seconds': chunk['source_location'].get('end_seconds'),
             'source_location': json.dumps(chunk['source_location'],ensure_ascii=False),
             'heading_path': chunk.get('heading_path',[]), 'warnings': chunk.get('warnings',[]),
-            'review_status': chunk['review_status'],
             'default_embedding_candidate': chunk['default_embedding_candidate'],
             'embedding_route': chunk['embedding_route'],
             'embedding_reason': chunk['embedding_reason'],
@@ -69,7 +68,7 @@ def main(cache_dir):
     V = datasets.Value
     string_fields = ['chunk_id','document_id','modality','representation','text','asset_path',
                      'document_title','collection','grade_label','material_type','source_location',
-                     'review_status','previous_text_chunk_id','next_text_chunk_id',
+                     'previous_text_chunk_id','next_text_chunk_id',
                      'embedding_route','embedding_reason','visual_evidence','embedding_duplicate_of','asset_sha256']
     features = datasets.Features({name:V('string') for name in string_fields})
     features.update({'image':datasets.Image(decode=False),'video':datasets.Video(decode=False),

@@ -203,7 +203,7 @@ def import_archive(archive_path, root):
             doc = {'document_id': ident, 'sha256': sha, 'source_paths': [entry['path']],
                    'title': relative.stem, 'extension': extension, 'bytes': len(raw),
                    'collection': entry['source_id'], 'grade_label': entry.get('grade_range'),
-                   'material_type': prepare.classify(relative.name), 'review_status': 'unreviewed',
+                   'material_type': prepare.classify(relative.name),
                    'original_path': prepare.rel(original), 'handoff_sources': [entry],
                    'warnings': [], 'processing_status': 'prepared'}
             chunks = []
@@ -282,8 +282,8 @@ def add_image(root, base, doc, chunks, raw, locator):
             return
     chunks.append({'chunk_id': ident, 'document_id': doc['document_id'], 'modality': 'image',
                    'representation': 'visual', 'asset_path': asset.relative_to(root).as_posix(),
-                   'source_location': locator, 'review_status': 'unreviewed',
-                   'warnings': ['embedded_image_not_semantically_reviewed']})
+                   'source_location': locator,
+                   'warnings': []})
 
 
 def compact_images(archive_path, root):
