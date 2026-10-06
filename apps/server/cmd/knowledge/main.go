@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -28,6 +29,8 @@ func (d *directories) Set(value string) error { *d = append(*d, value); return n
 func main() {
 	data := flag.String("data-dir", "", "prepared corpus directory")
 	replaceText := flag.Bool("replace-text", false, "replace the active text index with completed offline embeddings")
+	uploadObjects := flag.Bool("upload-objects", false, "upload corpus files and write --catalog using knowledge_storage configuration")
+	describeTargets := flag.Bool("describe-targets", false, "print destination names without credentials or storage writes")
 	catalog := flag.String("catalog", "", "catalog.json matching the uploaded corpus")
 	project := flag.String("knowledge-project", "../knowledge", "offline Python tool directory")
 	var embeddings directories
@@ -42,6 +45,36 @@ func main() {
 	cfg, err := config.LoadDefault(".")
 	if err != nil {
 		fail("configuration loading failed: " + err.Error())
+	}
+	if *describeTargets {
+		database, _ := url.Parse(cfg.KnowledgeDatabase.URL)
+		endpoint, _ := url.Parse(cfg.KnowledgeStorage.Endpoint)
+		endpoint.User, endpoint.RawQuery, endpoint.Fragment = nil, "", ""
+		json.NewEncoder(os.Stdout).Encode(map[string]string{"database_host": database.Host, "database_name": database.Path[1:], "object_endpoint": endpoint.String(), "object_bucket": cfg.KnowledgeStorage.Bucket})
+		return
+	}
+	if *uploadObjects {
+		if *data == "" || *catalog == "" {
+			fail("--upload-objects requires --data-dir and --catalog")
+		}
+		if _, err := objectstore.New(ctx, cfg.KnowledgeStorage); err != nil {
+			fail("knowledge bucket initialization failed")
+		}
+		absolute, err := filepath.Abs(*data)
+		if err != nil {
+			fail("invalid corpus path")
+		}
+		destination, err := filepath.Abs(*catalog)
+		if err != nil {
+			fail("invalid catalog path")
+		}
+		command := exec.CommandContext(ctx, "uv", "run", "--locked", "--project", *project, "--with", "boto3", "python", "-m", "preparation.publish_objects", "--data-dir", absolute, "--catalog-out", destination, "--endpoint", cfg.KnowledgeStorage.Endpoint, "--bucket", cfg.KnowledgeStorage.Bucket, "--region", cfg.KnowledgeStorage.Region)
+		command.Env = append(os.Environ(), "AWS_ACCESS_KEY_ID="+cfg.KnowledgeStorage.AccessKey, "AWS_SECRET_ACCESS_KEY="+cfg.KnowledgeStorage.SecretKey)
+		command.Stdout, command.Stderr = os.Stdout, os.Stderr
+		if err := command.Run(); err != nil {
+			fail("corpus upload failed")
+		}
+		return
 	}
 	textEncoder := knowledge.NewEncoder(cfg.KnowledgeTextModel.Endpoint, cfg.KnowledgeTextModel.ID, cfg.KnowledgeTextModel.APIKey, http.DefaultClient)
 	visualEncoder := knowledge.NewEncoder(cfg.KnowledgeVisualModel.Endpoint, cfg.KnowledgeVisualModel.ID, cfg.KnowledgeVisualModel.APIKey, http.DefaultClient)
