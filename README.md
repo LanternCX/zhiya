@@ -38,6 +38,8 @@
 
 ## 系统架构
 
+知识库资料及已完成的文本、视觉 Embedding 独立发布在 [Hugging Face：LanternCX/zhiya-knowledge](https://huggingface.co/datasets/LanternCX/zhiya-knowledge)。配置基础设施后执行 `bash scripts/import-knowledge.sh`，审核操作说明并确认，即可完成下载、校验及 PostgreSQL／RustFS 导入，无需重新生成向量；配置与接入步骤见 [知识库说明](apps/knowledge/README.md)。
+
 主／子 Agent 统一在服务端运行；Go 分别向客户端和 Agent 提供 API，共用业务与持久化能力。客户端断开连接不取消生成，重新进入后恢复已保存的内容与运行状态。
 
 ![知芽技术架构：客户端、Go 双 API 入口与服务端 Pi 运行时](docs/assets/zhiya-architecture.svg)
