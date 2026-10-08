@@ -1,4 +1,5 @@
 import { installDemoBackend } from './backend';
+import { revealPreview } from '../preview-motion';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
@@ -14,6 +15,9 @@ import '../../../client/src/motion.css';
 const parameters = new URLSearchParams(location.search);
 const scene = parameters.get('scene') ?? 'materials';
 installDemoBackend(scene, parameters.get('role') === 'teacher');
+document.addEventListener('load', event => {
+  if (event.target instanceof HTMLIFrameElement && event.target.classList.contains('lesson-slide')) revealPreview(event.target);
+}, true);
 if (!location.hash) location.hash = scene === 'profile' ? '/learning-profile' : scene === 'classes' ? '/classes/demo-class' : '/courses/demo-course/conversations/demo-conversation';
 const router = createHashRouter([{ path: '/shares/:token', Component: SharedDeliverable }, { path: '/', Component: App, children: pageRoutes }]);
 createRoot(document.getElementById('root')!).render(

@@ -17,6 +17,9 @@ test('the download section explains availability when no complete release exists
   const section = page.getByRole('region', { name: '把知芽，带到你的桌面。' });
   await expect(section.getByText('安装包准备中')).toBeVisible();
   await expect(section.getByRole('link', { name: /下载 Windows|下载 macOS/ })).toHaveCount(0);
+  await expect(section.getByRole('link', { name: '查看 Windows 发布页' })).toHaveAttribute('href', 'https://github.com/LanternCX/zhiya/releases');
+  await expect(section.getByRole('link', { name: '查看 macOS 发布页' })).toHaveAttribute('href', 'https://github.com/LanternCX/zhiya/releases');
+  await expect(section.getByRole('link', { name: 'GitHub Releases', exact: true })).toHaveAttribute('href', 'https://github.com/LanternCX/zhiya/releases');
 });
 
 test('a complete static manifest exposes Windows and Apple Silicon installers and installation instructions', async ({ page }) => {
@@ -43,4 +46,6 @@ test('an incomplete or unavailable manifest keeps broken downloads off the page'
   await page.route('**/downloads.json', route => route.abort());
   await page.reload();
   await expect(page.getByText('安装包准备中')).toBeVisible();
+  await expect(page.getByRole('link', { name: '查看 Windows 发布页' })).toHaveAttribute('href', 'https://github.com/LanternCX/zhiya/releases');
+  await expect(page.getByRole('link', { name: '查看 macOS 发布页' })).toHaveAttribute('href', 'https://github.com/LanternCX/zhiya/releases');
 });

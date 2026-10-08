@@ -12,8 +12,9 @@ function run(...args) {
   return spawnSync(process.execPath, [script, ...args], { encoding: 'utf8' });
 }
 
-test('release tags must be semantic versions and production builds require a public HTTPS origin', () => {
+test('release tags are validated independently of an optional production API origin', () => {
   assert.equal(run('validate', 'v1.2.3').status, 0);
+  assert.equal(run('validate', 'v1.2.3', '').status, 0);
   assert.equal(run('validate', 'v1.2.3-alpha.2').status, 0);
   assert.notEqual(run('validate', 'v1.2').status, 0);
   assert.notEqual(run('validate', 'v1.2.3\n').status, 0);

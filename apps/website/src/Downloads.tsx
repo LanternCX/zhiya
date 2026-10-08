@@ -46,10 +46,11 @@ export default function Downloads() {
         const item = manifest?.downloads.find(item => item.id === id);
         return <article className="download-card" key={id}><Icon aria-hidden="true" /><h3>{title}</h3><p>{detail}</p>{item
           ? <><a className="product-link" href={item.url} aria-label={`下载 ${item.label}`}><Download aria-hidden="true" />下载安装包</a><small>{(item.size / 1024 / 1024).toFixed(1)} MB</small></>
-          : <span className="download-pending">准备中</span>}</article>;
+          : <><span className="download-pending">准备中</span><a className="product-link" href={repository} target="_blank" rel="noreferrer" aria-label={`查看 ${title} 发布页`}>查看发布页<ArrowUpRight aria-hidden="true" /></a></>}</article>;
       })}
     </div>
-    {manifest && <div className="download-metadata"><a href={manifest.releaseUrl}>版本说明<ArrowUpRight aria-hidden="true" /></a><a href={manifest.checksumsUrl}>SHA-256 校验文件<ArrowUpRight aria-hidden="true" /></a></div>}
+    <div className="download-metadata"><a href={manifest?.releaseUrl ?? repository} target="_blank" rel="noreferrer">{manifest ? '版本说明' : 'GitHub Releases'}<ArrowUpRight aria-hidden="true" /></a>{manifest && <a href={manifest.checksumsUrl}>SHA-256 校验文件<ArrowUpRight aria-hidden="true" /></a>}</div>
+    {!loading && !manifest && <p className="installation-note">安装包尚未发布，可先到 GitHub Releases 查看现有版本。</p>}
     <p className="installation-note">当前安装包未使用受信任的开发者签名，macOS 版本未通过 Apple 公证。首次安装可能出现系统提示。</p>
     <div className="installation-guides">
       <details><summary>Windows 首次安装</summary><p>下载并打开安装程序。如果 Windows 提示“未知发布者”或 SmartScreen 警告，请先确认文件来自本页链接的 GitHub Release，并核对校验值。确认信任后，可在系统允许时选择“更多信息 → 仍要运行”。受管理设备可能禁止继续安装，请联系管理员。</p></details>

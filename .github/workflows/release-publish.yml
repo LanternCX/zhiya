@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22.19.0
-      - name: Verify publication, CI and production configuration
+      - name: Verify publication, CI and optional API configuration
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
@@ -65,7 +65,6 @@ jobs:
             platform: macos-arm64
             bundle: app,dmg
     env:
-      ZHIYA_CLIENT_API_ORIGIN: ${{ vars.ZHIYA_API_ORIGIN }}
       RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
       RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
     defaults:
@@ -81,6 +80,13 @@ jobs:
           node-version: 22.19.0
           cache: npm
       - run: npm ci
+      - name: Apply an optional API origin override
+        env:
+          API_ORIGIN: ${{ vars.ZHIYA_API_ORIGIN }}
+        run: |
+          if [[ -n "$API_ORIGIN" ]]; then
+            echo "ZHIYA_CLIENT_API_ORIGIN=$API_ORIGIN" >> "$GITHUB_ENV"
+          fi
       - name: Install the Rust target
         env:
           RUST_TARGET: ${{ matrix.target }}
