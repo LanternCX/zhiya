@@ -11,10 +11,11 @@
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "paths": { "@/*": ["../client/src/*"] },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "vite.config.ts", "playwright*.config.ts", "tests"]
+  "include": ["src", "../client/src/config.d.ts", "vite.config.ts", "playwright*.config.ts", "tests"]
 }

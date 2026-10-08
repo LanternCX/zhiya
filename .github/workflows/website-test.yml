@@ -1,6 +1,7 @@
 name: Website tests
 
 on:
+  workflow_call:
   pull_request:
     branches: [main]
 
@@ -8,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: website-tests-${{ github.event.pull_request.number }}
+  group: website-tests-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,6 +29,8 @@ jobs:
         run: npm ci
       - name: Check and build the website
         run: npm run build:website
+      - name: Check release scripts
+        run: node --test scripts/release.test.mjs
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run website tests

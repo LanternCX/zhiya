@@ -1,0 +1,65 @@
+name: Website deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/website/**'
+      - 'apps/client/src/**'
+      - 'scripts/release.mjs'
+      - 'scripts/website-downloads.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/website-pages.yml'
+  workflow_run:
+    workflows: ['Release installers']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.19.0
+          cache: npm
+      - run: npm ci
+      - name: Generate static download information
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/website-downloads.mjs
+      - run: node --test scripts/release.test.mjs
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build and test the Pages site
+        run: npm run test:website:pages
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: apps/website/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        id: deployment

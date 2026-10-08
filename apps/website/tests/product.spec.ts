@@ -1,63 +1,57 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from '@playwright/test';
 
-test("green neobrutalism has a grid hero and visible bounded controls", async ({ page }) => {
-  await page.goto("./");
-  await expect(page.locator(".hero")).toHaveCSS("background-image", /linear-gradient/);
-  const action = page.getByRole("link", { name: "了解知芽", exact: true });
-  await expect(action).toHaveCSS("border-top-width", "2px");
-  await expect(action).not.toHaveCSS("box-shadow", "none");
-  await action.focus();
-  await expect(action).toBeFocused();
+test('original teacher workspace edits classroom and document together and downloads HTML', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const demo = page.getByRole('region', { name: '备课与内容产物演示' });
+  const client = demo.frameLocator('iframe');
+  await client.getByRole('textbox', { name: '告诉知芽你想学什么' }).fill('把这个例子改成穿衣活动');
+  await client.getByRole('button', { name: '发送', exact: true }).click();
+  await expect(client.getByText('已把示例改成穿衣活动，课堂和文档已同步更新。')).toBeVisible();
+  await client.getByRole('button', { name: '文档', exact: true }).click();
+  await expect(client.getByRole('region', { name: '文档预览' })).toContainText('温度低 → 加一件外套');
+  await client.getByRole('button', { name: '导出与分享', exact: true }).click();
+  const download = page.waitForEvent('download');
+  await client.getByRole('menuitem', { name: '下载 HTML 单文件' }).click();
+  expect((await download).suggestedFilename()).toMatch(/\.html$/);
 });
 
-test("product entry is reserved and grade selection remains keyboard accessible", async ({ page }) => {
-  await page.goto("./");
-  const address = page.url();
-  for (const entry of await page.getByRole("button", { name: "进入知芽", exact: true }).all()) {
-    await expect(entry).toBeDisabled();
-  }
-  await expect(page.getByRole("button", { name: "进入知芽", exact: true }).first()).toBeVisible();
-  await page.getByRole("tab", { name: "小学低年级", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "故事与观察", exact: true })).toBeVisible();
-  await page.getByRole("tab", { name: "小学低年级", exact: true }).press("End");
-  await expect(page.getByRole("tab", { name: "高中", exact: true })).toBeFocused();
-  await expect(page.getByRole("heading", { name: "模型与项目", exact: true })).toBeVisible();
-  await expect(page).toHaveURL(address);
-
-  await expect(page.locator("#lesson .teaching-media")).toBeVisible();
-  await expect(page.locator(".teaching-media img")).toHaveCount(0);
-  await expect(page.locator(".lesson-ring, .lesson-dot")).toHaveCount(0);
+test('original sharing dialog supports public and multiple class permissions', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const client = page.getByRole('region', { name: '备课与内容产物演示' }).frameLocator('iframe');
+  await client.getByRole('button', { name: '导出与分享', exact: true }).click();
+  await client.getByRole('menuitem', { name: '分享设置' }).click();
+  await client.getByRole('radio', { name: /获得链接的任何人可见/ }).click();
+  await expect(client.getByText('已开放分享，可复制链接。')).toBeVisible();
+  await client.getByRole('radio', { name: /分享到班级/ }).click();
+  await client.getByRole('checkbox', { name: '五年级 · AI 探索' }).check();
+  await client.getByRole('checkbox', { name: '编程探索班' }).check();
+  await client.getByRole('button', { name: '保存班级分享' }).click();
+  await expect(client.getByText('已分享给所选班级，成员登录后可查看。')).toBeVisible();
 });
 
-test("classroom steps work without navigating and the FAQ is removed", async ({ page }) => {
-  await page.goto("./");
-  const address = page.url();
-  await page.getByRole("tab", { name: "反馈", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "下一步学习什么？", exact: true })).toBeVisible();
-  await page.getByRole("tab", { name: "反馈", exact: true }).press("Home");
-  await expect(page.getByRole("tab", { name: "提问", exact: true })).toBeFocused();
-  await expect(page.getByRole("heading", { name: "AI 为什么会认错？", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "你可能想了解" })).toHaveCount(0);
-  await expect(page.locator('a[href="#questions"]')).toHaveCount(0);
-  await expect(page).toHaveURL(address);
+test('original class management and teacher materials are available in the embedded client', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const demo = page.getByRole('region', { name: '班级与内容分享演示' });
+  await demo.locator('.product-embed-toolbar').scrollIntoViewIfNeeded();
+  const client = demo.frameLocator('iframe');
+  await client.getByRole('link', { name: '管理班级' }).click();
+  await client.getByRole('textbox', { name: '班级名称', exact: true }).fill('五年级 · 编程探索');
+  await client.getByRole('button', { name: '保存名称' }).click();
+  await expect(client.getByText('班级名称已保存')).toBeVisible();
+  await client.getByRole('link', { name: '返回班级面板' }).click();
+  await expect(client.getByRole('heading', { name: '五年级 · 编程探索', exact: true })).toBeVisible();
+  await client.getByRole('link', { name: /教师分享/ }).click();
+  await expect(client.getByRole('heading', { name: '条件判断 · 教案与学习材料' })).toBeVisible();
 });
 
-test("grade and modality sections reserve blank real-image areas with black light-theme text", async ({ page }) => {
-  await page.emulateMedia({ colorScheme: "light" });
-  await page.goto("./");
-  for (const name of ["小学低年级", "小学高年级", "初中", "高中"]) {
-    await page.getByRole("tab", { name, exact: true }).click();
-    const media = page.locator("#stages .teaching-media");
-    await expect(media).toBeVisible();
-    await expect(media).toHaveAttribute("aria-label", `知芽 ${name}教学实景`);
-    await expect(media.locator("img")).toHaveCount(0);
-  }
-  await expect(page.locator("#multimodal .teaching-media")).toHaveCount(3);
-  for (const media of await page.locator("#multimodal .teaching-media").all()) {
-    await expect(media).toBeVisible();
-    await expect(media.locator("img")).toHaveCount(0);
-  }
-  for (const text of await page.locator("#stages h3, #stages p, #multimodal h3, #multimodal p").all()) {
-    await expect(text).toHaveCSS("color", "rgb(0, 0, 0)");
-  }
+test('hero controls lead to the embedded classroom and download sections', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  await page.locator('.hero').getByRole('link', { name: '体验课堂', exact: true }).click();
+  await expect(page.getByRole('region', { name: '交互课堂演示' })).toBeInViewport();
+  await page.getByRole('link', { name: '下载知芽', exact: true }).first().click();
+  await expect(page.getByRole('heading', { name: '把知芽，带到你的桌面。' })).toBeInViewport();
 });

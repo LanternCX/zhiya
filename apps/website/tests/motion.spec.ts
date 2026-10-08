@@ -10,8 +10,8 @@ test("opening finishes automatically and can be skipped with Escape", async ({ p
   await page.keyboard.press("Escape");
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await page.clock.runFor(4200);
-  await page.getByRole("link", { name: "了解知芽", exact: true }).click();
-  await expect(page.locator("#experience")).toBeInViewport();
+  await page.getByRole("link", { name: /了解知芽/ }).click();
+  await expect(page.locator("#start")).toBeInViewport();
 });
 
 test("reduced motion bypasses opening and retains content and tab navigation", async ({ page }) => {
@@ -19,9 +19,9 @@ test("reduced motion bypasses opening and retains content and tab navigation", a
   await page.goto("./");
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await expect(page.getByRole("heading", { level: 1, name: "知芽" })).toBeVisible();
-  await page.getByRole("tab", { name: "高中", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "模型与项目", exact: true })).toBeVisible();
-  await expect(page.locator(".stage-copy")).toHaveCSS("animation-name", "none");
+  const demo = page.getByRole('region', { name: '交互课堂演示' });
+  await demo.getByRole('button', { name: '语音对话', exact: true }).click();
+  await expect(demo.frameLocator('iframe').frameLocator('iframe[title="课件页面：说出来，也随时插一句"]').getByText(/不采集麦克风/)).toBeVisible();
 });
 
 test("scroll parallax moves layers and stops when reduced motion is enabled", async ({ page }) => {

@@ -78,23 +78,25 @@ export function useScrollParallax() {
   useEffect(() => {
     const preference = matchMedia("(prefers-reduced-motion: reduce)");
     const hero = document.querySelector<HTMLElement>(".hero");
-    const experiment = document.querySelector<HTMLElement>(".experiment-layout");
+    const chapters = document.querySelectorAll<HTMLElement>(".story-section");
     let frame = 0;
     const update = () => {
       frame = 0;
-      if (!hero || !experiment) return;
+      if (!hero) return;
       if (preference.matches) {
         hero.style.setProperty("--parallax", "0px");
-        experiment.style.setProperty("--parallax", "0px");
+        chapters.forEach(chapter => chapter.style.setProperty("--parallax", "0px"));
         return;
       }
       const mobile = window.innerWidth <= 800 ? .4 : 1;
       const rect = hero.getBoundingClientRect();
       const progress = Math.max(0, Math.min(-rect.top, rect.height));
       hero.style.setProperty("--parallax", `${progress * .15 * mobile}px`);
-      const panel = experiment.getBoundingClientRect();
-      const offset = (window.innerHeight / 2 - panel.top - panel.height / 2) * .055 * mobile;
-      experiment.style.setProperty("--parallax", `${Math.max(-20, Math.min(20, offset))}px`);
+      chapters.forEach(chapter => {
+        const panel = chapter.getBoundingClientRect();
+        const offset = (window.innerHeight / 2 - panel.top) * .055 * mobile;
+        chapter.style.setProperty("--parallax", `${Math.max(-20, Math.min(20, offset))}px`);
+      });
     };
     const request = () => { if (!frame) frame = requestAnimationFrame(update); };
     update();
@@ -107,7 +109,7 @@ export function useScrollParallax() {
       window.removeEventListener("resize", request);
       preference.removeEventListener("change", update);
       hero?.style.removeProperty("--parallax");
-      experiment?.style.removeProperty("--parallax");
+      chapters.forEach(chapter => chapter.style.removeProperty("--parallax"));
     };
   }, []);
 }
