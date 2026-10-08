@@ -66,7 +66,7 @@
 .feature-grid > .reveal-arrived:nth-child(3) { animation-delay: 180ms; }
 /* 4: User-driven classroom/grade transitions; never move or recreate the focused tabs. */
 .lesson-copy,.stage-copy { animation: panel-enter 320ms ease-out both; }
-.lesson-layout > .teaching-media,.stage-detail > .teaching-media { animation: media-enter 320ms ease-out both; }
+.lesson-note,.stage-artwork { animation: media-enter 320ms ease-out both; }
 @keyframes opening-curtain { to { transform: translateY(-101%); visibility: hidden; } }
 @keyframes sprout-grow { 0% { transform: scale(0); opacity: 0; } 35%,70% { transform: scale(1); opacity: 1; } 100% { transform: scale(.7); opacity: 0; } }
 @keyframes trunk-grow { to { stroke-dashoffset: 0; } }

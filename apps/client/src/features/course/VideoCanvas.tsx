@@ -1,6 +1,11 @@
+import { createContext, useContext } from "react";
 import type { VideoPage } from "../../domain/learning";
 
+// A host can provide a local preview without changing the video classroom UI.
+export const VideoPreviewContext = createContext<string | null>(null);
+
 export default function VideoCanvas({ page }: { page: VideoPage }) {
+  const preview = useContext(VideoPreviewContext);
   if (!/^BV[0-9A-Za-z]{10}$/.test(page.bvid))
     return <p role="alert">视频标识无效，请重新检索。</p>;
 
@@ -14,7 +19,7 @@ export default function VideoCanvas({ page }: { page: VideoPage }) {
       <iframe
         key={page.bvid}
         title={`B站视频：${page.title}`}
-        src={`https://player.bilibili.com/player.html?bvid=${page.bvid}&autoplay=0&danmaku=0`}
+        src={preview ?? `https://player.bilibili.com/player.html?bvid=${page.bvid}&autoplay=0&danmaku=0`}
         allow="fullscreen"
         allowFullScreen
         referrerPolicy="strict-origin-when-cross-origin"
