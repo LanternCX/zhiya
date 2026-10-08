@@ -1,0 +1,69 @@
+name: Release draft
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-draft-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.19.0
+          cache: npm
+      - name: Require a version tag on main
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node scripts/release.mjs validate "$RELEASE_TAG"
+          git merge-base --is-ancestor HEAD origin/main
+      - run: npm ci
+      - name: Validate the application and agent
+        run: |
+          npm run check
+          npm run build
+          npm run build:agent
+          npm run test:agent
+          node --test scripts/config.test.mjs scripts/release.test.mjs .github/scripts/check-pr.test.cjs
+  client:
+    needs: validate
+    uses: ./.github/workflows/client-test.yml
+  server:
+    needs: validate
+    uses: ./.github/workflows/server-test.yml
+  website:
+    needs: validate
+    uses: ./.github/workflows/website-test.yml
+  draft:
+    needs: [validate, client, server, website]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Create a draft without building installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft >/dev/null 2>&1; then
+            echo "Release already exists; preserving its review and publication state."
+            exit 0
+          fi
+          prerelease=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then prerelease=(--prerelease); fi
+          gh release create "$RELEASE_TAG" --verify-tag --draft "${prerelease[@]}" --title "知芽 $RELEASE_TAG" --generate-notes

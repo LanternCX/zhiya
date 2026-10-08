@@ -10,7 +10,7 @@
 
 [![License](https://img.shields.io/badge/License-AGPL--3.0-22c55e?style=flat-square)](LICENSE)
 
-[参与贡献](CONTRIBUTING.md) · [本地开发](docs/development.md)
+[参与贡献](CONTRIBUTING.md) · [本地开发](docs/development.md) · [官网与版本发布](docs/releasing.md)
 
 </div>
 

@@ -17,7 +17,7 @@
     "build:desktop": "node scripts/run.mjs desktop-build",
     "build:server": "go -C apps/server build -o ../../dist/server ./cmd/api",
     "check": "npm run check --workspace @zhiya/client && npm run check --workspace @zhiya/agent",
-    "test": "go -C apps/server test ./... && node --test .github/scripts/check-pr.test.cjs scripts/config.test.mjs",
+    "test": "go -C apps/server test ./... && node --test .github/scripts/check-pr.test.cjs scripts/config.test.mjs scripts/release.test.mjs",
     "test:accounts": "node scripts/run.mjs test-accounts",
     "test:desktop": "node scripts/run.mjs desktop-test",
     "test:e2e": "node scripts/run.mjs test-e2e",

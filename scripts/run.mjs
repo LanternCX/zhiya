@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 import { loadClientConfig, root } from "./config.mjs";
@@ -76,7 +76,14 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
           ...extra,
         ];
       } else {
-        const websocketOrigin = config.api_origin.replace(/^http/, "ws");
+        if (command === "desktop-build") {
+          if (!env.npm_execpath) throw new Error("Run desktop builds through npm run build:desktop");
+          const icons = spawnSync(process.execPath, [
+            env.npm_execpath, "run", "tauri", "--workspace", "@zhiya/client", "--",
+            "icon", "src-tauri/icons/icon.svg", "--output", "src-tauri/gen/icons",
+          ], { cwd: root, env, stdio: "inherit" });
+          if (icons.status !== 0) throw new Error("Could not generate desktop application icons");
+        }
         executable = "npm";
         args = [
           "run",
@@ -88,13 +95,10 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
           "--config",
           JSON.stringify({
             build: { devUrl: config.dev_origin },
-            app: {
-              security: {
-                csp: `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self' https://player.bilibili.com; connect-src 'self' ipc: http://ipc.localhost ${websocketOrigin} https: http://127.0.0.1:* http://localhost:*`,
-              },
-            },
+            ...(command === "desktop-build" ? { bundle: { icon: [
+              "gen/icons/32x32.png", "gen/icons/128x128.png", "gen/icons/icon.icns", "gen/icons/icon.ico",
+            ] } } : {}),
           }),
-          ...(command === "desktop-build" ? ["--no-bundle"] : []),
           ...extra,
         ];
       }
@@ -123,6 +127,11 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
     default:
       throw new Error("Unknown development command");
   }
+}
+// npm's Windows launcher is a .cmd file; run its JS entry point directly without a shell.
+if (executable === "npm" && env.npm_execpath) {
+  args.unshift(env.npm_execpath);
+  executable = process.execPath;
 }
 const child = spawn(executable, args, { cwd: root, env, stdio: "inherit" });
 for (const signal of ["SIGINT", "SIGTERM"])
