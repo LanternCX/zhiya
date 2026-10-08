@@ -55,7 +55,7 @@ test("opening finishes automatically and can be skipped with Escape", async ({ p
   await page.keyboard.press("Escape");
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await page.clock.runFor(4200);
-  await page.getByRole("link", { name: /了解知芽/ }).click();
+  await page.locator(".site-nav").getByRole("link", { name: "认识知芽", exact: true }).click();
   await expect(page.locator("#start")).toBeInViewport();
 });
 

@@ -1,2 +1,41 @@
 <!doctype html>
-<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>本地视频示意</title><style>body{margin:0;min-height:100vh;display:grid;place-content:center;text-align:center;background:#e1ebd5;color:#285334;font:16px system-ui}button{padding:16px 24px;border:1px solid #285334;border-radius:8px;background:white;color:inherit;font:inherit;cursor:pointer}small{margin:20px}</style><h1>条件判断</h1><p>从生活到代码</p><button onclick="this.textContent=this.textContent==='▶ 播放预设画面'?'Ⅱ 暂停预设画面':'▶ 播放预设画面'">▶ 播放预设画面</button><small>官网本地示意，不连接 B 站</small></html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>条件判断入门 · 知芽教程演示</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#14241c;color:#edf6ee;font:14px system-ui,sans-serif}
+.player{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.lesson{flex:1;min-height:0;padding:clamp(12px,3vw,32px);display:flex;flex-direction:column;justify-content:center;gap:12px;background:radial-gradient(ellipse at top right,#31583e,transparent 70%)}
+.eyebrow{margin:0;color:#b1d7bb;font-size:clamp(9px,1.8vw,12px);letter-spacing:.08em}h1{margin:0;font-size:clamp(18px,4vw,32px);line-height:1.25}
+.board{display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;margin:0;padding:12px;border:1px solid #8fbf9c55;border-radius:8px;background:#ffffff08;font-size:clamp(13px,2.8vw,23px)}
+.condition{padding:8px 12px;border:1px solid #91e0a7;border-radius:6px;color:#baf5ca}.branch{display:grid;gap:6px;font-size:clamp(11px,2vw,17px)}
+pre{margin:0;white-space:pre-wrap;font:clamp(11px,2vw,18px)/1.5 monospace;color:#baf5ca}
+.caption{margin:0;color:#d4e6d8;font-size:clamp(10px,1.8vw,14px);line-height:1.5}
+.controls{flex:none;padding:8px 12px;background:#0e1812}.timeline{width:100%;margin:0;accent-color:#82d39a;cursor:pointer}
+.toolbar{display:flex;align-items:center;gap:12px;height:32px;font-size:11px}.toolbar small{margin-left:auto;color:#9fbaaa}
+button{border:0;background:transparent;color:inherit;cursor:pointer;font:inherit;min-width:32px;min-height:32px}button:hover{color:#91e0a7}:focus-visible{outline:2px solid #91e0a7;outline-offset:2px}
+@media(max-height:300px){.lesson{padding:8px;gap:5px}h1{font-size:16px}.board{min-height:35px;padding:5px;font-size:13px}.condition{padding:4px 6px}.caption{font-size:10px}.controls{padding:4px 8px}.toolbar{height:24px}button{min-height:24px}pre{font-size:11px;line-height:1.3}}
+@media(max-height:190px){.eyebrow,.caption{display:none}h1{font-size:12px}.lesson{padding:6px;gap:4px}.board{font-size:11px}.branch{font-size:10px;gap:3px}pre{font-size:9px;line-height:1.2}.toolbar{font-size:9px}.toolbar small{display:none}}
+</style>
+</head>
+<body>
+<main class="player" aria-label="条件判断教程播放器">
+<section class="lesson"><p class="eyebrow" id="chapter">01 / 观察条件</p><h1 id="title">下雨了，要带伞吗？</h1><div id="board" class="board"><span class="condition">下雨了吗？</span><span>→</span><span>选择行动</span></div><p class="caption" id="caption">先观察天气。我们要判断的条件是：现在是否下雨。</p></section>
+<div class="controls"><input class="timeline" id="progress" type="range" min="0" max="24" step="0.1" value="0" aria-label="教程进度"><div class="toolbar"><button id="play" aria-label="播放教程">▶</button><span id="time">00:00 / 00:24</span><small>知芽 · 本地教程</small></div></div>
+</main>
+<script>
+const scenes=[
+{title:'下雨了，要带伞吗？',chapter:'01 / 观察条件',board:'<span class="condition">下雨了吗？</span><span>→</span><span>选择行动</span>',caption:'先观察天气。我们要判断的条件是：现在是否下雨。'},
+{title:'同一个条件，两种选择',chapter:'02 / 比较分支',board:'<span class="condition">下雨了吗？</span><span>→</span><div class="branch"><span>是 → 带上雨伞</span><span>否 → 直接出门</span></div>',caption:'条件成立时带伞；条件不成立时，走另一条分支。'},
+{title:'把选择写成代码',chapter:'03 / 写成程序',board:'<pre>if raining:\n    print("带上雨伞")\nelse:\n    print("直接出门")</pre>',caption:'if 检查条件，else 表示条件不成立时该做什么。'},
+{title:'换个场景，找出条件',chapter:'04 / 举一反三',board:'<span class="condition">温度低吗？</span><span>→</span><div class="branch"><span>是 → 加一件外套</span><span>否 → 轻装出门</span></div>',caption:'轮到你：生活中还有哪些选择，可以写成“如果……否则……”？'}
+];
+const progress=document.getElementById('progress'),play=document.getElementById('play');let playing=false,elapsed=0,last=0,chapter=0;
+function render(){const next=Math.min(3,Math.floor(elapsed/6));if(next!==chapter){chapter=next;const scene=scenes[next];document.getElementById('title').textContent=scene.title;document.getElementById('chapter').textContent=scene.chapter;document.getElementById('caption').textContent=scene.caption;const board=document.getElementById('board');board.innerHTML=scene.board;if(!matchMedia('(prefers-reduced-motion:reduce)').matches)board.animate([{opacity:.2,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:280});}progress.value=elapsed;progress.setAttribute('aria-valuetext',Math.floor(elapsed)+' 秒，共 24 秒');document.getElementById('time').textContent='00:'+String(Math.floor(elapsed)).padStart(2,'0')+' / 00:24';}
+function toggle(value){playing=value;play.textContent=playing?'Ⅱ':'▶';play.setAttribute('aria-label',playing?'暂停教程':'播放教程');last=0;if(playing)requestAnimationFrame(tick);}
+function tick(now){if(!playing)return;if(last)elapsed=Math.min(24,elapsed+(now-last)/1000);last=now;render();if(elapsed>=24)toggle(false);else requestAnimationFrame(tick);}
+play.addEventListener('click',()=>{if(elapsed>=24)elapsed=0;toggle(!playing);render();});progress.addEventListener('input',()=>{elapsed=Number(progress.value);render();});document.addEventListener('visibilitychange',()=>{if(document.hidden)toggle(false);});
+</script>
+</body>
+</html>

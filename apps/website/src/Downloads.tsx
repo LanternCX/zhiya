@@ -39,7 +39,7 @@ export default function Downloads() {
     return () => controller.abort();
   }, []);
   return <section className="content-section download-section" id="download" aria-labelledby="download-title">
-    <div className="section-heading"><p className="eyebrow">NEXT STOP / 你的桌面</p><h2 id="download-title">把知芽，带到你的桌面。</h2><p>选好你的系统，把下一次好奇留给知芽。</p></div>
+    <div className="section-heading"><p className="eyebrow">下载知芽</p><h2 id="download-title">把知芽，带到你的桌面。</h2><p>选择适合你电脑的安装包。</p></div>
     <p className="download-version" role="status">{loading ? '正在读取下载信息…' : manifest ? `版本 ${manifest.version}` : '安装包准备中'}</p>
     <div className="download-grid">
       {platforms.map(({ id, title, detail, icon: Icon }) => {

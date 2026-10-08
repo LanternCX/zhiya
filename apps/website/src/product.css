@@ -22,8 +22,6 @@
 .story-index { display: inline-block; font: 12px monospace; color: var(--forest); letter-spacing: 2px; margin-bottom: 22px; transform: translateY(var(--parallax, 0px)); }
 .capability-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; margin-top: 28px; font-size: 12px; color: var(--muted); }
 .capability-strip span::before { content: '✳'; color: var(--forest); margin-right: 8px; }
-.hero-learn-link { align-self: center; min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; text-underline-offset: 5px; }
-.hero-learn-link:hover { text-decoration: underline; }
 .product-demo { margin: 40px 0 64px; min-width: 0; }
 .demo-scenarios { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
 .demo-scenarios button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 24px; background: var(--paper); font-size: 13px; }

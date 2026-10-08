@@ -21,9 +21,23 @@ export default function ProductEmbed({ label, initialScene = 'materials', teache
     <div className="product-embed-viewport" aria-busy={loading}>
     <iframe key={scene + role + reset} title={label + '：知芽原版界面'} src={source} loading="lazy" onLoad={event => {
       releaseWheel.current?.();
+      const frame = event.currentTarget;
+      let focused = document.activeElement;
+      const embedded = event.currentTarget.contentDocument;
+      const trackFocus = () => { if (document.activeElement !== frame) focused = document.activeElement; };
+      const preserveFocus = () => {
+        if (focused instanceof HTMLElement && focused.closest('.site-header')) focused.focus({ preventScroll: true });
+      };
+      const allowFocus = () => embedded?.removeEventListener('focusin', preserveFocus);
+      const keyboardFocus = (event: KeyboardEvent) => { if (event.key === 'Tab') allowFocus(); };
+      document.addEventListener('focusin', trackFocus);
+      document.addEventListener('keydown', keyboardFocus);
+      embedded?.addEventListener('focusin', preserveFocus);
+      embedded?.addEventListener('pointerdown', allowFocus, { once: true, capture: true });
+      embedded?.addEventListener('keydown', allowFocus, { once: true, capture: true });
       const releaseInput = forwardEmbedWheel(event.currentTarget);
       const releaseScroll = stage.current && panel.current ? connectEmbedScroll(stage.current, panel.current, event.currentTarget) : () => {};
-      releaseWheel.current = () => { releaseInput(); releaseScroll(); };
+      releaseWheel.current = () => { releaseInput(); releaseScroll(); allowFocus(); document.removeEventListener('focusin', trackFocus); document.removeEventListener('keydown', keyboardFocus); embedded?.removeEventListener('pointerdown', allowFocus, true); embedded?.removeEventListener('keydown', allowFocus, true); };
       setLoading(false);
       revealPreview(event.currentTarget);
     }} sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups" />
@@ -31,6 +45,6 @@ export default function ProductEmbed({ label, initialScene = 'materials', teache
     </div>
     <div className="product-scroll-caption"><span className="product-scroll-hint">继续滚动，展开这一段</span><div className="product-scroll-progress" aria-hidden="true"><i /></div><a href={source} target="_blank" rel="noreferrer">自由操作 ↗</a></div>
     </div></div>
-    <p className="demo-disclosure">界面直接复用桌面客户端；回复、材料和运行结果为浏览器内预设。可以操作原版侧栏、课堂、文档、班级与分享。语音只展示预设内容，不采集麦克风。</p>
+    <p className="demo-disclosure">这是知芽的实际界面，演示内容已提前准备好。可以点击操作，也可以展开体验。语音演示不会开启麦克风。</p>
   </section>;
 }
