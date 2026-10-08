@@ -46,7 +46,7 @@ export default function Downloads() {
         const item = manifest?.downloads.find(item => item.id === id);
         return <article className="download-card" key={id}><Icon aria-hidden="true" /><h3>{title}</h3><p>{detail}</p>{item
           ? <><a className="product-link" href={item.url} aria-label={`下载 ${item.label}`}><Download aria-hidden="true" />下载安装包</a><small>{(item.size / 1024 / 1024).toFixed(1)} MB</small></>
-          : <><span className="download-pending">准备中</span><a className="product-link" href={repository} target="_blank" rel="noreferrer" aria-label={`查看 ${title} 发布页`}>查看发布页<ArrowUpRight aria-hidden="true" /></a></>}</article>;
+          : <span className="download-pending">准备中</span>}</article>;
       })}
     </div>
     <div className="download-metadata"><a href={manifest?.releaseUrl ?? repository} target="_blank" rel="noreferrer">{manifest ? '版本说明' : 'GitHub Releases'}<ArrowUpRight aria-hidden="true" /></a>{manifest && <a href={manifest.checksumsUrl}>SHA-256 校验文件<ArrowUpRight aria-hidden="true" /></a>}</div>
