@@ -165,8 +165,8 @@ svg { width: 20px; height: 20px; flex-shrink: 0; stroke-width: 2; }
   .scene-steps button span { display: block; margin: 0 0 4px; }
 }
 @media (max-width: 800px) {
-  .site-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; gap: 0; padding: 12px 24px; background: var(--paper); border-bottom: 3px solid var(--border); }
-  .site-nav.is-open { display: flex; }
+  .site-nav { visibility: hidden; opacity: 0; transform: translateY(-8px); pointer-events: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; gap: 0; padding: 12px 24px; background: var(--paper); border-bottom: 3px solid var(--border); }
+  .site-nav.is-open { visibility: visible; opacity: 1; transform: none; pointer-events: auto; }
   .site-nav a { min-height: 48px; }
   .menu-button { display: grid; }
   .content-section { padding-block: 64px; }

@@ -93,7 +93,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const [command, tag, input, output, platform] = process.argv.slice(2);
     if (command === 'validate') {
       console.log(releaseVersion(tag));
-      if (input !== undefined) validateApiOrigin(input);
+      if (input) validateApiOrigin(input);
     } else if (command === 'collect') collect(tag, input, output, platform);
     else if (command === 'assemble') assemble(tag, input, output);
     else throw new Error('Unknown release command');

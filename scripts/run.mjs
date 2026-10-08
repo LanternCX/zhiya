@@ -55,14 +55,6 @@ if (["server", "check-server-config", "test-accounts"].includes(command)) {
     case "desktop-dev":
     case "desktop-build":
     case "desktop-test":
-      if (
-        command === "desktop-build" &&
-        !config.api_origin.startsWith("https://")
-      ) {
-        throw new Error(
-          "Desktop release builds require an HTTPS client api_origin",
-        );
-      }
       env.ZHIYA_BUILD_API_ORIGIN = config.api_origin;
       env.ZHIYA_BUILD_REQUEST_TIMEOUT_SECONDS = String(
         config.request_timeout_seconds,

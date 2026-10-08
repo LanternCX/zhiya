@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('the website covers current capabilities using the actual product interface', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
-  for (const title of ['先认识你，再一起往前走。', '把一节课，讲成看得见的理解。', '从备课，到一份拿得走的材料。', '让好内容，在班级里流动。']) {
+  for (const title of ['说说你的需求', '不懂就问，也可以自己试试', '准备课件，修改教案，安排课堂活动', '老师分享材料，学生随时查看']) {
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
   }
   const demo = page.getByRole('region', { name: '交互课堂演示' });

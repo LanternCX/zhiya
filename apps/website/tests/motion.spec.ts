@@ -1,5 +1,50 @@
 import { expect, test } from "@playwright/test";
 
+test("switching classroom scenes fades the new preview in and leaves the exercise usable", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("./");
+  await page.keyboard.press("Escape");
+  const demo = page.getByRole("region", { name: "交互课堂演示" });
+  const control = demo.getByRole("button", { name: "随堂练习", exact: true });
+  await control.click();
+  await page.waitForFunction(() => {
+    const frame = document.querySelector<HTMLIFrameElement>('#classroom iframe[src*="scene=question"]');
+    const opacity = frame ? Number(getComputedStyle(frame).opacity) : 1;
+    return opacity > 0 && opacity < 1;
+  }, undefined, { timeout: 5000 });
+  await expect(demo.locator("iframe")).toHaveCSS("opacity", "1");
+  await expect(control).toHaveAttribute("aria-pressed", "true");
+  await demo.frameLocator("iframe").getByLabel("带上雨伞", { exact: true }).check();
+});
+
+for (const reducedMotion of ["no-preference", "reduce"] as const) {
+  test(`scroll-driven slides transition and remain readable with motion preference ${reducedMotion}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto("./");
+    await page.keyboard.press("Escape");
+    const demo = page.getByRole("region", { name: "交互课堂演示" });
+    await demo.getByRole("button", { name: "图文课件", exact: true }).click();
+    await expect(demo.frameLocator("iframe").locator('iframe[title="课件页面：把天气变成一个条件"]')).toBeVisible();
+    await demo.locator("iframe").evaluate(frame => {
+      const stage = frame.closest<HTMLElement>(".product-scroll-stage")!;
+      const panel = stage.querySelector<HTMLElement>(".product-scroll-panel")!;
+      window.scrollTo({ top: window.scrollY + stage.getBoundingClientRect().top - parseFloat(getComputedStyle(panel).top) + (stage.clientHeight - panel.offsetHeight) * .8, behavior: "instant" });
+    });
+    if (reducedMotion === "no-preference") {
+      await page.waitForFunction(() => {
+        const client = document.querySelector<HTMLIFrameElement>("#classroom iframe")?.contentDocument;
+        const slide = client?.querySelector<HTMLIFrameElement>('iframe[title="课件页面：在生活中找到另一个条件"]');
+        const opacity = slide ? Number(client!.defaultView!.getComputedStyle(slide).opacity) : 1;
+        return opacity > 0 && opacity < 1;
+      }, undefined, { timeout: 5000 });
+    }
+    const slide = demo.frameLocator("iframe").locator('iframe[title="课件页面：在生活中找到另一个条件"]');
+    await expect(slide).toHaveCSS("opacity", "1");
+    await expect(slide).toBeVisible();
+    if (reducedMotion === "reduce") await expect(demo.locator("iframe")).toHaveCSS("opacity", "1");
+  });
+}
+
 test("opening finishes automatically and can be skipped with Escape", async ({ page }) => {
   await page.clock.install();
   await page.goto("./");
@@ -10,7 +55,7 @@ test("opening finishes automatically and can be skipped with Escape", async ({ p
   await page.keyboard.press("Escape");
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await page.clock.runFor(4200);
-  await page.getByRole("link", { name: /了解知芽/ }).click();
+  await page.locator(".site-nav").getByRole("link", { name: "认识知芽", exact: true }).click();
   await expect(page.locator("#start")).toBeInViewport();
 });
 

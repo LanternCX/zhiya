@@ -39,7 +39,7 @@ export default function Downloads() {
     return () => controller.abort();
   }, []);
   return <section className="content-section download-section" id="download" aria-labelledby="download-title">
-    <div className="section-heading"><p className="eyebrow">NEXT STOP / 你的桌面</p><h2 id="download-title">把知芽，带到你的桌面。</h2><p>选好你的系统，把下一次好奇留给知芽。</p></div>
+    <div className="section-heading"><p className="eyebrow">下载知芽</p><h2 id="download-title">把知芽，带到你的桌面。</h2><p>选择适合你电脑的安装包。</p></div>
     <p className="download-version" role="status">{loading ? '正在读取下载信息…' : manifest ? `版本 ${manifest.version}` : '安装包准备中'}</p>
     <div className="download-grid">
       {platforms.map(({ id, title, detail, icon: Icon }) => {
@@ -49,7 +49,8 @@ export default function Downloads() {
           : <span className="download-pending">准备中</span>}</article>;
       })}
     </div>
-    {manifest && <div className="download-metadata"><a href={manifest.releaseUrl}>版本说明<ArrowUpRight aria-hidden="true" /></a><a href={manifest.checksumsUrl}>SHA-256 校验文件<ArrowUpRight aria-hidden="true" /></a></div>}
+    <div className="download-metadata"><a href={manifest?.releaseUrl ?? repository} target="_blank" rel="noreferrer">{manifest ? '版本说明' : 'GitHub Releases'}<ArrowUpRight aria-hidden="true" /></a>{manifest && <a href={manifest.checksumsUrl}>SHA-256 校验文件<ArrowUpRight aria-hidden="true" /></a>}</div>
+    {!loading && !manifest && <p className="installation-note">安装包尚未发布，可先到 GitHub Releases 查看现有版本。</p>}
     <p className="installation-note">当前安装包未使用受信任的开发者签名，macOS 版本未通过 Apple 公证。首次安装可能出现系统提示。</p>
     <div className="installation-guides">
       <details><summary>Windows 首次安装</summary><p>下载并打开安装程序。如果 Windows 提示“未知发布者”或 SmartScreen 警告，请先确认文件来自本页链接的 GitHub Release，并核对校验值。确认信任后，可在系统允许时选择“更多信息 → 仍要运行”。受管理设备可能禁止继续安装，请联系管理员。</p></details>

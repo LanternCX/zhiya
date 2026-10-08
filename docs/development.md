@@ -210,7 +210,7 @@ ZHIYA_KNOWLEDGE_TEST_URL='postgres://zhiya:zhiya-local@127.0.0.1:54329/postgres?
 | `npm run test:desktop` | 运行桌面请求行为测试 |
 | `npm run build` | 构建浏览器客户端 |
 | `npm run build:server` | 构建服务端到 `dist/server` |
-| `npm run build:desktop` | 构建桌面安装包，要求 HTTPS API 地址 |
+| `npm run build:desktop` | 使用客户端配置构建桌面安装包 |
 
 浏览器测试首次运行前需要安装 Chromium：
 

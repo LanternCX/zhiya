@@ -2,9 +2,11 @@
 
 官网是 `apps/website` 中的纯静态 React 应用，包含滚动视差、预设交互课堂演示和下载入口。演示不调用模型、不连接业务后端，也不要求登录。网页自身使用仓库内资源；下载信息来自随站点部署的 `downloads.json`，浏览器不查询 GitHub API。
 
-演示窗口加载同站点的 `product-demo/index.html`，直接使用 `apps/client` 的 App、路由、组件和样式。客户端视觉改动会同步进入官网演示。官网专用的内存适配器在这个独立文档里接管请求和状态通知，提供示例账户、课堂、档案与班级；数据刷新后重置，文件不会上传，语音不采集麦克风。B 站播放器使用本地预设画面，客户端正式版本仍使用官方播放器。演示的场景选择与重置按钮位于官网外框，不改变产品界面。
+演示窗口加载同站点的 `product-demo/index.html`，直接使用 `apps/client` 的 App、路由、组件和样式。客户端视觉改动会同步进入官网演示。官网专用的内存适配器在这个独立文档里接管请求和状态通知，提供示例账户、课堂、档案与班级；数据刷新后重置，文件不会上传，语音不采集麦克风。视频区域播放本地 24 秒条件判断教程演示，支持播放、暂停和进度跳转，不提供占位 B 站外链；客户端正式版本仍使用官方播放器及真实视频链接。演示的场景选择与重置按钮位于官网外框，不改变产品界面。
 
 官网使用一个页面滚动位置推进演示。演示窗口在当前章节停留，滚动进度带动较长的对话、档案、文档或班级内容，并推进图文课件的预设页面；当前章节完成后，页面继续进入下一段。嵌入窗口及其中的课件、视频窗口不独立响应滚轮，内部滚动条隐藏。按钮和输入仍可操作；点击“展开体验”进入独立页面后，可以自由滚动产品界面。
+
+场景、身份及重置切换在演示加载后渐入，图文课件翻页也有过渡。手机导航、场景按钮及安装说明提供交互动画；遵循系统的“减少动画”偏好，不修改正式客户端的组件或动画。
 
 官网部署目标为 GitHub Pages，默认地址为 <https://lanterncx.github.io/zhiya/>。首次部署需要先完成下方仓库设置。安装包由 GitHub Releases 分发，支持 Windows x64 和 macOS Apple Silicon（M 系列芯片）。产品后端须另行部署；GitHub Pages 和 Releases 不提供 AI 服务。
 
@@ -13,21 +15,21 @@
 维护者在 GitHub 仓库中完成以下设置：
 
 1. 在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
-2. 在 **Settings → Secrets and variables → Actions → Variables** 设置 `ZHIYA_API_ORIGIN`，值为产品 API 的 HTTPS origin，例如 `https://api.example.com`。它不能包含路径、凭据或末尾斜杠；示例地址不能用于实际发布。
+2. 如需覆盖仓库内的客户端 API 地址，在 **Settings → Secrets and variables → Actions → Variables** 设置 `ZHIYA_API_ORIGIN`，值为产品 API 的 HTTPS origin，例如 `https://api.example.com`。它不能包含路径、凭据或末尾斜杠。未设置时使用 `apps/client/config.json`，不阻止打包。
 3. 若 `github-pages` environment 限制部署来源，允许 `main`。Pages 工作流始终构建最新 `main`，即使由安装包工作流完成事件触发。
 
-API 地址是客户端的公开构建配置，不是密钥。它在构建时嵌入安装包；变更地址需要发布新客户端。地址未配置时，官网仍可部署，但安装包工作流会停止，不会将本地开发地址带入正式发布。
+API 地址是客户端的公开构建配置，不是密钥。它在构建时嵌入安装包；变更地址需要发布新客户端。Tauri 安装包只包含客户端，打包和下载不要求后端已上线。仓库当前默认地址为 `http://127.0.0.1:8080`；使用这一配置的客户端可安装，但注册、登录和课堂等服务功能需要该地址上的后端。需要连接线上后端时，应在构建前配置对应地址。
 
 ## 发布步骤
 
 1. 将经过审核的改动合入 `main`。从该提交创建并 push 版本 tag，如 `v1.2.3` 或 `v1.2.3-alpha.1`；还支持 `beta.N` 和 `rc.N`。每个 tag 固定一次版本，不移动已发布的 tag。
 2. **Release draft** 工作流校验 tag 属于 `main`，运行客户端、服务端、Agent 和官网检查。通过后创建 Draft Release，生成更新说明，尚不构建安装包。带预发布后缀的 tag 默认标记为 prerelease。
-3. 人工审核并完善 Draft 的更新说明。确认产品 API 已就绪且构建地址正确后，点击 **Publish release**。
-4. **Release installers** 工作流确认同一 tag 的 CI 成功和 API 地址有效，再并行生成两个安装包。版本号由 tag 决定，通过 Tauri 构建配置传入，不需要在 CI 中修改源码版本文件。Windows 使用 NSIS，附带 WebView2 bootstrapper；缺少 WebView2 时，安装仍需联网下载运行时。macOS 使用 DMG 与 ad-hoc 临时签名，不使用 Developer ID 或 Apple 公证。
+3. 人工审核并完善 Draft 的更新说明，明确客户端使用的 API 地址和后端可用情况后，点击 **Publish release**。后端尚未上线不阻止发布客户端安装包。
+4. **Release installers** 工作流确认同一 tag 的 CI 成功，校验可选的 API 地址覆盖，再并行生成两个安装包。版本号由 tag 决定，通过 Tauri 构建配置传入，不需要在 CI 中修改源码版本文件。Windows 使用 NSIS，附带 WebView2 bootstrapper；缺少 WebView2 时，安装仍需联网下载运行时。macOS 使用 DMG 与 ad-hoc 临时签名，不使用 Developer ID 或 Apple 公证。
 5. 所有构建成功后，上传安装包和 `SHA256SUMS.txt`，最后上传 `downloads.json` 作为完整发布标记。正式 Release 在这段构建期间暂时没有安装包。
 6. **Website deployment** 接到成功完成事件后，从最新 `main` 构建并测试 `/zhiya/` 路径的官网，再部署 Pages。它检查清单、附件大小与可用的 GitHub SHA-256 digest，不将不完整版本设为下载版本。完整稳定版本优先；没有完整稳定版本时使用完整预发布版本。同类版本按发布时间选择。
 
-官网改动合入 `main` 后也会独立部署，复用最近完整版本的下载信息。没有完整版本时显示“安装包准备中”。读取 GitHub 失败会让部署停止，保留已上线页面。API 可用性与真实账号/课堂的上线验收属于后端部署工作，不能通过官网 demo 或打包成功推断。
+官网改动合入 `main` 后也会独立部署，复用最近完整版本的下载信息。没有完整版本时显示“安装包准备中”，下载区提供一个统一的 GitHub Releases 入口，明确说明安装包尚未发布。完整安装包发布后，平台卡片自动显示附件的直接下载地址及校验文件。读取 GitHub 失败会让部署停止，保留已上线页面。API 可用性与真实账号/课堂的上线验收属于后端部署工作，不能通过官网 demo 或打包成功推断。
 
 ## 重试与维护
 

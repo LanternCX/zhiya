@@ -1,4 +1,19 @@
 /* Opening, scroll effects and pausable decorative conveyors. */
+@media (prefers-reduced-motion: no-preference) {
+  body, .site-header, .product-embed-toolbar, .product-scroll-caption, .download-card {
+    transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
+  }
+  .demo-scenarios button, .product-embed-toolbar :is(button, a), .icon-button {
+    transition: transform 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+  .demo-scenarios button:hover, .product-embed-toolbar :is(button, a):hover, .icon-button:hover { transform: translateY(-2px); }
+  .demo-scenarios button:active, .product-embed-toolbar :is(button, a):active, .icon-button:active { transform: translateY(0) scale(.97); }
+  .installation-guides details[open] > :not(summary) { animation: content-enter 220ms ease-out both; }
+}
+@media (max-width: 800px) and (prefers-reduced-motion: no-preference) {
+  .site-nav { transition: opacity 180ms ease, transform 220ms ease, visibility 0s linear 220ms; }
+  .site-nav.is-open { transition-delay: 0s; }
+}
 .opening-scene {
   position: fixed; inset: 0; z-index: 90; display: grid; place-items: center;
   background: #67d994; color: #07190e; border-bottom: 3px solid #171c18;
