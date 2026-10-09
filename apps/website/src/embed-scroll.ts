@@ -22,8 +22,16 @@ export function connectEmbedScroll(stage: HTMLElement, panel: HTMLElement, frame
       targets = nextTargets;
       const longest = Math.max(0, ...targets.map(element => element.scrollHeight - element.clientHeight));
       distance = Math.max(320, Math.min(3600, longest + window.innerHeight * .55));
+      const previous = stage.getBoundingClientRect();
+      const scrollPosition = window.scrollY;
+      const top = parseFloat(getComputedStyle(panel).top) || 96;
       stage.style.setProperty('--demo-scroll-distance', distance + 'px');
       stage.style.height = panel.offsetHeight + distance + 'px';
+      // Loading an earlier demo must not move the chapter the visitor is reading.
+      if (previous.bottom <= top) {
+        const change = stage.getBoundingClientRect().height - previous.height;
+        if (change) window.scrollTo({ top: scrollPosition + change, behavior: 'instant' });
+      }
     }
     const top = parseFloat(getComputedStyle(panel).top) || 96;
     const position = Math.max(0, Math.min(distance, top - stage.getBoundingClientRect().top));
