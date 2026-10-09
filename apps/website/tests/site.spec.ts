@@ -63,7 +63,7 @@ test('late profile loading preserves the first keyboard navigation target', asyn
   await expect(skip).toBeFocused();
   release();
   const profile = page.getByRole('region', { name: '建档与学习记忆演示' });
-  await expect(profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true })).toBeVisible();
+  await profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true }).waitFor({ state: 'visible' });
   await expect(skip).toBeFocused();
 });
 

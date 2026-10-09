@@ -75,7 +75,7 @@ test('late classroom loading preserves the download destination', async ({ page 
   await expect(destination).toBeInViewport();
   release();
   const demo = page.getByRole('region', { name: '交互课堂演示' });
-  await expect(demo.frameLocator('iframe').getByRole('textbox', { name: '告诉知芽你想学什么' })).toBeVisible();
+  await demo.frameLocator('iframe').getByRole('textbox', { name: '告诉知芽你想学什么' }).waitFor({ state: 'visible' });
   await expect(destination).toBeInViewport();
 });
 
@@ -97,6 +97,6 @@ test('late profile loading preserves the classroom destination', async ({ page }
   await expect(classroom).toBeInViewport();
   release();
   const profile = page.getByRole('region', { name: '建档与学习记忆演示' });
-  await expect(profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true })).toBeVisible();
+  await profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true }).waitFor({ state: 'visible' });
   await expect(classroom).toBeInViewport();
 });
