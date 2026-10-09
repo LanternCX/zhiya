@@ -1,17 +1,37 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function pausePreviewTransitions(page: Page) {
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args);
+      if (this instanceof HTMLIFrameElement) {
+        const duration = animation.effect?.getTiming().duration;
+        if (typeof duration === 'number' && duration > 0) {
+          animation.pause();
+          animation.currentTime = duration / 2;
+        }
+      }
+      return animation;
+    };
+  });
+}
 
 test("switching classroom scenes fades the new preview in and leaves the exercise usable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await pausePreviewTransitions(page);
   await page.goto("./");
   await page.keyboard.press("Escape");
   const demo = page.getByRole("region", { name: "交互课堂演示" });
   const control = demo.getByRole("button", { name: "随堂练习", exact: true });
   await control.click();
+  await demo.frameLocator('iframe').getByLabel('带上雨伞', { exact: true }).waitFor({ state: 'visible' });
   await page.waitForFunction(() => {
     const frame = document.querySelector<HTMLIFrameElement>('#classroom iframe[src*="scene=question"]');
     const opacity = frame ? Number(getComputedStyle(frame).opacity) : 1;
     return opacity > 0 && opacity < 1;
   }, undefined, { timeout: 5000 });
+  await demo.locator('iframe').evaluate(frame => frame.getAnimations().forEach(animation => animation.finish()));
   await expect(demo.locator("iframe")).toHaveCSS("opacity", "1");
   await expect(control).toHaveAttribute("aria-pressed", "true");
   await demo.frameLocator("iframe").getByLabel("带上雨伞", { exact: true }).check();
@@ -20,6 +40,7 @@ test("switching classroom scenes fades the new preview in and leaves the exercis
 for (const reducedMotion of ["no-preference", "reduce"] as const) {
   test(`scroll-driven slides transition and remain readable with motion preference ${reducedMotion}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion });
+    await pausePreviewTransitions(page);
     await page.goto("./");
     await page.keyboard.press("Escape");
     const demo = page.getByRole("region", { name: "交互课堂演示" });
@@ -30,6 +51,8 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       const panel = stage.querySelector<HTMLElement>(".product-scroll-panel")!;
       window.scrollTo({ top: window.scrollY + stage.getBoundingClientRect().top - parseFloat(getComputedStyle(panel).top) + (stage.clientHeight - panel.offsetHeight) * .8, behavior: "instant" });
     });
+    const slide = demo.frameLocator("iframe").locator('iframe[title="课件页面：在生活中找到另一个条件"]');
+    await slide.waitFor({ state: 'visible' });
     if (reducedMotion === "no-preference") {
       await page.waitForFunction(() => {
         const client = document.querySelector<HTMLIFrameElement>("#classroom iframe")?.contentDocument;
@@ -37,8 +60,8 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
         const opacity = slide ? Number(client!.defaultView!.getComputedStyle(slide).opacity) : 1;
         return opacity > 0 && opacity < 1;
       }, undefined, { timeout: 5000 });
+      await slide.evaluate(frame => frame.getAnimations().forEach(animation => animation.finish()));
     }
-    const slide = demo.frameLocator("iframe").locator('iframe[title="课件页面：在生活中找到另一个条件"]');
     await expect(slide).toHaveCSS("opacity", "1");
     await expect(slide).toBeVisible();
     if (reducedMotion === "reduce") await expect(demo.locator("iframe")).toHaveCSS("opacity", "1");

@@ -37,9 +37,9 @@ jobs:
         run: npm run test:website
       - name: Run GitHub Pages tests
         run: npm run test:website:pages
-      - name: Repeat navigation and delayed-loading regressions
+      - name: Repeat navigation, loading and animation regressions
         working-directory: apps/website
-        run: npx playwright test --config playwright.pages.config.ts --grep 'late .* loading|hero controls|supports keyboard focus' --repeat-each=5
+        run: npx playwright test --config playwright.pages.config.ts --grep 'late .* loading|hero controls|supports keyboard focus|switching classroom scenes|scroll-driven slides' --repeat-each=5
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
