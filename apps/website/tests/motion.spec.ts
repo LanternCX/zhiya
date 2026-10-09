@@ -1,4 +1,4 @@
-import { expect, test, openWebsite, reloadWebsite, pausePreviewTransitions, waitForPreview } from './browser';
+import { expect, test, openWebsite, reloadWebsite, pausePreviewTransitions, waitForPreview, dismissOpening, freezeOpeningClock } from './browser';
 
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -8,7 +8,7 @@ test("switching classroom scenes fades the new preview in and leaves the exercis
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await pausePreviewTransitions(page);
   await openWebsite(page);
-  await page.keyboard.press("Escape");
+  await dismissOpening(page);
   const demo = page.getByRole("region", { name: "交互课堂演示" });
   const control = demo.getByRole("button", { name: "随堂练习", exact: true });
   await control.click();
@@ -29,7 +29,7 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
     await page.emulateMedia({ reducedMotion });
     await pausePreviewTransitions(page);
     await openWebsite(page);
-    await page.keyboard.press("Escape");
+    await dismissOpening(page);
     const demo = page.getByRole("region", { name: "交互课堂演示" });
     await demo.getByRole("button", { name: "图文课件", exact: true }).click();
     await waitForPreview(demo, demo.frameLocator("iframe").locator('iframe[title="课件页面：把天气变成一个条件"]'));
@@ -55,16 +55,28 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
   });
 }
 
-test("opening finishes automatically and can be skipped with Escape", async ({ page }) => {
-  await page.clock.install();
+test("opening finishes automatically and supports pointer and keyboard dismissal", async ({ page }) => {
+  await freezeOpeningClock(page);
   await openWebsite(page);
   await expect(page.locator(".opening-scene")).toBeVisible();
+  await page.clock.runFor(2800);
+  await page.getByRole('button', { name: '跳过开屏' }).click();
+  await expect(page.locator('.opening-scene')).toHaveCount(0);
   await page.clock.runFor(4200);
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await reloadWebsite(page);
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".opening-scene")).toHaveCount(0);
+  await expect(page.locator('.opening-scene')).toBeVisible();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: '跳到主要内容' })).toBeFocused();
+  await expect(page.locator('.opening-scene')).toHaveCount(0);
+  await reloadWebsite(page);
+  await expect(page.locator('.opening-scene')).toBeVisible();
+  await dismissOpening(page);
+  await reloadWebsite(page);
+  await expect(page.locator('.opening-scene')).toBeVisible();
   await page.clock.runFor(4200);
+  await expect(page.locator(".opening-scene")).toHaveCount(0);
+  await page.clock.resume();
   await page.locator(".site-nav").getByRole("link", { name: "认识知芽", exact: true }).click();
   await expect(page.locator("#start")).toBeInViewport();
 });
@@ -82,8 +94,10 @@ test("reduced motion bypasses opening and retains content and tab navigation", a
 });
 
 test("scroll parallax moves layers and stops when reduced motion is enabled", async ({ page }) => {
+  await page.clock.install();
   await openWebsite(page);
-  await page.getByRole("button", { name: "跳过开屏" }).click();
+  await page.clock.fastForward(4200);
+  await dismissOpening(page);
   const notes = page.locator(".hero-content");
   const before = await notes.evaluate(el => getComputedStyle(el).translate);
   await page.evaluate(() => window.scrollTo({ top: 400, behavior: "instant" }));
@@ -95,7 +109,7 @@ test("scroll parallax moves layers and stops when reduced motion is enabled", as
 
 test("decorative conveyors can be paused and resumed together", async ({ page }) => {
   await openWebsite(page);
-  await page.keyboard.press("Escape");
+  await dismissOpening(page);
   await page.getByRole("button", { name: "暂停装饰滚动" }).click();
   for (const track of await page.locator(".notes-track, .ribbon-track").all()) {
     await expect(track).toHaveCSS("animation-play-state", "paused");
@@ -104,6 +118,15 @@ test("decorative conveyors can be paused and resumed together", async ({ page })
   await page.mouse.move(700, 400);
   await page.getByRole("button", { name: "暂停装饰滚动" }).blur();
   await expect(page.locator(".ribbon-track")).toHaveCSS("animation-play-state", "running");
-  const start = await page.locator(".notes-track").first().evaluate(el => getComputedStyle(el).transform);
-  await expect.poll(() => page.locator(".notes-track").first().evaluate(el => getComputedStyle(el).transform)).not.toBe(start);
+  const notes = page.locator('.notes-track').first();
+  await expect(notes).toHaveCSS('animation-play-state', 'running');
+  const positions = await notes.evaluate(element => {
+    const animation = element.getAnimations()[0];
+    animation.pause();
+    animation.currentTime = 0;
+    const start = getComputedStyle(element).transform;
+    animation.currentTime = 1000;
+    return { start, advanced: getComputedStyle(element).transform };
+  });
+  expect(positions.advanced).not.toBe(positions.start);
 });
