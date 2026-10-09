@@ -35,6 +35,27 @@ export async function reloadWebsite(page: Page) {
   await waitForWebsite(page);
 }
 
+export async function dismissOpening(page: Page) {
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.opening-scene')).toHaveCount(0);
+}
+
+/** Keep expiring opening controls available until the test advances their clock. */
+export async function freezeOpeningClock(page: Page) {
+  const time = new Date('2026-01-01T00:00:00Z');
+  await page.clock.install({ time });
+  await page.clock.pauseAt(new Date(time.getTime() + 1000));
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      const opening = document.querySelector('.opening-scene');
+      opening?.getAnimations({ subtree: true }).forEach(animation => {
+        if (animation.playState !== 'paused') animation.pause();
+      });
+    });
+    observer.observe(document, { childList: true, subtree: true });
+  });
+}
+
 export async function waitForPreview(demo: Locator, content: Locator) {
   await demo.locator('.product-embed-viewport[aria-busy="false"]').waitFor({ state: 'attached' });
   await content.waitFor({ state: 'visible' });

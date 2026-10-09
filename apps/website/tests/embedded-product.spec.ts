@@ -42,6 +42,10 @@ test('page scrolling reveals long embedded content before releasing the next sec
     const stage = document.querySelector('#classroom .product-scroll-stage')!;
     window.scrollTo({ top: window.scrollY + stage.getBoundingClientRect().top - 96, behavior: 'instant' });
   });
+  const panel = demo.locator('.product-scroll-panel');
+  await expect.poll(() => panel.evaluate(element =>
+    element.getBoundingClientRect().top - parseFloat(getComputedStyle(element).top)
+  )).toBeCloseTo(0, 0);
   const pinned = (await frame.boundingBox())!.y;
   const before = await conversation.evaluate(element => element.scrollTop);
   await conversation.hover({ position: { x: 80, y: 80 } });
@@ -49,8 +53,8 @@ test('page scrolling reveals long embedded content before releasing the next sec
   await page.mouse.wheel(0, 260);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(outer + 100);
   await expect.poll(() => conversation.evaluate(element => element.scrollTop)).toBeGreaterThan(before + 50);
-  expect((await frame.boundingBox())!.y).toBeCloseTo(pinned, 0);
-  expect(await conversation.evaluate(element => getComputedStyle(element).scrollbarWidth)).toBe('none');
+  await expect.poll(async () => (await frame.boundingBox())!.y).toBeCloseTo(pinned, 0);
+  await expect(conversation).toHaveCSS('scrollbar-width', 'none');
   await page.mouse.move(10, 450);
   const internal = await conversation.evaluate(element => element.scrollTop);
   await page.mouse.wheel(0, 260);
@@ -74,6 +78,7 @@ test('original learning profile accepts a local preference correction', async ({
 });
 
 test('original illustration and video classrooms use local assets without external calls', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const external: string[] = [];
   page.on('request', request => {
@@ -85,19 +90,42 @@ test('original illustration and video classrooms use local assets without extern
   await demo.getByRole('button', { name: '插图与绘本', exact: true }).click();
   await waitForPreview(demo, client.getByRole('img', { name: '小芽在花园中观察天气' }));
   await demo.getByRole('button', { name: '视频教学', exact: true }).click();
-  await expect(client.getByRole('link', { name: '在B站打开' })).toHaveCount(0);
   const video = client.frameLocator('iframe[title="教程演示：条件判断 · 从生活到代码"]');
+  await waitForPreview(demo, video.getByRole('button', { name: '播放教程' }));
+  await expect(client.getByRole('link', { name: '在B站打开' })).toHaveCount(0);
+  // Let frames load normally, then pause at a fixed future instant before playback.
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await video.getByRole('button', { name: '播放教程' }).click();
   await expect(video.getByRole('button', { name: '暂停教程' })).toBeVisible();
-  await expect.poll(() => video.getByRole('slider', { name: '教程进度' }).inputValue()).not.toBe('0');
+  await page.clock.runFor(1000);
+  const progress = video.getByRole('slider', { name: '教程进度' });
+  expect(Number(await progress.inputValue())).toBeGreaterThan(0);
+  await video.getByRole('button', { name: '暂停教程' }).click();
+  const paused = await progress.inputValue();
+  await page.clock.runFor(1000);
+  await expect(progress).toHaveValue(paused);
   await video.getByRole('slider', { name: '教程进度' }).fill('16');
   await expect(video.getByRole('heading', { name: '把选择写成代码' })).toBeVisible();
+  await video.getByRole('button', { name: '播放教程' }).click();
+  await page.clock.runFor(9000);
+  await expect(progress).toHaveValue('24');
+  await expect(video.getByRole('button', { name: '播放教程' })).toBeVisible();
+  await video.getByRole('button', { name: '播放教程' }).click();
+  await expect(progress).toHaveValue('0');
   await video.getByRole('button', { name: '暂停教程' }).click();
+  expect(external).toEqual([]);
+});
+
+test('wheel scrolling over a paused nested tutorial advances the website', async ({ page }) => {
+  await openWebsite(page);
+  const demo = page.getByRole('region', { name: '交互课堂演示' });
+  await demo.getByRole('button', { name: '视频教学', exact: true }).click();
+  const video = demo.frameLocator('iframe').frameLocator('iframe[title="教程演示：条件判断 · 从生活到代码"]');
+  await waitForPreview(demo, video.getByRole('button', { name: '播放教程' }));
   await video.getByRole('button', { name: '播放教程' }).hover();
   const outerScroll = await page.evaluate(() => window.scrollY);
   await page.mouse.wheel(0, 180);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(outerScroll + 80);
-  expect(external).toEqual([]);
 });
 
 test('the website embeds the actual client workspace with local preset interactions', async ({ page }) => {
