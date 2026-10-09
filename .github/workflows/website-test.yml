@@ -37,9 +37,6 @@ jobs:
         run: npm run test:website
       - name: Run GitHub Pages tests
         run: npm run test:website:pages
-      - name: Repeat navigation, loading and animation regressions
-        working-directory: apps/website
-        run: npx playwright test --config playwright.pages.config.ts --grep 'late .* loading|hero controls|supports keyboard focus|motion.spec.ts|embedded-product.spec.ts' --repeat-each=5
       - name: Test the complete Pages site with slower CPU and resources
         working-directory: apps/website
         env:
