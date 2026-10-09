@@ -38,9 +38,33 @@ test("supports keyboard focus, theme choice, and reduced motion", async ({ page 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.reload();
 
+  await expect(page.getByRole('link', { name: '知芽首页' })).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "跳到主要内容" })).toBeFocused();
   await expect(page.locator(".opening-scene")).toHaveCount(0);
+});
+
+test('late profile loading preserves the first keyboard navigation target', async ({ page }) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { requested = resolve; });
+  await page.route('**/product-demo/index.html?scene=profile&role=student', async route => {
+    requested();
+    await gate;
+    await route.continue();
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  await expect(page.getByRole('link', { name: '知芽首页' })).toBeVisible();
+  await started;
+  await page.keyboard.press('Tab');
+  const skip = page.getByRole('link', { name: '跳到主要内容' });
+  await expect(skip).toBeFocused();
+  release();
+  const profile = page.getByRole('region', { name: '建档与学习记忆演示' });
+  await expect(profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true })).toBeVisible();
+  await expect(skip).toBeFocused();
 });
 
 test("keeps the page and theme usable when browser storage is denied", async ({ page }) => {

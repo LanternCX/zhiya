@@ -55,3 +55,26 @@ test('hero controls lead to the embedded classroom and download sections', async
   await page.getByRole('link', { name: '下载知芽', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: '把知芽，带到你的桌面。' })).toBeInViewport();
 });
+
+test('late classroom loading preserves the download destination', async ({ page }) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { requested = resolve; });
+  await page.route('**/product-demo/index.html?scene=materials&role=student', async route => {
+    requested();
+    await gate;
+    await route.continue();
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  await page.locator('.hero').getByRole('link', { name: '体验课堂', exact: true }).click();
+  await started;
+  await page.getByRole('link', { name: '下载知芽', exact: true }).first().click();
+  const destination = page.getByRole('heading', { name: '把知芽，带到你的桌面。' });
+  await expect(destination).toBeInViewport();
+  release();
+  const demo = page.getByRole('region', { name: '交互课堂演示' });
+  await expect(demo.frameLocator('iframe').getByRole('textbox', { name: '告诉知芽你想学什么' })).toBeVisible();
+  await expect(destination).toBeInViewport();
+});
