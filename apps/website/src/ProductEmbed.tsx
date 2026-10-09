@@ -21,23 +21,9 @@ export default function ProductEmbed({ label, initialScene = 'materials', teache
     <div className="product-embed-viewport" aria-busy={loading}>
     <iframe key={scene + role + reset} title={label + '：知芽原版界面'} src={source} loading="lazy" onLoad={event => {
       releaseWheel.current?.();
-      const frame = event.currentTarget;
-      let focused = document.activeElement;
-      const embedded = event.currentTarget.contentDocument;
-      const trackFocus = () => { if (document.activeElement !== frame) focused = document.activeElement; };
-      const preserveFocus = () => {
-        if (focused instanceof HTMLElement && focused.closest('.site-header')) focused.focus({ preventScroll: true });
-      };
-      const allowFocus = () => embedded?.removeEventListener('focusin', preserveFocus);
-      const keyboardFocus = (event: KeyboardEvent) => { if (event.key === 'Tab') allowFocus(); };
-      document.addEventListener('focusin', trackFocus);
-      document.addEventListener('keydown', keyboardFocus);
-      embedded?.addEventListener('focusin', preserveFocus);
-      embedded?.addEventListener('pointerdown', allowFocus, { once: true, capture: true });
-      embedded?.addEventListener('keydown', allowFocus, { once: true, capture: true });
       const releaseInput = forwardEmbedWheel(event.currentTarget);
       const releaseScroll = stage.current && panel.current ? connectEmbedScroll(stage.current, panel.current, event.currentTarget) : () => {};
-      releaseWheel.current = () => { releaseInput(); releaseScroll(); allowFocus(); document.removeEventListener('focusin', trackFocus); document.removeEventListener('keydown', keyboardFocus); embedded?.removeEventListener('pointerdown', allowFocus, true); embedded?.removeEventListener('keydown', allowFocus, true); };
+      releaseWheel.current = () => { releaseInput(); releaseScroll(); };
       setLoading(false);
       revealPreview(event.currentTarget);
     }} sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups" />

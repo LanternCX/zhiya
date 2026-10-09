@@ -1,4 +1,5 @@
 import { installDemoBackend } from './backend';
+import { deferEmbedFocus } from './focus';
 import { revealPreview } from '../preview-motion';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter } from 'react-router';
@@ -13,6 +14,7 @@ import './utilities.css';
 import '../../../client/src/motion.css';
 
 const parameters = new URLSearchParams(location.search);
+deferEmbedFocus();
 const scene = parameters.get('scene') ?? 'materials';
 installDemoBackend(scene, parameters.get('role') === 'teacher');
 document.addEventListener('load', event => {

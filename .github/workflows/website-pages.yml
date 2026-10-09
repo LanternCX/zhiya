@@ -47,6 +47,22 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Build and test the Pages site
         run: npm run test:website:pages
+      - name: Repeat navigation, loading and animation regressions
+        working-directory: apps/website
+        run: npx playwright test --config playwright.pages.config.ts --grep 'late .* loading|hero controls|supports keyboard focus|switching classroom scenes|scroll-driven slides' --repeat-each=5
+      - name: Test the complete Pages site with slower CPU and resources
+        working-directory: apps/website
+        env:
+          ZHIYA_WEBSITE_STRESS: '1'
+        run: npx playwright test --config playwright.pages.config.ts
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: website-pages-failures-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/website/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: apps/website/dist

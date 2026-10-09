@@ -1,12 +1,12 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, openWebsite, waitForPreview } from './browser';
 
 test('one scroll position advances original slides and can rewind them', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '交互课堂演示' });
   await demo.getByRole('button', { name: '图文课件', exact: true }).click();
   const client = demo.frameLocator('iframe');
-  await expect(client.locator('iframe[title="课件页面：把天气变成一个条件"]')).toBeVisible();
+  await waitForPreview(demo, client.locator('iframe[title="课件页面：把天气变成一个条件"]'));
   const scrollTo = async (progress: number) => {
     await demo.locator('.product-scroll-stage').evaluate((stage, value) => {
       const panel = stage.querySelector<HTMLElement>('.product-scroll-panel')!;
@@ -23,12 +23,12 @@ test('one scroll position advances original slides and can rewind them', async (
 
 test('page scrolling reveals long embedded content before releasing the next section', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '交互课堂演示' });
   await demo.scrollIntoViewIfNeeded();
   const client = demo.frameLocator('iframe');
   const conversation = client.locator('.course-thread');
-  await expect(conversation).toBeVisible();
+  await waitForPreview(demo, conversation);
   await conversation.evaluate(element => {
     const filler = element.ownerDocument.createElement('div');
     filler.style.height = '2000px';
@@ -64,9 +64,10 @@ test('page scrolling reveals long embedded content before releasing the next sec
 
 test('original learning profile accepts a local preference correction', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
-  const client = page.getByRole('region', { name: '建档与学习记忆演示' }).frameLocator('iframe');
-  await expect(client.getByRole('heading', { name: '学习档案', exact: true })).toBeVisible();
+  await openWebsite(page);
+  const demo = page.getByRole('region', { name: '建档与学习记忆演示' });
+  const client = demo.frameLocator('iframe');
+  await waitForPreview(demo, client.getByRole('heading', { name: '学习档案', exact: true }));
   await client.getByRole('textbox', { name: '修改或忘记' }).fill('我想先自己尝试，再看讲解');
   await client.getByRole('button', { name: '提交修改' }).click();
   await expect(client.locator('.memory-document')).toContainText('本次说明：我想先自己尝试，再看讲解');
@@ -78,11 +79,11 @@ test('original illustration and video classrooms use local assets without extern
   page.on('request', request => {
     if (request.url().startsWith('https://') || request.url().includes('/api/')) external.push(request.url());
   });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '交互课堂演示' });
   const client = demo.frameLocator('iframe');
   await demo.getByRole('button', { name: '插图与绘本', exact: true }).click();
-  await expect(client.getByRole('img', { name: '小芽在花园中观察天气' })).toBeVisible();
+  await waitForPreview(demo, client.getByRole('img', { name: '小芽在花园中观察天气' }));
   await demo.getByRole('button', { name: '视频教学', exact: true }).click();
   await expect(client.getByRole('link', { name: '在B站打开' })).toHaveCount(0);
   const video = client.frameLocator('iframe[title="教程演示：条件判断 · 从生活到代码"]');
@@ -105,10 +106,10 @@ test('the website embeds the actual client workspace with local preset interacti
   page.on('request', request => {
     if (request.url().includes('/api/') || request.url().startsWith('https://')) calls.push(request.url());
   });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '交互课堂演示' });
   const client = demo.frameLocator('iframe');
-  await expect(client.getByRole('button', { name: '学习地图' })).toBeVisible();
+  await waitForPreview(demo, client.getByRole('button', { name: '学习地图' }));
   await expect(client.getByRole('textbox', { name: '告诉知芽你想学什么' })).toBeVisible();
   await demo.getByRole('button', { name: '随堂练习', exact: true }).click();
   await client.getByLabel('带上雨伞', { exact: true }).check();

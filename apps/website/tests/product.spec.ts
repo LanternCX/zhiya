@@ -1,8 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, openWebsite, waitForPreview } from './browser';
 
 test('original teacher workspace edits classroom and document together and downloads HTML', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '备课与内容产物演示' });
   const client = demo.frameLocator('iframe');
   await client.getByRole('textbox', { name: '告诉知芽你想学什么' }).fill('把这个例子改成穿衣活动');
@@ -18,7 +18,7 @@ test('original teacher workspace edits classroom and document together and downl
 
 test('original sharing dialog supports public and multiple class permissions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   const client = page.getByRole('region', { name: '备课与内容产物演示' }).frameLocator('iframe');
   await client.getByRole('button', { name: '导出与分享', exact: true }).click();
   await client.getByRole('menuitem', { name: '分享设置' }).click();
@@ -33,7 +33,7 @@ test('original sharing dialog supports public and multiple class permissions', a
 
 test('original class management and teacher materials are available in the embedded client', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   const demo = page.getByRole('region', { name: '班级与内容分享演示' });
   await demo.locator('.product-embed-toolbar').scrollIntoViewIfNeeded();
   const client = demo.frameLocator('iframe');
@@ -49,9 +49,54 @@ test('original class management and teacher materials are available in the embed
 
 test('hero controls lead to the embedded classroom and download sections', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await openWebsite(page);
   await page.locator('.hero').getByRole('link', { name: '体验课堂', exact: true }).click();
   await expect(page.getByRole('region', { name: '交互课堂演示' })).toBeInViewport();
   await page.getByRole('link', { name: '下载知芽', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: '把知芽，带到你的桌面。' })).toBeInViewport();
+});
+
+test('late classroom loading preserves the download destination', async ({ page }) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { requested = resolve; });
+  await page.route('**/product-demo/index.html?scene=materials&role=student', async route => {
+    requested();
+    await gate;
+    await route.continue();
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openWebsite(page);
+  await page.locator('.hero').getByRole('link', { name: '体验课堂', exact: true }).click();
+  await started;
+  await page.getByRole('link', { name: '下载知芽', exact: true }).first().click();
+  const destination = page.getByRole('heading', { name: '把知芽，带到你的桌面。' });
+  await expect(destination).toBeInViewport();
+  release();
+  const demo = page.getByRole('region', { name: '交互课堂演示' });
+  await waitForPreview(demo, demo.frameLocator('iframe').getByRole('textbox', { name: '告诉知芽你想学什么' }));
+  await expect(destination).toBeInViewport();
+});
+
+test('late profile loading preserves the classroom destination', async ({ page }) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { requested = resolve; });
+  await page.route('**/product-demo/index.html?scene=profile&role=student', async route => {
+    requested();
+    await gate;
+    await route.continue();
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openWebsite(page);
+  await page.locator('.hero').getByRole('link', { name: '体验课堂', exact: true }).click();
+  await started;
+  const classroom = page.getByRole('region', { name: '交互课堂演示' });
+  await expect(classroom).toBeInViewport();
+  release();
+  const profile = page.getByRole('region', { name: '建档与学习记忆演示' });
+  await waitForPreview(profile, profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true }));
+  await expect(classroom).toBeInViewport();
 });

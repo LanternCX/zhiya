@@ -56,6 +56,16 @@ npm run test:website
 npm run test:website:pages
 ```
 
+两套浏览器测试均先构建再启动独立静态预览，分别验证根路径和 Pages 子路径，不复用开发服务器。测试先等待页面或演示内容就绪，再验证焦点、滚动和交互；动画测试控制真实浏览器动画的进度，避免依赖短暂过渡的实时采样。
+
+CI 还会运行关键场景的重复验证及整套 Pages 压力测试。压力测试将 Chromium CPU 降速 4 倍，并为本地资源请求增加 150 毫秒延迟；可在完成 Pages 构建后单独运行：
+
+```sh
+ZHIYA_WEBSITE_STRESS=1 npm exec --workspace @zhiya/website -- playwright test --config playwright.pages.config.ts
+```
+
+测试失败时，Actions 附件保存 trace、截图及错误上下文 7 天。应检查失败的加载顺序和可观察行为，修复后再重试。
+
 官网预览使用 `npm run dev:website`。本地完整 Release 清单可通过 `gh` 登录后执行以下命令生成到忽略目录，再查看内容：
 
 ```sh
