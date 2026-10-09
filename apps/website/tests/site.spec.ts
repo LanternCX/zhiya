@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, openWebsite, reloadWebsite, waitForPreview } from './browser';
 
 test("keeps navigation usable without horizontal overflow on a phone", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.goto("./");
+  await openWebsite(page);
 
   await page.getByRole("button", { name: "打开导航" }).click();
   const navigation = page.getByRole("navigation", { name: "主导航" });
@@ -21,12 +21,12 @@ test("keeps navigation usable without horizontal overflow on a phone", async ({
 
 test("supports keyboard focus, theme choice, and reduced motion", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-  await page.goto("./");
+  await openWebsite(page);
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.getByRole("button", { name: "主题：自动；切换至浅色" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.reload();
+  await reloadWebsite(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
   await page.getByRole("button", { name: "主题：浅色；切换至深色" }).click();
@@ -36,9 +36,8 @@ test("supports keyboard focus, theme choice, and reduced motion", async ({ page 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
+  await reloadWebsite(page);
 
-  await expect(page.getByRole('link', { name: '知芽首页' })).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "跳到主要内容" })).toBeFocused();
   await expect(page.locator(".opening-scene")).toHaveCount(0);
@@ -55,15 +54,14 @@ test('late profile loading preserves the first keyboard navigation target', asyn
     await route.continue();
   });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
-  await expect(page.getByRole('link', { name: '知芽首页' })).toBeVisible();
+  await openWebsite(page);
   await started;
   await page.keyboard.press('Tab');
   const skip = page.getByRole('link', { name: '跳到主要内容' });
   await expect(skip).toBeFocused();
   release();
   const profile = page.getByRole('region', { name: '建档与学习记忆演示' });
-  await profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true }).waitFor({ state: 'visible' });
+  await waitForPreview(profile, profile.frameLocator('iframe').getByRole('heading', { name: '学习档案', exact: true }));
   await expect(skip).toBeFocused();
 });
 
@@ -75,7 +73,7 @@ test("keeps the page and theme usable when browser storage is denied", async ({ 
       get() { throw new DOMException("Storage blocked", "SecurityError"); },
     });
   });
-  await page.goto("./");
+  await openWebsite(page);
   await expect(page.getByRole("heading", { level: 1, name: "知芽" })).toBeVisible();
   await page.getByRole("button", { name: "主题：自动；切换至浅色" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
@@ -84,7 +82,7 @@ test("keeps the page and theme usable when browser storage is denied", async ({ 
 
 test("closes phone navigation with Escape and returns keyboard focus", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("./");
+  await openWebsite(page);
   await page.getByRole("button", { name: "打开导航" }).click();
   await page.getByRole("navigation", { name: "主导航" }).getByRole("link").first().focus();
   await page.keyboard.press("Escape");
@@ -98,7 +96,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1366, height: 76
     test(`renders readable content and teaching artwork at ${viewport.width}px in ${colorScheme}`, async ({ page }, testInfo) => {
       await page.setViewportSize(viewport);
       await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-      await page.goto("./");
+      await openWebsite(page);
       await expect(page.getByRole("heading", { level: 1, name: "知芽" })).toBeInViewport();
       const overflow = await page.locator("main, header, footer").evaluateAll(roots =>
         roots.flatMap(root => Array.from(root.querySelectorAll("*"))).filter(element => {

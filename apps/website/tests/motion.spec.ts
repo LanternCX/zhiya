@@ -1,31 +1,18 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, openWebsite, reloadWebsite, pausePreviewTransitions, waitForPreview } from './browser';
 
-async function pausePreviewTransitions(page: Page) {
-  await page.addInitScript(() => {
-    const animate = Element.prototype.animate;
-    Element.prototype.animate = function (...args) {
-      const animation = animate.apply(this, args);
-      if (this instanceof HTMLIFrameElement) {
-        const duration = animation.effect?.getTiming().duration;
-        if (typeof duration === 'number' && duration > 0) {
-          animation.pause();
-          animation.currentTime = duration / 2;
-        }
-      }
-      return animation;
-    };
-  });
-}
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+});
 
 test("switching classroom scenes fades the new preview in and leaves the exercise usable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await pausePreviewTransitions(page);
-  await page.goto("./");
+  await openWebsite(page);
   await page.keyboard.press("Escape");
   const demo = page.getByRole("region", { name: "交互课堂演示" });
   const control = demo.getByRole("button", { name: "随堂练习", exact: true });
   await control.click();
-  await demo.frameLocator('iframe').getByLabel('带上雨伞', { exact: true }).waitFor({ state: 'visible' });
+  await waitForPreview(demo, demo.frameLocator('iframe').getByLabel('带上雨伞', { exact: true }));
   await page.waitForFunction(() => {
     const frame = document.querySelector<HTMLIFrameElement>('#classroom iframe[src*="scene=question"]');
     const opacity = frame ? Number(getComputedStyle(frame).opacity) : 1;
@@ -41,11 +28,11 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
   test(`scroll-driven slides transition and remain readable with motion preference ${reducedMotion}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion });
     await pausePreviewTransitions(page);
-    await page.goto("./");
+    await openWebsite(page);
     await page.keyboard.press("Escape");
     const demo = page.getByRole("region", { name: "交互课堂演示" });
     await demo.getByRole("button", { name: "图文课件", exact: true }).click();
-    await expect(demo.frameLocator("iframe").locator('iframe[title="课件页面：把天气变成一个条件"]')).toBeVisible();
+    await waitForPreview(demo, demo.frameLocator("iframe").locator('iframe[title="课件页面：把天气变成一个条件"]'));
     await demo.locator("iframe").evaluate(frame => {
       const stage = frame.closest<HTMLElement>(".product-scroll-stage")!;
       const panel = stage.querySelector<HTMLElement>(".product-scroll-panel")!;
@@ -70,11 +57,11 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
 
 test("opening finishes automatically and can be skipped with Escape", async ({ page }) => {
   await page.clock.install();
-  await page.goto("./");
+  await openWebsite(page);
   await expect(page.locator(".opening-scene")).toBeVisible();
   await page.clock.runFor(4200);
   await expect(page.locator(".opening-scene")).toHaveCount(0);
-  await page.reload();
+  await reloadWebsite(page);
   await page.keyboard.press("Escape");
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await page.clock.runFor(4200);
@@ -84,16 +71,18 @@ test("opening finishes automatically and can be skipped with Escape", async ({ p
 
 test("reduced motion bypasses opening and retains content and tab navigation", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("./");
+  await openWebsite(page);
   await expect(page.locator(".opening-scene")).toHaveCount(0);
   await expect(page.getByRole("heading", { level: 1, name: "知芽" })).toBeVisible();
   const demo = page.getByRole('region', { name: '交互课堂演示' });
   await demo.getByRole('button', { name: '语音对话', exact: true }).click();
-  await expect(demo.frameLocator('iframe').frameLocator('iframe[title="课件页面：说出来，也随时插一句"]').getByText(/不采集麦克风/)).toBeVisible();
+  const content = demo.frameLocator('iframe').frameLocator('iframe[title="课件页面：说出来，也随时插一句"]').getByText(/不采集麦克风/);
+  await waitForPreview(demo, content);
+  await expect(content).toBeVisible();
 });
 
 test("scroll parallax moves layers and stops when reduced motion is enabled", async ({ page }) => {
-  await page.goto("./");
+  await openWebsite(page);
   await page.getByRole("button", { name: "跳过开屏" }).click();
   const notes = page.locator(".hero-content");
   const before = await notes.evaluate(el => getComputedStyle(el).translate);
@@ -105,7 +94,7 @@ test("scroll parallax moves layers and stops when reduced motion is enabled", as
 });
 
 test("decorative conveyors can be paused and resumed together", async ({ page }) => {
-  await page.goto("./");
+  await openWebsite(page);
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "暂停装饰滚动" }).click();
   for (const track of await page.locator(".notes-track, .ribbon-track").all()) {
