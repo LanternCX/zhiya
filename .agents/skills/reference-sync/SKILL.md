@@ -1,30 +1,27 @@
 ---
 name: reference-sync
-description: Consult, check, or update Zhiya's competition requirements and GitHub product requirements issue. Use for requirements alignment and source consistency checks, not product implementation.
+description: Check Zhiya's competition requirements against current code and task decisions, or update the competition reference. Use for requirements alignment, not product implementation.
 ---
 
 # Reference Sync
 
-## Configuration and sources
+## Sources
 
-The skill lives directly in `.agents/skills/reference-sync/`.
+| Source | Use |
+| --- | --- |
+| [competition.md](reference/competition.md) → `docs/competition.md` | Official JBGS-2026-02 requirements, scoring, and deliverables |
+| [Frontend style guide](reference/DESIGN.md) → `docs/design/DESIGN.md` | Agent-facing frontend visual styles and interaction presentation; not a system architecture or technology guide |
+| Current code, configuration, and relevant tests | Evidence of implemented capabilities and deployment behavior |
+| Relevant task Issue or PR | Confirmed scope, decisions, acceptance criteria, and unresolved questions |
 
-Competition requirements live in the repository. Product requirements live only in the GitHub issue body. The competition reference is a relative symlink to the canonical file; do not create a local copy of the product requirements issue.
-
-| Reference | Canonical document | Scope |
-| --- | --- | --- |
-| [competition.md](reference/competition.md) | `docs/competition.md` | JBGS-2026-02 requirements, shared track rules, scoring, and support. |
-| [DESIGN.md](reference/DESIGN.md) | `docs/design/DESIGN.md` | Visual and interaction guidelines; product requirements remain in issue #3. |
-| [Product requirements issue #3](https://github.com/LanternCX/zhiya/issues/3) | GitHub issue body | Product goals, scenarios, requirements, design constraints, acceptance checks, and open questions. |
-| [Technology selection issue #2](https://github.com/LanternCX/zhiya/issues/2) | GitHub issue body | Confirmed technology choices, responsibility boundaries, and unresolved technical decisions. |
+The competition reference is a relative symlink to the canonical document. Do not create duplicate references or local PRDs.
 
 ## Workflow
 
-1. Read competition requirements through `reference/competition.md` and confirm that the link resolves to `docs/competition.md`. Read the product requirements with `gh issue view 3 --repo LanternCX/zhiya --json body,comments,labels`; read issue #2 the same way when technical context matters. If GitHub is unavailable, report the limitation rather than treating a local copy as authoritative.
-2. Keep the competition scope limited to topic 2, the multimodal K12 AI literacy teaching assistant conversational agent, identified by `JBGS-2026-02`, plus applicable shared track rules.
-3. For a check request, report inconsistencies or gaps without editing. For an update request, apply confirmed competition changes directly to the canonical Markdown file. Update confirmed product requirements in issue #3's body using `gh issue edit --body-file`, preserving unrelated content. Temporary transport files must stay outside the repository and be removed after verification; they are not maintained mirrors.
-4. Preserve the distinction between official competition requirements, product decisions, derived acceptance checks, and open questions. Do not turn an unresolved gap into a confirmed feature. Ask the user to resolve conflicting requirements when needed.
-5. Keep official requirements in the competition document and link to it from the product requirements issue using a full GitHub URL. Use comments for discussion and consolidate confirmed requirements into the issue body. Development issues reference its sections; technical decisions belong in issue #2 or the relevant implementation issue or PR. Close the product requirements issue for archival after the agreed scope is implemented and accepted and unfinished items are explicitly resolved or deferred. Retain the issue and discussion. Do not create ADRs, local PRDs, or standalone long-term memory documents. Use English filenames and harness instructions; product content follows the user's requested language.
-6. Check identifiers, minimum counts, scoring totals, deliverables, functional constraints, Markdown structure, and links. Describe verification only to the extent supported by the material actually read.
+- Read the competition reference and verify that it resolves to `docs/competition.md`. Keep the scope to JBGS-2026-02 and applicable shared track rules.
+- Inspect relevant code and configuration before describing current capabilities. Read task context with `gh issue view <number> --repo LanternCX/zhiya --json body,comments,labels`; use PR context when relevant.
+- Distinguish official requirements, current implementation, confirmed task decisions, and open questions. Code or tests alone do not establish acceptance or educational quality. Report conflicts instead of silently treating either historical plans or incomplete implementation as confirmed requirements.
+- For a check request, report gaps without editing. For an authorized reference update, modify only confirmed official requirements in the canonical competition document and check identifiers, minimum counts, scoring totals, deliverables, structure, and links.
+- Record product and technical decisions in the relevant task Issue or PR when authorized. Follow `AGENTS.md` for write authorization and documentation conventions.
 
-Do not create duplicate reference documents, commit automatically, or start product implementation as part of document alignment. Finish by briefly reporting changes, verification results, and any differences requiring a user decision.
+Report what was checked, the evidence and its limits, and any unresolved decisions. Do not start product implementation or commit as part of reference alignment.

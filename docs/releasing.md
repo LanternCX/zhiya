@@ -1,85 +1,33 @@
 # 官网与桌面版本发布
 
-官网是 `apps/website` 中的纯静态 React 应用，包含滚动视差、预设交互课堂演示和下载入口。演示不调用模型、不连接业务后端，也不要求登录。网页自身使用仓库内资源；下载信息来自随站点部署的 `downloads.json`，浏览器不查询 GitHub API。
+本指南供维护者发布官网和桌面安装包使用。后端部署见[开发指南](development.md)。
 
-演示窗口加载同站点的 `product-demo/index.html`，直接使用 `apps/client` 的 App、路由、组件和样式。客户端视觉改动会同步进入官网演示。官网专用的内存适配器在这个独立文档里接管请求和状态通知，提供示例账户、课堂、档案与班级；数据刷新后重置，文件不会上传，语音不采集麦克风。视频区域播放本地 24 秒条件判断教程演示，支持播放、暂停和进度跳转，不提供占位 B 站外链；客户端正式版本仍使用官方播放器及真实视频链接。演示的场景选择与重置按钮位于官网外框，不改变产品界面。
+## 首次设置
 
-官网使用一个页面滚动位置推进演示。演示窗口在当前章节停留，滚动进度带动较长的对话、档案、文档或班级内容，并推进图文课件的预设页面；当前章节完成后，页面继续进入下一段。嵌入窗口及其中的课件、视频窗口不独立响应滚轮，内部滚动条隐藏。按钮和输入仍可操作；点击“展开体验”进入独立页面后，可以自由滚动产品界面。
+维护者在仓库中配置：
 
-场景、身份及重置切换在演示加载后渐入，图文课件翻页也有过渡。手机导航、场景按钮及安装说明提供交互动画；遵循系统的“减少动画”偏好，不修改正式客户端的组件或动画。
+1. **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+2. 需要覆盖客户端 API 地址时，在 **Settings → Secrets and variables → Actions → Variables** 设置 `ZHIYA_API_ORIGIN`，例如 `https://api.example.com`。必须是公开 HTTPS 域名，不含路径、凭据或末尾斜杠。
+3. 若 `github-pages` environment 限制部署来源，允许 `main`。
 
-官网部署目标为 GitHub Pages，默认地址为 <https://lanterncx.github.io/zhiya/>。首次部署需要先完成下方仓库设置。安装包由 GitHub Releases 分发，支持 Windows x64 和 macOS Apple Silicon（M 系列芯片）。产品后端须另行部署；GitHub Pages 和 Releases 不提供 AI 服务。
-
-## 仓库设置
-
-维护者在 GitHub 仓库中完成以下设置：
-
-1. 在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
-2. 如需覆盖仓库内的客户端 API 地址，在 **Settings → Secrets and variables → Actions → Variables** 设置 `ZHIYA_API_ORIGIN`，值为产品 API 的 HTTPS origin，例如 `https://api.example.com`。它不能包含路径、凭据或末尾斜杠。未设置时使用 `apps/client/config.json`，不阻止打包。
-3. 若 `github-pages` environment 限制部署来源，允许 `main`。Pages 工作流始终构建最新 `main`，即使由安装包工作流完成事件触发。
-
-API 地址是客户端的公开构建配置，不是密钥。它在构建时嵌入安装包；变更地址需要发布新客户端。Tauri 安装包只包含客户端，打包和下载不要求后端已上线。仓库当前默认地址为 `http://127.0.0.1:8080`；使用这一配置的客户端可安装，但注册、登录和课堂等服务功能需要该地址上的后端。需要连接线上后端时，应在构建前配置对应地址。
+未设置 `ZHIYA_API_ORIGIN` 时，使用 [apps/client/config.json](../apps/client/config.json) 中的地址。API 地址在构建时写入客户端，修改后需要重新发布。
 
 ## 发布步骤
 
-1. 将经过审核的改动合入 `main`。从该提交创建并 push 版本 tag，如 `v1.2.3` 或 `v1.2.3-alpha.1`；还支持 `beta.N` 和 `rc.N`。每个 tag 固定一次版本，不移动已发布的 tag。
-2. **Release draft** 工作流校验 tag 属于 `main`，运行客户端、服务端、Agent 和官网检查。通过后创建 Draft Release，生成更新说明，尚不构建安装包。带预发布后缀的 tag 默认标记为 prerelease。
-3. 人工审核并完善 Draft 的更新说明，明确客户端使用的 API 地址和后端可用情况后，点击 **Publish release**。后端尚未上线不阻止发布客户端安装包。
-4. **Release installers** 工作流确认同一 tag 的 CI 成功，校验可选的 API 地址覆盖，再并行生成两个安装包。版本号由 tag 决定，通过 Tauri 构建配置传入，不需要在 CI 中修改源码版本文件。Windows 使用 NSIS，附带 WebView2 bootstrapper；缺少 WebView2 时，安装仍需联网下载运行时。macOS 使用 DMG 与 ad-hoc 临时签名，不使用 Developer ID 或 Apple 公证。
-5. 所有构建成功后，上传安装包和 `SHA256SUMS.txt`，最后上传 `downloads.json` 作为完整发布标记。正式 Release 在这段构建期间暂时没有安装包。
-6. **Website deployment** 接到成功完成事件后，从最新 `main` 构建并测试 `/zhiya/` 路径的官网，再部署 Pages。它检查清单、附件大小与可用的 GitHub SHA-256 digest，不将不完整版本设为下载版本。完整稳定版本优先；没有完整稳定版本时使用完整预发布版本。同类版本按发布时间选择。
+1. 将审核通过的改动合入 `main`，从该提交创建并推送版本 tag，例如 `v1.2.3` 或 `v1.2.3-alpha.1`。不要移动已发布的 tag。
+2. 在 **Actions → Release draft** 等待检查通过，并在 **Releases** 中打开生成的草稿。
+3. 核对更新说明、客户端 API 地址和后端可用情况。注册、登录和课堂功能需要可用后端；若后端尚未上线，在版本说明中明确告知。
+4. 点击 **Publish release**，等待 **Release installers** 和 **Website deployment** 成功。
+5. 检查官网的下载链接，并在 Windows x64 和 macOS Apple Silicon 上验证安装及后端连接。
 
-官网改动合入 `main` 后也会独立部署，复用最近完整版本的下载信息。没有完整版本时显示“安装包准备中”，下载区提供一个统一的 GitHub Releases 入口，明确说明安装包尚未发布。完整安装包发布后，平台卡片自动显示附件的直接下载地址及校验文件。读取 GitHub 失败会让部署停止，保留已上线页面。API 可用性与真实账号/课堂的上线验收属于后端部署工作，不能通过官网 demo 或打包成功推断。
+发布后安装包仍需等待构建完成。官网改动合入 `main` 后自动部署，无需发布新版本。
 
-## 重试与维护
+工作流细节见 [Release draft](../.github/workflows/release-draft.yml)、[Release installers](../.github/workflows/release-publish.yml) 和 [Website deployment](../.github/workflows/website-pages.yml)。
 
-- Tag CI 失败：修复原因后对原工作流重试；若需要修改源码，应创建新 tag。
-- 安装包失败：在 Actions 重试工作流，或从 `main` 手工运行 **Release installers** 并填写已正式发布的 tag。它仍要求该 tag 的 Draft CI 成功；手工运行不会创建或发布 Release。
-- 附件上传失败：重试后覆盖同名附件，完整清单最后上传。不要手工把不完整清单标记为就绪。
-- Pages 部署失败：修复设置或失败原因后，从 `main` 手工运行 **Website deployment**，不必重新打包。
-- 撤回版本：删除或撤回有问题的 Release 后，手工运行官网部署以重新选择完整版本。已下载的客户端不会自动回滚。
+## 失败重试
 
-`SHA256SUMS.txt` 验证文件内容是否与发布附件一致，不代替发布者身份认证。Windows 安装包没有受信任的代码签名，可能出现未知发布者、SmartScreen 或设备策略拦截。macOS 首次打开可能需要在“隐私与安全性”中选择“仍要打开”；确认下载来源和校验值后，必要时可以仅移除该应用的隔离属性：
-
-```sh
-xattr -dr com.apple.quarantine "/Applications/Zhiya.app"
-```
-
-不要求用户关闭系统安全保护，也不向用户分发自签根证书。尚未提供自动更新；用户通过官网下载安装新版本。
-
-## 本地验证
-
-```sh
-npm ci
-node --test scripts/release.test.mjs
-npm run test:website
-npm run test:website:pages
-```
-
-两套浏览器测试均先构建再启动独立静态预览，分别验证根路径和 Pages 子路径，不复用开发服务器。测试先等待页面或演示内容就绪，再验证焦点、滚动和交互；动画测试控制真实浏览器动画的进度，避免依赖短暂过渡的实时采样。
-
-开屏测试单独控制自动关闭的计时器和开屏画面，验证按钮、键盘及自动退出。其他动画测试先确认开屏已退出，不等待可能已经消失的跳过按钮；视差测试还验证开屏自动结束之后的操作。
-
-教程测试控制播放时间，验证播放、暂停、跳转、自动结束与重新播放；装饰动画通过浏览器动画时间轴验证位移。滚动测试等待面板固定后再比较位置，避免把尚未完成的布局当成操作前的基准。
-
-CI 在正常行为测试之外运行一次整套 Pages 压力测试，不默认重复运行测试。压力测试将 Chromium CPU 降速 4 倍，并为本地资源请求增加 150 毫秒延迟；可在完成 Pages 构建后单独运行：
-
-```sh
-ZHIYA_WEBSITE_STRESS=1 npm exec --workspace @zhiya/website -- playwright test --config playwright.pages.config.ts
-```
-
-测试失败时，Actions 附件保存 trace、截图及错误上下文 7 天。应检查失败的加载顺序和可观察行为，修复后再重试。
-
-官网预览使用 `npm run dev:website`。本地完整 Release 清单可通过 `gh` 登录后执行以下命令生成到忽略目录，再查看内容：
-
-```sh
-node scripts/website-downloads.mjs dist/downloads.json
-```
-
-本机打包须安装 Tauri 对应平台的系统依赖及 Rust target。命令会从现有 SVG 自动生成原生图标到忽略目录 `apps/client/src-tauri/gen/icons`：
-
-```sh
-ZHIYA_CLIENT_API_ORIGIN=https://your-api-domain.example npm run build:desktop -- --bundles dmg --config '{"version":"1.2.3"}' -- --locked
-```
-
-Windows 在本机或 Windows Actions runner 上使用 `--bundles nsis`。先检查生成的安装包，再决定是否发布；不要分发连接占位地址的本地验证包。
+| 情况 | 处理方式 |
+| --- | --- |
+| Release draft 失败 | 查看失败日志，排除环境问题后重试；需要修改源码时创建新 tag |
+| 安装包构建或上传失败 | 重试失败的 Actions，或在 Release installers 中点击 Run workflow，选择 `main` 并填写已发布的 tag |
+| 官网部署失败 | 修复失败原因后，在 Website deployment 中点击 Run workflow，选择 `main`；无需重新打包 |
