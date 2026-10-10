@@ -10,7 +10,7 @@
 
 1. 按[本地开发指南](../../docs/development.md)准备项目环境，另外安装 `hf` 和 `uv`。
 2. 启动项目已有的 PostgreSQL 和 RustFS。知识库使用其中独立的数据库和桶，无需另开服务。
-3. 按[知识库配置说明](../../docs/development.md#教学知识库资料处理)配置存储连接和查询模型的 API Key。
+3. 按[知识库配置说明](../../docs/development.md#接入教学知识库)配置存储连接和查询模型的 API Key。
 4. 执行导入命令：
 
 ```sh

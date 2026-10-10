@@ -1,162 +1,71 @@
-# 知芽开发指南
+# 知芽开发与部署指南
 
-本文介绍本地启动、配置和验证知芽所需的信息。产品目标与功能范围以[产品需求 Issue #3](https://github.com/LanternCX/zhiya/issues/3)为准，已确认的技术选择见[技术选型 Issue #2](https://github.com/LanternCX/zhiya/issues/2)。
+这份指南帮助你在本地运行知芽，配置教学服务，并部署到自己的环境。所有命令都在仓库根目录执行。
 
-## 环境要求
+## 本地运行
 
-- Node.js 22.19 或更高版本
-- npm
-- Go 1.26 或更高版本
-- Docker
-- Rust 与对应系统的 [Tauri 开发环境](https://v2.tauri.app/start/prerequisites/)，仅桌面端开发需要
+### 1. 准备环境
 
-在仓库根目录安装依赖：
+安装 Node.js 22.19+、npm、Go 1.26+ 和 Docker，然后安装项目依赖：
 
 ```sh
 npm install
 ```
 
-## 启动本地环境
+如果要开发桌面版，另外准备 Rust 和对应系统的 [Tauri 开发环境](https://v2.tauri.app/start/prerequisites/)。
 
-先启动 PostgreSQL 与 Mailpit：
+### 2. 启动配套服务
 
 ```sh
 npm run dev:services
 ```
 
-再使用两个终端分别启动服务端和客户端：
+该命令启动数据库、文件存储、邮件收件箱、材料解析和代码运行服务。首次运行需要下载镜像，并构建部分容器。
+
+默认配置可以直接用于本地开发。端口被占用时，按[修改本地配置](#修改本地配置)调整。
+
+### 3. 配置教学模型
+
+在 `apps/server/config.local.yaml` 中填写模型连接：
+
+```yaml
+model:
+  endpoint: "https://your-model-service.example/v1/chat/completions"
+  id: "your-model-id"
+  api_key: "your-api-key"
+```
+
+这里需要支持 OpenAI-compatible Chat Completions 的模型服务。`endpoint` 填写完整接口地址，包括 `/v1/chat/completions`。
+
+接着按[接入教学知识库](#接入教学知识库)准备教材和检索服务。模型和知识库都配置完成后，才能体验完整教学。
+
+只想先查看账号页面时，可以暂时跳过这一步。
+
+### 4. 打开知芽
+
+在一个终端启动后端：
 
 ```sh
 npm run dev:server
+```
+
+在另一个终端启动客户端：
+
+```sh
 npm run dev
 ```
 
-| 服务 | 地址 |
-| --- | --- |
-| 浏览器客户端 | <http://127.0.0.1:1420> |
-| 服务端健康检查 | <http://127.0.0.1:8080/health> |
-| Mailpit 测试收件箱 | <http://127.0.0.1:8025> |
+打开 <http://127.0.0.1:1420>。注册时可使用测试邮箱，在 <http://127.0.0.1:8025> 查看验证码；本地邮件不会发往真实邮箱。
 
-Mailpit 不会向真实邮箱发送邮件，可使用任意测试邮箱完成本地注册、密码找回和邮箱更换流程。运行 `npm run stop:services` 可以停止 Docker 服务并保留开发数据。
+桌面版使用 `npm run dev:desktop` 代替 `npm run dev`。Linux 桌面版需要已解锁的 Secret Service 保存登录凭据。
 
-如需启动 Tauri 桌面窗口，使用下面的命令代替 `npm run dev`：
+结束开发后，关闭上述终端进程，再运行 `npm run stop:services` 停止配套服务。数据会保留。
 
-```sh
-npm run dev:desktop
-```
+## 接入教学知识库
 
-## 连接模型
+知芽通过知识库查阅教材和教学资料。可以直接导入已发布的资料与向量，不需要重新生成 Embedding。
 
-主 Agent 与子 Agent 在服务端的 TypeScript 进程中运行，模型请求通过 Go 内部 API 转发。客户端只发送操作并订阅状态；关闭页面、退出客户端或退出登录不会终止已开始的执行，主动停止仍会取消执行。模型凭据只配置在 Go 服务端。
-
-`npm run dev:server` 同时启动 Go 与 Pi 服务，并为本次开发进程生成共享认证密钥。默认的 Go 内部 API 监听 `127.0.0.1:8081`，Pi 监听 `127.0.0.1:8082`。内部端口不要作为客户端 API 暴露。
-
-独立部署时，分别执行 `npm run build:server` 与 `npm run build:agent`，再运行 Go 二进制和 `node apps/agent/dist/server.mjs`。Go 的 `agent.secret`（或 `ZHIYA_SERVER_AGENT_SECRET`）与 Pi 的 `ZHIYA_AGENT_SECRET` 必须一致；Pi 使用 `ZHIYA_AGENT_API` 指定 Go 内部 API 地址，使用 `ZHIYA_AGENT_LISTEN` 指定监听地址。Go 的 `agent.endpoint` 指向 Pi，`agent.internal_listen` 指定工具 API 监听地址。生产密钥至少 32 个字符。
-
-当前运行一个 Pi 服务进程，Go 实例共同向它下发指令。Pi 按会话实例化 Agent，同一会话的并发请求复用同一实例；执行和工具调用不依赖客户端连接。Pi 使用原生 `JsonlSessionRepo` 在每个用户的独立工作空间保存完整消息和工具记录；PostgreSQL 保存课程、权限、前端展示状态，以及建档问答和档案修改的事务状态。空闲实例会回收，再次实例化时读取 Pi 会话；服务进程故障后的自动续跑不在本功能范围内。
-
-通过 `ZHIYA_AGENT_WORKSPACES` 指定工作空间根目录，默认是 Pi 进程工作目录下的 `.workspaces`。部署时应配置固定的绝对路径并挂载持久化磁盘，同时备份 Pi 会话与 PostgreSQL。
-
-Agent 开发集中在 `apps/agent/src/pi`：`agent/` 定义各 Agent，`tools/` 定义工具，`sessions/` 保留教学与建档编排，`session.ts` 接入 Pi 原生会话。HTTP 入口在 `server.ts`，实例生命周期和状态同步在 `runtime/`，Go API 适配在 `adapters/`。Go 后端维护业务规则与 JSON 接口；`apps/client` 和 `apps/agent` 各自在 `src/domain` 手动维护所需类型，不引用彼此的源码。接口变更时同步检查两端类型，并通过相关行为测试验证通信与展示。界面转换与 Agent 执行辅助逻辑分别放在所属应用内。
-
-当前使用 OpenAI-compatible Chat Completions 流式接口。可以在 [`apps/server/config.yaml`](../apps/server/config.yaml) 中配置，也可以使用环境变量覆盖：
-
-| 配置 | 环境变量 | 说明 |
-| --- | --- | --- |
-| `model.endpoint` | `ZHIYA_SERVER_MODEL_ENDPOINT` | 包含 `/v1/chat/completions` 的完整接口地址 |
-| `model.id` | `ZHIYA_SERVER_MODEL_ID` | 服务支持的模型 ID |
-| `model.api_key` | `ZHIYA_SERVER_MODEL_API_KEY` | 服务端模型凭据 |
-
-未配置模型时，账号服务仍可使用，学习页面会提示暂时无法交流。自动化测试使用模拟模型响应，不消耗真实模型额度，也不能代表真实模型的教学质量。
-
-## 语音模式
-
-实时语音和可编辑听写都由服务端代理语音供应商。ASR 和 TTS 使用独立凭据，浏览器不会接触任何供应商 API Key。可以在服务端本地配置中填写，或使用环境变量覆盖：
-
-| 配置 | 环境变量 | 用途 |
-| --- | --- | --- |
-| `speech.endpoint` | `ZHIYA_SERVER_SPEECH_ENDPOINT` | DashScope WebSocket 地址 |
-| `speech.asr_api_key` | `ZHIYA_SERVER_SPEECH_ASR_API_KEY` | 语音识别凭据 |
-| `speech.tts_api_key` | `ZHIYA_SERVER_SPEECH_TTS_API_KEY` | 语音合成凭据 |
-| `speech.asr_model` | `ZHIYA_SERVER_SPEECH_ASR_MODEL` | ASR 模型 ID |
-| `speech.tts_model` | `ZHIYA_SERVER_SPEECH_TTS_MODEL` | TTS 模型 ID |
-| `speech.tts_voice` | `ZHIYA_SERVER_SPEECH_TTS_VOICE` | TTS 音色 |
-
-麦克风按钮用于可编辑听写：停止听写后，文字留在输入框，编辑后手动发送。语音对话入口开启持续监听、停顿断句后自动发送和回答播报，并隐藏键盘输入区；播报期间继续监听，新的一句话结束后打断当前回答。打断按钮和 Esc 停止回答，保留监听。退出语音对话恢复草稿和普通输入，不发送已有草稿。
-
-用户菜单中的「语音播报」设置保存在当前浏览器，开启后普通文字或听写发送的课堂对话也会播报回答。语音对话始终播报，退出后恢复这个设置。听写需要麦克风权限。开发环境的 `localhost` 和 `127.0.0.1` 属于浏览器允许的安全上下文；部署到其他域名时应使用 HTTPS。拒绝麦克风权限不会影响文字聊天。识别断开时可重试麦克风或退出；播报失败时退出语音对话，保留文字聊天。
-
-## 配置
-
-客户端公开配置位于 [`apps/client/config.json`](../apps/client/config.json)：
-
-| 字段 | 用途 |
-| --- | --- |
-| `api_origin` | 桌面端 API 地址和 Vite 开发代理目标 |
-| `request_timeout_seconds` | 浏览器和桌面请求超时 |
-| `dev_origin` | Vite 监听地址、Tauri 开发窗口和浏览器测试入口 |
-
-本地覆盖可以写入已忽略的 `apps/client/config.local.json`，并通过 `ZHIYA_CLIENT_CONFIG` 选择。`ZHIYA_CLIENT_API_ORIGIN`、`ZHIYA_CLIENT_REQUEST_TIMEOUT_SECONDS` 和 `ZHIYA_CLIENT_DEV_ORIGIN` 的优先级高于配置文件。
-
-服务端配置位于 [`apps/server/config.yaml`](../apps/server/config.yaml)。默认开发命令还会合并已忽略的 `apps/server/config.local.yaml`，环境变量最后覆盖合并结果。环境变量遵循 `ZHIYA_SERVER_<SECTION>_<KEY>` 格式，例如：
-
-```sh
-ZHIYA_SERVER_HTTP_LISTEN=127.0.0.1:18080 npm run dev:server
-```
-
-也可以使用 `ZHIYA_SERVER_CONFIG` 或 `-config` 选择仓库外的完整部署配置。显式指定配置文件时不会再合并默认和本地配置。服务端会拒绝未知字段和无效配置；修改后需要重启，不支持热重载。
-
-### 服务端日志
-
-Go 服务将结构化日志写入标准错误流。开发环境默认使用紧凑、按级别着色的文本格式；非交互输出会自动关闭颜色，也可以设置 `NO_COLOR` 强制关闭。由部署平台采集日志时可切换为逐行 JSON：
-
-```yaml
-logging:
-  level: info
-  format: json
-```
-
-`logging.level` 支持 `debug`、`info`、`warn` 和 `error`，`logging.format` 支持 `text` 和 `json`。也可以通过 `ZHIYA_SERVER_LOGGING_LEVEL` 与 `ZHIYA_SERVER_LOGGING_FORMAT` 覆盖。
-
-每个 HTTP 响应都包含 `X-Request-ID`。客户端会在 `5xx` 服务端错误提示中显示该错误编号，并在开发者控制台记录不含请求正文的请求摘要，可用它关联请求完成日志和错误日志；可直接处理的 `4xx` 业务错误保持原有提示。WebSocket 操作同时记录连接请求 ID 与客户端操作 ID；模型流重试、最终中断、跨实例通知重连及后台资源清理失败也会单独记录。访问日志记录方法、路由模板、状态码与耗时，不记录查询参数、请求正文、Cookie、认证信息、教学内容或模型输出。日志采集、保存和轮转由运行环境负责。
-
-Docker 基础设施配置由 [`dev-services.env`](../dev-services.env) 管理。若修改 PostgreSQL 或 Mailpit 的映射端口，需要同步调整服务端连接配置。
-
-## 材料解析服务的启动与测试
-
-`npm run dev:services` 会构建并启动 `material-parser`。在 `apps/server/config.local.yaml` 中设置 `vision_model.api_key`，或通过 `ZHIYA_SERVER_VISION_MODEL_API_KEY` 注入百炼北京地域凭证，然后重启 Go 服务。
-
-独立部署时，构建 `apps/material-parser/Dockerfile` 并运行容器，将 Go 的 `material_parser.endpoint` 指向转换服务的 8090 端口。容器运行约束可参考 `compose.yaml` 中的 `material-parser` 服务；该端口只向 Go 服务开放。
-
-完整转换测试（包括真实旧版 Office 转换）在容器中运行：
-
-```sh
-docker compose --env-file dev-services.env run --rm --no-deps material-parser uv run --no-sync python -m unittest -v
-```
-
-仅运行本机解析测试可使用 `uv run --directory apps/material-parser python -m unittest -v`，未安装 LibreOffice 时会跳过 Office 转换用例。Go 的材料行为测试包含在 `npm run test:accounts` 中。
-
-运行 Go 上传接口到实际转换容器的集成测试（视觉供应商使用本地测试响应）：
-
-```sh
-ZHIYA_TEST_MATERIAL_PARSER=http://127.0.0.1:8090 npm run test:accounts -- -run TestImageUploadThroughConverterAndVisionBecomesReadable
-```
-
-已配置本地视觉凭证并启动转换服务后，可显式选择不含敏感信息的测试 PNG，验证真实千问调用。此命令会产生模型调用费用，并输出该测试图的识别文字和描述：
-
-```sh
-ZHIYA_TEST_VISION_IMAGE=/absolute/path/to/test.png go -C apps/server test ./internal/materialparse -run TestLiveVisionParsesSelectedImage -count=1 -v
-```
-
-## 教学知识库资料处理
-
-完整资料和两路已完成向量发布在 [Hugging Face：LanternCX/zhiya-knowledge](https://huggingface.co/datasets/LanternCX/zhiya-knowledge)。导入步骤及操作确认说明见[知识库使用指南](../apps/knowledge/README.md#接入知识库)。本节说明部署前需要填写的服务端配置。
-
-数据默认下载到被 Git 忽略的根目录 `data/`，与代码分开保存。
-
-在线知识库复用现有 PostgreSQL 和 RustFS 实例，分别使用独立数据库 `zhiya_knowledge` 和独立桶 `zhiya-knowledge`。开发 PostgreSQL 镜像包含 pgvector，原 `postgres-data` 卷继续保存业务数据。服务端通过 `knowledge_database`、`knowledge_storage` 配置独立连接；生产环境预先创建数据库并授予必要权限。文本 Embedding 使用 `knowledge_text_model`，视觉 Embedding 使用 `knowledge_visual_model`，分别配置 `endpoint`、`id` 和 `api_key`，查询路由按索引类型选择对应配置并核对模型。两路凭证独立读取，没有默认复用或回退。缺少任一启用索引的凭证时，在发送模型请求前报错。
-
-在 `apps/server/config.local.yaml` 中分别填写两路凭证：
+在 `apps/server/config.local.yaml` 中填写查询凭据：
 
 ```yaml
 knowledge_text_model:
@@ -165,119 +74,163 @@ knowledge_visual_model:
   api_key: "视觉 Embedding API Key"
 ```
 
-文本查询使用硅基流动 `Qwen/Qwen3-Embedding-8B`，视觉查询使用 `Qwen/Qwen3-VL-Embedding-8B`，均请求原生 4096 维，分别匹配对应的离线模型。两路分别设置 `ZHIYA_SERVER_KNOWLEDGE_TEXT_MODEL_API_KEY` 和 `ZHIYA_SERVER_KNOWLEDGE_VISUAL_MODEL_API_KEY`。百炼页面内容识别凭证使用 `vision_model.api_key` 或 `ZHIYA_SERVER_VISION_MODEL_API_KEY`，与两路 Embedding 配置独立。
+两路查询使用硅基流动的 `Qwen/Qwen3-Embedding-8B` 和 `Qwen/Qwen3-VL-Embedding-8B`。凭据分别填写，不会自动共用。
 
-导入命令从服务端目录加载配置，读取已准备好的资料、已上传对象的 `object-catalog.json` 和已完成的离线向量任务。沿用 `document_id`、`chunk_id` 及按 SHA-256 去重的对象位置。导入不调用模型 API、不上传重复资料；先校验资料、向量和桶中目录一致性，再事务提交。每套索引记录模型、版本、维度和处理配置；Query 按索引类型选择独立配置并校验模型与维度，调用硅基流动 `/v1/embeddings`。两路检索按排名融合，不比较跨模型原始相似度。pgvector 保存完整向量，通过二值 HNSW 索引召回后用完整向量重排。重复导入保持引用稳定。
+安装 `hf` 和 `uv` 后，按[知识库说明](../apps/knowledge/README.md#接入知识库)下载并导入。导入会写入独立的知识库数据库和存储桶。
+
+## 使用语音、插图和材料识别
+
+需要这些能力时，在服务端本地配置中填写相应凭据：
+
+| 能力 | 配置项 |
+| --- | --- |
+| 听写和语音对话 | `speech.asr_api_key`、`speech.tts_api_key` |
+| 教学插图 | `image_model.api_key` |
+| 图片及文档内图片识别 | `vision_model.api_key`，使用百炼北京地域凭据 |
+
+默认服务地址和模型见 [apps/server/config.yaml](../apps/server/config.yaml)。修改配置后重启后端。
+
+浏览器使用麦克风需要本地地址或 HTTPS。
+
+## 修改本地配置
+
+默认配置分为三处：
+
+| 文件 | 管理内容 |
+| --- | --- |
+| [apps/server/config.yaml](../apps/server/config.yaml) | 后端服务、模型、存储和邮件连接 |
+| [apps/client/config.json](../apps/client/config.json) | 客户端连接地址与请求超时 |
+| [dev-services.env](../dev-services.env) | Docker 服务端口与开发凭据 |
+
+**后端**：将需要覆盖的字段写入 `apps/server/config.local.yaml`。这个文件不会进入版本库。也可用 `ZHIYA_SERVER_<SECTION>_<KEY>` 环境变量覆盖，例如 `ZHIYA_SERVER_MODEL_API_KEY`。
+
+**客户端**：复制默认配置为 `apps/client/config.local.json`，修改后显式选择它：
 
 ```sh
-go -C apps/server run ./cmd/knowledge --check-model --route visual
-go -C apps/server run ./cmd/knowledge --check-model --route text
-go -C apps/server run ./cmd/knowledge \
-  --data-dir /absolute/path/to/knowledge \
-  --catalog /absolute/path/to/object-catalog.json \
-  --embedding-dir /absolute/path/to/visual-embedding-results
-go -C apps/server run ./cmd/knowledge --query '什么是训练数据？'
-go -C apps/server run ./cmd/knowledge --replace-text \
-  --embedding-dir /absolute/path/to/text-embedding-results
+ZHIYA_CLIENT_CONFIG=config.local.json npm run dev
 ```
 
-`--embedding-dir` 接受已完成的 Qwen3-VL-Embedding-8B 视觉任务和 Qwen3-Embedding-8B 文本任务，可以重复传入以同时导入两路。缺少文本向量时只接通视觉索引，导入结果返回 `pendingText`，不会自动重新编码文本或把未导入文本当成可检索内容。
-
-`--replace-text` 流式读取一个已完成的文本任务，只替换当前资料集的文本索引。工具核对模型、维度、数量、来源 ID 和所有已选文本的覆盖情况，在单个事务中完成切换；失败时回滚。已有视觉向量、资料对象和引用保持稳定。被替换的文本向量不再参与检索，历史引用对应的资料内容仍可读取。此操作不重新生成向量。
-
-视频索引对应完整视频，不提供片段内容识别。托管 Query API 与离线模型的版本、指令处理一致性仍需通过真实检索验证；API 返回同名模型不能证明部署版本一致。
-
-Pi 使用 `search_knowledge` 和 `read_knowledge_block` 检索并读取依据，图片视觉读取复用材料解析能力并缓存结果。前端显示实际查询、候选资料与搜索失败状态，引用用于对话，生成的 PPT 和文档不包含内部知识库链接。
-
-知识库集成测试使用独立临时数据库，不修改业务库或已导入知识库：
+**Docker 服务**：复制 `dev-services.env` 为 `dev-services.local.env`，修改后运行：
 
 ```sh
-ZHIYA_KNOWLEDGE_TEST_URL='postgres://zhiya:zhiya-local@127.0.0.1:54329/postgres?sslmode=disable' go -C apps/server test ./internal/knowledge -v
+ZHIYA_SERVICES_ENV=dev-services.local.env npm run dev:services
 ```
 
-## 常用命令
+修改端口或凭据时，同时更新后端的连接配置。修改客户端地址后，需要重启开发服务或重新构建客户端。真实密钥只放在本地配置或部署环境中。
+
+## 部署学习应用
+
+学习应用需要 Go 后端、Agent 服务和配套容器。浏览器页面由 Go 提供，教学生成由 Agent 服务执行。
+
+### 1. 准备运行环境
+
+准备 Node.js、PostgreSQL（支持 pgvector）、RustFS、真实 SMTP，以及材料解析和 go-judge 容器。容器配置可参考 [compose.yaml](../compose.yaml)。
+
+业务与知识库分别使用独立数据库和存储桶。启动时会初始化数据表，数据库账号需要相应权限。
+
+### 2. 构建应用
+
+```sh
+npm run build
+npm run build:server
+npm run build:agent
+```
+
+部署时保留以下文件，以及 Agent 运行所需的 Node.js 依赖：
+
+| 文件或目录 | 用途 |
+| --- | --- |
+| `apps/client/dist` | 浏览器页面 |
+| `dist/server` | Go 后端 |
+| `apps/agent/dist` | Agent 服务 |
+
+### 3. 准备部署配置
+
+以 [apps/server/config.yaml](../apps/server/config.yaml) 为基础，创建完整部署配置，例如 `/etc/zhiya/server.yaml`。本地开发凭据需要替换。
+
+| 配置 | 需要填写的内容 |
+| --- | --- |
+| `development` | `false` |
+| `http.listen` | Go 监听地址 |
+| `http.origin` | 用户访问学习应用的 HTTPS 地址 |
+| `http.web_dir` | 客户端构建产物的绝对路径 |
+| `database`、`knowledge_database` | 两个数据库的连接 |
+| `storage`、`knowledge_storage` | 两个存储桶的连接与凭据 |
+| `smtp` | 邮件服务连接与发件人 |
+| `material_parser.endpoint`、`runner.endpoint` | Go 可访问的材料解析和代码运行地址 |
+| `agent.secret` | 至少 32 个字符的密钥，Go 与 Agent 使用同一个值 |
+
+模型配置与本地运行相同。存储的服务地址和公开地址都需要 HTTPS；公开地址必须能由客户端访问。RustFS 的 CORS 设置需要允许学习应用域名。
+
+使用 `-config` 指定文件时，后端只读取该完整配置，不再合并默认和本地文件。可通过环境变量覆盖其中的密钥。
+
+### 4. 启动后端与 Agent
+
+启动 Go：
+
+```sh
+./dist/server -config /etc/zhiya/server.yaml
+```
+
+另一个进程启动 Agent，替换示例中的密钥和保存目录：
+
+```sh
+ZHIYA_AGENT_SECRET='与 Go agent.secret 一致的密钥' \
+ZHIYA_AGENT_API=http://127.0.0.1:8081 \
+ZHIYA_AGENT_LISTEN=127.0.0.1:8082 \
+ZHIYA_AGENT_WORKSPACES=/var/lib/zhiya/workspaces \
+node apps/agent/dist/server.mjs
+```
+
+以上示例将两个进程放在同一台机器。Go 的 `agent.internal_listen` 应为 `127.0.0.1:8081`，`agent.endpoint` 应为 `http://127.0.0.1:8082`。分开部署时改为彼此可访问的内部地址。
+
+配置 HTTPS 反向代理，将页面和 API 转发给 Go。代理需要支持 WebSocket。Agent、数据库、材料解析和代码运行服务只在内部网络开放。
+
+### 5. 保存数据并检查运行
+
+持久化并备份以下三处：
+
+- PostgreSQL 数据。
+- RustFS 中的材料和素材。
+- `ZHIYA_AGENT_WORKSPACES` 指定的目录，其中保存 Agent 会话。
+
+Agent 保存目录使用固定绝对路径。默认目录随进程工作目录变化，容易在部署时遗漏。
+
+先检查 `/health`，再实际完成注册、建档和教学检索。需要语音、材料识别或编程时，也逐项试用。客户端退出后生成可以继续，但 Agent 进程故障后不保证自动续跑。
+
+Go 日志输出到标准错误。集中采集时设置 `logging.format: json`；页面中的错误编号可用于查找对应请求日志。
+
+## 官网与桌面版
+
+本地查看官网：
+
+```sh
+npm run dev:website
+```
+
+打开 <http://127.0.0.1:4174>。官网使用预设演示，不需要业务后端。
+
+桌面安装包构建使用 `npm run build:desktop`。官网部署、版本发布和客户端连接地址的设置见[发布指南](releasing.md)。
+
+## 开发验证
 
 | 命令 | 用途 |
 | --- | --- |
+| `npm run check:client-config` | 检查客户端配置 |
+| `npm run check:server-config` | 检查后端配置 |
 | `npm run check` | TypeScript 类型检查 |
-| `npm run test:agent` | 验证 Pi 后台执行、重复请求与主动停止 |
-| `npm run test:unit --workspace @zhiya/client` | 验证 PPTX／DOCX 文件内容、图片嵌入与开发代理的 WebSocket 转发 |
-| `npm run check:client-config` | 校验客户端配置 |
-| `npm run check:server-config` | 校验服务端配置，不连接数据库或发送邮件 |
-| `npm test` | Go 行为测试和仓库规则测试 |
-| `npm run test:accounts` | 使用 PostgreSQL 运行账号行为与并发测试 |
-| `npm run test:e2e` | 使用本地数据库和 Mailpit 运行浏览器行为测试 |
-| `npm run test:desktop` | 运行桌面请求行为测试 |
-| `npm run build` | 构建浏览器客户端 |
-| `npm run build:server` | 构建服务端到 `dist/server` |
-| `npm run build:desktop` | 使用客户端配置构建桌面安装包 |
+| `npm test` | Go 与仓库规则测试 |
+| `npm run test:agent` | Agent 测试 |
+| `npm run test:accounts` | 数据库行为测试 |
+| `npm run test:e2e` | 浏览器测试 |
+| `npm run test:desktop` | 桌面请求测试 |
 
-浏览器测试首次运行前需要安装 Chromium：
+完整部署配置可用 `./dist/server -config /etc/zhiya/server.yaml -check-config` 检查。配置通过不表示外部服务已经连通。
+
+首次运行浏览器测试前，安装 Chromium：
 
 ```sh
 npx --workspace @zhiya/client playwright install chromium
 ```
 
-浏览器测试自动构建客户端，大部分用例使用构建产物；依赖源码模块或 Vite 行为的用例使用独立开发服务器。两个 worker 并行运行，失败时保留 trace、截图和 HTML 报告，CI 将这些诊断文件保存为 artifact。Node 测试使用独立命令运行，不参与 Playwright 用例收集。
-
-GitHub CI 将浏览器用例交替分配到两个并行分片，使同一文件中的用例分散到两个 runner，避免较慢的课程与播放测试集中在一片。每个分片使用独立 runner 和两个 worker，共四个浏览器并行执行。所有分片通过后，汇总检查 `Client tests` 才通过。可用 `npm run test:e2e -- --shard=1/2` 或 `--shard=2/2` 单独复现某个分片；该命令先收集用例，再通过 Playwright 的测试清单执行所选分片。
-
-CI 为较慢的 runner 将普通断言等待设为 10 秒、单项测试上限设为 60 秒（本机分别为 5 秒、30 秒）。等待在条件满足时立即结束，不固定延迟每项测试，也不自动重试失败用例。
-
-测试会占用客户端端口及其后一端口（默认 `1420` 和 `1421`）。端口被已有开发服务占用时，可以为端到端测试选择其他端口：
-
-```sh
-ZHIYA_CLIENT_API_ORIGIN=http://127.0.0.1:18080 \
-ZHIYA_CLIENT_DEV_ORIGIN=http://127.0.0.1:11420 \
-ZHIYA_SERVER_HTTP_LISTEN=127.0.0.1:18080 \
-ZHIYA_SERVER_HTTP_ORIGIN=http://127.0.0.1:11420 npm run test:e2e
-```
-
-## 代码结构
-
-```text
-apps/
-├─ client/                 React 与 Tauri 客户端
-│  └─ src/
-│     ├─ features/         账号、学生档案与课堂
-│     └─ transport/        HTTP、状态订阅与身份状态
-├─ agent/                  服务端 Pi 实例与执行管理
-└─ server/                 Go 服务
-   ├─ cmd/api/
-   │  ├─ main.go          服务启动与依赖组装
-   │  ├─ client/          客户端 HTTP 接口、用户认证与 WebSocket
-   │  ├─ agent/           Agent HTTP 接口、服务认证与执行范围校验
-   │  └─ transport/       共用 JSON、模型流与实时传输
-   └─ internal/
-      ├─ application/
-      │  ├─ accounts/     账号与用户会话
-      │  ├─ courses/      课程、对话归属与材料
-      │  ├─ learning/     建档对话与学习状态
-      │  ├─ illustrations/ 插图生成与素材
-      │  ├─ execution/    Agent 执行凭证、状态保存与工具编排
-      │  └─ identity/     业务事务内的显式身份校验
-      ├─ data/             PostgreSQL 数据访问
-      └─ mailer/           邮件投递
-packages/
-└─ learning/src/
-   ├─ domain/              学习领域与同步状态类型
-   └─ pi/                  Agent、工具和会话编排
-```
-
-客户端与 Agent API 使用独立的路由与监听端口，分别接受用户凭据和内部服务凭据；共同业务显式接收授权函数，并在事务内重新校验身份。Agent 创建课程及绑定原对话由执行模块在同一事务内完成。
-
-`deliverables` 模块从课程大纲、课堂页面、导入课件和补充文档实时提供课堂 PPT 与课程文档；两种下载共用源内容，聊天记录不进入文档。Agent 先读取源页面及版本，再用唯一原文定位局部修改；导入课件和补充文档支持带修订版本的文本 patch、插入、移动和删除。文本批次按修改前的内容定位，任何匹配或版本错误都不会保存。客户端下载时重新读取完整内容，再导出 PPTX／DOCX；图示导出为静态形状与连线，学生答案和个人运行代码不进入文件。导入 PPTX 在 Go 服务中提取文字与嵌入图片；旧版 PPT 由 `material-parser` 转换为 PPTX 后使用同一流程。更新转换服务代码后，运行 `npm run dev:services -- --build material-parser` 重建本地服务。
-
-动画导出将初始画面和每个播放预设的逐步状态展开为静态页面，保留标签更新、显隐、重点和流向；不同预设分别从原场景开始。导出不改变课堂源内容或播放状态。
-
-教学与课件使用独立的模型流，可以并行工作。Agent 在服务端持续执行，生成状态保存后通过 WebSocket 同步到在线设备。首次发送时建立独立对话和固定入口，模型未调用课程工具时，消息仍会保存并出现在最近对话中。课程和章节是可选归属；归属操作保留原对话 ID 与消息。空白学习页不创建对话，筛选课程只改变展示范围。侧边栏独立订阅当前用户的对话与任务状态，优先展示正在生成的对话；离开会话不会停止任务。重新进入会话或断线重连时，客户端先恢复最新状态，再持续接收流式内容、工具调用和页面更新；生成和重新连接通过状态图标提示。
-
-桌面端登录凭据通过 Tauri 原生层保存到系统安全存储。macOS 使用钥匙串，Windows 使用系统凭据存储，Linux 需要可用且已解锁的 Secret Service；各平台仍需在正式发布前完成实测。
-
-## 协作入口
-
-- [贡献指南](../CONTRIBUTING.md)
-- [开发约定](../AGENTS.md)
-- [产品需求 Issue #3](https://github.com/LanternCX/zhiya/issues/3)
-- [技术选型 Issue #2](https://github.com/LanternCX/zhiya/issues/2)
-- [赛事要求](competition.md)
+自动化测试中的模型响应是模拟数据。教学效果需要使用真实模型另行验证。
