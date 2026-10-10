@@ -72,7 +72,7 @@
       "id": "model",
       "type": "cloud",
       "label": "模型服务",
-      "sublabel": "语言 · 图像 · 语音",
+      "sublabel": "语言 · 视觉 · 图像 · 语音 · Embedding",
       "pos": [770, 110],
       "size": [200, 64]
     },
@@ -87,8 +87,9 @@
     {
       "id": "postgres",
       "type": "database",
-      "label": "PostgreSQL 17",
-      "sublabel": "用户 · 对话 · 任务",
+      "label": "PostgreSQL · pgvector",
+      "sublabel": "业务库：用户 · 对话 · 任务",
+      "tag": "知识库：资料 · 向量索引",
       "pos": [1030, 190],
       "size": [170, 64]
     },
@@ -96,7 +97,8 @@
       "id": "rustfs",
       "type": "database",
       "label": "RustFS",
-      "sublabel": "材料 · 素材（S3）",
+      "sublabel": "业务桶：材料 · 素材",
+      "tag": "知识库桶：原文件 · 页面",
       "pos": [1030, 318],
       "size": [170, 64]
     },
@@ -107,13 +109,29 @@
       "sublabel": "多语言沙箱执行",
       "pos": [1030, 446],
       "size": [170, 64]
+    },
+    {
+      "id": "material-parser",
+      "type": "backend",
+      "label": "LibreOffice · PDFium",
+      "sublabel": "Python · Pillow · 材料解析",
+      "pos": [1030, 574],
+      "size": [170, 64]
+    },
+    {
+      "id": "export",
+      "type": "frontend",
+      "label": "文件打包与导出",
+      "sublabel": "PPTX · DOCX · HTML",
+      "pos": [20, 490],
+      "size": [150, 72]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
       "label": "Web / Tauri 客户端",
-      "wraps": ["ui"],
+      "wraps": ["ui", "export"],
       "pad": 14
     },
     {
@@ -130,6 +148,24 @@
     }
   ],
   "connections": [
+    {
+      "id": "ui-export",
+      "from": "ui",
+      "to": "export",
+      "label": "本地导出",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "server-material-parser",
+      "from": "infrastructure",
+      "to": "material-parser",
+      "label": "材料解析",
+      "labelAt": [1050, 548],
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    },
     {
       "id": "student-ui",
       "from": "student",
