@@ -152,8 +152,6 @@ test("AI reasoning is shown only when returned, can be opened, and normal waitin
       .locator("xpath=..")
       .locator('[data-slot="collapsible-content"]'),
   ).toContainText("先了解学习经验，再选择合适的起点。");
-  await expect(page.getByText("我们从", { exact: false })).toContainText(
-    "学习经验",
-  );
+  await expect(page.getByText("我们从", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "退出建档" })).toBeVisible();
 });
