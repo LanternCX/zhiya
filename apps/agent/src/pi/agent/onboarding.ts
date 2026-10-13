@@ -26,6 +26,7 @@ Users can resume recent conversations from the sidebar or browse their course se
 The teaching agent reads this Markdown profile to understand the user's role and goals, choose depth, language, examples, teaching media, the order of explanation and practice, and the amount of content to prepare at a time. Useful context should help it make these decisions while respecting the user's current request.
 
 Conversation guidance
+This is a structured question-and-answer interface, not a free-text chat. Ordinary assistant text is hidden from the user. Put every user-facing question, greeting, explanation, and option inside ask_student (text, description, and options). Never finish a turn with prose instead of a tool call. First call ask_student and wait for an actual answer. After an answer, use the memory tools, ask another useful question, or save the profile and call complete_onboarding when enough context is available. A resumed or retried execution is an application operation, not an answer, refusal, uncertainty, or request for reassurance. Infer these only from the user's actual submitted answer; do not apologize, console, or repeat a question merely because execution resumed.
 Use ask_student for both students and teachers to present one concrete, approachable question at a time. The application supplies the teacher or student identity selected at registration; use it without asking for identity again. Adapt subsequent questions and your language to the user's actual answers. K12 students differ widely in cognition, expression, and experience. Age is a clue, not an ability label. Explain a relevant classroom possibility briefly when it helps the user answer; they need not already know the app's features.
 For a student during initial onboarding, explore the background and learning preferences that would help them begin: what they want to learn, prior experience, useful examples or interests, how they like to approach unfamiliar material, when they want help, and how much content or interaction they want at a time. These are directions to explore, not required fields or a questionnaire to exhaust. Choose the questions and their order yourself, follow up where an answer would change teaching, and use what the student has already told you.
 For example, a student may want to attempt a problem and ask for explanations only when stuck, learn through examples with practice along the way, or receive a complete set of material to browse before asking questions. These are possibilities, not mutually exclusive modes or labels. Preserve conditions such as preferring guidance for new topics but independent practice for familiar ones. A small diagnostic question is optional when useful, never a prerequisite for finishing. When preferences are unclear, accept uncertainty rather than inventing a preference or repeatedly asking the student to choose.
@@ -60,6 +61,7 @@ export function createOnboardingAgent(options: {
     memoryVersion: number;
     answered: boolean;
     saved: boolean;
+    completed: boolean;
   };
   execute: PersistedToolExecutor;
   onRetry: ModelRetryListener;
@@ -83,14 +85,15 @@ export function createOnboardingAgent(options: {
         ...options.context(),
         correcting: options.correcting,
       }),
-    shouldStopAfterTurn: () => options.correcting && options.context().saved,
+    shouldStopAfterTurn: () =>
+      options.correcting
+        ? options.context().saved
+        : options.context().completed,
     request: (payload, signal) => {
-      if (options.correcting) {
-        payload.thinking = { type: "disabled" };
-        payload.tool_choice = options.context().answered
-          ? "required"
-          : { type: "function", function: { name: "ask_student" } };
-      }
+      payload.thinking = { type: "disabled" };
+      payload.tool_choice = options.context().answered
+        ? "required"
+        : { type: "function", function: { name: "ask_student" } };
       return options.gateway.onboarding(
         options.runId,
         payload,

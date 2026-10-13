@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { mockLearning } from "./mock-learning";
 
-test("a completed message is synchronized without replacing the conversation", async ({
+test("a new onboarding question is synchronized without replacing the conversation", async ({
   page,
 }) => {
   await page.route("**/api/me", (route) =>
@@ -17,36 +17,59 @@ test("a completed message is synchronized without replacing the conversation", a
   await page.route("**/api/learning/model", (route) =>
     route.fulfill({ json: { id: "test", available: false } }),
   );
-  const assistant = (text: string) => ({
+  const question = (id: string, text: string) => ({
+    id,
+    text,
+    kind: "text",
+    options: [],
+  });
+  const assistant = (id: string, text: string) => ({
     role: "assistant",
-    content: [{ type: "text", text }],
-    stopReason: "stop",
+    content: [
+      {
+        type: "toolCall",
+        id,
+        name: "ask_student",
+        arguments: { text, kind: "text", options: [] },
+      },
+    ],
+    stopReason: "toolUse",
     timestamp: 1,
   });
   const initial = {
     id: "conversation",
     purpose: "onboarding",
-    messages: [assistant("第一条完整回复")],
+    messages: [assistant("first", "你想学习什么？")],
     messageSequence: 1,
     completed: false,
     correctionEnded: false,
-    question: null,
+    question: question("first", "你想学习什么？"),
     memory: "",
     memoryVersion: 0,
     revision: 1,
-    status: "idle",
+    status: "waiting",
     leaseUntil: "",
   };
   const learning = await mockLearning(page, () => initial);
   await page.goto("/");
-  await expect(page.getByText("第一条完整回复", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "你想学习什么？", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("textbox", { name: "你的回答" }).fill("想学 Python");
   learning.sync({
     ...initial,
-    messages: [assistant("第二条完整回复")],
+    messages: [assistant("second", "你以前写过代码吗？")],
+    question: question("second", "你以前写过代码吗？"),
     messageSequence: 2,
     revision: 2,
   });
-  await expect(page.getByText("第二条完整回复", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "你以前写过代码吗？", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "你想学习什么？", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "你的回答" })).toBeEmpty();
 });
 
 test("an unconfirmed action is retried with the same request id after reconnecting", async ({

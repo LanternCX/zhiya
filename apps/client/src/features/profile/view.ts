@@ -16,7 +16,6 @@ export function conversationView(state: Conversation): ConversationView {
     status: state.status,
     leaseUntil: state.leaseUntil,
     messageCount: state.messages.length,
-    lastAssistant: last?.role === "assistant",
     output: {
       text: content
         .filter((part) => part.type === "text")
