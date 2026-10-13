@@ -14,6 +14,14 @@ import type { ModelGateway } from "../gateway";
 import { createOnboardingAgent } from "../agent/onboarding";
 
 const maxInterruptedTurnRetries = 5;
+const maxUnstructuredTurnRetries = 2;
+
+function unstructuredAssistant(message: AgentMessage) {
+  return (
+    message.role === "assistant" &&
+    !message.content.some((block) => block.type === "toolCall")
+  );
+}
 
 function interruptedAssistant(message: AgentMessage | undefined) {
   return (
@@ -183,7 +191,13 @@ export class ProfileSession {
           }
         }
       }
-      if (correcting && !userText) {
+      if (!state.completed) {
+        // Hidden prose is not a question the user has seen or failed to answer.
+        // Keep durable history, but exclude it from the model's working context.
+        for (let index = messages.length - 1; index >= 0; index--) {
+          if (unstructuredAssistant(messages[index])) messages.splice(index, 1);
+        }
+      } else if (correcting && !userText) {
         // Retry an interrupted structured turn without inventing a student reply.
         while (messages.at(-1)?.role === "assistant") {
           const last = messages[messages.length - 1];
@@ -205,8 +219,16 @@ export class ProfileSession {
             role: this.role,
             memory: state.memory,
             memoryVersion: state.memoryVersion,
-            answered: Boolean(progress?.answered),
+            answered: correcting
+              ? Boolean(progress?.answered)
+              : state.messages.some(
+                  (message) =>
+                    message.role === "toolResult" &&
+                    message.toolName === "ask_student" &&
+                    !message.isError,
+                ),
             saved: Boolean(progress?.saved),
+            completed: state.completed,
           };
         },
         execute: (id) => this.execute(id),
@@ -223,10 +245,7 @@ export class ProfileSession {
         ) {
           const message = event.message as AssistantMessage;
           this.output({
-            text: message.content
-              .filter((b) => b.type === "text")
-              .map((b) => b.text)
-              .join(""),
+            text: "",
             reasoning: message.content
               .filter((b) => b.type === "thinking")
               .map((b) => b.thinking)
@@ -273,9 +292,24 @@ export class ProfileSession {
       else if (agent.state.messages.at(-1)?.role !== "assistant")
         await agent.continue();
       await this.recoverInterruptedTurn(agent);
+      if (!correcting) {
+        for (let attempt = 0; attempt < maxUnstructuredTurnRetries; attempt++) {
+          if (this.stopped || state.completed || agent.state.errorMessage) break;
+          const last = agent.state.messages.at(-1);
+          if (!last || !unstructuredAssistant(last)) break;
+          agent.state.messages.pop();
+          await agent.continue();
+          await this.recoverInterruptedTurn(agent);
+        }
+      }
       this.onRetry(null);
+      if (this.stopped) return;
       if (agent.state.errorMessage)
         throw new Error("交流暂时中断了，你的回答已保存，请重试。");
+      if (!correcting && !state.completed)
+        throw new Error(
+          "暂时未能生成可回答的问题，请点击继续交流重试。你的已提交回答已保留。",
+        );
       if (correcting && !correctionProgress(state)?.saved)
         throw new Error("档案修改尚未完成，请继续交流。你的已提交回答已保留。");
     } finally {

@@ -256,7 +256,6 @@ export type ConversationView = {
   status: "idle" | "running" | "waiting";
   leaseUntil: string;
   messageCount: number;
-  lastAssistant: boolean;
   output: AssistantOutput;
   correction: { answered: boolean; saved: boolean } | null;
 };

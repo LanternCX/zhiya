@@ -319,9 +319,7 @@ export default function Profile({
                   <div className="learning-progress">
                     <Suspense fallback={<Spinner aria-label="正在思考" />}>
                       <AssistantResponse
-                        output={
-                          state.completed ? { ...output, text: "" } : output
-                        }
+                        output={{ ...output, text: "" }}
                         active={Boolean(active)}
                         stopped={stopped}
                         thinkingLabel={
@@ -353,16 +351,7 @@ export default function Profile({
                           <button
                             className="primary"
                             disabled={running}
-                            onClick={() =>
-                              void run(
-                                info,
-                                state.completed && (!progress || progress.saved)
-                                  ? correction.trim() || undefined
-                                  : !state.completed && state.lastAssistant
-                                    ? "请继续我们的交流。"
-                                    : undefined,
-                              )
-                            }
+                            onClick={() => void run(info)}
                           >
                             继续交流
                           </button>

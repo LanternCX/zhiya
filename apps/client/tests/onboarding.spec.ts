@@ -71,6 +71,8 @@ test("Pi resumes a persisted question across devices and saves memory before com
     ).ok(),
   ).toBeTruthy();
   let textOnlyCorrection = true;
+  let textOnlyOnboarding = true;
+  const onboardingPayloads: any[] = [];
   let correctionCall = 0;
   let holdCorrection = false;
   let releaseCorrection: () => void = () => {};
@@ -178,6 +180,14 @@ test("Pi resumes a persisted question across devices and saves memory before com
       });
       return;
     }
+    onboardingPayloads.push(payload);
+    if (textOnlyOnboarding) {
+      await route.fulfill({
+        contentType: "text/event-stream",
+        body: `data: ${JSON.stringify({ id: "text-only-onboarding", object: "chat.completion.chunk", created: 1, model: "gpt-5.6-luna", choices: [{ index: 0, delta: { role: "assistant", content: "您好！您想学习什么？" }, finish_reason: null }] })}\n\ndata: ${JSON.stringify({ id: "text-only-onboarding", choices: [{ index: 0, delta: {}, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`,
+      });
+      return;
+    }
     const results = payload.messages.filter(
       (m: { role: string }) => m.role === "tool",
     );
@@ -241,9 +251,19 @@ test("Pi resumes a persisted question across devices and saves memory before com
   ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "主导航" })).toHaveCount(0);
   await page.getByRole("button", { name: "开始", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("未能生成可回答的问题");
+  await expect(page.getByText("您好！您想学习什么？", { exact: true })).toHaveCount(0);
+  expect(onboardingPayloads).toHaveLength(3);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "继续交流" })).toBeVisible();
+  await expect(page.getByText("您好！您想学习什么？", { exact: true })).toHaveCount(0);
+  textOnlyOnboarding = false;
+  await page.getByRole("button", { name: "继续交流" }).click();
   await expect(
     page.getByRole("heading", { name: "你以前用过 Scratch 吗？" }),
   ).toBeVisible();
+  expect(onboardingPayloads.at(-1).messages.filter((message: any) => message.role === "user")).toHaveLength(1);
+  expect(JSON.stringify(onboardingPayloads.at(-1).messages)).not.toContain("您好！您想学习什么？");
   const other = await context.newPage();
   const renderingErrors: string[] = [];
   other.on("pageerror", (error) => renderingErrors.push(error.message));
@@ -359,6 +379,27 @@ test("Pi resumes a persisted question across devices and saves memory before com
   expect(renderingErrors).toEqual([]);
   await other.close();
   model.close();
+});
+
+test("restored onboarding hides persisted prose without presenting it as a question", async ({ page }) => {
+  await page.route("**/api/me", (route) => route.fulfill({
+    json: { id: "teacher", role: "teacher", nickname: "老师", email: "teacher@example.com", avatar: "" },
+  }));
+  await page.route("**/api/learning/model", (route) => route.fulfill({
+    json: { id: "test", available: false },
+  }));
+  await mockLearning(page, () => ({
+    id: "onboarding", purpose: "onboarding", completed: false, question: null,
+    memory: "", memoryVersion: 0, messageSequence: 2, revision: 2, status: "idle", leaseUntil: "",
+    messages: [
+      { role: "user", content: [{ type: "text", text: "请开始认识我。" }], timestamp: 1 },
+      { role: "assistant", content: [{ type: "text", text: "您主要教哪个学科？" }], timestamp: 2 },
+    ],
+  }));
+  await page.goto("/");
+  await expect(page.getByText("知芽暂时无法开始交流，请稍后再来。", { exact: true })).toBeVisible();
+  await expect(page.locator(".learning-progress .ai-elements")).toBeEmpty();
+  await expect(page.getByText("您主要教哪个学科？", { exact: true })).toHaveCount(0);
 });
 
 test("a student answers one concrete question and sees the overview when the agent finishes", async ({
