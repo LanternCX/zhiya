@@ -1,0 +1,322 @@
+{
+  "duration": 10.856166666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "在 Word 里打开教案，教学目标、课堂安排、",
+      "words": [
+        {
+          "confidence": 0.8987043,
+          "endTime": 0.435,
+          "startTime": 0.225,
+          "word": "在"
+        },
+        {
+          "confidence": 0.7342866,
+          "endTime": 0.735,
+          "startTime": 0.435,
+          "word": "Word"
+        },
+        {
+          "confidence": 0.83079094,
+          "endTime": 0.925,
+          "startTime": 0.735,
+          "word": "里"
+        },
+        {
+          "confidence": 0.931685,
+          "endTime": 1.095,
+          "startTime": 0.925,
+          "word": "打"
+        },
+        {
+          "confidence": 0.98945105,
+          "endTime": 1.265,
+          "startTime": 1.095,
+          "word": "开"
+        },
+        {
+          "confidence": 0.87702686,
+          "endTime": 1.465,
+          "startTime": 1.265,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8689361,
+          "endTime": 1.665,
+          "startTime": 1.465,
+          "word": "案，"
+        },
+        {
+          "confidence": 0.9024913,
+          "endTime": 2.125,
+          "startTime": 1.955,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9459881,
+          "endTime": 2.315,
+          "startTime": 2.125,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8653994,
+          "endTime": 2.475,
+          "startTime": 2.315,
+          "word": "目"
+        },
+        {
+          "confidence": 0.12975062,
+          "endTime": 2.505,
+          "startTime": 2.475,
+          "word": "标、"
+        },
+        {
+          "confidence": 0.91923004,
+          "endTime": 3.095,
+          "startTime": 2.905,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9525084,
+          "endTime": 3.265,
+          "startTime": 3.095,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.8073086,
+          "endTime": 3.435,
+          "startTime": 3.295,
+          "word": "安"
+        },
+        {
+          "confidence": 0.21077241,
+          "endTime": 3.465,
+          "startTime": 3.435,
+          "word": "排、"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "代码和常见错误都保留在文档中。",
+      "words": [
+        {
+          "confidence": 0.48462972,
+          "endTime": 4.2150416,
+          "startTime": 4.140042,
+          "word": "代"
+        },
+        {
+          "confidence": 0.72503877,
+          "endTime": 4.375042,
+          "startTime": 4.2150416,
+          "word": "码"
+        },
+        {
+          "confidence": 0.92380273,
+          "endTime": 4.5250416,
+          "startTime": 4.375042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9667557,
+          "endTime": 4.7150416,
+          "startTime": 4.5250416,
+          "word": "常"
+        },
+        {
+          "confidence": 0.94256675,
+          "endTime": 4.875042,
+          "startTime": 4.7150416,
+          "word": "见"
+        },
+        {
+          "confidence": 0.95285976,
+          "endTime": 5.075042,
+          "startTime": 4.875042,
+          "word": "错"
+        },
+        {
+          "confidence": 0.8900281,
+          "endTime": 5.295042,
+          "startTime": 5.075042,
+          "word": "误"
+        },
+        {
+          "confidence": 0.9469545,
+          "endTime": 5.625042,
+          "startTime": 5.465042,
+          "word": "都"
+        },
+        {
+          "confidence": 0.91618377,
+          "endTime": 5.785042,
+          "startTime": 5.625042,
+          "word": "保"
+        },
+        {
+          "confidence": 0.94773525,
+          "endTime": 5.915042,
+          "startTime": 5.785042,
+          "word": "留"
+        },
+        {
+          "confidence": 0.88319916,
+          "endTime": 6.0650415,
+          "startTime": 5.915042,
+          "word": "在"
+        },
+        {
+          "confidence": 0.81083393,
+          "endTime": 6.1950417,
+          "startTime": 6.0650415,
+          "word": "文"
+        },
+        {
+          "confidence": 0.91259897,
+          "endTime": 6.375042,
+          "startTime": 6.1950417,
+          "word": "档"
+        },
+        {
+          "confidence": 0.9473285,
+          "endTime": 6.6050415,
+          "startTime": 6.375042,
+          "word": "中。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "在 Word 里打开教案，教学目标、课堂安排、代码和常见错误都保留在文档中。老师可以按实际课堂继续调整，也可以打印使用。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以按实际课堂继续调整，也可以打印使用。",
+      "words": [
+        {
+          "confidence": 0.89408123,
+          "endTime": 7.1650834,
+          "startTime": 7.0000834,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9723787,
+          "endTime": 7.4150834,
+          "startTime": 7.1650834,
+          "word": "师"
+        },
+        {
+          "confidence": 0.811426,
+          "endTime": 7.5650835,
+          "startTime": 7.4150834,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8418437,
+          "endTime": 7.7050834,
+          "startTime": 7.5650835,
+          "word": "以"
+        },
+        {
+          "confidence": 0.86116976,
+          "endTime": 7.7950835,
+          "startTime": 7.7050834,
+          "word": "按"
+        },
+        {
+          "confidence": 0.9397944,
+          "endTime": 7.9950833,
+          "startTime": 7.7950835,
+          "word": "实"
+        },
+        {
+          "confidence": 0.908279,
+          "endTime": 8.135083,
+          "startTime": 7.9950833,
+          "word": "际"
+        },
+        {
+          "confidence": 0.9268309,
+          "endTime": 8.295083,
+          "startTime": 8.135083,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96152866,
+          "endTime": 8.485084,
+          "startTime": 8.295083,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9260972,
+          "endTime": 8.625084,
+          "startTime": 8.485084,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9533177,
+          "endTime": 8.755083,
+          "startTime": 8.625084,
+          "word": "续"
+        },
+        {
+          "confidence": 0.950897,
+          "endTime": 8.975083,
+          "startTime": 8.755083,
+          "word": "调"
+        },
+        {
+          "confidence": 0.955232,
+          "endTime": 9.155084,
+          "startTime": 8.975083,
+          "word": "整，"
+        },
+        {
+          "confidence": 0.956421,
+          "endTime": 9.595083,
+          "startTime": 9.465083,
+          "word": "也"
+        },
+        {
+          "confidence": 0.703016,
+          "endTime": 9.735084,
+          "startTime": 9.595083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.69636554,
+          "endTime": 9.835083,
+          "startTime": 9.735084,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9356904,
+          "endTime": 9.995083,
+          "startTime": 9.835083,
+          "word": "打"
+        },
+        {
+          "confidence": 0.1922105,
+          "endTime": 10.025084,
+          "startTime": 9.995083,
+          "word": "印"
+        },
+        {
+          "confidence": 0.16713877,
+          "endTime": 10.085083,
+          "startTime": 10.025084,
+          "word": "使"
+        },
+        {
+          "confidence": 0.3565842,
+          "endTime": 10.115084,
+          "startTime": 10.085083,
+          "word": "用。"
+        }
+      ]
+    }
+  ]
+}

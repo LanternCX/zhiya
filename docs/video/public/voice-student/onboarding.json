@@ -1,0 +1,340 @@
+{
+  "duration": 11.056791666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "第一次使用，先通过对话说明自己的学段、基础和兴趣。",
+      "words": [
+        {
+          "confidence": 0.91473997,
+          "endTime": 0.455,
+          "startTime": 0.265,
+          "word": "第"
+        },
+        {
+          "confidence": 0.84920424,
+          "endTime": 0.505,
+          "startTime": 0.455,
+          "word": "一"
+        },
+        {
+          "confidence": 0.956263,
+          "endTime": 0.655,
+          "startTime": 0.505,
+          "word": "次"
+        },
+        {
+          "confidence": 0.6900951,
+          "endTime": 0.885,
+          "startTime": 0.655,
+          "word": "使"
+        },
+        {
+          "confidence": 0.92512393,
+          "endTime": 1.115,
+          "startTime": 0.885,
+          "word": "用，"
+        },
+        {
+          "confidence": 0.9629864,
+          "endTime": 1.565,
+          "startTime": 1.315,
+          "word": "先"
+        },
+        {
+          "confidence": 0.96197397,
+          "endTime": 1.775,
+          "startTime": 1.565,
+          "word": "通"
+        },
+        {
+          "confidence": 0.9158952,
+          "endTime": 1.885,
+          "startTime": 1.775,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9474092,
+          "endTime": 2.055,
+          "startTime": 1.885,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9691137,
+          "endTime": 2.305,
+          "startTime": 2.055,
+          "word": "话"
+        },
+        {
+          "confidence": 0.93275297,
+          "endTime": 2.495,
+          "startTime": 2.305,
+          "word": "说"
+        },
+        {
+          "confidence": 0.9467877,
+          "endTime": 2.645,
+          "startTime": 2.495,
+          "word": "明"
+        },
+        {
+          "confidence": 0.8596585,
+          "endTime": 2.765,
+          "startTime": 2.645,
+          "word": "自"
+        },
+        {
+          "confidence": 0.983801,
+          "endTime": 2.885,
+          "startTime": 2.765,
+          "word": "己"
+        },
+        {
+          "confidence": 0.979483,
+          "endTime": 2.975,
+          "startTime": 2.885,
+          "word": "的"
+        },
+        {
+          "confidence": 0.92135304,
+          "endTime": 3.195,
+          "startTime": 2.975,
+          "word": "学"
+        },
+        {
+          "confidence": 0.1866549,
+          "endTime": 3.225,
+          "startTime": 3.195,
+          "word": "段、"
+        },
+        {
+          "confidence": 0.8999783,
+          "endTime": 3.875,
+          "startTime": 3.675,
+          "word": "基"
+        },
+        {
+          "confidence": 0.92568696,
+          "endTime": 4.195,
+          "startTime": 3.875,
+          "word": "础"
+        },
+        {
+          "confidence": 0.8293867,
+          "endTime": 4.305,
+          "startTime": 4.195,
+          "word": "和"
+        },
+        {
+          "confidence": 0.95782465,
+          "endTime": 4.515,
+          "startTime": 4.305,
+          "word": "兴"
+        },
+        {
+          "confidence": 0.8211771,
+          "endTime": 4.725,
+          "startTime": 4.515,
+          "word": "趣。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "第一次使用，先通过对话说明自己的学段、基础和兴趣。这里选择初中，也可以直接补充：我没有学过编程，希望先看生活中的例子。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这里选择初中，也可以直接补充：我没有学过编程，",
+      "words": [
+        {
+          "confidence": 0.94849074,
+          "endTime": 5.1950417,
+          "startTime": 5.0700417,
+          "word": "这"
+        },
+        {
+          "confidence": 0.8557825,
+          "endTime": 5.2750416,
+          "startTime": 5.1950417,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9377069,
+          "endTime": 5.4450417,
+          "startTime": 5.2750416,
+          "word": "选"
+        },
+        {
+          "confidence": 0.97505087,
+          "endTime": 5.5950418,
+          "startTime": 5.4450417,
+          "word": "择"
+        },
+        {
+          "confidence": 0.9516383,
+          "endTime": 5.7950416,
+          "startTime": 5.5950418,
+          "word": "初"
+        },
+        {
+          "confidence": 0.9476434,
+          "endTime": 6.015042,
+          "startTime": 5.7950416,
+          "word": "中，"
+        },
+        {
+          "confidence": 0.9667675,
+          "endTime": 6.535042,
+          "startTime": 6.4050417,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7052882,
+          "endTime": 6.665042,
+          "startTime": 6.535042,
+          "word": "可"
+        },
+        {
+          "confidence": 0.69217044,
+          "endTime": 6.765042,
+          "startTime": 6.665042,
+          "word": "以"
+        },
+        {
+          "confidence": 0.90095663,
+          "endTime": 6.9050417,
+          "startTime": 6.765042,
+          "word": "直"
+        },
+        {
+          "confidence": 0.9226797,
+          "endTime": 7.0650415,
+          "startTime": 6.9050417,
+          "word": "接"
+        },
+        {
+          "confidence": 0.87432086,
+          "endTime": 7.1950417,
+          "startTime": 7.0650415,
+          "word": "补"
+        },
+        {
+          "confidence": 0.13709824,
+          "endTime": 7.2250414,
+          "startTime": 7.1950417,
+          "word": "充："
+        },
+        {
+          "confidence": 0.8821128,
+          "endTime": 7.9250417,
+          "startTime": 7.7550416,
+          "word": "我"
+        },
+        {
+          "confidence": 0.98012483,
+          "endTime": 8.115042,
+          "startTime": 7.9250417,
+          "word": "没"
+        },
+        {
+          "confidence": 0.9505272,
+          "endTime": 8.155042,
+          "startTime": 8.115042,
+          "word": "有"
+        },
+        {
+          "confidence": 0.97388995,
+          "endTime": 8.335042,
+          "startTime": 8.155042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.95579237,
+          "endTime": 8.455042,
+          "startTime": 8.335042,
+          "word": "过"
+        },
+        {
+          "confidence": 0.83838785,
+          "endTime": 8.635042,
+          "startTime": 8.455042,
+          "word": "编"
+        },
+        {
+          "confidence": 0.966251,
+          "endTime": 8.975041,
+          "startTime": 8.635042,
+          "word": "程，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "希望先看生活中的例子。",
+      "words": [
+        {
+          "confidence": 0.88813263,
+          "endTime": 9.425083,
+          "startTime": 9.230083,
+          "word": "希"
+        },
+        {
+          "confidence": 0.96440816,
+          "endTime": 9.505083,
+          "startTime": 9.425083,
+          "word": "望"
+        },
+        {
+          "confidence": 0.97058815,
+          "endTime": 9.705084,
+          "startTime": 9.505083,
+          "word": "先"
+        },
+        {
+          "confidence": 0.93205994,
+          "endTime": 9.905084,
+          "startTime": 9.705084,
+          "word": "看"
+        },
+        {
+          "confidence": 0.92111504,
+          "endTime": 10.115084,
+          "startTime": 9.905084,
+          "word": "生"
+        },
+        {
+          "confidence": 0.5720192,
+          "endTime": 10.205084,
+          "startTime": 10.115084,
+          "word": "活"
+        },
+        {
+          "confidence": 0.13457894,
+          "endTime": 10.265083,
+          "startTime": 10.205084,
+          "word": "中"
+        },
+        {
+          "confidence": 0.2113636,
+          "endTime": 10.325084,
+          "startTime": 10.265083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.1709008,
+          "endTime": 10.385083,
+          "startTime": 10.325084,
+          "word": "例"
+        },
+        {
+          "confidence": 0.3127264,
+          "endTime": 10.445084,
+          "startTime": 10.385083,
+          "word": "子。"
+        }
+      ]
+    }
+  ]
+}

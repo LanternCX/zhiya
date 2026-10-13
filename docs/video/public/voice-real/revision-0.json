@@ -1,0 +1,214 @@
+{
+  "duration": 6.959416666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "第一版不一定适合这个班。",
+      "words": [
+        {
+          "confidence": 0.9515158,
+          "endTime": 0.465,
+          "startTime": 0.225,
+          "word": "第"
+        },
+        {
+          "confidence": 0.9207431,
+          "endTime": 0.525,
+          "startTime": 0.465,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9069682,
+          "endTime": 0.765,
+          "startTime": 0.525,
+          "word": "版"
+        },
+        {
+          "confidence": 0.87093383,
+          "endTime": 0.995,
+          "startTime": 0.765,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9110709,
+          "endTime": 1.085,
+          "startTime": 0.995,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9808783,
+          "endTime": 1.235,
+          "startTime": 1.085,
+          "word": "定"
+        },
+        {
+          "confidence": 0.9106453,
+          "endTime": 1.425,
+          "startTime": 1.235,
+          "word": "适"
+        },
+        {
+          "confidence": 0.95525604,
+          "endTime": 1.565,
+          "startTime": 1.425,
+          "word": "合"
+        },
+        {
+          "confidence": 0.9304386,
+          "endTime": 1.705,
+          "startTime": 1.565,
+          "word": "这"
+        },
+        {
+          "confidence": 0.48101965,
+          "endTime": 1.775,
+          "startTime": 1.705,
+          "word": "个"
+        },
+        {
+          "confidence": 0.934999,
+          "endTime": 2.005,
+          "startTime": 1.775,
+          "word": "班。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "第一版不一定适合这个班。比如变量这一页，文字太多，学生的注意力会被分散。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "比如变量这一页，文字太多，学生的注意力会被分散。",
+      "words": [
+        {
+          "confidence": 0.62717843,
+          "endTime": 2.5750418,
+          "startTime": 2.5000417,
+          "word": "比"
+        },
+        {
+          "confidence": 0.7013733,
+          "endTime": 2.6650417,
+          "startTime": 2.5750418,
+          "word": "如"
+        },
+        {
+          "confidence": 0.86501443,
+          "endTime": 2.8750417,
+          "startTime": 2.6650417,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9667052,
+          "endTime": 3.0650418,
+          "startTime": 2.8750417,
+          "word": "量"
+        },
+        {
+          "confidence": 0.8412013,
+          "endTime": 3.2050416,
+          "startTime": 3.0650418,
+          "word": "这"
+        },
+        {
+          "confidence": 0.7839402,
+          "endTime": 3.3950417,
+          "startTime": 3.2050416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.7655906,
+          "endTime": 3.5050416,
+          "startTime": 3.3950417,
+          "word": "页，"
+        },
+        {
+          "confidence": 0.8740089,
+          "endTime": 4.075042,
+          "startTime": 3.9050417,
+          "word": "文"
+        },
+        {
+          "confidence": 0.8318679,
+          "endTime": 4.245042,
+          "startTime": 4.075042,
+          "word": "字"
+        },
+        {
+          "confidence": 0.90422845,
+          "endTime": 4.495042,
+          "startTime": 4.245042,
+          "word": "太"
+        },
+        {
+          "confidence": 0.9562032,
+          "endTime": 4.745042,
+          "startTime": 4.495042,
+          "word": "多，"
+        },
+        {
+          "confidence": 0.96902937,
+          "endTime": 5.1950417,
+          "startTime": 4.9650416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8366046,
+          "endTime": 5.375042,
+          "startTime": 5.1950417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9467715,
+          "endTime": 5.4750414,
+          "startTime": 5.375042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9400057,
+          "endTime": 5.625042,
+          "startTime": 5.4750414,
+          "word": "注"
+        },
+        {
+          "confidence": 0.91567594,
+          "endTime": 5.755042,
+          "startTime": 5.625042,
+          "word": "意"
+        },
+        {
+          "confidence": 0.90404975,
+          "endTime": 5.9350414,
+          "startTime": 5.755042,
+          "word": "力"
+        },
+        {
+          "confidence": 0.96927303,
+          "endTime": 6.1050415,
+          "startTime": 5.9350414,
+          "word": "会"
+        },
+        {
+          "confidence": 0.7781407,
+          "endTime": 6.1950417,
+          "startTime": 6.1050415,
+          "word": "被"
+        },
+        {
+          "confidence": 0.19308273,
+          "endTime": 6.255042,
+          "startTime": 6.1950417,
+          "word": "分"
+        },
+        {
+          "confidence": 0.50351745,
+          "endTime": 6.3150415,
+          "startTime": 6.255042,
+          "word": "散。"
+        }
+      ]
+    }
+  ]
+}

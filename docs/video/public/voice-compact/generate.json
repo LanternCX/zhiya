@@ -1,0 +1,340 @@
+{
+  "duration": 12.132041666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "确定方向以后，要求知芽生成讲解页、过程动画和教师教案。",
+      "words": [
+        {
+          "confidence": 0.8947773,
+          "endTime": 0.425,
+          "startTime": 0.245,
+          "word": "确"
+        },
+        {
+          "confidence": 0.9745947,
+          "endTime": 0.555,
+          "startTime": 0.425,
+          "word": "定"
+        },
+        {
+          "confidence": 0.96867335,
+          "endTime": 0.715,
+          "startTime": 0.555,
+          "word": "方"
+        },
+        {
+          "confidence": 0.963989,
+          "endTime": 0.935,
+          "startTime": 0.715,
+          "word": "向"
+        },
+        {
+          "confidence": 0.9228659,
+          "endTime": 1.035,
+          "startTime": 0.935,
+          "word": "以"
+        },
+        {
+          "confidence": 0.97708195,
+          "endTime": 1.375,
+          "startTime": 1.035,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.73704344,
+          "endTime": 1.735,
+          "startTime": 1.615,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9694285,
+          "endTime": 1.985,
+          "startTime": 1.735,
+          "word": "求"
+        },
+        {
+          "confidence": 0.94435614,
+          "endTime": 2.205,
+          "startTime": 1.985,
+          "word": "知"
+        },
+        {
+          "confidence": 0.94828373,
+          "endTime": 2.425,
+          "startTime": 2.205,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.92239004,
+          "endTime": 2.625,
+          "startTime": 2.425,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9751842,
+          "endTime": 2.845,
+          "startTime": 2.625,
+          "word": "成"
+        },
+        {
+          "confidence": 0.93707275,
+          "endTime": 3.045,
+          "startTime": 2.845,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9159289,
+          "endTime": 3.235,
+          "startTime": 3.045,
+          "word": "解"
+        },
+        {
+          "confidence": 0.29732475,
+          "endTime": 3.435,
+          "startTime": 3.405,
+          "word": "页、"
+        },
+        {
+          "confidence": 0.92488253,
+          "endTime": 3.915,
+          "startTime": 3.775,
+          "word": "过"
+        },
+        {
+          "confidence": 0.96838826,
+          "endTime": 4.105,
+          "startTime": 3.915,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9602151,
+          "endTime": 4.265,
+          "startTime": 4.105,
+          "word": "动"
+        },
+        {
+          "confidence": 0.973935,
+          "endTime": 4.595,
+          "startTime": 4.265,
+          "word": "画"
+        },
+        {
+          "confidence": 0.92438895,
+          "endTime": 4.835,
+          "startTime": 4.625,
+          "word": "和"
+        },
+        {
+          "confidence": 0.95789754,
+          "endTime": 5.005,
+          "startTime": 4.835,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8221881,
+          "endTime": 5.205,
+          "startTime": 5.005,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8338213,
+          "endTime": 5.405,
+          "startTime": 5.205,
+          "word": "教"
+        },
+        {
+          "confidence": 0.88869613,
+          "endTime": 5.565,
+          "startTime": 5.405,
+          "word": "案。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "发送任务，内容逐步出现在课堂区。",
+      "words": [
+        {
+          "confidence": 0.68665624,
+          "endTime": 6.1150413,
+          "startTime": 6.0000415,
+          "word": "发"
+        },
+        {
+          "confidence": 0.7253955,
+          "endTime": 6.2650414,
+          "startTime": 6.1150413,
+          "word": "送"
+        },
+        {
+          "confidence": 0.91580987,
+          "endTime": 6.5150414,
+          "startTime": 6.2650414,
+          "word": "任"
+        },
+        {
+          "confidence": 0.83093286,
+          "endTime": 6.6550417,
+          "startTime": 6.5150414,
+          "word": "务，"
+        },
+        {
+          "confidence": 0.8011668,
+          "endTime": 7.075042,
+          "startTime": 6.9150414,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9679631,
+          "endTime": 7.2950416,
+          "startTime": 7.075042,
+          "word": "容"
+        },
+        {
+          "confidence": 0.90333074,
+          "endTime": 7.5150414,
+          "startTime": 7.2950416,
+          "word": "逐"
+        },
+        {
+          "confidence": 0.96007353,
+          "endTime": 7.6950417,
+          "startTime": 7.5150414,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9797743,
+          "endTime": 7.8650417,
+          "startTime": 7.6950417,
+          "word": "出"
+        },
+        {
+          "confidence": 0.93735516,
+          "endTime": 8.025042,
+          "startTime": 7.8650417,
+          "word": "现"
+        },
+        {
+          "confidence": 0.97847927,
+          "endTime": 8.145041,
+          "startTime": 8.025042,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9650632,
+          "endTime": 8.305041,
+          "startTime": 8.145041,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96582913,
+          "endTime": 8.495041,
+          "startTime": 8.305041,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.8539381,
+          "endTime": 8.765041,
+          "startTime": 8.495041,
+          "word": "区。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "确定方向以后，要求知芽生成讲解页、过程动画和教师教案。发送任务，内容逐步出现在课堂区。老师可以边看结果，边决定下一步。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以边看结果，边决定下一步。",
+      "words": [
+        {
+          "confidence": 0.90458935,
+          "endTime": 9.355083,
+          "startTime": 9.180083,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9235055,
+          "endTime": 9.625083,
+          "startTime": 9.355083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7627137,
+          "endTime": 9.775084,
+          "startTime": 9.625083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.81864625,
+          "endTime": 9.885083,
+          "startTime": 9.775084,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8200361,
+          "endTime": 10.075083,
+          "startTime": 9.885083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.9424172,
+          "endTime": 10.275084,
+          "startTime": 10.075083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9267998,
+          "endTime": 10.495083,
+          "startTime": 10.275084,
+          "word": "结"
+        },
+        {
+          "confidence": 0.9786494,
+          "endTime": 10.765083,
+          "startTime": 10.495083,
+          "word": "果，"
+        },
+        {
+          "confidence": 0.76773316,
+          "endTime": 11.015083,
+          "startTime": 10.845083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.7352382,
+          "endTime": 11.165083,
+          "startTime": 11.015083,
+          "word": "决"
+        },
+        {
+          "confidence": 0.981009,
+          "endTime": 11.285084,
+          "startTime": 11.165083,
+          "word": "定"
+        },
+        {
+          "confidence": 0.2329908,
+          "endTime": 11.345083,
+          "startTime": 11.285084,
+          "word": "下"
+        },
+        {
+          "confidence": 0.14655882,
+          "endTime": 11.375083,
+          "startTime": 11.345083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.18308362,
+          "endTime": 11.435083,
+          "startTime": 11.375083,
+          "word": "步。"
+        }
+      ]
+    }
+  ]
+}

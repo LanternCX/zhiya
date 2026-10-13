@@ -1,0 +1,226 @@
+{
+  "duration": 8.187875,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "流程确定后，老师提出具体要求：三张核心讲解页，一个过程动画，再加一份教师教案。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "流程确定后，老师提出具体要求：三张核心讲解页，",
+      "words": [
+        {
+          "confidence": 0.8948724,
+          "endTime": 0.415,
+          "startTime": 0.265,
+          "word": "流"
+        },
+        {
+          "confidence": 0.9308158,
+          "endTime": 0.595,
+          "startTime": 0.415,
+          "word": "程"
+        },
+        {
+          "confidence": 0.8774033,
+          "endTime": 0.775,
+          "startTime": 0.595,
+          "word": "确"
+        },
+        {
+          "confidence": 0.96695435,
+          "endTime": 0.905,
+          "startTime": 0.775,
+          "word": "定"
+        },
+        {
+          "confidence": 0.9271983,
+          "endTime": 1.285,
+          "startTime": 0.905,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9369647,
+          "endTime": 1.685,
+          "startTime": 1.495,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96986043,
+          "endTime": 1.925,
+          "startTime": 1.685,
+          "word": "师"
+        },
+        {
+          "confidence": 0.90247923,
+          "endTime": 2.115,
+          "startTime": 1.925,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9273013,
+          "endTime": 2.265,
+          "startTime": 2.115,
+          "word": "出"
+        },
+        {
+          "confidence": 0.6396051,
+          "endTime": 2.425,
+          "startTime": 2.265,
+          "word": "具"
+        },
+        {
+          "confidence": 0.8808595,
+          "endTime": 2.645,
+          "startTime": 2.425,
+          "word": "体"
+        },
+        {
+          "confidence": 0.69008833,
+          "endTime": 2.735,
+          "startTime": 2.645,
+          "word": "要"
+        },
+        {
+          "confidence": 0.31395626,
+          "endTime": 2.765,
+          "startTime": 2.735,
+          "word": "求："
+        },
+        {
+          "confidence": 0.8709247,
+          "endTime": 3.725,
+          "startTime": 3.495,
+          "word": "三"
+        },
+        {
+          "confidence": 0.9425641,
+          "endTime": 3.925,
+          "startTime": 3.725,
+          "word": "张"
+        },
+        {
+          "confidence": 0.9747093,
+          "endTime": 4.145,
+          "startTime": 3.925,
+          "word": "核"
+        },
+        {
+          "confidence": 0.9558697,
+          "endTime": 4.335,
+          "startTime": 4.145,
+          "word": "心"
+        },
+        {
+          "confidence": 0.9036771,
+          "endTime": 4.535,
+          "startTime": 4.335,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9548756,
+          "endTime": 4.735,
+          "startTime": 4.535,
+          "word": "解"
+        },
+        {
+          "confidence": 0.87828887,
+          "endTime": 5.025,
+          "startTime": 4.735,
+          "word": "页，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "一个过程动画，再加一份教师教案。",
+      "words": [
+        {
+          "confidence": 0.8711658,
+          "endTime": 5.4350414,
+          "startTime": 5.3600416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9740548,
+          "endTime": 5.555042,
+          "startTime": 5.4350414,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9433015,
+          "endTime": 5.6950417,
+          "startTime": 5.555042,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9566541,
+          "endTime": 5.8850417,
+          "startTime": 5.6950417,
+          "word": "程"
+        },
+        {
+          "confidence": 0.88650143,
+          "endTime": 6.0450416,
+          "startTime": 5.8850417,
+          "word": "动"
+        },
+        {
+          "confidence": 0.9520913,
+          "endTime": 6.285042,
+          "startTime": 6.0450416,
+          "word": "画，"
+        },
+        {
+          "confidence": 0.875578,
+          "endTime": 6.7250414,
+          "startTime": 6.555042,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9715474,
+          "endTime": 6.9150414,
+          "startTime": 6.7250414,
+          "word": "加"
+        },
+        {
+          "confidence": 0.8547841,
+          "endTime": 7.0050416,
+          "startTime": 6.9150414,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9594595,
+          "endTime": 7.2350416,
+          "startTime": 7.0050416,
+          "word": "份"
+        },
+        {
+          "confidence": 0.90730685,
+          "endTime": 7.415042,
+          "startTime": 7.2350416,
+          "word": "教"
+        },
+        {
+          "confidence": 0.90007883,
+          "endTime": 7.625042,
+          "startTime": 7.415042,
+          "word": "师"
+        },
+        {
+          "confidence": 0.85975623,
+          "endTime": 7.8150415,
+          "startTime": 7.625042,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8336634,
+          "endTime": 7.9850416,
+          "startTime": 7.8150415,
+          "word": "案。"
+        }
+      ]
+    }
+  ]
+}

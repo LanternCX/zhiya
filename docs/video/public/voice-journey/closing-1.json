@@ -1,0 +1,220 @@
+{
+  "duration": 7.1567083333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这堂课怎么教，始终由老师决定。",
+      "words": [
+        {
+          "confidence": 0.9496067,
+          "endTime": 0.395,
+          "startTime": 0.215,
+          "word": "这"
+        },
+        {
+          "confidence": 0.95215774,
+          "endTime": 0.605,
+          "startTime": 0.395,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.96151406,
+          "endTime": 0.825,
+          "startTime": 0.605,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9588572,
+          "endTime": 0.975,
+          "startTime": 0.825,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.97497994,
+          "endTime": 1.045,
+          "startTime": 0.975,
+          "word": "么"
+        },
+        {
+          "confidence": 0.909086,
+          "endTime": 1.315,
+          "startTime": 1.045,
+          "word": "教，"
+        },
+        {
+          "confidence": 0.88087714,
+          "endTime": 1.795,
+          "startTime": 1.545,
+          "word": "始"
+        },
+        {
+          "confidence": 0.9344906,
+          "endTime": 2.035,
+          "startTime": 1.795,
+          "word": "终"
+        },
+        {
+          "confidence": 0.7695119,
+          "endTime": 2.135,
+          "startTime": 2.035,
+          "word": "由"
+        },
+        {
+          "confidence": 0.9244382,
+          "endTime": 2.295,
+          "startTime": 2.135,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96197826,
+          "endTime": 2.545,
+          "startTime": 2.295,
+          "word": "师"
+        },
+        {
+          "confidence": 0.49935943,
+          "endTime": 2.695,
+          "startTime": 2.545,
+          "word": "决"
+        },
+        {
+          "confidence": 0.9658322,
+          "endTime": 2.915,
+          "startTime": 2.695,
+          "word": "定。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这堂课怎么教，始终由老师决定。知芽帮助老师，把教学想法变成可以使用的材料。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "知芽帮助老师，把教学想法变成可以使用的材料。",
+      "words": [
+        {
+          "confidence": 0.53321373,
+          "endTime": 3.4950416,
+          "startTime": 3.4200416,
+          "word": "知"
+        },
+        {
+          "confidence": 0.84103954,
+          "endTime": 3.6750417,
+          "startTime": 3.4950416,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.91597587,
+          "endTime": 3.8350415,
+          "startTime": 3.6750417,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.90865314,
+          "endTime": 3.9950416,
+          "startTime": 3.8350415,
+          "word": "助"
+        },
+        {
+          "confidence": 0.8913775,
+          "endTime": 4.1350417,
+          "startTime": 3.9950416,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98731995,
+          "endTime": 4.4750414,
+          "startTime": 4.1350417,
+          "word": "师，"
+        },
+        {
+          "confidence": 0.8202957,
+          "endTime": 4.6350417,
+          "startTime": 4.5050416,
+          "word": "把"
+        },
+        {
+          "confidence": 0.8980599,
+          "endTime": 4.8550415,
+          "startTime": 4.6350417,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9764936,
+          "endTime": 5.0450416,
+          "startTime": 4.8550415,
+          "word": "学"
+        },
+        {
+          "confidence": 0.95193696,
+          "endTime": 5.2650414,
+          "startTime": 5.0450416,
+          "word": "想"
+        },
+        {
+          "confidence": 0.9692071,
+          "endTime": 5.535042,
+          "startTime": 5.2650414,
+          "word": "法"
+        },
+        {
+          "confidence": 0.9552322,
+          "endTime": 5.6950417,
+          "startTime": 5.5650415,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9716011,
+          "endTime": 5.8950415,
+          "startTime": 5.6950417,
+          "word": "成"
+        },
+        {
+          "confidence": 0.7886512,
+          "endTime": 6.1050415,
+          "startTime": 5.8950415,
+          "word": "可"
+        },
+        {
+          "confidence": 0.64367115,
+          "endTime": 6.1450415,
+          "startTime": 6.1050415,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8064927,
+          "endTime": 6.3050413,
+          "startTime": 6.1450415,
+          "word": "使"
+        },
+        {
+          "confidence": 0.13141687,
+          "endTime": 6.3350415,
+          "startTime": 6.3050413,
+          "word": "用"
+        },
+        {
+          "confidence": 0.21757321,
+          "endTime": 6.3950415,
+          "startTime": 6.3350415,
+          "word": "的"
+        },
+        {
+          "confidence": 0.10691076,
+          "endTime": 6.455042,
+          "startTime": 6.3950415,
+          "word": "材"
+        },
+        {
+          "confidence": 0.24111226,
+          "endTime": 6.5150414,
+          "startTime": 6.455042,
+          "word": "料。"
+        }
+      ]
+    }
+  ]
+}

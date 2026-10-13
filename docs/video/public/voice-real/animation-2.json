@@ -1,0 +1,190 @@
+{
+  "duration": 6.065458333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这时先不急着讲下一句。让学生指一指，刚才的数据，现在走到了哪里。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这时先不急着讲下一句。",
+      "words": [
+        {
+          "confidence": 0.9251275,
+          "endTime": 0.415,
+          "startTime": 0.225,
+          "word": "这"
+        },
+        {
+          "confidence": 0.85756,
+          "endTime": 0.775,
+          "startTime": 0.415,
+          "word": "时"
+        },
+        {
+          "confidence": 0.95086616,
+          "endTime": 1.055,
+          "startTime": 0.815,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9107062,
+          "endTime": 1.275,
+          "startTime": 1.055,
+          "word": "不"
+        },
+        {
+          "confidence": 0.91019255,
+          "endTime": 1.455,
+          "startTime": 1.275,
+          "word": "急"
+        },
+        {
+          "confidence": 0.9242541,
+          "endTime": 1.555,
+          "startTime": 1.455,
+          "word": "着"
+        },
+        {
+          "confidence": 0.968785,
+          "endTime": 1.685,
+          "startTime": 1.555,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.95691335,
+          "endTime": 1.945,
+          "startTime": 1.685,
+          "word": "下"
+        },
+        {
+          "confidence": 0.8731583,
+          "endTime": 2.065,
+          "startTime": 1.945,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9372393,
+          "endTime": 2.315,
+          "startTime": 2.065,
+          "word": "句。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "让学生指一指，刚才的数据，现在走到了哪里。",
+      "words": [
+        {
+          "confidence": 0.5158213,
+          "endTime": 2.7950418,
+          "startTime": 2.7200418,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9246669,
+          "endTime": 2.9350417,
+          "startTime": 2.7950418,
+          "word": "学"
+        },
+        {
+          "confidence": 0.7826029,
+          "endTime": 3.1250417,
+          "startTime": 2.9350417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9080448,
+          "endTime": 3.2850418,
+          "startTime": 3.1250417,
+          "word": "指"
+        },
+        {
+          "confidence": 0.8817505,
+          "endTime": 3.4350417,
+          "startTime": 3.2850418,
+          "word": "一"
+        },
+        {
+          "confidence": 0.914956,
+          "endTime": 3.705042,
+          "startTime": 3.4350417,
+          "word": "指，"
+        },
+        {
+          "confidence": 0.7899457,
+          "endTime": 3.8850417,
+          "startTime": 3.7450418,
+          "word": "刚"
+        },
+        {
+          "confidence": 0.9491807,
+          "endTime": 4.0950418,
+          "startTime": 3.8850417,
+          "word": "才"
+        },
+        {
+          "confidence": 0.9492659,
+          "endTime": 4.185042,
+          "startTime": 4.0950418,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9196134,
+          "endTime": 4.3950415,
+          "startTime": 4.185042,
+          "word": "数"
+        },
+        {
+          "confidence": 0.90122336,
+          "endTime": 4.6450415,
+          "startTime": 4.3950415,
+          "word": "据，"
+        },
+        {
+          "confidence": 0.9809691,
+          "endTime": 4.9650416,
+          "startTime": 4.755042,
+          "word": "现"
+        },
+        {
+          "confidence": 0.89981085,
+          "endTime": 5.0950418,
+          "startTime": 4.9650416,
+          "word": "在"
+        },
+        {
+          "confidence": 0.13754818,
+          "endTime": 5.1550417,
+          "startTime": 5.0950418,
+          "word": "走"
+        },
+        {
+          "confidence": 0.16358314,
+          "endTime": 5.2150416,
+          "startTime": 5.1550417,
+          "word": "到"
+        },
+        {
+          "confidence": 0.17016427,
+          "endTime": 5.2750416,
+          "startTime": 5.2150416,
+          "word": "了"
+        },
+        {
+          "confidence": 0.21035941,
+          "endTime": 5.335042,
+          "startTime": 5.2750416,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.24219722,
+          "endTime": 5.3950415,
+          "startTime": 5.335042,
+          "word": "里。"
+        }
+      ]
+    }
+  ]
+}

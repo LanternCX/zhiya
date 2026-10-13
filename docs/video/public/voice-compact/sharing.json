@@ -1,0 +1,412 @@
+{
+  "duration": 14.297791666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "打开分享设置，选择分享到班级，勾选这次上课的班级，再保存。",
+      "words": [
+        {
+          "confidence": 0.9295506,
+          "endTime": 0.385,
+          "startTime": 0.225,
+          "word": "打"
+        },
+        {
+          "confidence": 0.98132956,
+          "endTime": 0.555,
+          "startTime": 0.385,
+          "word": "开"
+        },
+        {
+          "confidence": 0.97140515,
+          "endTime": 0.705,
+          "startTime": 0.555,
+          "word": "分"
+        },
+        {
+          "confidence": 0.97470474,
+          "endTime": 0.875,
+          "startTime": 0.705,
+          "word": "享"
+        },
+        {
+          "confidence": 0.9121193,
+          "endTime": 1.125,
+          "startTime": 0.875,
+          "word": "设"
+        },
+        {
+          "confidence": 0.9438262,
+          "endTime": 1.355,
+          "startTime": 1.125,
+          "word": "置，"
+        },
+        {
+          "confidence": 0.93799937,
+          "endTime": 1.985,
+          "startTime": 1.725,
+          "word": "选"
+        },
+        {
+          "confidence": 0.927508,
+          "endTime": 2.245,
+          "startTime": 1.985,
+          "word": "择"
+        },
+        {
+          "confidence": 0.95093626,
+          "endTime": 2.405,
+          "startTime": 2.245,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9762508,
+          "endTime": 2.595,
+          "startTime": 2.405,
+          "word": "享"
+        },
+        {
+          "confidence": 0.96889096,
+          "endTime": 2.755,
+          "startTime": 2.595,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9551622,
+          "endTime": 2.945,
+          "startTime": 2.755,
+          "word": "班"
+        },
+        {
+          "confidence": 0.96854615,
+          "endTime": 3.275,
+          "startTime": 2.945,
+          "word": "级，"
+        },
+        {
+          "confidence": 0.8225434,
+          "endTime": 3.765,
+          "startTime": 3.605,
+          "word": "勾"
+        },
+        {
+          "confidence": 0.9131936,
+          "endTime": 4.035,
+          "startTime": 3.765,
+          "word": "选"
+        },
+        {
+          "confidence": 0.9160474,
+          "endTime": 4.185,
+          "startTime": 4.035,
+          "word": "这"
+        },
+        {
+          "confidence": 0.94548553,
+          "endTime": 4.295,
+          "startTime": 4.185,
+          "word": "次"
+        },
+        {
+          "confidence": 0.97214335,
+          "endTime": 4.495,
+          "startTime": 4.295,
+          "word": "上"
+        },
+        {
+          "confidence": 0.9838829,
+          "endTime": 4.655,
+          "startTime": 4.495,
+          "word": "课"
+        },
+        {
+          "confidence": 0.922823,
+          "endTime": 4.745,
+          "startTime": 4.655,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9796733,
+          "endTime": 4.915,
+          "startTime": 4.745,
+          "word": "班"
+        },
+        {
+          "confidence": 0.9532337,
+          "endTime": 5.195,
+          "startTime": 4.915,
+          "word": "级，"
+        },
+        {
+          "confidence": 0.9387127,
+          "endTime": 5.545,
+          "startTime": 5.365,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9595719,
+          "endTime": 5.715,
+          "startTime": 5.545,
+          "word": "保"
+        },
+        {
+          "confidence": 0.73663294,
+          "endTime": 5.985,
+          "startTime": 5.715,
+          "word": "存。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "材料就开放给这些班级的成员。",
+      "words": [
+        {
+          "confidence": 0.9378788,
+          "endTime": 6.605042,
+          "startTime": 6.390042,
+          "word": "材"
+        },
+        {
+          "confidence": 0.8900356,
+          "endTime": 6.785042,
+          "startTime": 6.605042,
+          "word": "料"
+        },
+        {
+          "confidence": 0.9621345,
+          "endTime": 6.9050417,
+          "startTime": 6.785042,
+          "word": "就"
+        },
+        {
+          "confidence": 0.978793,
+          "endTime": 7.1150417,
+          "startTime": 6.9050417,
+          "word": "开"
+        },
+        {
+          "confidence": 0.94895875,
+          "endTime": 7.285042,
+          "startTime": 7.1150417,
+          "word": "放"
+        },
+        {
+          "confidence": 0.9838259,
+          "endTime": 7.435042,
+          "startTime": 7.285042,
+          "word": "给"
+        },
+        {
+          "confidence": 0.92828125,
+          "endTime": 7.545042,
+          "startTime": 7.435042,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9631077,
+          "endTime": 7.685042,
+          "startTime": 7.545042,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9618527,
+          "endTime": 7.825042,
+          "startTime": 7.685042,
+          "word": "班"
+        },
+        {
+          "confidence": 0.9080541,
+          "endTime": 7.965042,
+          "startTime": 7.825042,
+          "word": "级"
+        },
+        {
+          "confidence": 0.96141285,
+          "endTime": 8.055042,
+          "startTime": 7.965042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9711686,
+          "endTime": 8.285042,
+          "startTime": 8.055042,
+          "word": "成"
+        },
+        {
+          "confidence": 0.97073543,
+          "endTime": 8.515041,
+          "startTime": 8.285042,
+          "word": "员。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "打开分享设置，选择分享到班级，勾选这次上课的班级，再保存。材料就开放给这些班级的成员。老师可以按教学需要决定，哪些内容只留给自己，哪些交给学生。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以按教学需要决定，哪些内容只留给自己，哪些交给学生。",
+      "words": [
+        {
+          "confidence": 0.9710859,
+          "endTime": 9.175083,
+          "startTime": 8.985084,
+          "word": "老"
+        },
+        {
+          "confidence": 0.90477055,
+          "endTime": 9.435083,
+          "startTime": 9.175083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.79848963,
+          "endTime": 9.595083,
+          "startTime": 9.435083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.85623866,
+          "endTime": 9.755083,
+          "startTime": 9.595083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9289813,
+          "endTime": 9.895083,
+          "startTime": 9.755083,
+          "word": "按"
+        },
+        {
+          "confidence": 0.9361183,
+          "endTime": 10.055083,
+          "startTime": 9.895083,
+          "word": "教"
+        },
+        {
+          "confidence": 0.97866476,
+          "endTime": 10.215083,
+          "startTime": 10.055083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9013434,
+          "endTime": 10.445084,
+          "startTime": 10.215083,
+          "word": "需"
+        },
+        {
+          "confidence": 0.93558,
+          "endTime": 10.585083,
+          "startTime": 10.445084,
+          "word": "要"
+        },
+        {
+          "confidence": 0.82994163,
+          "endTime": 10.755083,
+          "startTime": 10.585083,
+          "word": "决"
+        },
+        {
+          "confidence": 0.9497242,
+          "endTime": 10.955084,
+          "startTime": 10.755083,
+          "word": "定，"
+        },
+        {
+          "confidence": 0.9446813,
+          "endTime": 11.415083,
+          "startTime": 11.255083,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.95288175,
+          "endTime": 11.605083,
+          "startTime": 11.415083,
+          "word": "些"
+        },
+        {
+          "confidence": 0.89067703,
+          "endTime": 11.755083,
+          "startTime": 11.605083,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9595974,
+          "endTime": 11.945084,
+          "startTime": 11.755083,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9350163,
+          "endTime": 12.105083,
+          "startTime": 11.945084,
+          "word": "只"
+        },
+        {
+          "confidence": 0.94492185,
+          "endTime": 12.245083,
+          "startTime": 12.105083,
+          "word": "留"
+        },
+        {
+          "confidence": 0.97891766,
+          "endTime": 12.375083,
+          "startTime": 12.245083,
+          "word": "给"
+        },
+        {
+          "confidence": 0.9646783,
+          "endTime": 12.535084,
+          "startTime": 12.375083,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9799088,
+          "endTime": 12.8150835,
+          "startTime": 12.535084,
+          "word": "己，"
+        },
+        {
+          "confidence": 0.8940066,
+          "endTime": 13.155083,
+          "startTime": 13.015083,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.5761355,
+          "endTime": 13.255083,
+          "startTime": 13.155083,
+          "word": "些"
+        },
+        {
+          "confidence": 0.1479846,
+          "endTime": 13.3150835,
+          "startTime": 13.255083,
+          "word": "交"
+        },
+        {
+          "confidence": 0.2266329,
+          "endTime": 13.375084,
+          "startTime": 13.3150835,
+          "word": "给"
+        },
+        {
+          "confidence": 0.145554,
+          "endTime": 13.435083,
+          "startTime": 13.375084,
+          "word": "学"
+        },
+        {
+          "confidence": 0.17173871,
+          "endTime": 13.495083,
+          "startTime": 13.435083,
+          "word": "生。"
+        }
+      ]
+    }
+  ]
+}

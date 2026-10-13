@@ -1,0 +1,88 @@
+{
+  "duration": 2.692625,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "教案和课件，也能下载到电脑。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "教案和课件，也能下载到电脑。",
+      "words": [
+        {
+          "confidence": 0.7773788,
+          "endTime": 0.505,
+          "startTime": 0.235,
+          "word": "教"
+        },
+        {
+          "confidence": 0.6228334,
+          "endTime": 0.595,
+          "startTime": 0.505,
+          "word": "案"
+        },
+        {
+          "confidence": 0.8930478,
+          "endTime": 0.755,
+          "startTime": 0.595,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9517262,
+          "endTime": 0.955,
+          "startTime": 0.755,
+          "word": "课"
+        },
+        {
+          "confidence": 0.95325357,
+          "endTime": 1.285,
+          "startTime": 0.955,
+          "word": "件，"
+        },
+        {
+          "confidence": 0.915519,
+          "endTime": 1.475,
+          "startTime": 1.325,
+          "word": "也"
+        },
+        {
+          "confidence": 0.96491414,
+          "endTime": 1.595,
+          "startTime": 1.475,
+          "word": "能"
+        },
+        {
+          "confidence": 0.98128724,
+          "endTime": 1.805,
+          "startTime": 1.595,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9615948,
+          "endTime": 1.935,
+          "startTime": 1.805,
+          "word": "载"
+        },
+        {
+          "confidence": 0.9434428,
+          "endTime": 2.055,
+          "startTime": 1.935,
+          "word": "到"
+        },
+        {
+          "confidence": 0.94991744,
+          "endTime": 2.235,
+          "startTime": 2.055,
+          "word": "电"
+        },
+        {
+          "confidence": 0.9379362,
+          "endTime": 2.505,
+          "startTime": 2.235,
+          "word": "脑。"
+        }
+      ]
+    }
+  ]
+}

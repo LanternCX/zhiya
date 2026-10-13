@@ -1,0 +1,478 @@
+{
+  "duration": 15.343208333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "先让知芽了解你。",
+      "words": [
+        {
+          "confidence": 0.949491,
+          "endTime": 0.445,
+          "startTime": 0.225,
+          "word": "先"
+        },
+        {
+          "confidence": 0.91079247,
+          "endTime": 0.575,
+          "startTime": 0.445,
+          "word": "让"
+        },
+        {
+          "confidence": 0.79605234,
+          "endTime": 0.745,
+          "startTime": 0.575,
+          "word": "知"
+        },
+        {
+          "confidence": 0.7407719,
+          "endTime": 0.905,
+          "startTime": 0.745,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.41725066,
+          "endTime": 1.045,
+          "startTime": 0.905,
+          "word": "了"
+        },
+        {
+          "confidence": 0.8674164,
+          "endTime": 1.235,
+          "startTime": 1.045,
+          "word": "解"
+        },
+        {
+          "confidence": 0.95160353,
+          "endTime": 1.425,
+          "startTime": 1.235,
+          "word": "你。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "通过对话，说清楚你教什么、学生有什么基础，以及备课时的实际条件。",
+      "words": [
+        {
+          "confidence": 0.46762404,
+          "endTime": 2.0250416,
+          "startTime": 1.9500417,
+          "word": "通"
+        },
+        {
+          "confidence": 0.21542083,
+          "endTime": 2.0850418,
+          "startTime": 2.0250416,
+          "word": "过"
+        },
+        {
+          "confidence": 0.7460032,
+          "endTime": 2.2050416,
+          "startTime": 2.0850418,
+          "word": "对"
+        },
+        {
+          "confidence": 0.95628524,
+          "endTime": 2.5450416,
+          "startTime": 2.2050416,
+          "word": "话，"
+        },
+        {
+          "confidence": 0.8178481,
+          "endTime": 2.7750416,
+          "startTime": 2.5750418,
+          "word": "说"
+        },
+        {
+          "confidence": 0.8740353,
+          "endTime": 3.0050416,
+          "startTime": 2.7750416,
+          "word": "清"
+        },
+        {
+          "confidence": 0.91652477,
+          "endTime": 3.1950417,
+          "startTime": 3.0050416,
+          "word": "楚"
+        },
+        {
+          "confidence": 0.9205525,
+          "endTime": 3.3450418,
+          "startTime": 3.1950417,
+          "word": "你"
+        },
+        {
+          "confidence": 0.90227103,
+          "endTime": 3.5750418,
+          "startTime": 3.3450418,
+          "word": "教"
+        },
+        {
+          "confidence": 0.582653,
+          "endTime": 3.8450418,
+          "startTime": 3.5750418,
+          "word": "什"
+        },
+        {
+          "confidence": 0.30113685,
+          "endTime": 3.9250417,
+          "startTime": 3.8450418,
+          "word": "么、"
+        },
+        {
+          "confidence": 0.9791053,
+          "endTime": 4.4150414,
+          "startTime": 4.2150416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8378726,
+          "endTime": 4.5950418,
+          "startTime": 4.4150414,
+          "word": "生"
+        },
+        {
+          "confidence": 0.973021,
+          "endTime": 4.6950417,
+          "startTime": 4.5950418,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9773785,
+          "endTime": 4.8450418,
+          "startTime": 4.6950417,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98671883,
+          "endTime": 4.9150414,
+          "startTime": 4.8450418,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9036872,
+          "endTime": 5.0950418,
+          "startTime": 4.9150414,
+          "word": "基"
+        },
+        {
+          "confidence": 0.93880934,
+          "endTime": 5.3850417,
+          "startTime": 5.0950418,
+          "word": "础，"
+        },
+        {
+          "confidence": 0.8422966,
+          "endTime": 5.7350416,
+          "startTime": 5.6150417,
+          "word": "以"
+        },
+        {
+          "confidence": 0.937673,
+          "endTime": 5.9250417,
+          "startTime": 5.7350416,
+          "word": "及"
+        },
+        {
+          "confidence": 0.97313714,
+          "endTime": 6.1150417,
+          "startTime": 5.9250417,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9735709,
+          "endTime": 6.2950416,
+          "startTime": 6.1150417,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9455574,
+          "endTime": 6.4450417,
+          "startTime": 6.2950416,
+          "word": "时"
+        },
+        {
+          "confidence": 0.955189,
+          "endTime": 6.535042,
+          "startTime": 6.4450417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.96065885,
+          "endTime": 6.705042,
+          "startTime": 6.535042,
+          "word": "实"
+        },
+        {
+          "confidence": 0.91208255,
+          "endTime": 6.8450418,
+          "startTime": 6.705042,
+          "word": "际"
+        },
+        {
+          "confidence": 0.9104305,
+          "endTime": 7.075042,
+          "startTime": 6.8450418,
+          "word": "条"
+        },
+        {
+          "confidence": 0.98734707,
+          "endTime": 7.3150415,
+          "startTime": 7.075042,
+          "word": "件。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这些信息会整理成个人档案，供后续协助备课时参考。",
+      "words": [
+        {
+          "confidence": 0.9774371,
+          "endTime": 7.8050838,
+          "startTime": 7.6650834,
+          "word": "这"
+        },
+        {
+          "confidence": 0.97752553,
+          "endTime": 7.9350834,
+          "startTime": 7.8050838,
+          "word": "些"
+        },
+        {
+          "confidence": 0.89229834,
+          "endTime": 8.115084,
+          "startTime": 7.9350834,
+          "word": "信"
+        },
+        {
+          "confidence": 0.85520595,
+          "endTime": 8.345083,
+          "startTime": 8.115084,
+          "word": "息"
+        },
+        {
+          "confidence": 0.9621023,
+          "endTime": 8.525084,
+          "startTime": 8.345083,
+          "word": "会"
+        },
+        {
+          "confidence": 0.91776204,
+          "endTime": 8.685083,
+          "startTime": 8.525084,
+          "word": "整"
+        },
+        {
+          "confidence": 0.84418756,
+          "endTime": 8.775084,
+          "startTime": 8.685083,
+          "word": "理"
+        },
+        {
+          "confidence": 0.9367702,
+          "endTime": 8.965084,
+          "startTime": 8.775084,
+          "word": "成"
+        },
+        {
+          "confidence": 0.87313724,
+          "endTime": 9.105083,
+          "startTime": 8.965084,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9090231,
+          "endTime": 9.225083,
+          "startTime": 9.105083,
+          "word": "人"
+        },
+        {
+          "confidence": 0.83280754,
+          "endTime": 9.395083,
+          "startTime": 9.225083,
+          "word": "档"
+        },
+        {
+          "confidence": 0.9060467,
+          "endTime": 9.595083,
+          "startTime": 9.395083,
+          "word": "案，"
+        },
+        {
+          "confidence": 0.9235672,
+          "endTime": 9.995084,
+          "startTime": 9.865084,
+          "word": "供"
+        },
+        {
+          "confidence": 0.8129262,
+          "endTime": 10.215084,
+          "startTime": 9.995084,
+          "word": "后"
+        },
+        {
+          "confidence": 0.7845899,
+          "endTime": 10.405084,
+          "startTime": 10.215084,
+          "word": "续"
+        },
+        {
+          "confidence": 0.8516393,
+          "endTime": 10.625084,
+          "startTime": 10.405084,
+          "word": "协"
+        },
+        {
+          "confidence": 0.87502545,
+          "endTime": 10.745084,
+          "startTime": 10.625084,
+          "word": "助"
+        },
+        {
+          "confidence": 0.9511171,
+          "endTime": 10.895083,
+          "startTime": 10.745084,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9784717,
+          "endTime": 11.0650835,
+          "startTime": 10.895083,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96600777,
+          "endTime": 11.215084,
+          "startTime": 11.0650835,
+          "word": "时"
+        },
+        {
+          "confidence": 0.9622492,
+          "endTime": 11.395083,
+          "startTime": 11.215084,
+          "word": "参"
+        },
+        {
+          "confidence": 0.72762805,
+          "endTime": 11.485084,
+          "startTime": 11.395083,
+          "word": "考。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先让知芽了解你。通过对话，说清楚你教什么、学生有什么基础，以及备课时的实际条件。这些信息会整理成个人档案，供后续协助备课时参考。你可以查看，也可以提出修改或要求忘记。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "你可以查看，也可以提出修改或要求忘记。",
+      "words": [
+        {
+          "confidence": 0.97089964,
+          "endTime": 12.135126,
+          "startTime": 11.995126,
+          "word": "你"
+        },
+        {
+          "confidence": 0.72901094,
+          "endTime": 12.265125,
+          "startTime": 12.135126,
+          "word": "可"
+        },
+        {
+          "confidence": 0.67438936,
+          "endTime": 12.345125,
+          "startTime": 12.265125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9626048,
+          "endTime": 12.585126,
+          "startTime": 12.345125,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9676207,
+          "endTime": 12.845125,
+          "startTime": 12.585126,
+          "word": "看，"
+        },
+        {
+          "confidence": 0.9509959,
+          "endTime": 13.225125,
+          "startTime": 13.095125,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7481223,
+          "endTime": 13.355125,
+          "startTime": 13.225125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7012145,
+          "endTime": 13.445126,
+          "startTime": 13.355125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9595065,
+          "endTime": 13.605125,
+          "startTime": 13.445126,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9799013,
+          "endTime": 13.745126,
+          "startTime": 13.605125,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9100499,
+          "endTime": 13.955126,
+          "startTime": 13.745126,
+          "word": "修"
+        },
+        {
+          "confidence": 0.95659,
+          "endTime": 14.205126,
+          "startTime": 13.955126,
+          "word": "改"
+        },
+        {
+          "confidence": 0.90537107,
+          "endTime": 14.435125,
+          "startTime": 14.235126,
+          "word": "或"
+        },
+        {
+          "confidence": 0.8088705,
+          "endTime": 14.555126,
+          "startTime": 14.435125,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9374559,
+          "endTime": 14.765125,
+          "startTime": 14.555126,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9236861,
+          "endTime": 14.905126,
+          "startTime": 14.765125,
+          "word": "忘"
+        },
+        {
+          "confidence": 0.958981,
+          "endTime": 15.145125,
+          "startTime": 14.905126,
+          "word": "记。"
+        }
+      ]
+    }
+  ]
+}

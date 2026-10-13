@@ -1,0 +1,178 @@
+{
+  "duration": 5.201125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "打开班级里的教师分享，就能找到老师开放给本班的课件和文档。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "打开班级里的教师分享，就能找到老师开放给本班的课件和文档。",
+      "words": [
+        {
+          "confidence": 0.9570143,
+          "endTime": 0.395,
+          "startTime": 0.225,
+          "word": "打"
+        },
+        {
+          "confidence": 0.973394,
+          "endTime": 0.575,
+          "startTime": 0.395,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9519499,
+          "endTime": 0.745,
+          "startTime": 0.575,
+          "word": "班"
+        },
+        {
+          "confidence": 0.93793,
+          "endTime": 0.905,
+          "startTime": 0.745,
+          "word": "级"
+        },
+        {
+          "confidence": 0.9757888,
+          "endTime": 1.035,
+          "startTime": 0.905,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9492275,
+          "endTime": 1.135,
+          "startTime": 1.035,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97323567,
+          "endTime": 1.275,
+          "startTime": 1.135,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9390552,
+          "endTime": 1.445,
+          "startTime": 1.275,
+          "word": "师"
+        },
+        {
+          "confidence": 0.97424364,
+          "endTime": 1.615,
+          "startTime": 1.445,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9753453,
+          "endTime": 1.895,
+          "startTime": 1.615,
+          "word": "享，"
+        },
+        {
+          "confidence": 0.9023708,
+          "endTime": 2.225,
+          "startTime": 2.085,
+          "word": "就"
+        },
+        {
+          "confidence": 0.96852523,
+          "endTime": 2.365,
+          "startTime": 2.225,
+          "word": "能"
+        },
+        {
+          "confidence": 0.90077466,
+          "endTime": 2.525,
+          "startTime": 2.365,
+          "word": "找"
+        },
+        {
+          "confidence": 0.9641414,
+          "endTime": 2.715,
+          "startTime": 2.525,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9069023,
+          "endTime": 2.865,
+          "startTime": 2.715,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96117824,
+          "endTime": 3.075,
+          "startTime": 2.865,
+          "word": "师"
+        },
+        {
+          "confidence": 0.95215523,
+          "endTime": 3.285,
+          "startTime": 3.075,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9615005,
+          "endTime": 3.445,
+          "startTime": 3.285,
+          "word": "放"
+        },
+        {
+          "confidence": 0.9735481,
+          "endTime": 3.605,
+          "startTime": 3.445,
+          "word": "给"
+        },
+        {
+          "confidence": 0.82995,
+          "endTime": 3.765,
+          "startTime": 3.605,
+          "word": "本"
+        },
+        {
+          "confidence": 0.87612236,
+          "endTime": 3.935,
+          "startTime": 3.815,
+          "word": "班"
+        },
+        {
+          "confidence": 0.89191115,
+          "endTime": 4.035,
+          "startTime": 3.935,
+          "word": "的"
+        },
+        {
+          "confidence": 0.93771553,
+          "endTime": 4.245,
+          "startTime": 4.035,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9249343,
+          "endTime": 4.425,
+          "startTime": 4.245,
+          "word": "件"
+        },
+        {
+          "confidence": 0.879346,
+          "endTime": 4.565,
+          "startTime": 4.425,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9162661,
+          "endTime": 4.715,
+          "startTime": 4.565,
+          "word": "文"
+        },
+        {
+          "confidence": 0.90237254,
+          "endTime": 4.925,
+          "startTime": 4.715,
+          "word": "档。"
+        }
+      ]
+    }
+  ]
+}

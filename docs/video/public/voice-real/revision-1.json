@@ -1,0 +1,226 @@
+{
+  "duration": 7.849125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师直接提出修改：留一句解释，一行代码，再加一个追问。这里不用重新写整套材料。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师直接提出修改：留一句解释，一行代码，再加一个追问。",
+      "words": [
+        {
+          "confidence": 0.95053214,
+          "endTime": 0.425,
+          "startTime": 0.235,
+          "word": "老"
+        },
+        {
+          "confidence": 0.95710933,
+          "endTime": 0.715,
+          "startTime": 0.425,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8309319,
+          "endTime": 0.925,
+          "startTime": 0.715,
+          "word": "直"
+        },
+        {
+          "confidence": 0.9228136,
+          "endTime": 1.125,
+          "startTime": 0.925,
+          "word": "接"
+        },
+        {
+          "confidence": 0.933215,
+          "endTime": 1.305,
+          "startTime": 1.125,
+          "word": "提"
+        },
+        {
+          "confidence": 0.96167064,
+          "endTime": 1.455,
+          "startTime": 1.305,
+          "word": "出"
+        },
+        {
+          "confidence": 0.89043075,
+          "endTime": 1.645,
+          "startTime": 1.455,
+          "word": "修"
+        },
+        {
+          "confidence": 0.20041165,
+          "endTime": 1.675,
+          "startTime": 1.645,
+          "word": "改："
+        },
+        {
+          "confidence": 0.9297261,
+          "endTime": 2.375,
+          "startTime": 2.165,
+          "word": "留"
+        },
+        {
+          "confidence": 0.8366031,
+          "endTime": 2.465,
+          "startTime": 2.375,
+          "word": "一"
+        },
+        {
+          "confidence": 0.93704885,
+          "endTime": 2.585,
+          "startTime": 2.465,
+          "word": "句"
+        },
+        {
+          "confidence": 0.92012316,
+          "endTime": 2.795,
+          "startTime": 2.585,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9653514,
+          "endTime": 3.105,
+          "startTime": 2.795,
+          "word": "释，"
+        },
+        {
+          "confidence": 0.91236293,
+          "endTime": 3.465,
+          "startTime": 3.325,
+          "word": "一"
+        },
+        {
+          "confidence": 0.90311235,
+          "endTime": 3.635,
+          "startTime": 3.465,
+          "word": "行"
+        },
+        {
+          "confidence": 0.92777133,
+          "endTime": 3.825,
+          "startTime": 3.635,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8371578,
+          "endTime": 4.035,
+          "startTime": 3.825,
+          "word": "码，"
+        },
+        {
+          "confidence": 0.9674529,
+          "endTime": 4.445,
+          "startTime": 4.255,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9788344,
+          "endTime": 4.645,
+          "startTime": 4.445,
+          "word": "加"
+        },
+        {
+          "confidence": 0.9316468,
+          "endTime": 4.695,
+          "startTime": 4.645,
+          "word": "一"
+        },
+        {
+          "confidence": 0.98039013,
+          "endTime": 4.805,
+          "startTime": 4.695,
+          "word": "个"
+        },
+        {
+          "confidence": 0.93860275,
+          "endTime": 5.055,
+          "startTime": 4.805,
+          "word": "追"
+        },
+        {
+          "confidence": 0.8569539,
+          "endTime": 5.205,
+          "startTime": 5.055,
+          "word": "问。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这里不用重新写整套材料。",
+      "words": [
+        {
+          "confidence": 0.88966614,
+          "endTime": 5.705042,
+          "startTime": 5.620042,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9590996,
+          "endTime": 5.8850417,
+          "startTime": 5.705042,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9503399,
+          "endTime": 6.105042,
+          "startTime": 5.8850417,
+          "word": "不"
+        },
+        {
+          "confidence": 0.98486483,
+          "endTime": 6.255042,
+          "startTime": 6.105042,
+          "word": "用"
+        },
+        {
+          "confidence": 0.7934567,
+          "endTime": 6.465042,
+          "startTime": 6.255042,
+          "word": "重"
+        },
+        {
+          "confidence": 0.9419224,
+          "endTime": 6.645042,
+          "startTime": 6.465042,
+          "word": "新"
+        },
+        {
+          "confidence": 0.80176485,
+          "endTime": 6.875042,
+          "startTime": 6.645042,
+          "word": "写"
+        },
+        {
+          "confidence": 0.96407616,
+          "endTime": 7.055042,
+          "startTime": 6.875042,
+          "word": "整"
+        },
+        {
+          "confidence": 0.19969817,
+          "endTime": 7.1150417,
+          "startTime": 7.055042,
+          "word": "套"
+        },
+        {
+          "confidence": 0.20314088,
+          "endTime": 7.1750417,
+          "startTime": 7.1150417,
+          "word": "材"
+        },
+        {
+          "confidence": 0.20931408,
+          "endTime": 7.2350416,
+          "startTime": 7.1750417,
+          "word": "料。"
+        }
+      ]
+    }
+  ]
+}

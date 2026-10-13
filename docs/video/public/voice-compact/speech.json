@@ -1,0 +1,214 @@
+{
+  "duration": 7.1178333333333335,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "也可以直接说出教学想法。",
+      "words": [
+        {
+          "confidence": 0.8926762,
+          "endTime": 0.425,
+          "startTime": 0.285,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7789675,
+          "endTime": 0.605,
+          "startTime": 0.425,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7133339,
+          "endTime": 0.805,
+          "startTime": 0.605,
+          "word": "以"
+        },
+        {
+          "confidence": 0.91087854,
+          "endTime": 0.995,
+          "startTime": 0.805,
+          "word": "直"
+        },
+        {
+          "confidence": 0.95940614,
+          "endTime": 1.155,
+          "startTime": 0.995,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9284457,
+          "endTime": 1.345,
+          "startTime": 1.155,
+          "word": "说"
+        },
+        {
+          "confidence": 0.92700434,
+          "endTime": 1.505,
+          "startTime": 1.345,
+          "word": "出"
+        },
+        {
+          "confidence": 0.91527987,
+          "endTime": 1.665,
+          "startTime": 1.505,
+          "word": "教"
+        },
+        {
+          "confidence": 0.97230875,
+          "endTime": 1.825,
+          "startTime": 1.665,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9675302,
+          "endTime": 2.055,
+          "startTime": 1.825,
+          "word": "想"
+        },
+        {
+          "confidence": 0.9755793,
+          "endTime": 2.345,
+          "startTime": 2.055,
+          "word": "法。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "也可以直接说出教学想法。语音会转成文字，老师检查和修改后，再发送给知芽。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "语音会转成文字，老师检查和修改后，再发送给知芽。",
+      "words": [
+        {
+          "confidence": 0.5433923,
+          "endTime": 2.8250418,
+          "startTime": 2.7800417,
+          "word": "语"
+        },
+        {
+          "confidence": 0.8755524,
+          "endTime": 2.9850416,
+          "startTime": 2.8250418,
+          "word": "音"
+        },
+        {
+          "confidence": 0.9509462,
+          "endTime": 3.1750417,
+          "startTime": 2.9850416,
+          "word": "会"
+        },
+        {
+          "confidence": 0.89628065,
+          "endTime": 3.3150418,
+          "startTime": 3.1750417,
+          "word": "转"
+        },
+        {
+          "confidence": 0.893683,
+          "endTime": 3.5250416,
+          "startTime": 3.3150418,
+          "word": "成"
+        },
+        {
+          "confidence": 0.92423034,
+          "endTime": 3.6550417,
+          "startTime": 3.5250416,
+          "word": "文"
+        },
+        {
+          "confidence": 0.87044376,
+          "endTime": 3.8950417,
+          "startTime": 3.6550417,
+          "word": "字，"
+        },
+        {
+          "confidence": 0.95198995,
+          "endTime": 4.4250417,
+          "startTime": 4.2750416,
+          "word": "老"
+        },
+        {
+          "confidence": 0.990362,
+          "endTime": 4.625042,
+          "startTime": 4.4250417,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9341587,
+          "endTime": 4.8550415,
+          "startTime": 4.625042,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9581199,
+          "endTime": 5.085042,
+          "startTime": 4.8550415,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9432301,
+          "endTime": 5.205042,
+          "startTime": 5.085042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9138893,
+          "endTime": 5.3950415,
+          "startTime": 5.205042,
+          "word": "修"
+        },
+        {
+          "confidence": 0.95047045,
+          "endTime": 5.575042,
+          "startTime": 5.3950415,
+          "word": "改"
+        },
+        {
+          "confidence": 0.9049198,
+          "endTime": 5.8850417,
+          "startTime": 5.575042,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9754323,
+          "endTime": 6.085042,
+          "startTime": 5.915042,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9231688,
+          "endTime": 6.2650414,
+          "startTime": 6.085042,
+          "word": "发"
+        },
+        {
+          "confidence": 0.754289,
+          "endTime": 6.3950415,
+          "startTime": 6.2650414,
+          "word": "送"
+        },
+        {
+          "confidence": 0.93655604,
+          "endTime": 6.535042,
+          "startTime": 6.3950415,
+          "word": "给"
+        },
+        {
+          "confidence": 0.90221834,
+          "endTime": 6.7350416,
+          "startTime": 6.535042,
+          "word": "知"
+        },
+        {
+          "confidence": 0.71586037,
+          "endTime": 6.9250417,
+          "startTime": 6.7350416,
+          "word": "芽。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "duration": 7.868416666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "知芽给出了教学目标和时间分配。",
+      "words": [
+        {
+          "confidence": 0.7843488,
+          "endTime": 0.425,
+          "startTime": 0.225,
+          "word": "知"
+        },
+        {
+          "confidence": 0.87493014,
+          "endTime": 0.645,
+          "startTime": 0.425,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.94995445,
+          "endTime": 0.805,
+          "startTime": 0.645,
+          "word": "给"
+        },
+        {
+          "confidence": 0.88360876,
+          "endTime": 0.975,
+          "startTime": 0.805,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9584926,
+          "endTime": 1.075,
+          "startTime": 0.975,
+          "word": "了"
+        },
+        {
+          "confidence": 0.977686,
+          "endTime": 1.245,
+          "startTime": 1.075,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9480757,
+          "endTime": 1.425,
+          "startTime": 1.245,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9632173,
+          "endTime": 1.585,
+          "startTime": 1.425,
+          "word": "目"
+        },
+        {
+          "confidence": 0.9632844,
+          "endTime": 1.865,
+          "startTime": 1.585,
+          "word": "标"
+        },
+        {
+          "confidence": 0.8825871,
+          "endTime": 1.995,
+          "startTime": 1.915,
+          "word": "和"
+        },
+        {
+          "confidence": 0.91524625,
+          "endTime": 2.185,
+          "startTime": 1.995,
+          "word": "时"
+        },
+        {
+          "confidence": 0.99085045,
+          "endTime": 2.325,
+          "startTime": 2.185,
+          "word": "间"
+        },
+        {
+          "confidence": 0.9769648,
+          "endTime": 2.515,
+          "startTime": 2.325,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9758373,
+          "endTime": 2.795,
+          "startTime": 2.515,
+          "word": "配。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽给出了教学目标和时间分配。从点餐导入，到认识工具，再到讲解和上机练习。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "从点餐导入，到认识工具，再到讲解和上机练习。",
+      "words": [
+        {
+          "confidence": 0.6443191,
+          "endTime": 3.3250418,
+          "startTime": 3.2500417,
+          "word": "从"
+        },
+        {
+          "confidence": 0.8799858,
+          "endTime": 3.5750418,
+          "startTime": 3.3250418,
+          "word": "点"
+        },
+        {
+          "confidence": 0.88162535,
+          "endTime": 3.7850418,
+          "startTime": 3.5750418,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.88528293,
+          "endTime": 4.0250416,
+          "startTime": 3.7850418,
+          "word": "导"
+        },
+        {
+          "confidence": 0.963386,
+          "endTime": 4.3150415,
+          "startTime": 4.0250416,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.9119836,
+          "endTime": 4.6050415,
+          "startTime": 4.4050417,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9573211,
+          "endTime": 4.765042,
+          "startTime": 4.6050415,
+          "word": "认"
+        },
+        {
+          "confidence": 0.9771391,
+          "endTime": 4.9350414,
+          "startTime": 4.765042,
+          "word": "识"
+        },
+        {
+          "confidence": 0.9422706,
+          "endTime": 5.125042,
+          "startTime": 4.9350414,
+          "word": "工"
+        },
+        {
+          "confidence": 0.8646343,
+          "endTime": 5.3550415,
+          "startTime": 5.125042,
+          "word": "具，"
+        },
+        {
+          "confidence": 0.90591365,
+          "endTime": 5.805042,
+          "startTime": 5.6350417,
+          "word": "再"
+        },
+        {
+          "confidence": 0.89165074,
+          "endTime": 5.9650416,
+          "startTime": 5.805042,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9103288,
+          "endTime": 6.2250414,
+          "startTime": 5.9650416,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9360957,
+          "endTime": 6.515042,
+          "startTime": 6.2250414,
+          "word": "解"
+        },
+        {
+          "confidence": 0.8870184,
+          "endTime": 6.7150416,
+          "startTime": 6.585042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.95323277,
+          "endTime": 6.9350414,
+          "startTime": 6.7150416,
+          "word": "上"
+        },
+        {
+          "confidence": 0.93353254,
+          "endTime": 7.0950418,
+          "startTime": 6.9350414,
+          "word": "机"
+        },
+        {
+          "confidence": 0.8980496,
+          "endTime": 7.2650414,
+          "startTime": 7.0950418,
+          "word": "练"
+        },
+        {
+          "confidence": 0.8882477,
+          "endTime": 7.4050417,
+          "startTime": 7.2650414,
+          "word": "习。"
+        }
+      ]
+    }
+  ]
+}

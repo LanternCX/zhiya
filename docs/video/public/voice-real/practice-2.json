@@ -1,0 +1,232 @@
+{
+  "duration": 7.331041666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "再用一道小题，确认学生有没有理解变量的作用。",
+      "words": [
+        {
+          "confidence": 0.9471265,
+          "endTime": 0.425,
+          "startTime": 0.245,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9706306,
+          "endTime": 0.565,
+          "startTime": 0.425,
+          "word": "用"
+        },
+        {
+          "confidence": 0.90802675,
+          "endTime": 0.665,
+          "startTime": 0.565,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95283574,
+          "endTime": 0.795,
+          "startTime": 0.665,
+          "word": "道"
+        },
+        {
+          "confidence": 0.9565489,
+          "endTime": 1.035,
+          "startTime": 0.795,
+          "word": "小"
+        },
+        {
+          "confidence": 0.9236028,
+          "endTime": 1.345,
+          "startTime": 1.035,
+          "word": "题，"
+        },
+        {
+          "confidence": 0.93887615,
+          "endTime": 1.765,
+          "startTime": 1.555,
+          "word": "确"
+        },
+        {
+          "confidence": 0.78556573,
+          "endTime": 1.985,
+          "startTime": 1.765,
+          "word": "认"
+        },
+        {
+          "confidence": 0.86467576,
+          "endTime": 2.195,
+          "startTime": 1.985,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9067463,
+          "endTime": 2.405,
+          "startTime": 2.195,
+          "word": "生"
+        },
+        {
+          "confidence": 0.96217203,
+          "endTime": 2.555,
+          "startTime": 2.405,
+          "word": "有"
+        },
+        {
+          "confidence": 0.98644966,
+          "endTime": 2.755,
+          "startTime": 2.555,
+          "word": "没"
+        },
+        {
+          "confidence": 0.9633805,
+          "endTime": 2.805,
+          "startTime": 2.755,
+          "word": "有"
+        },
+        {
+          "confidence": 0.74469334,
+          "endTime": 2.955,
+          "startTime": 2.805,
+          "word": "理"
+        },
+        {
+          "confidence": 0.8422195,
+          "endTime": 3.135,
+          "startTime": 2.955,
+          "word": "解"
+        },
+        {
+          "confidence": 0.90156376,
+          "endTime": 3.325,
+          "startTime": 3.135,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9770147,
+          "endTime": 3.475,
+          "startTime": 3.325,
+          "word": "量"
+        },
+        {
+          "confidence": 0.970734,
+          "endTime": 3.565,
+          "startTime": 3.475,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9445173,
+          "endTime": 3.785,
+          "startTime": 3.565,
+          "word": "作"
+        },
+        {
+          "confidence": 0.8211586,
+          "endTime": 3.975,
+          "startTime": 3.785,
+          "word": "用。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再用一道小题，确认学生有没有理解变量的作用。讲解和练习，接在同一条学习路径上。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "讲解和练习，接在同一条学习路径上。",
+      "words": [
+        {
+          "confidence": 0.6965492,
+          "endTime": 4.5450416,
+          "startTime": 4.4400415,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9265265,
+          "endTime": 4.7750416,
+          "startTime": 4.5450416,
+          "word": "解"
+        },
+        {
+          "confidence": 0.92452997,
+          "endTime": 4.9250417,
+          "startTime": 4.7750416,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9153412,
+          "endTime": 5.0850415,
+          "startTime": 4.9250417,
+          "word": "练"
+        },
+        {
+          "confidence": 0.97972715,
+          "endTime": 5.4150414,
+          "startTime": 5.0850415,
+          "word": "习，"
+        },
+        {
+          "confidence": 0.9235805,
+          "endTime": 5.5950413,
+          "startTime": 5.4550414,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9533591,
+          "endTime": 5.7550416,
+          "startTime": 5.5950413,
+          "word": "在"
+        },
+        {
+          "confidence": 0.96192944,
+          "endTime": 5.9850416,
+          "startTime": 5.7550416,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9153932,
+          "endTime": 6.1050415,
+          "startTime": 5.9850416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9621353,
+          "endTime": 6.2750416,
+          "startTime": 6.1050415,
+          "word": "条"
+        },
+        {
+          "confidence": 0.9547031,
+          "endTime": 6.4350414,
+          "startTime": 6.2750416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.93617237,
+          "endTime": 6.6050415,
+          "startTime": 6.4350414,
+          "word": "习"
+        },
+        {
+          "confidence": 0.5991987,
+          "endTime": 6.675041,
+          "startTime": 6.6050415,
+          "word": "路"
+        },
+        {
+          "confidence": 0.14293364,
+          "endTime": 6.7350416,
+          "startTime": 6.675041,
+          "word": "径"
+        },
+        {
+          "confidence": 0.28363243,
+          "endTime": 6.7950416,
+          "startTime": 6.7350416,
+          "word": "上。"
+        }
+      ]
+    }
+  ]
+}

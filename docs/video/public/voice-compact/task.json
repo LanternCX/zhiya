@@ -1,0 +1,316 @@
+{
+  "duration": 11.397458333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "现在提出这堂课的任务：初一零基础，四十分钟，两人一机。",
+      "words": [
+        {
+          "confidence": 0.97623354,
+          "endTime": 0.475,
+          "startTime": 0.225,
+          "word": "现"
+        },
+        {
+          "confidence": 0.9261625,
+          "endTime": 0.685,
+          "startTime": 0.475,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9359633,
+          "endTime": 0.855,
+          "startTime": 0.685,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9751801,
+          "endTime": 1.005,
+          "startTime": 0.855,
+          "word": "出"
+        },
+        {
+          "confidence": 0.96099854,
+          "endTime": 1.125,
+          "startTime": 1.005,
+          "word": "这"
+        },
+        {
+          "confidence": 0.92482793,
+          "endTime": 1.285,
+          "startTime": 1.125,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.96340364,
+          "endTime": 1.455,
+          "startTime": 1.285,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9487688,
+          "endTime": 1.555,
+          "startTime": 1.455,
+          "word": "的"
+        },
+        {
+          "confidence": 0.90597326,
+          "endTime": 1.805,
+          "startTime": 1.555,
+          "word": "任"
+        },
+        {
+          "confidence": 0.22582957,
+          "endTime": 1.835,
+          "startTime": 1.805,
+          "word": "务："
+        },
+        {
+          "confidence": 0.95725656,
+          "endTime": 2.445,
+          "startTime": 2.235,
+          "word": "初"
+        },
+        {
+          "confidence": 0.8915808,
+          "endTime": 2.615,
+          "startTime": 2.445,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95329124,
+          "endTime": 2.785,
+          "startTime": 2.615,
+          "word": "零"
+        },
+        {
+          "confidence": 0.9012018,
+          "endTime": 2.975,
+          "startTime": 2.785,
+          "word": "基"
+        },
+        {
+          "confidence": 0.94216734,
+          "endTime": 3.255,
+          "startTime": 2.975,
+          "word": "础，"
+        },
+        {
+          "confidence": 0.84478074,
+          "endTime": 3.555,
+          "startTime": 3.375,
+          "word": "四"
+        },
+        {
+          "confidence": 0.9506217,
+          "endTime": 3.675,
+          "startTime": 3.555,
+          "word": "十"
+        },
+        {
+          "confidence": 0.9361787,
+          "endTime": 3.815,
+          "startTime": 3.675,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9525816,
+          "endTime": 4.045,
+          "startTime": 3.815,
+          "word": "钟，"
+        },
+        {
+          "confidence": 0.9633687,
+          "endTime": 4.445,
+          "startTime": 4.245,
+          "word": "两"
+        },
+        {
+          "confidence": 0.9514374,
+          "endTime": 4.645,
+          "startTime": 4.445,
+          "word": "人"
+        },
+        {
+          "confidence": 0.9492163,
+          "endTime": 4.765,
+          "startTime": 4.645,
+          "word": "一"
+        },
+        {
+          "confidence": 0.91824853,
+          "endTime": 5.035,
+          "startTime": 4.765,
+          "word": "机。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "用食堂点餐，讲清楚变量、输入和输出。",
+      "words": [
+        {
+          "confidence": 0.72126013,
+          "endTime": 5.575042,
+          "startTime": 5.430042,
+          "word": "用"
+        },
+        {
+          "confidence": 0.80429465,
+          "endTime": 5.795042,
+          "startTime": 5.575042,
+          "word": "食"
+        },
+        {
+          "confidence": 0.949373,
+          "endTime": 5.975042,
+          "startTime": 5.795042,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.92543393,
+          "endTime": 6.1550417,
+          "startTime": 5.975042,
+          "word": "点"
+        },
+        {
+          "confidence": 0.90605867,
+          "endTime": 6.395042,
+          "startTime": 6.1550417,
+          "word": "餐，"
+        },
+        {
+          "confidence": 0.96495473,
+          "endTime": 6.7750416,
+          "startTime": 6.575042,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.8830297,
+          "endTime": 6.9650416,
+          "startTime": 6.7750416,
+          "word": "清"
+        },
+        {
+          "confidence": 0.8749643,
+          "endTime": 7.145042,
+          "startTime": 6.9650416,
+          "word": "楚"
+        },
+        {
+          "confidence": 0.6568,
+          "endTime": 7.5250416,
+          "startTime": 7.145042,
+          "word": "变"
+        },
+        {
+          "confidence": 0.22223674,
+          "endTime": 7.555042,
+          "startTime": 7.5250416,
+          "word": "量、"
+        },
+        {
+          "confidence": 0.9380692,
+          "endTime": 8.005042,
+          "startTime": 7.725042,
+          "word": "输"
+        },
+        {
+          "confidence": 0.96367365,
+          "endTime": 8.255042,
+          "startTime": 8.005042,
+          "word": "入"
+        },
+        {
+          "confidence": 0.8928473,
+          "endTime": 8.415042,
+          "startTime": 8.285042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.90358317,
+          "endTime": 8.595041,
+          "startTime": 8.415042,
+          "word": "输"
+        },
+        {
+          "confidence": 0.95964557,
+          "endTime": 8.875042,
+          "startTime": 8.595041,
+          "word": "出。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "现在提出这堂课的任务：初一零基础，四十分钟，两人一机。用食堂点餐，讲清楚变量、输入和输出。先确认范围，再准备材料。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "先确认范围，再准备材料。",
+      "words": [
+        {
+          "confidence": 0.87672836,
+          "endTime": 9.395083,
+          "startTime": 9.230083,
+          "word": "先"
+        },
+        {
+          "confidence": 0.8221622,
+          "endTime": 9.5650835,
+          "startTime": 9.395083,
+          "word": "确"
+        },
+        {
+          "confidence": 0.7809526,
+          "endTime": 9.695084,
+          "startTime": 9.5650835,
+          "word": "认"
+        },
+        {
+          "confidence": 0.86368984,
+          "endTime": 9.945084,
+          "startTime": 9.695084,
+          "word": "范"
+        },
+        {
+          "confidence": 0.953011,
+          "endTime": 10.165084,
+          "startTime": 9.945084,
+          "word": "围，"
+        },
+        {
+          "confidence": 0.9312106,
+          "endTime": 10.525084,
+          "startTime": 10.365084,
+          "word": "再"
+        },
+        {
+          "confidence": 0.20122561,
+          "endTime": 10.585083,
+          "startTime": 10.525084,
+          "word": "准"
+        },
+        {
+          "confidence": 0.10761436,
+          "endTime": 10.645083,
+          "startTime": 10.585083,
+          "word": "备"
+        },
+        {
+          "confidence": 0.13534091,
+          "endTime": 10.705084,
+          "startTime": 10.645083,
+          "word": "材"
+        },
+        {
+          "confidence": 0.28914195,
+          "endTime": 10.765083,
+          "startTime": 10.705084,
+          "word": "料。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "duration": 4.11525,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "那我只写包子单价等于二，屏幕上会有数字吗？",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "那我只写包子单价等于二，屏幕上会有数字吗？",
+      "words": [
+        {
+          "confidence": 0.9272906,
+          "endTime": 0.455,
+          "startTime": 0.205,
+          "word": "那"
+        },
+        {
+          "confidence": 0.9490437,
+          "endTime": 0.635,
+          "startTime": 0.455,
+          "word": "我"
+        },
+        {
+          "confidence": 0.8754927,
+          "endTime": 0.815,
+          "startTime": 0.635,
+          "word": "只"
+        },
+        {
+          "confidence": 0.82234955,
+          "endTime": 1.045,
+          "startTime": 0.815,
+          "word": "写"
+        },
+        {
+          "confidence": 0.9545138,
+          "endTime": 1.245,
+          "startTime": 1.045,
+          "word": "包"
+        },
+        {
+          "confidence": 0.8474003,
+          "endTime": 1.375,
+          "startTime": 1.245,
+          "word": "子"
+        },
+        {
+          "confidence": 0.9263444,
+          "endTime": 1.555,
+          "startTime": 1.375,
+          "word": "单"
+        },
+        {
+          "confidence": 0.9463878,
+          "endTime": 1.765,
+          "startTime": 1.555,
+          "word": "价"
+        },
+        {
+          "confidence": 0.9318188,
+          "endTime": 1.935,
+          "startTime": 1.765,
+          "word": "等"
+        },
+        {
+          "confidence": 0.97572565,
+          "endTime": 2.055,
+          "startTime": 1.935,
+          "word": "于"
+        },
+        {
+          "confidence": 0.9617853,
+          "endTime": 2.295,
+          "startTime": 2.055,
+          "word": "二，"
+        },
+        {
+          "confidence": 0.96797645,
+          "endTime": 2.745,
+          "startTime": 2.545,
+          "word": "屏"
+        },
+        {
+          "confidence": 0.9580006,
+          "endTime": 2.865,
+          "startTime": 2.745,
+          "word": "幕"
+        },
+        {
+          "confidence": 0.9100864,
+          "endTime": 3.055,
+          "startTime": 2.865,
+          "word": "上"
+        },
+        {
+          "confidence": 0.92814904,
+          "endTime": 3.255,
+          "startTime": 3.055,
+          "word": "会"
+        },
+        {
+          "confidence": 0.9661139,
+          "endTime": 3.335,
+          "startTime": 3.255,
+          "word": "有"
+        },
+        {
+          "confidence": 0.90200686,
+          "endTime": 3.545,
+          "startTime": 3.335,
+          "word": "数"
+        },
+        {
+          "confidence": 0.95544916,
+          "endTime": 3.735,
+          "startTime": 3.545,
+          "word": "字"
+        },
+        {
+          "confidence": 0.95930356,
+          "endTime": 3.935,
+          "startTime": 3.735,
+          "word": "吗？"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,886 @@
+{
+  "duration": 30.663875,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "想象一下，明天你要给一群第一次接触编程的学生上课。",
+      "words": [
+        {
+          "confidence": 0.97285813,
+          "endTime": 0.465,
+          "startTime": 0.245,
+          "word": "想"
+        },
+        {
+          "confidence": 0.9514317,
+          "endTime": 0.675,
+          "startTime": 0.465,
+          "word": "象"
+        },
+        {
+          "confidence": 0.87011176,
+          "endTime": 0.785,
+          "startTime": 0.675,
+          "word": "一"
+        },
+        {
+          "confidence": 0.96714437,
+          "endTime": 1.075,
+          "startTime": 0.785,
+          "word": "下，"
+        },
+        {
+          "confidence": 0.95996696,
+          "endTime": 1.545,
+          "startTime": 1.325,
+          "word": "明"
+        },
+        {
+          "confidence": 0.9128256,
+          "endTime": 1.795,
+          "startTime": 1.545,
+          "word": "天"
+        },
+        {
+          "confidence": 0.9182019,
+          "endTime": 1.975,
+          "startTime": 1.795,
+          "word": "你"
+        },
+        {
+          "confidence": 0.95685875,
+          "endTime": 2.075,
+          "startTime": 1.975,
+          "word": "要"
+        },
+        {
+          "confidence": 0.95433027,
+          "endTime": 2.215,
+          "startTime": 2.075,
+          "word": "给"
+        },
+        {
+          "confidence": 0.8321156,
+          "endTime": 2.355,
+          "startTime": 2.215,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95666987,
+          "endTime": 2.635,
+          "startTime": 2.355,
+          "word": "群"
+        },
+        {
+          "confidence": 0.9187563,
+          "endTime": 2.855,
+          "startTime": 2.635,
+          "word": "第"
+        },
+        {
+          "confidence": 0.93973154,
+          "endTime": 2.915,
+          "startTime": 2.855,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95735806,
+          "endTime": 3.085,
+          "startTime": 2.915,
+          "word": "次"
+        },
+        {
+          "confidence": 0.8798902,
+          "endTime": 3.235,
+          "startTime": 3.085,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9295895,
+          "endTime": 3.395,
+          "startTime": 3.235,
+          "word": "触"
+        },
+        {
+          "confidence": 0.8546852,
+          "endTime": 3.565,
+          "startTime": 3.395,
+          "word": "编"
+        },
+        {
+          "confidence": 0.9555626,
+          "endTime": 3.735,
+          "startTime": 3.565,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9765722,
+          "endTime": 3.825,
+          "startTime": 3.735,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95227444,
+          "endTime": 3.985,
+          "startTime": 3.825,
+          "word": "学"
+        },
+        {
+          "confidence": 0.88550913,
+          "endTime": 4.115,
+          "startTime": 3.985,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9690405,
+          "endTime": 4.325,
+          "startTime": 4.115,
+          "word": "上"
+        },
+        {
+          "confidence": 0.9795019,
+          "endTime": 4.635,
+          "startTime": 4.325,
+          "word": "课。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "教什么，你已经想好了。",
+      "words": [
+        {
+          "confidence": 0.69800085,
+          "endTime": 5.1550417,
+          "startTime": 5.0500417,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9296998,
+          "endTime": 5.3650417,
+          "startTime": 5.1550417,
+          "word": "什"
+        },
+        {
+          "confidence": 0.9808353,
+          "endTime": 5.5950418,
+          "startTime": 5.3650417,
+          "word": "么，"
+        },
+        {
+          "confidence": 0.8979228,
+          "endTime": 5.975042,
+          "startTime": 5.805042,
+          "word": "你"
+        },
+        {
+          "confidence": 0.7804016,
+          "endTime": 6.035042,
+          "startTime": 5.975042,
+          "word": "已"
+        },
+        {
+          "confidence": 0.9655109,
+          "endTime": 6.165042,
+          "startTime": 6.035042,
+          "word": "经"
+        },
+        {
+          "confidence": 0.8801568,
+          "endTime": 6.3850417,
+          "startTime": 6.165042,
+          "word": "想"
+        },
+        {
+          "confidence": 0.8920717,
+          "endTime": 6.6550417,
+          "startTime": 6.3850417,
+          "word": "好"
+        },
+        {
+          "confidence": 0.961949,
+          "endTime": 6.8450418,
+          "startTime": 6.6550417,
+          "word": "了。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "可接下来呢？",
+      "words": [
+        {
+          "confidence": 0.9020708,
+          "endTime": 7.295083,
+          "startTime": 7.145083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.9314766,
+          "endTime": 7.4750834,
+          "startTime": 7.295083,
+          "word": "接"
+        },
+        {
+          "confidence": 0.95025665,
+          "endTime": 7.645083,
+          "startTime": 7.4750834,
+          "word": "下"
+        },
+        {
+          "confidence": 0.97931385,
+          "endTime": 7.795083,
+          "startTime": 7.645083,
+          "word": "来"
+        },
+        {
+          "confidence": 0.9773143,
+          "endTime": 7.985083,
+          "startTime": 7.795083,
+          "word": "呢？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "找案例、做课件、准备练习，还得把这些内容整理成教案。",
+      "words": [
+        {
+          "confidence": 0.8421865,
+          "endTime": 8.535125,
+          "startTime": 8.350124,
+          "word": "找"
+        },
+        {
+          "confidence": 0.81705374,
+          "endTime": 8.735125,
+          "startTime": 8.535125,
+          "word": "案"
+        },
+        {
+          "confidence": 0.1908112,
+          "endTime": 8.765124,
+          "startTime": 8.735125,
+          "word": "例、"
+        },
+        {
+          "confidence": 0.8996974,
+          "endTime": 9.365125,
+          "startTime": 9.185124,
+          "word": "做"
+        },
+        {
+          "confidence": 0.8503088,
+          "endTime": 9.575125,
+          "startTime": 9.365125,
+          "word": "课"
+        },
+        {
+          "confidence": 0.18734685,
+          "endTime": 9.8151245,
+          "startTime": 9.785124,
+          "word": "件、"
+        },
+        {
+          "confidence": 0.8715336,
+          "endTime": 10.285124,
+          "startTime": 10.115125,
+          "word": "准"
+        },
+        {
+          "confidence": 0.9832863,
+          "endTime": 10.415125,
+          "startTime": 10.285124,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9229839,
+          "endTime": 10.5651245,
+          "startTime": 10.415125,
+          "word": "练"
+        },
+        {
+          "confidence": 0.9755622,
+          "endTime": 10.945125,
+          "startTime": 10.5651245,
+          "word": "习，"
+        },
+        {
+          "confidence": 0.96733123,
+          "endTime": 11.365125,
+          "startTime": 11.205124,
+          "word": "还"
+        },
+        {
+          "confidence": 0.7865089,
+          "endTime": 11.455124,
+          "startTime": 11.365125,
+          "word": "得"
+        },
+        {
+          "confidence": 0.889745,
+          "endTime": 11.585124,
+          "startTime": 11.455124,
+          "word": "把"
+        },
+        {
+          "confidence": 0.97585356,
+          "endTime": 11.715124,
+          "startTime": 11.585124,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9217789,
+          "endTime": 11.875124,
+          "startTime": 11.715124,
+          "word": "些"
+        },
+        {
+          "confidence": 0.86372745,
+          "endTime": 12.035124,
+          "startTime": 11.875124,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97437227,
+          "endTime": 12.245125,
+          "startTime": 12.035124,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9138842,
+          "endTime": 12.435124,
+          "startTime": 12.245125,
+          "word": "整"
+        },
+        {
+          "confidence": 0.92430645,
+          "endTime": 12.535124,
+          "startTime": 12.435124,
+          "word": "理"
+        },
+        {
+          "confidence": 0.96053666,
+          "endTime": 12.725124,
+          "startTime": 12.535124,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9012362,
+          "endTime": 12.935124,
+          "startTime": 12.725124,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8907072,
+          "endTime": 13.155125,
+          "startTime": 12.935124,
+          "word": "案。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "忙了一圈，一个完整的教学想法，反倒散在了好几个工具里。",
+      "words": [
+        {
+          "confidence": 0.93490964,
+          "endTime": 13.715165,
+          "startTime": 13.545165,
+          "word": "忙"
+        },
+        {
+          "confidence": 0.8759026,
+          "endTime": 13.8151655,
+          "startTime": 13.715165,
+          "word": "了"
+        },
+        {
+          "confidence": 0.73011476,
+          "endTime": 13.925165,
+          "startTime": 13.8151655,
+          "word": "一"
+        },
+        {
+          "confidence": 0.93500054,
+          "endTime": 14.225165,
+          "startTime": 13.925165,
+          "word": "圈，"
+        },
+        {
+          "confidence": 0.92765033,
+          "endTime": 14.625166,
+          "startTime": 14.495165,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9557343,
+          "endTime": 14.765165,
+          "startTime": 14.625166,
+          "word": "个"
+        },
+        {
+          "confidence": 0.98240113,
+          "endTime": 14.945166,
+          "startTime": 14.765165,
+          "word": "完"
+        },
+        {
+          "confidence": 0.9290263,
+          "endTime": 15.115166,
+          "startTime": 14.945166,
+          "word": "整"
+        },
+        {
+          "confidence": 0.94509226,
+          "endTime": 15.215165,
+          "startTime": 15.115166,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9718928,
+          "endTime": 15.375166,
+          "startTime": 15.215165,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9795665,
+          "endTime": 15.5651655,
+          "startTime": 15.375166,
+          "word": "学"
+        },
+        {
+          "confidence": 0.93894625,
+          "endTime": 15.795165,
+          "startTime": 15.5651655,
+          "word": "想"
+        },
+        {
+          "confidence": 0.9657371,
+          "endTime": 16.095165,
+          "startTime": 15.795165,
+          "word": "法，"
+        },
+        {
+          "confidence": 0.86159086,
+          "endTime": 16.445166,
+          "startTime": 16.235165,
+          "word": "反"
+        },
+        {
+          "confidence": 0.82761234,
+          "endTime": 16.595165,
+          "startTime": 16.445166,
+          "word": "倒"
+        },
+        {
+          "confidence": 0.89771974,
+          "endTime": 16.825165,
+          "startTime": 16.595165,
+          "word": "散"
+        },
+        {
+          "confidence": 0.93800986,
+          "endTime": 16.975166,
+          "startTime": 16.825165,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9380453,
+          "endTime": 17.055164,
+          "startTime": 16.975166,
+          "word": "了"
+        },
+        {
+          "confidence": 0.85212857,
+          "endTime": 17.255165,
+          "startTime": 17.055164,
+          "word": "好"
+        },
+        {
+          "confidence": 0.91859746,
+          "endTime": 17.435165,
+          "startTime": 17.255165,
+          "word": "几"
+        },
+        {
+          "confidence": 0.86408406,
+          "endTime": 17.595165,
+          "startTime": 17.435165,
+          "word": "个"
+        },
+        {
+          "confidence": 0.95721763,
+          "endTime": 17.775166,
+          "startTime": 17.595165,
+          "word": "工"
+        },
+        {
+          "confidence": 0.86721003,
+          "endTime": 17.965166,
+          "startTime": 17.775166,
+          "word": "具"
+        },
+        {
+          "confidence": 0.933593,
+          "endTime": 18.165165,
+          "startTime": 17.965166,
+          "word": "里。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽，就是想帮老师把这些准备工作串起来。",
+      "words": [
+        {
+          "confidence": 0.5147925,
+          "endTime": 18.725208,
+          "startTime": 18.650208,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9132298,
+          "endTime": 18.965208,
+          "startTime": 18.725208,
+          "word": "芽，"
+        },
+        {
+          "confidence": 0.9018174,
+          "endTime": 19.295208,
+          "startTime": 19.155207,
+          "word": "就"
+        },
+        {
+          "confidence": 0.97380966,
+          "endTime": 19.425207,
+          "startTime": 19.295208,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9387242,
+          "endTime": 19.595207,
+          "startTime": 19.425207,
+          "word": "想"
+        },
+        {
+          "confidence": 0.89605886,
+          "endTime": 19.775208,
+          "startTime": 19.595207,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.9163437,
+          "endTime": 19.915207,
+          "startTime": 19.775208,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98148495,
+          "endTime": 20.225208,
+          "startTime": 19.915207,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8626273,
+          "endTime": 20.375208,
+          "startTime": 20.255207,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9767404,
+          "endTime": 20.505207,
+          "startTime": 20.375208,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9565229,
+          "endTime": 20.645208,
+          "startTime": 20.505207,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9501229,
+          "endTime": 20.835207,
+          "startTime": 20.645208,
+          "word": "准"
+        },
+        {
+          "confidence": 0.9854458,
+          "endTime": 20.975208,
+          "startTime": 20.835207,
+          "word": "备"
+        },
+        {
+          "confidence": 0.95229834,
+          "endTime": 21.135208,
+          "startTime": 20.975208,
+          "word": "工"
+        },
+        {
+          "confidence": 0.9661789,
+          "endTime": 21.275208,
+          "startTime": 21.135208,
+          "word": "作"
+        },
+        {
+          "confidence": 0.8521123,
+          "endTime": 21.505207,
+          "startTime": 21.275208,
+          "word": "串"
+        },
+        {
+          "confidence": 0.91015816,
+          "endTime": 21.705208,
+          "startTime": 21.505207,
+          "word": "起"
+        },
+        {
+          "confidence": 0.96472394,
+          "endTime": 21.905209,
+          "startTime": 21.705208,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "想象一下，明天你要给一群第一次接触编程的学生上课。教什么，你已经想好了。可接下来呢？找案例、做课件、准备练习，还得把这些内容整理成教案。忙了一圈，一个完整的教学想法，反倒散在了好几个工具里。知芽，就是想帮老师把这些准备工作串起来。接下来，我们拿一节真实的 Python 入门课，看老师怎样提出需求，查看内容，再把不合适的地方改掉。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "接下来，我们拿一节真实的 Python 入门课，看老师怎样提出需求，查看内容，再把不合适的地方改掉。",
+      "words": [
+        {
+          "confidence": 0.8365725,
+          "endTime": 22.49525,
+          "startTime": 22.33025,
+          "word": "接"
+        },
+        {
+          "confidence": 0.90839165,
+          "endTime": 22.69525,
+          "startTime": 22.49525,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9812106,
+          "endTime": 22.95525,
+          "startTime": 22.69525,
+          "word": "来，"
+        },
+        {
+          "confidence": 0.9004352,
+          "endTime": 23.28525,
+          "startTime": 23.15525,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9663533,
+          "endTime": 23.38525,
+          "startTime": 23.28525,
+          "word": "们"
+        },
+        {
+          "confidence": 0.8117256,
+          "endTime": 23.51525,
+          "startTime": 23.38525,
+          "word": "拿"
+        },
+        {
+          "confidence": 0.84424984,
+          "endTime": 23.65525,
+          "startTime": 23.51525,
+          "word": "一"
+        },
+        {
+          "confidence": 0.903079,
+          "endTime": 23.85525,
+          "startTime": 23.65525,
+          "word": "节"
+        },
+        {
+          "confidence": 0.9351327,
+          "endTime": 24.05525,
+          "startTime": 23.85525,
+          "word": "真"
+        },
+        {
+          "confidence": 0.97407985,
+          "endTime": 24.26525,
+          "startTime": 24.05525,
+          "word": "实"
+        },
+        {
+          "confidence": 0.87209326,
+          "endTime": 24.35525,
+          "startTime": 24.26525,
+          "word": "的"
+        },
+        {
+          "confidence": 0.4044813,
+          "endTime": 24.71525,
+          "startTime": 24.35525,
+          "word": "Python"
+        },
+        {
+          "confidence": 0.9049513,
+          "endTime": 24.87525,
+          "startTime": 24.71525,
+          "word": "入"
+        },
+        {
+          "confidence": 0.90937406,
+          "endTime": 25.04525,
+          "startTime": 24.87525,
+          "word": "门"
+        },
+        {
+          "confidence": 0.9580162,
+          "endTime": 25.36525,
+          "startTime": 25.04525,
+          "word": "课，"
+        },
+        {
+          "confidence": 0.95374674,
+          "endTime": 25.81525,
+          "startTime": 25.60525,
+          "word": "看"
+        },
+        {
+          "confidence": 0.93044657,
+          "endTime": 25.96525,
+          "startTime": 25.81525,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98058844,
+          "endTime": 26.255249,
+          "startTime": 25.96525,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9152797,
+          "endTime": 26.49525,
+          "startTime": 26.29525,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9791282,
+          "endTime": 26.64525,
+          "startTime": 26.49525,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9197886,
+          "endTime": 26.81525,
+          "startTime": 26.64525,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9744857,
+          "endTime": 26.96525,
+          "startTime": 26.81525,
+          "word": "出"
+        },
+        {
+          "confidence": 0.86822605,
+          "endTime": 27.19525,
+          "startTime": 26.96525,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9244051,
+          "endTime": 27.52525,
+          "startTime": 27.19525,
+          "word": "求，"
+        },
+        {
+          "confidence": 0.91328406,
+          "endTime": 27.97525,
+          "startTime": 27.755249,
+          "word": "查"
+        },
+        {
+          "confidence": 0.88637006,
+          "endTime": 28.12525,
+          "startTime": 27.97525,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9399752,
+          "endTime": 28.325249,
+          "startTime": 28.12525,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97958815,
+          "endTime": 28.53525,
+          "startTime": 28.325249,
+          "word": "容，"
+        },
+        {
+          "confidence": 0.97446144,
+          "endTime": 28.98525,
+          "startTime": 28.83525,
+          "word": "再"
+        },
+        {
+          "confidence": 0.8597281,
+          "endTime": 29.11525,
+          "startTime": 28.98525,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9057335,
+          "endTime": 29.29525,
+          "startTime": 29.18525,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9522817,
+          "endTime": 29.45525,
+          "startTime": 29.29525,
+          "word": "合"
+        },
+        {
+          "confidence": 0.94646776,
+          "endTime": 29.62525,
+          "startTime": 29.45525,
+          "word": "适"
+        },
+        {
+          "confidence": 0.9621465,
+          "endTime": 29.71525,
+          "startTime": 29.62525,
+          "word": "的"
+        },
+        {
+          "confidence": 0.98193145,
+          "endTime": 29.86525,
+          "startTime": 29.71525,
+          "word": "地"
+        },
+        {
+          "confidence": 0.9553516,
+          "endTime": 30.02525,
+          "startTime": 29.86525,
+          "word": "方"
+        },
+        {
+          "confidence": 0.93214244,
+          "endTime": 30.23525,
+          "startTime": 30.02525,
+          "word": "改"
+        },
+        {
+          "confidence": 0.9476278,
+          "endTime": 30.505249,
+          "startTime": 30.23525,
+          "word": "掉。"
+        }
+      ]
+    }
+  ]
+}

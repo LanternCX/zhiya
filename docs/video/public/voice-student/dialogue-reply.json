@@ -1,0 +1,238 @@
+{
+  "duration": 8.400416666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "不会，这一步只是赋值。",
+      "words": [
+        {
+          "confidence": 0.78061193,
+          "endTime": 0.385,
+          "startTime": 0.225,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9663635,
+          "endTime": 0.695,
+          "startTime": 0.385,
+          "word": "会，"
+        },
+        {
+          "confidence": 0.81147206,
+          "endTime": 1.135,
+          "startTime": 0.955,
+          "word": "这"
+        },
+        {
+          "confidence": 0.8683254,
+          "endTime": 1.295,
+          "startTime": 1.135,
+          "word": "一"
+        },
+        {
+          "confidence": 0.91900927,
+          "endTime": 1.575,
+          "startTime": 1.295,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9511021,
+          "endTime": 1.725,
+          "startTime": 1.575,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9792508,
+          "endTime": 1.865,
+          "startTime": 1.725,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9659163,
+          "endTime": 2.055,
+          "startTime": 1.865,
+          "word": "赋"
+        },
+        {
+          "confidence": 0.8576232,
+          "endTime": 2.375,
+          "startTime": 2.055,
+          "word": "值。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "想看到数字，还要调用 print。",
+      "words": [
+        {
+          "confidence": 0.37613407,
+          "endTime": 2.9550416,
+          "startTime": 2.8800416,
+          "word": "想"
+        },
+        {
+          "confidence": 0.6624732,
+          "endTime": 3.0250416,
+          "startTime": 2.9550416,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9708554,
+          "endTime": 3.1350417,
+          "startTime": 3.0250416,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9551142,
+          "endTime": 3.3550415,
+          "startTime": 3.1350417,
+          "word": "数"
+        },
+        {
+          "confidence": 0.97868097,
+          "endTime": 3.6750417,
+          "startTime": 3.3550415,
+          "word": "字，"
+        },
+        {
+          "confidence": 0.9428761,
+          "endTime": 3.9050417,
+          "startTime": 3.7250416,
+          "word": "还"
+        },
+        {
+          "confidence": 0.95303935,
+          "endTime": 4.0250416,
+          "startTime": 3.9050417,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9215568,
+          "endTime": 4.2150416,
+          "startTime": 4.0250416,
+          "word": "调"
+        },
+        {
+          "confidence": 0.9468857,
+          "endTime": 4.3650417,
+          "startTime": 4.2150416,
+          "word": "用"
+        },
+        {
+          "confidence": 0.8635082,
+          "endTime": 4.8350415,
+          "startTime": 4.3650417,
+          "word": "print。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "不会，这一步只是赋值。想看到数字，还要调用 print。你可以先预测，再运行右侧的代码验证。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "你可以先预测，再运行右侧的代码验证。",
+      "words": [
+        {
+          "confidence": 0.95106345,
+          "endTime": 5.3250833,
+          "startTime": 5.220083,
+          "word": "你"
+        },
+        {
+          "confidence": 0.65746915,
+          "endTime": 5.465083,
+          "startTime": 5.3250833,
+          "word": "可"
+        },
+        {
+          "confidence": 0.67023605,
+          "endTime": 5.5550833,
+          "startTime": 5.465083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9657507,
+          "endTime": 5.7850833,
+          "startTime": 5.5550833,
+          "word": "先"
+        },
+        {
+          "confidence": 0.94820493,
+          "endTime": 5.925083,
+          "startTime": 5.7850833,
+          "word": "预"
+        },
+        {
+          "confidence": 0.9526313,
+          "endTime": 6.235083,
+          "startTime": 5.925083,
+          "word": "测，"
+        },
+        {
+          "confidence": 0.91925895,
+          "endTime": 6.595083,
+          "startTime": 6.375083,
+          "word": "再"
+        },
+        {
+          "confidence": 0.6530354,
+          "endTime": 6.695083,
+          "startTime": 6.595083,
+          "word": "运"
+        },
+        {
+          "confidence": 0.88315976,
+          "endTime": 6.965083,
+          "startTime": 6.695083,
+          "word": "行"
+        },
+        {
+          "confidence": 0.9238721,
+          "endTime": 7.1050835,
+          "startTime": 6.965083,
+          "word": "右"
+        },
+        {
+          "confidence": 0.9396085,
+          "endTime": 7.2650833,
+          "startTime": 7.1050835,
+          "word": "侧"
+        },
+        {
+          "confidence": 0.91834927,
+          "endTime": 7.375083,
+          "startTime": 7.2650833,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9097725,
+          "endTime": 7.5250835,
+          "startTime": 7.375083,
+          "word": "代"
+        },
+        {
+          "confidence": 0.89550436,
+          "endTime": 7.695083,
+          "startTime": 7.5250835,
+          "word": "码"
+        },
+        {
+          "confidence": 0.84289825,
+          "endTime": 7.8250833,
+          "startTime": 7.695083,
+          "word": "验"
+        },
+        {
+          "confidence": 0.92458373,
+          "endTime": 8.025084,
+          "startTime": 7.8250833,
+          "word": "证。"
+        }
+      ]
+    }
+  ]
+}

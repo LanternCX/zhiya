@@ -1,0 +1,580 @@
+{
+  "duration": 20.020458333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这时，老师可以把任务说得很具体：用食堂点餐作为共同案例，",
+      "words": [
+        {
+          "confidence": 0.9328541,
+          "endTime": 0.375,
+          "startTime": 0.195,
+          "word": "这"
+        },
+        {
+          "confidence": 0.87989354,
+          "endTime": 0.755,
+          "startTime": 0.375,
+          "word": "时，"
+        },
+        {
+          "confidence": 0.94289917,
+          "endTime": 1.155,
+          "startTime": 0.965,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9708089,
+          "endTime": 1.375,
+          "startTime": 1.155,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8051348,
+          "endTime": 1.525,
+          "startTime": 1.375,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8365138,
+          "endTime": 1.605,
+          "startTime": 1.525,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9065051,
+          "endTime": 1.785,
+          "startTime": 1.605,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9574108,
+          "endTime": 2.005,
+          "startTime": 1.785,
+          "word": "任"
+        },
+        {
+          "confidence": 0.8927078,
+          "endTime": 2.075,
+          "startTime": 2.005,
+          "word": "务"
+        },
+        {
+          "confidence": 0.8605701,
+          "endTime": 2.255,
+          "startTime": 2.075,
+          "word": "说"
+        },
+        {
+          "confidence": 0.9580462,
+          "endTime": 2.355,
+          "startTime": 2.255,
+          "word": "得"
+        },
+        {
+          "confidence": 0.98307514,
+          "endTime": 2.575,
+          "startTime": 2.355,
+          "word": "很"
+        },
+        {
+          "confidence": 0.8640328,
+          "endTime": 2.745,
+          "startTime": 2.575,
+          "word": "具"
+        },
+        {
+          "confidence": 0.30589148,
+          "endTime": 2.775,
+          "startTime": 2.745,
+          "word": "体："
+        },
+        {
+          "confidence": 0.9697341,
+          "endTime": 3.565,
+          "startTime": 3.425,
+          "word": "用"
+        },
+        {
+          "confidence": 0.93926585,
+          "endTime": 3.775,
+          "startTime": 3.565,
+          "word": "食"
+        },
+        {
+          "confidence": 0.94572437,
+          "endTime": 3.985,
+          "startTime": 3.775,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9416005,
+          "endTime": 4.185,
+          "startTime": 3.985,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9207276,
+          "endTime": 4.465,
+          "startTime": 4.185,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.8444984,
+          "endTime": 4.645,
+          "startTime": 4.465,
+          "word": "作"
+        },
+        {
+          "confidence": 0.88882256,
+          "endTime": 4.715,
+          "startTime": 4.645,
+          "word": "为"
+        },
+        {
+          "confidence": 0.92916703,
+          "endTime": 4.885,
+          "startTime": 4.715,
+          "word": "共"
+        },
+        {
+          "confidence": 0.9112112,
+          "endTime": 5.085,
+          "startTime": 4.885,
+          "word": "同"
+        },
+        {
+          "confidence": 0.83267426,
+          "endTime": 5.235,
+          "startTime": 5.085,
+          "word": "案"
+        },
+        {
+          "confidence": 0.96999085,
+          "endTime": 5.445,
+          "startTime": 5.235,
+          "word": "例，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "准备三张讲解页，",
+      "words": [
+        {
+          "confidence": 0.78008133,
+          "endTime": 5.9150414,
+          "startTime": 5.8000417,
+          "word": "准"
+        },
+        {
+          "confidence": 0.85585505,
+          "endTime": 6.0950418,
+          "startTime": 5.9150414,
+          "word": "备"
+        },
+        {
+          "confidence": 0.75603914,
+          "endTime": 6.3450418,
+          "startTime": 6.0950418,
+          "word": "三"
+        },
+        {
+          "confidence": 0.94996816,
+          "endTime": 6.5250416,
+          "startTime": 6.3450418,
+          "word": "张"
+        },
+        {
+          "confidence": 0.9023211,
+          "endTime": 6.725042,
+          "startTime": 6.5250416,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.924085,
+          "endTime": 6.915042,
+          "startTime": 6.725042,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9013138,
+          "endTime": 7.1350417,
+          "startTime": 6.915042,
+          "word": "页，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "分别讲输出、变量和输入；",
+      "words": [
+        {
+          "confidence": 0.81208515,
+          "endTime": 7.6850834,
+          "startTime": 7.5200834,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9568826,
+          "endTime": 7.8350835,
+          "startTime": 7.6850834,
+          "word": "别"
+        },
+        {
+          "confidence": 0.9394043,
+          "endTime": 8.125084,
+          "startTime": 7.8350835,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.684783,
+          "endTime": 8.735084,
+          "startTime": 8.125084,
+          "word": "输"
+        },
+        {
+          "confidence": 0.27616256,
+          "endTime": 8.795083,
+          "startTime": 8.765083,
+          "word": "出、"
+        },
+        {
+          "confidence": 0.85725194,
+          "endTime": 9.215083,
+          "startTime": 8.985084,
+          "word": "变"
+        },
+        {
+          "confidence": 0.94418114,
+          "endTime": 9.455084,
+          "startTime": 9.215083,
+          "word": "量"
+        },
+        {
+          "confidence": 0.93987525,
+          "endTime": 9.665083,
+          "startTime": 9.455084,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9410196,
+          "endTime": 9.915083,
+          "startTime": 9.665083,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9744708,
+          "endTime": 10.205084,
+          "startTime": 9.915083,
+          "word": "入；"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再做一个能分步播放的过程动画，最后整理教师教案。",
+      "words": [
+        {
+          "confidence": 0.9466564,
+          "endTime": 10.695125,
+          "startTime": 10.540125,
+          "word": "再"
+        },
+        {
+          "confidence": 0.96222204,
+          "endTime": 10.835125,
+          "startTime": 10.695125,
+          "word": "做"
+        },
+        {
+          "confidence": 0.7549019,
+          "endTime": 10.965125,
+          "startTime": 10.835125,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9591178,
+          "endTime": 11.175125,
+          "startTime": 10.965125,
+          "word": "个"
+        },
+        {
+          "confidence": 0.97392964,
+          "endTime": 11.3151245,
+          "startTime": 11.175125,
+          "word": "能"
+        },
+        {
+          "confidence": 0.95187926,
+          "endTime": 11.5651245,
+          "startTime": 11.3151245,
+          "word": "分"
+        },
+        {
+          "confidence": 0.94529456,
+          "endTime": 11.735125,
+          "startTime": 11.5651245,
+          "word": "步"
+        },
+        {
+          "confidence": 0.93946266,
+          "endTime": 11.905125,
+          "startTime": 11.735125,
+          "word": "播"
+        },
+        {
+          "confidence": 0.9583841,
+          "endTime": 12.095125,
+          "startTime": 11.905125,
+          "word": "放"
+        },
+        {
+          "confidence": 0.9349633,
+          "endTime": 12.195125,
+          "startTime": 12.095125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9574436,
+          "endTime": 12.325125,
+          "startTime": 12.195125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.96059006,
+          "endTime": 12.505125,
+          "startTime": 12.325125,
+          "word": "程"
+        },
+        {
+          "confidence": 0.85342455,
+          "endTime": 12.655125,
+          "startTime": 12.505125,
+          "word": "动"
+        },
+        {
+          "confidence": 0.88785404,
+          "endTime": 12.905125,
+          "startTime": 12.655125,
+          "word": "画，"
+        },
+        {
+          "confidence": 0.87995875,
+          "endTime": 13.435125,
+          "startTime": 13.255125,
+          "word": "最"
+        },
+        {
+          "confidence": 0.90854406,
+          "endTime": 13.695125,
+          "startTime": 13.435125,
+          "word": "后"
+        },
+        {
+          "confidence": 0.92001784,
+          "endTime": 13.925125,
+          "startTime": 13.695125,
+          "word": "整"
+        },
+        {
+          "confidence": 0.9104854,
+          "endTime": 14.055125,
+          "startTime": 13.925125,
+          "word": "理"
+        },
+        {
+          "confidence": 0.8906312,
+          "endTime": 14.215125,
+          "startTime": 14.055125,
+          "word": "教"
+        },
+        {
+          "confidence": 0.86519104,
+          "endTime": 14.405125,
+          "startTime": 14.215125,
+          "word": "师"
+        },
+        {
+          "confidence": 0.80831325,
+          "endTime": 14.605125,
+          "startTime": 14.405125,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8515971,
+          "endTime": 14.795125,
+          "startTime": 14.605125,
+          "word": "案。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这时，老师可以把任务说得很具体：用食堂点餐作为共同案例，准备三张讲解页，分别讲输出、变量和输入；再做一个能分步播放的过程动画，最后整理教师教案。这样生成的内容都有明确用途，老师也知道接下来要检查什么。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这样生成的内容都有明确用途，老师也知道接下来要检查什么。",
+      "words": [
+        {
+          "confidence": 0.47315088,
+          "endTime": 15.405166,
+          "startTime": 15.330166,
+          "word": "这"
+        },
+        {
+          "confidence": 0.11928091,
+          "endTime": 15.435165,
+          "startTime": 15.405166,
+          "word": "样"
+        },
+        {
+          "confidence": 0.8400784,
+          "endTime": 15.5651655,
+          "startTime": 15.435165,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9599119,
+          "endTime": 15.725166,
+          "startTime": 15.5651655,
+          "word": "成"
+        },
+        {
+          "confidence": 0.93079084,
+          "endTime": 15.825166,
+          "startTime": 15.725166,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9614449,
+          "endTime": 15.995166,
+          "startTime": 15.825166,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97543633,
+          "endTime": 16.205166,
+          "startTime": 15.995166,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9184553,
+          "endTime": 16.345165,
+          "startTime": 16.205166,
+          "word": "都"
+        },
+        {
+          "confidence": 0.9732661,
+          "endTime": 16.485167,
+          "startTime": 16.345165,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9700982,
+          "endTime": 16.675165,
+          "startTime": 16.485167,
+          "word": "明"
+        },
+        {
+          "confidence": 0.9455172,
+          "endTime": 16.885166,
+          "startTime": 16.675165,
+          "word": "确"
+        },
+        {
+          "confidence": 0.95554954,
+          "endTime": 17.075167,
+          "startTime": 16.885166,
+          "word": "用"
+        },
+        {
+          "confidence": 0.9759184,
+          "endTime": 17.365166,
+          "startTime": 17.075167,
+          "word": "途，"
+        },
+        {
+          "confidence": 0.9757171,
+          "endTime": 17.815166,
+          "startTime": 17.655167,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9909196,
+          "endTime": 18.025166,
+          "startTime": 17.815166,
+          "word": "师"
+        },
+        {
+          "confidence": 0.91615087,
+          "endTime": 18.135166,
+          "startTime": 18.025166,
+          "word": "也"
+        },
+        {
+          "confidence": 0.96016455,
+          "endTime": 18.315166,
+          "startTime": 18.135166,
+          "word": "知"
+        },
+        {
+          "confidence": 0.91760653,
+          "endTime": 18.515165,
+          "startTime": 18.315166,
+          "word": "道"
+        },
+        {
+          "confidence": 0.9365727,
+          "endTime": 18.685165,
+          "startTime": 18.515165,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9599607,
+          "endTime": 18.845165,
+          "startTime": 18.685165,
+          "word": "下"
+        },
+        {
+          "confidence": 0.97490895,
+          "endTime": 18.965166,
+          "startTime": 18.845165,
+          "word": "来"
+        },
+        {
+          "confidence": 0.96563715,
+          "endTime": 19.075165,
+          "startTime": 18.965166,
+          "word": "要"
+        },
+        {
+          "confidence": 0.92386854,
+          "endTime": 19.255165,
+          "startTime": 19.075165,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9733323,
+          "endTime": 19.495167,
+          "startTime": 19.255165,
+          "word": "查"
+        },
+        {
+          "confidence": 0.81764084,
+          "endTime": 19.625166,
+          "startTime": 19.495167,
+          "word": "什"
+        },
+        {
+          "confidence": 0.446877,
+          "endTime": 19.685165,
+          "startTime": 19.625166,
+          "word": "么。"
+        }
+      ]
+    }
+  ]
+}

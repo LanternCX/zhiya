@@ -1,0 +1,508 @@
+{
+  "duration": 16.768541666666668,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "看完这些材料，老师可能会发现：变量这一页，文字还是太多了。",
+      "words": [
+        {
+          "confidence": 0.87339026,
+          "endTime": 0.395,
+          "startTime": 0.235,
+          "word": "看"
+        },
+        {
+          "confidence": 0.96622074,
+          "endTime": 0.535,
+          "startTime": 0.395,
+          "word": "完"
+        },
+        {
+          "confidence": 0.95292425,
+          "endTime": 0.675,
+          "startTime": 0.535,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9528109,
+          "endTime": 0.805,
+          "startTime": 0.675,
+          "word": "些"
+        },
+        {
+          "confidence": 0.96353436,
+          "endTime": 1.035,
+          "startTime": 0.805,
+          "word": "材"
+        },
+        {
+          "confidence": 0.92720103,
+          "endTime": 1.275,
+          "startTime": 1.035,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.96583164,
+          "endTime": 1.665,
+          "startTime": 1.515,
+          "word": "老"
+        },
+        {
+          "confidence": 0.97531396,
+          "endTime": 1.895,
+          "startTime": 1.665,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8976064,
+          "endTime": 2.025,
+          "startTime": 1.895,
+          "word": "可"
+        },
+        {
+          "confidence": 0.9771023,
+          "endTime": 2.145,
+          "startTime": 2.025,
+          "word": "能"
+        },
+        {
+          "confidence": 0.97905755,
+          "endTime": 2.285,
+          "startTime": 2.145,
+          "word": "会"
+        },
+        {
+          "confidence": 0.89100397,
+          "endTime": 2.465,
+          "startTime": 2.285,
+          "word": "发"
+        },
+        {
+          "confidence": 0.11442898,
+          "endTime": 2.495,
+          "startTime": 2.465,
+          "word": "现："
+        },
+        {
+          "confidence": 0.9112748,
+          "endTime": 3.305,
+          "startTime": 3.105,
+          "word": "变"
+        },
+        {
+          "confidence": 0.965924,
+          "endTime": 3.525,
+          "startTime": 3.305,
+          "word": "量"
+        },
+        {
+          "confidence": 0.82415235,
+          "endTime": 3.685,
+          "startTime": 3.525,
+          "word": "这"
+        },
+        {
+          "confidence": 0.7759495,
+          "endTime": 3.835,
+          "startTime": 3.685,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9189623,
+          "endTime": 4.055,
+          "startTime": 3.835,
+          "word": "页，"
+        },
+        {
+          "confidence": 0.8846578,
+          "endTime": 4.315,
+          "startTime": 4.125,
+          "word": "文"
+        },
+        {
+          "confidence": 0.88176006,
+          "endTime": 4.445,
+          "startTime": 4.315,
+          "word": "字"
+        },
+        {
+          "confidence": 0.91311574,
+          "endTime": 4.675,
+          "startTime": 4.445,
+          "word": "还"
+        },
+        {
+          "confidence": 0.97143465,
+          "endTime": 4.845,
+          "startTime": 4.675,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9586747,
+          "endTime": 5.025,
+          "startTime": 4.845,
+          "word": "太"
+        },
+        {
+          "confidence": 0.98684055,
+          "endTime": 5.215,
+          "startTime": 5.025,
+          "word": "多"
+        },
+        {
+          "confidence": 0.9811344,
+          "endTime": 5.395,
+          "startTime": 5.215,
+          "word": "了。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "对于零基础学生，",
+      "words": [
+        {
+          "confidence": 0.83419836,
+          "endTime": 5.8450418,
+          "startTime": 5.7400417,
+          "word": "对"
+        },
+        {
+          "confidence": 0.8365788,
+          "endTime": 5.9850416,
+          "startTime": 5.8450418,
+          "word": "于"
+        },
+        {
+          "confidence": 0.9435629,
+          "endTime": 6.1550417,
+          "startTime": 5.9850416,
+          "word": "零"
+        },
+        {
+          "confidence": 0.92727816,
+          "endTime": 6.3150415,
+          "startTime": 6.1550417,
+          "word": "基"
+        },
+        {
+          "confidence": 0.9479224,
+          "endTime": 6.4650416,
+          "startTime": 6.3150415,
+          "word": "础"
+        },
+        {
+          "confidence": 0.97145885,
+          "endTime": 6.6750417,
+          "startTime": 6.4650416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8732513,
+          "endTime": 6.975042,
+          "startTime": 6.6750417,
+          "word": "生，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "一边听、一边看定义、一边读代码，",
+      "words": [
+        {
+          "confidence": 0.7162696,
+          "endTime": 7.355083,
+          "startTime": 7.300083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.82415885,
+          "endTime": 7.565083,
+          "startTime": 7.355083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.29767886,
+          "endTime": 8.035083,
+          "startTime": 8.005083,
+          "word": "听、"
+        },
+        {
+          "confidence": 0.80807745,
+          "endTime": 8.105083,
+          "startTime": 8.035083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9399011,
+          "endTime": 8.245083,
+          "startTime": 8.105083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.9601626,
+          "endTime": 8.465083,
+          "startTime": 8.245083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9297923,
+          "endTime": 8.665083,
+          "startTime": 8.465083,
+          "word": "定"
+        },
+        {
+          "confidence": 0.25379688,
+          "endTime": 8.695084,
+          "startTime": 8.665083,
+          "word": "义、"
+        },
+        {
+          "confidence": 0.8630781,
+          "endTime": 8.905083,
+          "startTime": 8.695084,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9128662,
+          "endTime": 9.215083,
+          "startTime": 9.075083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.980379,
+          "endTime": 9.395083,
+          "startTime": 9.215083,
+          "word": "读"
+        },
+        {
+          "confidence": 0.9362606,
+          "endTime": 9.595083,
+          "startTime": 9.395083,
+          "word": "代"
+        },
+        {
+          "confidence": 0.79157984,
+          "endTime": 9.805083,
+          "startTime": 9.595083,
+          "word": "码，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "很容易不知道应该先看哪里。",
+      "words": [
+        {
+          "confidence": 0.9274467,
+          "endTime": 10.255125,
+          "startTime": 10.140125,
+          "word": "很"
+        },
+        {
+          "confidence": 0.96738946,
+          "endTime": 10.455125,
+          "startTime": 10.255125,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9724619,
+          "endTime": 10.585125,
+          "startTime": 10.455125,
+          "word": "易"
+        },
+        {
+          "confidence": 0.9383858,
+          "endTime": 10.715125,
+          "startTime": 10.585125,
+          "word": "不"
+        },
+        {
+          "confidence": 0.97230655,
+          "endTime": 10.845125,
+          "startTime": 10.715125,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9655337,
+          "endTime": 11.045125,
+          "startTime": 10.845125,
+          "word": "道"
+        },
+        {
+          "confidence": 0.8955887,
+          "endTime": 11.125125,
+          "startTime": 11.045125,
+          "word": "应"
+        },
+        {
+          "confidence": 0.981142,
+          "endTime": 11.235126,
+          "startTime": 11.125125,
+          "word": "该"
+        },
+        {
+          "confidence": 0.24520342,
+          "endTime": 11.295125,
+          "startTime": 11.235126,
+          "word": "先"
+        },
+        {
+          "confidence": 0.15316309,
+          "endTime": 11.355125,
+          "startTime": 11.295125,
+          "word": "看"
+        },
+        {
+          "confidence": 0.207473,
+          "endTime": 11.415125,
+          "startTime": 11.355125,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.30756325,
+          "endTime": 11.475125,
+          "startTime": 11.415125,
+          "word": "里。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "看完这些材料，老师可能会发现：变量这一页，文字还是太多了。对于零基础学生，一边听、一边看定义、一边读代码，很容易不知道应该先看哪里。这时候，老师可以直接说出希望保留什么、删掉什么。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这时候，老师可以直接说出希望保留什么、删掉什么。",
+      "words": [
+        {
+          "confidence": 0.9653132,
+          "endTime": 12.495168,
+          "startTime": 12.335167,
+          "word": "这"
+        },
+        {
+          "confidence": 0.93081224,
+          "endTime": 12.675167,
+          "startTime": 12.495168,
+          "word": "时"
+        },
+        {
+          "confidence": 0.7352592,
+          "endTime": 12.975167,
+          "startTime": 12.675167,
+          "word": "候，"
+        },
+        {
+          "confidence": 0.9697598,
+          "endTime": 13.345167,
+          "startTime": 13.185167,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9731588,
+          "endTime": 13.555167,
+          "startTime": 13.345167,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7505623,
+          "endTime": 13.695168,
+          "startTime": 13.555167,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6971883,
+          "endTime": 13.815167,
+          "startTime": 13.695168,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8930929,
+          "endTime": 13.995168,
+          "startTime": 13.815167,
+          "word": "直"
+        },
+        {
+          "confidence": 0.94147813,
+          "endTime": 14.155168,
+          "startTime": 13.995168,
+          "word": "接"
+        },
+        {
+          "confidence": 0.88966095,
+          "endTime": 14.365168,
+          "startTime": 14.155168,
+          "word": "说"
+        },
+        {
+          "confidence": 0.9756796,
+          "endTime": 14.595167,
+          "startTime": 14.365168,
+          "word": "出"
+        },
+        {
+          "confidence": 0.91341627,
+          "endTime": 14.805167,
+          "startTime": 14.595167,
+          "word": "希"
+        },
+        {
+          "confidence": 0.94264805,
+          "endTime": 14.925167,
+          "startTime": 14.805167,
+          "word": "望"
+        },
+        {
+          "confidence": 0.9121072,
+          "endTime": 15.135167,
+          "startTime": 14.925167,
+          "word": "保"
+        },
+        {
+          "confidence": 0.98023814,
+          "endTime": 15.285168,
+          "startTime": 15.135167,
+          "word": "留"
+        },
+        {
+          "confidence": 0.74243087,
+          "endTime": 15.475167,
+          "startTime": 15.285168,
+          "word": "什"
+        },
+        {
+          "confidence": 0.17715254,
+          "endTime": 15.505167,
+          "startTime": 15.475167,
+          "word": "么、"
+        },
+        {
+          "confidence": 0.9301579,
+          "endTime": 15.995167,
+          "startTime": 15.715168,
+          "word": "删"
+        },
+        {
+          "confidence": 0.9586059,
+          "endTime": 16.155167,
+          "startTime": 15.995167,
+          "word": "掉"
+        },
+        {
+          "confidence": 0.9865238,
+          "endTime": 16.355167,
+          "startTime": 16.155167,
+          "word": "什"
+        },
+        {
+          "confidence": 0.87976503,
+          "endTime": 16.605167,
+          "startTime": 16.355167,
+          "word": "么。"
+        }
+      ]
+    }
+  ]
+}

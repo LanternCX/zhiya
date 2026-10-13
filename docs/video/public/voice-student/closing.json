@@ -1,0 +1,370 @@
+{
+  "duration": 12.689375,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "从了解起点，到看懂讲解、动手验证，再根据反馈继续学习。",
+      "words": [
+        {
+          "confidence": 0.9286489,
+          "endTime": 0.575,
+          "startTime": 0.235,
+          "word": "从"
+        },
+        {
+          "confidence": 0.4565175,
+          "endTime": 0.695,
+          "startTime": 0.575,
+          "word": "了"
+        },
+        {
+          "confidence": 0.9151152,
+          "endTime": 0.885,
+          "startTime": 0.695,
+          "word": "解"
+        },
+        {
+          "confidence": 0.7996433,
+          "endTime": 1.135,
+          "startTime": 0.885,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9710844,
+          "endTime": 1.425,
+          "startTime": 1.135,
+          "word": "点，"
+        },
+        {
+          "confidence": 0.8652766,
+          "endTime": 1.895,
+          "startTime": 1.655,
+          "word": "到"
+        },
+        {
+          "confidence": 0.94528687,
+          "endTime": 2.135,
+          "startTime": 1.895,
+          "word": "看"
+        },
+        {
+          "confidence": 0.93929535,
+          "endTime": 2.295,
+          "startTime": 2.135,
+          "word": "懂"
+        },
+        {
+          "confidence": 0.90748984,
+          "endTime": 2.505,
+          "startTime": 2.295,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.20662,
+          "endTime": 2.535,
+          "startTime": 2.505,
+          "word": "解、"
+        },
+        {
+          "confidence": 0.96740216,
+          "endTime": 3.105,
+          "startTime": 2.985,
+          "word": "动"
+        },
+        {
+          "confidence": 0.95640767,
+          "endTime": 3.335,
+          "startTime": 3.105,
+          "word": "手"
+        },
+        {
+          "confidence": 0.94785255,
+          "endTime": 3.495,
+          "startTime": 3.335,
+          "word": "验"
+        },
+        {
+          "confidence": 0.9740651,
+          "endTime": 3.705,
+          "startTime": 3.495,
+          "word": "证，"
+        },
+        {
+          "confidence": 0.9562337,
+          "endTime": 4.175,
+          "startTime": 4.015,
+          "word": "再"
+        },
+        {
+          "confidence": 0.950165,
+          "endTime": 4.325,
+          "startTime": 4.175,
+          "word": "根"
+        },
+        {
+          "confidence": 0.9665829,
+          "endTime": 4.455,
+          "startTime": 4.325,
+          "word": "据"
+        },
+        {
+          "confidence": 0.9579295,
+          "endTime": 4.675,
+          "startTime": 4.455,
+          "word": "反"
+        },
+        {
+          "confidence": 0.8633618,
+          "endTime": 4.875,
+          "startTime": 4.675,
+          "word": "馈"
+        },
+        {
+          "confidence": 0.9163007,
+          "endTime": 5.055,
+          "startTime": 4.875,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9401287,
+          "endTime": 5.205,
+          "startTime": 5.055,
+          "word": "续"
+        },
+        {
+          "confidence": 0.91635734,
+          "endTime": 5.375,
+          "startTime": 5.205,
+          "word": "学"
+        },
+        {
+          "confidence": 0.91549915,
+          "endTime": 5.695,
+          "startTime": 5.375,
+          "word": "习。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽希望帮助学生的不只是获得答案，",
+      "words": [
+        {
+          "confidence": 0.8139115,
+          "endTime": 6.315042,
+          "startTime": 6.100042,
+          "word": "知"
+        },
+        {
+          "confidence": 0.88706464,
+          "endTime": 6.545042,
+          "startTime": 6.315042,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.93211377,
+          "endTime": 6.775042,
+          "startTime": 6.545042,
+          "word": "希"
+        },
+        {
+          "confidence": 0.92307407,
+          "endTime": 6.875042,
+          "startTime": 6.775042,
+          "word": "望"
+        },
+        {
+          "confidence": 0.9311147,
+          "endTime": 7.045042,
+          "startTime": 6.875042,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.9720119,
+          "endTime": 7.175042,
+          "startTime": 7.045042,
+          "word": "助"
+        },
+        {
+          "confidence": 0.8950356,
+          "endTime": 7.3850417,
+          "startTime": 7.175042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9007478,
+          "endTime": 7.6150417,
+          "startTime": 7.3850417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.8932088,
+          "endTime": 7.835042,
+          "startTime": 7.6150417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97946995,
+          "endTime": 8.015041,
+          "startTime": 7.875042,
+          "word": "不"
+        },
+        {
+          "confidence": 0.956392,
+          "endTime": 8.165042,
+          "startTime": 8.015041,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9555811,
+          "endTime": 8.305042,
+          "startTime": 8.165042,
+          "word": "是"
+        },
+        {
+          "confidence": 0.91056854,
+          "endTime": 8.465042,
+          "startTime": 8.305042,
+          "word": "获"
+        },
+        {
+          "confidence": 0.85178655,
+          "endTime": 8.585042,
+          "startTime": 8.465042,
+          "word": "得"
+        },
+        {
+          "confidence": 0.9523508,
+          "endTime": 8.815042,
+          "startTime": 8.585042,
+          "word": "答"
+        },
+        {
+          "confidence": 0.97708327,
+          "endTime": 8.995042,
+          "startTime": 8.815042,
+          "word": "案，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "从了解起点，到看懂讲解、动手验证，再根据反馈继续学习。知芽希望帮助学生的不只是获得答案，而是逐步建立自己理解和解决问题的方法。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "而是逐步建立自己理解和解决问题的方法。",
+      "words": [
+        {
+          "confidence": 0.9185305,
+          "endTime": 9.415084,
+          "startTime": 9.355083,
+          "word": "而"
+        },
+        {
+          "confidence": 0.9615033,
+          "endTime": 9.585084,
+          "startTime": 9.415084,
+          "word": "是"
+        },
+        {
+          "confidence": 0.89080226,
+          "endTime": 9.775084,
+          "startTime": 9.585084,
+          "word": "逐"
+        },
+        {
+          "confidence": 0.95929235,
+          "endTime": 9.915084,
+          "startTime": 9.775084,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9712202,
+          "endTime": 10.135084,
+          "startTime": 9.915084,
+          "word": "建"
+        },
+        {
+          "confidence": 0.93294275,
+          "endTime": 10.295084,
+          "startTime": 10.135084,
+          "word": "立"
+        },
+        {
+          "confidence": 0.94754434,
+          "endTime": 10.435083,
+          "startTime": 10.295084,
+          "word": "自"
+        },
+        {
+          "confidence": 0.95737016,
+          "endTime": 10.605083,
+          "startTime": 10.435083,
+          "word": "己"
+        },
+        {
+          "confidence": 0.82311755,
+          "endTime": 10.805083,
+          "startTime": 10.605083,
+          "word": "理"
+        },
+        {
+          "confidence": 0.9253166,
+          "endTime": 11.095083,
+          "startTime": 10.805083,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9118137,
+          "endTime": 11.3150835,
+          "startTime": 11.135084,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9259275,
+          "endTime": 11.485084,
+          "startTime": 11.3150835,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9130811,
+          "endTime": 11.655084,
+          "startTime": 11.485084,
+          "word": "决"
+        },
+        {
+          "confidence": 0.95163226,
+          "endTime": 11.755083,
+          "startTime": 11.655084,
+          "word": "问"
+        },
+        {
+          "confidence": 0.15822111,
+          "endTime": 11.8150835,
+          "startTime": 11.755083,
+          "word": "题"
+        },
+        {
+          "confidence": 0.16835299,
+          "endTime": 11.875084,
+          "startTime": 11.8150835,
+          "word": "的"
+        },
+        {
+          "confidence": 0.0750612,
+          "endTime": 11.935083,
+          "startTime": 11.875084,
+          "word": "方"
+        },
+        {
+          "confidence": 0.19854943,
+          "endTime": 11.995084,
+          "startTime": 11.935083,
+          "word": "法。"
+        }
+      ]
+    }
+  ]
+}

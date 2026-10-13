@@ -1,0 +1,406 @@
+{
+  "duration": 13.201625,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "带着刚才的问题，回到更小的例子。",
+      "words": [
+        {
+          "confidence": 0.95269233,
+          "endTime": 0.395,
+          "startTime": 0.225,
+          "word": "带"
+        },
+        {
+          "confidence": 0.8817352,
+          "endTime": 0.505,
+          "startTime": 0.395,
+          "word": "着"
+        },
+        {
+          "confidence": 0.9397338,
+          "endTime": 0.665,
+          "startTime": 0.505,
+          "word": "刚"
+        },
+        {
+          "confidence": 0.9651385,
+          "endTime": 0.905,
+          "startTime": 0.665,
+          "word": "才"
+        },
+        {
+          "confidence": 0.9048327,
+          "endTime": 1.005,
+          "startTime": 0.905,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9644695,
+          "endTime": 1.145,
+          "startTime": 1.005,
+          "word": "问"
+        },
+        {
+          "confidence": 0.9894764,
+          "endTime": 1.505,
+          "startTime": 1.145,
+          "word": "题，"
+        },
+        {
+          "confidence": 0.9408096,
+          "endTime": 1.795,
+          "startTime": 1.675,
+          "word": "回"
+        },
+        {
+          "confidence": 0.96124446,
+          "endTime": 1.955,
+          "startTime": 1.795,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9555342,
+          "endTime": 2.125,
+          "startTime": 1.955,
+          "word": "更"
+        },
+        {
+          "confidence": 0.9632523,
+          "endTime": 2.365,
+          "startTime": 2.125,
+          "word": "小"
+        },
+        {
+          "confidence": 0.95200276,
+          "endTime": 2.475,
+          "startTime": 2.365,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95861197,
+          "endTime": 2.645,
+          "startTime": 2.475,
+          "word": "例"
+        },
+        {
+          "confidence": 0.8790089,
+          "endTime": 2.815,
+          "startTime": 2.645,
+          "word": "子。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "把变量的值从二改成三，先预测，再验证。",
+      "words": [
+        {
+          "confidence": 0.6745211,
+          "endTime": 3.2950418,
+          "startTime": 3.2200418,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9031545,
+          "endTime": 3.4950418,
+          "startTime": 3.3250418,
+          "word": "变"
+        },
+        {
+          "confidence": 0.93561804,
+          "endTime": 3.6550417,
+          "startTime": 3.4950418,
+          "word": "量"
+        },
+        {
+          "confidence": 0.91791654,
+          "endTime": 3.7650418,
+          "startTime": 3.6550417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.88227165,
+          "endTime": 4.0950418,
+          "startTime": 3.7650418,
+          "word": "值"
+        },
+        {
+          "confidence": 0.946977,
+          "endTime": 4.3450418,
+          "startTime": 4.0950418,
+          "word": "从"
+        },
+        {
+          "confidence": 0.94656366,
+          "endTime": 4.6050415,
+          "startTime": 4.375042,
+          "word": "二"
+        },
+        {
+          "confidence": 0.9500289,
+          "endTime": 4.7750416,
+          "startTime": 4.6050415,
+          "word": "改"
+        },
+        {
+          "confidence": 0.98495305,
+          "endTime": 4.9450417,
+          "startTime": 4.7750416,
+          "word": "成"
+        },
+        {
+          "confidence": 0.95132226,
+          "endTime": 5.2150416,
+          "startTime": 4.9450417,
+          "word": "三，"
+        },
+        {
+          "confidence": 0.92710716,
+          "endTime": 5.795042,
+          "startTime": 5.515042,
+          "word": "先"
+        },
+        {
+          "confidence": 0.81535214,
+          "endTime": 5.915042,
+          "startTime": 5.795042,
+          "word": "预"
+        },
+        {
+          "confidence": 0.9365579,
+          "endTime": 6.225042,
+          "startTime": 5.915042,
+          "word": "测，"
+        },
+        {
+          "confidence": 0.92092675,
+          "endTime": 6.5950418,
+          "startTime": 6.3850417,
+          "word": "再"
+        },
+        {
+          "confidence": 0.86744356,
+          "endTime": 6.725042,
+          "startTime": 6.5950418,
+          "word": "验"
+        },
+        {
+          "confidence": 0.9574739,
+          "endTime": 6.9350414,
+          "startTime": 6.725042,
+          "word": "证。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课程对话保留这些交流，",
+      "words": [
+        {
+          "confidence": 0.8732809,
+          "endTime": 7.3950834,
+          "startTime": 7.2800837,
+          "word": "课"
+        },
+        {
+          "confidence": 0.93955594,
+          "endTime": 7.5650835,
+          "startTime": 7.3950834,
+          "word": "程"
+        },
+        {
+          "confidence": 0.93193394,
+          "endTime": 7.7150836,
+          "startTime": 7.5650835,
+          "word": "对"
+        },
+        {
+          "confidence": 0.95815223,
+          "endTime": 7.915084,
+          "startTime": 7.7150836,
+          "word": "话"
+        },
+        {
+          "confidence": 0.9102969,
+          "endTime": 8.095083,
+          "startTime": 7.915084,
+          "word": "保"
+        },
+        {
+          "confidence": 0.96171534,
+          "endTime": 8.275084,
+          "startTime": 8.095083,
+          "word": "留"
+        },
+        {
+          "confidence": 0.93799573,
+          "endTime": 8.375084,
+          "startTime": 8.275084,
+          "word": "这"
+        },
+        {
+          "confidence": 0.968483,
+          "endTime": 8.515083,
+          "startTime": 8.375084,
+          "word": "些"
+        },
+        {
+          "confidence": 0.939865,
+          "endTime": 8.725083,
+          "startTime": 8.515083,
+          "word": "交"
+        },
+        {
+          "confidence": 0.97196877,
+          "endTime": 8.955084,
+          "startTime": 8.725083,
+          "word": "流，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "你也可以主动要求复习，",
+      "words": [
+        {
+          "confidence": 0.9107599,
+          "endTime": 9.405126,
+          "startTime": 9.285126,
+          "word": "你"
+        },
+        {
+          "confidence": 0.97719026,
+          "endTime": 9.515125,
+          "startTime": 9.405126,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7723143,
+          "endTime": 9.675126,
+          "startTime": 9.515125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6578848,
+          "endTime": 9.7751255,
+          "startTime": 9.675126,
+          "word": "以"
+        },
+        {
+          "confidence": 0.92995477,
+          "endTime": 9.965126,
+          "startTime": 9.7751255,
+          "word": "主"
+        },
+        {
+          "confidence": 0.98256505,
+          "endTime": 10.135126,
+          "startTime": 9.965126,
+          "word": "动"
+        },
+        {
+          "confidence": 0.90831375,
+          "endTime": 10.295126,
+          "startTime": 10.135126,
+          "word": "要"
+        },
+        {
+          "confidence": 0.98841935,
+          "endTime": 10.435125,
+          "startTime": 10.295126,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9658079,
+          "endTime": 10.615126,
+          "startTime": 10.435125,
+          "word": "复"
+        },
+        {
+          "confidence": 0.95553374,
+          "endTime": 10.945126,
+          "startTime": 10.615126,
+          "word": "习，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "带着刚才的问题，回到更小的例子。把变量的值从二改成三，先预测，再验证。课程对话保留这些交流，你也可以主动要求复习，或者调整下一步学习内容。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "或者调整下一步学习内容。",
+      "words": [
+        {
+          "confidence": 0.8217146,
+          "endTime": 11.315167,
+          "startTime": 11.220167,
+          "word": "或"
+        },
+        {
+          "confidence": 0.91569066,
+          "endTime": 11.455167,
+          "startTime": 11.315167,
+          "word": "者"
+        },
+        {
+          "confidence": 0.94859636,
+          "endTime": 11.695168,
+          "startTime": 11.455167,
+          "word": "调"
+        },
+        {
+          "confidence": 0.96778864,
+          "endTime": 11.895167,
+          "startTime": 11.695168,
+          "word": "整"
+        },
+        {
+          "confidence": 0.94773996,
+          "endTime": 12.155168,
+          "startTime": 11.895167,
+          "word": "下"
+        },
+        {
+          "confidence": 0.90480256,
+          "endTime": 12.215167,
+          "startTime": 12.155168,
+          "word": "一"
+        },
+        {
+          "confidence": 0.30625325,
+          "endTime": 12.275167,
+          "startTime": 12.215167,
+          "word": "步"
+        },
+        {
+          "confidence": 0.0816607,
+          "endTime": 12.335167,
+          "startTime": 12.275167,
+          "word": "学"
+        },
+        {
+          "confidence": 0.17114545,
+          "endTime": 12.395167,
+          "startTime": 12.335167,
+          "word": "习"
+        },
+        {
+          "confidence": 0.09553981,
+          "endTime": 12.455167,
+          "startTime": 12.395167,
+          "word": "内"
+        },
+        {
+          "confidence": 0.18032545,
+          "endTime": 12.515167,
+          "startTime": 12.455167,
+          "word": "容。"
+        }
+      ]
+    }
+  ]
+}

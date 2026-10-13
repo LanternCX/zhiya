@@ -1,0 +1,244 @@
+{
+  "duration": 7.842583333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "点击材料，直接进入阅读页。",
+      "words": [
+        {
+          "confidence": 0.978445,
+          "endTime": 0.385,
+          "startTime": 0.225,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9772975,
+          "endTime": 0.535,
+          "startTime": 0.385,
+          "word": "击"
+        },
+        {
+          "confidence": 0.94191056,
+          "endTime": 0.775,
+          "startTime": 0.535,
+          "word": "材"
+        },
+        {
+          "confidence": 0.89387536,
+          "endTime": 0.965,
+          "startTime": 0.775,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.85987663,
+          "endTime": 1.325,
+          "startTime": 1.125,
+          "word": "直"
+        },
+        {
+          "confidence": 0.96700054,
+          "endTime": 1.505,
+          "startTime": 1.325,
+          "word": "接"
+        },
+        {
+          "confidence": 0.917776,
+          "endTime": 1.655,
+          "startTime": 1.505,
+          "word": "进"
+        },
+        {
+          "confidence": 0.88761204,
+          "endTime": 1.805,
+          "startTime": 1.655,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9224957,
+          "endTime": 1.935,
+          "startTime": 1.805,
+          "word": "阅"
+        },
+        {
+          "confidence": 0.9650497,
+          "endTime": 2.115,
+          "startTime": 1.935,
+          "word": "读"
+        },
+        {
+          "confidence": 0.9075138,
+          "endTime": 2.305,
+          "startTime": 2.115,
+          "word": "页。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "点击材料，直接进入阅读页。老师更新以后，刷新同一个分享页，就可以查看最新保存的内容。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师更新以后，刷新同一个分享页，就可以查看最新保存的内容。",
+      "words": [
+        {
+          "confidence": 0.3428494,
+          "endTime": 2.8550417,
+          "startTime": 2.7800417,
+          "word": "老"
+        },
+        {
+          "confidence": 0.4553695,
+          "endTime": 2.9250417,
+          "startTime": 2.8550417,
+          "word": "师"
+        },
+        {
+          "confidence": 0.79817253,
+          "endTime": 3.0550418,
+          "startTime": 2.9250417,
+          "word": "更"
+        },
+        {
+          "confidence": 0.9508164,
+          "endTime": 3.2650418,
+          "startTime": 3.0550418,
+          "word": "新"
+        },
+        {
+          "confidence": 0.89575607,
+          "endTime": 3.3750417,
+          "startTime": 3.2650418,
+          "word": "以"
+        },
+        {
+          "confidence": 0.95917946,
+          "endTime": 3.7250416,
+          "startTime": 3.3750417,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9391514,
+          "endTime": 4.075042,
+          "startTime": 3.8150415,
+          "word": "刷"
+        },
+        {
+          "confidence": 0.9239956,
+          "endTime": 4.2750416,
+          "startTime": 4.075042,
+          "word": "新"
+        },
+        {
+          "confidence": 0.958013,
+          "endTime": 4.535042,
+          "startTime": 4.2750416,
+          "word": "同"
+        },
+        {
+          "confidence": 0.8865236,
+          "endTime": 4.6550417,
+          "startTime": 4.535042,
+          "word": "一"
+        },
+        {
+          "confidence": 0.91447335,
+          "endTime": 4.745042,
+          "startTime": 4.6550417,
+          "word": "个"
+        },
+        {
+          "confidence": 0.96166396,
+          "endTime": 4.8850417,
+          "startTime": 4.745042,
+          "word": "分"
+        },
+        {
+          "confidence": 0.97983664,
+          "endTime": 5.055042,
+          "startTime": 4.8850417,
+          "word": "享"
+        },
+        {
+          "confidence": 0.15258752,
+          "endTime": 5.085042,
+          "startTime": 5.055042,
+          "word": "页，"
+        },
+        {
+          "confidence": 0.13885787,
+          "endTime": 5.1450415,
+          "startTime": 5.085042,
+          "word": "就"
+        },
+        {
+          "confidence": 0.17391758,
+          "endTime": 5.205042,
+          "startTime": 5.1450415,
+          "word": "可"
+        },
+        {
+          "confidence": 0.29314515,
+          "endTime": 5.2350416,
+          "startTime": 5.205042,
+          "word": "以"
+        },
+        {
+          "confidence": 0.21417896,
+          "endTime": 5.295042,
+          "startTime": 5.2350416,
+          "word": "查"
+        },
+        {
+          "confidence": 0.25200853,
+          "endTime": 5.5650415,
+          "startTime": 5.5050416,
+          "word": "看"
+        },
+        {
+          "confidence": 0.12863499,
+          "endTime": 5.625042,
+          "startTime": 5.5650415,
+          "word": "最"
+        },
+        {
+          "confidence": 0.15725867,
+          "endTime": 5.6850414,
+          "startTime": 5.625042,
+          "word": "新"
+        },
+        {
+          "confidence": 0.1451584,
+          "endTime": 6.2650414,
+          "startTime": 6.205042,
+          "word": "保"
+        },
+        {
+          "confidence": 0.1617262,
+          "endTime": 6.325042,
+          "startTime": 6.2650414,
+          "word": "存"
+        },
+        {
+          "confidence": 0.21018215,
+          "endTime": 6.3850417,
+          "startTime": 6.325042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.22577563,
+          "endTime": 6.5250416,
+          "startTime": 6.4650416,
+          "word": "内"
+        },
+        {
+          "confidence": 0.18940537,
+          "endTime": 6.995042,
+          "startTime": 6.935042,
+          "word": "容。"
+        }
+      ]
+    }
+  ]
+}

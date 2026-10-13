@@ -1,0 +1,394 @@
+{
+  "duration": 14.631708333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "输入、变量和输出之间的关系，可以变成分步动画。",
+      "words": [
+        {
+          "confidence": 0.8305415,
+          "endTime": 0.635,
+          "startTime": 0.235,
+          "word": "输"
+        },
+        {
+          "confidence": 0.14547259,
+          "endTime": 0.665,
+          "startTime": 0.635,
+          "word": "入、"
+        },
+        {
+          "confidence": 0.8814463,
+          "endTime": 1.245,
+          "startTime": 1.015,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9186388,
+          "endTime": 1.505,
+          "startTime": 1.245,
+          "word": "量"
+        },
+        {
+          "confidence": 0.9545675,
+          "endTime": 1.715,
+          "startTime": 1.505,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9493409,
+          "endTime": 1.905,
+          "startTime": 1.715,
+          "word": "输"
+        },
+        {
+          "confidence": 0.97916496,
+          "endTime": 2.105,
+          "startTime": 1.905,
+          "word": "出"
+        },
+        {
+          "confidence": 0.93592834,
+          "endTime": 2.255,
+          "startTime": 2.105,
+          "word": "之"
+        },
+        {
+          "confidence": 0.92664856,
+          "endTime": 2.375,
+          "startTime": 2.255,
+          "word": "间"
+        },
+        {
+          "confidence": 0.9126723,
+          "endTime": 2.475,
+          "startTime": 2.375,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9769227,
+          "endTime": 2.665,
+          "startTime": 2.475,
+          "word": "关"
+        },
+        {
+          "confidence": 0.96955377,
+          "endTime": 2.975,
+          "startTime": 2.665,
+          "word": "系，"
+        },
+        {
+          "confidence": 0.8864957,
+          "endTime": 3.315,
+          "startTime": 3.185,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8013272,
+          "endTime": 3.435,
+          "startTime": 3.315,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96770644,
+          "endTime": 3.605,
+          "startTime": 3.435,
+          "word": "变"
+        },
+        {
+          "confidence": 0.98621225,
+          "endTime": 3.805,
+          "startTime": 3.605,
+          "word": "成"
+        },
+        {
+          "confidence": 0.97190577,
+          "endTime": 4.055,
+          "startTime": 3.805,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9330192,
+          "endTime": 4.215,
+          "startTime": 4.055,
+          "word": "步"
+        },
+        {
+          "confidence": 0.973585,
+          "endTime": 4.375,
+          "startTime": 4.215,
+          "word": "动"
+        },
+        {
+          "confidence": 0.97364426,
+          "endTime": 4.665,
+          "startTime": 4.375,
+          "word": "画。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先看输入从哪里来，再看它存到哪里，最后看输出。",
+      "words": [
+        {
+          "confidence": 0.7735083,
+          "endTime": 5.2050414,
+          "startTime": 5.1100416,
+          "word": "先"
+        },
+        {
+          "confidence": 0.7748993,
+          "endTime": 5.3650417,
+          "startTime": 5.2050414,
+          "word": "看"
+        },
+        {
+          "confidence": 0.94469285,
+          "endTime": 5.6250415,
+          "startTime": 5.3650417,
+          "word": "输"
+        },
+        {
+          "confidence": 0.95824033,
+          "endTime": 5.7950416,
+          "startTime": 5.6250415,
+          "word": "入"
+        },
+        {
+          "confidence": 0.95262474,
+          "endTime": 5.9850416,
+          "startTime": 5.7950416,
+          "word": "从"
+        },
+        {
+          "confidence": 0.9087926,
+          "endTime": 6.1350417,
+          "startTime": 5.9850416,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9687315,
+          "endTime": 6.2950416,
+          "startTime": 6.1350417,
+          "word": "里"
+        },
+        {
+          "confidence": 0.953781,
+          "endTime": 6.575042,
+          "startTime": 6.2950416,
+          "word": "来，"
+        },
+        {
+          "confidence": 0.9643504,
+          "endTime": 7.0050416,
+          "startTime": 6.8450418,
+          "word": "再"
+        },
+        {
+          "confidence": 0.96122223,
+          "endTime": 7.2150416,
+          "startTime": 7.0050416,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9638541,
+          "endTime": 7.4250417,
+          "startTime": 7.2150416,
+          "word": "它"
+        },
+        {
+          "confidence": 0.90428466,
+          "endTime": 7.665042,
+          "startTime": 7.4250417,
+          "word": "存"
+        },
+        {
+          "confidence": 0.9529898,
+          "endTime": 7.825042,
+          "startTime": 7.665042,
+          "word": "到"
+        },
+        {
+          "confidence": 0.8757809,
+          "endTime": 7.9850416,
+          "startTime": 7.825042,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9735435,
+          "endTime": 8.185041,
+          "startTime": 7.9850416,
+          "word": "里，"
+        },
+        {
+          "confidence": 0.93895984,
+          "endTime": 8.665042,
+          "startTime": 8.485042,
+          "word": "最"
+        },
+        {
+          "confidence": 0.93516153,
+          "endTime": 8.925041,
+          "startTime": 8.665042,
+          "word": "后"
+        },
+        {
+          "confidence": 0.884607,
+          "endTime": 9.1050415,
+          "startTime": 8.925041,
+          "word": "看"
+        },
+        {
+          "confidence": 0.16829932,
+          "endTime": 9.165041,
+          "startTime": 9.1050415,
+          "word": "输"
+        },
+        {
+          "confidence": 0.3125189,
+          "endTime": 9.225041,
+          "startTime": 9.165041,
+          "word": "出。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "输入、变量和输出之间的关系，可以变成分步动画。先看输入从哪里来，再看它存到哪里，最后看输出。每一步由你点击，复杂的地方可以停下来重新观察。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "每一步由你点击，复杂的地方可以停下来重新观察。",
+      "words": [
+        {
+          "confidence": 0.89696133,
+          "endTime": 10.215083,
+          "startTime": 10.0650835,
+          "word": "每"
+        },
+        {
+          "confidence": 0.8896406,
+          "endTime": 10.335083,
+          "startTime": 10.215083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9364514,
+          "endTime": 10.575084,
+          "startTime": 10.335083,
+          "word": "步"
+        },
+        {
+          "confidence": 0.8961775,
+          "endTime": 10.725083,
+          "startTime": 10.575084,
+          "word": "由"
+        },
+        {
+          "confidence": 0.894509,
+          "endTime": 10.865084,
+          "startTime": 10.725083,
+          "word": "你"
+        },
+        {
+          "confidence": 0.9648649,
+          "endTime": 11.0650835,
+          "startTime": 10.865084,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9616474,
+          "endTime": 11.355083,
+          "startTime": 11.0650835,
+          "word": "击，"
+        },
+        {
+          "confidence": 0.95107454,
+          "endTime": 11.895083,
+          "startTime": 11.685083,
+          "word": "复"
+        },
+        {
+          "confidence": 0.9230404,
+          "endTime": 12.045084,
+          "startTime": 11.895083,
+          "word": "杂"
+        },
+        {
+          "confidence": 0.9487802,
+          "endTime": 12.175083,
+          "startTime": 12.045084,
+          "word": "的"
+        },
+        {
+          "confidence": 0.96899223,
+          "endTime": 12.3150835,
+          "startTime": 12.175083,
+          "word": "地"
+        },
+        {
+          "confidence": 0.9761049,
+          "endTime": 12.605083,
+          "startTime": 12.3150835,
+          "word": "方"
+        },
+        {
+          "confidence": 0.8380286,
+          "endTime": 12.765083,
+          "startTime": 12.635083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6873386,
+          "endTime": 12.895083,
+          "startTime": 12.765083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9319599,
+          "endTime": 13.115084,
+          "startTime": 12.895083,
+          "word": "停"
+        },
+        {
+          "confidence": 0.97272485,
+          "endTime": 13.3150835,
+          "startTime": 13.115084,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9688432,
+          "endTime": 13.465084,
+          "startTime": 13.3150835,
+          "word": "来"
+        },
+        {
+          "confidence": 0.9110192,
+          "endTime": 13.685083,
+          "startTime": 13.465084,
+          "word": "重"
+        },
+        {
+          "confidence": 0.9679571,
+          "endTime": 13.905084,
+          "startTime": 13.685083,
+          "word": "新"
+        },
+        {
+          "confidence": 0.86156255,
+          "endTime": 14.075083,
+          "startTime": 13.905084,
+          "word": "观"
+        },
+        {
+          "confidence": 0.96440756,
+          "endTime": 14.415083,
+          "startTime": 14.075083,
+          "word": "察。"
+        }
+      ]
+    }
+  ]
+}

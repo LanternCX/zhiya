@@ -1,0 +1,514 @@
+{
+  "duration": 17.3245,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "页面改好了，备课还没结束。",
+      "words": [
+        {
+          "confidence": 0.76225656,
+          "endTime": 0.395,
+          "startTime": 0.285,
+          "word": "页"
+        },
+        {
+          "confidence": 0.9723689,
+          "endTime": 0.545,
+          "startTime": 0.395,
+          "word": "面"
+        },
+        {
+          "confidence": 0.9207257,
+          "endTime": 0.735,
+          "startTime": 0.545,
+          "word": "改"
+        },
+        {
+          "confidence": 0.9007577,
+          "endTime": 0.985,
+          "startTime": 0.735,
+          "word": "好"
+        },
+        {
+          "confidence": 0.9554545,
+          "endTime": 1.185,
+          "startTime": 0.985,
+          "word": "了，"
+        },
+        {
+          "confidence": 0.94940776,
+          "endTime": 1.535,
+          "startTime": 1.375,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9740673,
+          "endTime": 1.715,
+          "startTime": 1.535,
+          "word": "课"
+        },
+        {
+          "confidence": 0.97695285,
+          "endTime": 1.845,
+          "startTime": 1.715,
+          "word": "还"
+        },
+        {
+          "confidence": 0.96054983,
+          "endTime": 1.955,
+          "startTime": 1.845,
+          "word": "没"
+        },
+        {
+          "confidence": 0.9514586,
+          "endTime": 2.115,
+          "startTime": 1.955,
+          "word": "结"
+        },
+        {
+          "confidence": 0.98623246,
+          "endTime": 2.405,
+          "startTime": 2.115,
+          "word": "束。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课件主要给学生看，老师自己还需要知道：什么时候提问，",
+      "words": [
+        {
+          "confidence": 0.37963355,
+          "endTime": 2.9750416,
+          "startTime": 2.9000416,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9219723,
+          "endTime": 3.2050416,
+          "startTime": 2.9750416,
+          "word": "件"
+        },
+        {
+          "confidence": 0.95810694,
+          "endTime": 3.3950415,
+          "startTime": 3.2050416,
+          "word": "主"
+        },
+        {
+          "confidence": 0.9813266,
+          "endTime": 3.4950416,
+          "startTime": 3.3950415,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9925223,
+          "endTime": 3.6050415,
+          "startTime": 3.4950416,
+          "word": "给"
+        },
+        {
+          "confidence": 0.8349087,
+          "endTime": 3.8150415,
+          "startTime": 3.6050415,
+          "word": "学"
+        },
+        {
+          "confidence": 0.87616587,
+          "endTime": 4.0150414,
+          "startTime": 3.8150415,
+          "word": "生"
+        },
+        {
+          "confidence": 0.94538647,
+          "endTime": 4.285042,
+          "startTime": 4.0150414,
+          "word": "看，"
+        },
+        {
+          "confidence": 0.95591944,
+          "endTime": 4.8450418,
+          "startTime": 4.6650414,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9606072,
+          "endTime": 5.1150417,
+          "startTime": 4.8450418,
+          "word": "师"
+        },
+        {
+          "confidence": 0.88450176,
+          "endTime": 5.2750416,
+          "startTime": 5.1150417,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9701526,
+          "endTime": 5.4350414,
+          "startTime": 5.2750416,
+          "word": "己"
+        },
+        {
+          "confidence": 0.9503745,
+          "endTime": 5.5950413,
+          "startTime": 5.4350414,
+          "word": "还"
+        },
+        {
+          "confidence": 0.9679938,
+          "endTime": 5.7550416,
+          "startTime": 5.5950413,
+          "word": "需"
+        },
+        {
+          "confidence": 0.96544653,
+          "endTime": 5.8750415,
+          "startTime": 5.7550416,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8235498,
+          "endTime": 6.0550413,
+          "startTime": 5.8750415,
+          "word": "知"
+        },
+        {
+          "confidence": 0.1751317,
+          "endTime": 6.2250414,
+          "startTime": 6.1950417,
+          "word": "道："
+        },
+        {
+          "confidence": 0.9814408,
+          "endTime": 6.7250414,
+          "startTime": 6.5050416,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98396987,
+          "endTime": 6.8050413,
+          "startTime": 6.7250414,
+          "word": "么"
+        },
+        {
+          "confidence": 0.97318184,
+          "endTime": 6.9250417,
+          "startTime": 6.8050413,
+          "word": "时"
+        },
+        {
+          "confidence": 0.91737324,
+          "endTime": 7.075042,
+          "startTime": 6.9250417,
+          "word": "候"
+        },
+        {
+          "confidence": 0.9550261,
+          "endTime": 7.3150415,
+          "startTime": 7.075042,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9589729,
+          "endTime": 7.5450416,
+          "startTime": 7.3150415,
+          "word": "问，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "留多少时间练习，学生卡住以后先检查什么。",
+      "words": [
+        {
+          "confidence": 0.6760149,
+          "endTime": 7.985083,
+          "startTime": 7.900083,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9233199,
+          "endTime": 8.105083,
+          "startTime": 7.985083,
+          "word": "多"
+        },
+        {
+          "confidence": 0.98703927,
+          "endTime": 8.265083,
+          "startTime": 8.105083,
+          "word": "少"
+        },
+        {
+          "confidence": 0.9801407,
+          "endTime": 8.435083,
+          "startTime": 8.265083,
+          "word": "时"
+        },
+        {
+          "confidence": 0.9057441,
+          "endTime": 8.605083,
+          "startTime": 8.435083,
+          "word": "间"
+        },
+        {
+          "confidence": 0.9429881,
+          "endTime": 8.755083,
+          "startTime": 8.605083,
+          "word": "练"
+        },
+        {
+          "confidence": 0.93755126,
+          "endTime": 9.005083,
+          "startTime": 8.755083,
+          "word": "习，"
+        },
+        {
+          "confidence": 0.23462264,
+          "endTime": 9.065083,
+          "startTime": 9.005083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.11650794,
+          "endTime": 9.125083,
+          "startTime": 9.065083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.18949646,
+          "endTime": 9.185083,
+          "startTime": 9.125083,
+          "word": "卡"
+        },
+        {
+          "confidence": 0.15095381,
+          "endTime": 9.245083,
+          "startTime": 9.185083,
+          "word": "住"
+        },
+        {
+          "confidence": 0.18330064,
+          "endTime": 9.275084,
+          "startTime": 9.245083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.18698652,
+          "endTime": 9.335083,
+          "startTime": 9.275084,
+          "word": "后"
+        },
+        {
+          "confidence": 0.62246054,
+          "endTime": 9.515083,
+          "startTime": 9.375083,
+          "word": "先"
+        },
+        {
+          "confidence": 0.1986632,
+          "endTime": 9.575083,
+          "startTime": 9.515083,
+          "word": "检"
+        },
+        {
+          "confidence": 0.12956302,
+          "endTime": 9.635083,
+          "startTime": 9.575083,
+          "word": "查"
+        },
+        {
+          "confidence": 0.3243681,
+          "endTime": 9.695083,
+          "startTime": 9.635083,
+          "word": "什"
+        },
+        {
+          "confidence": 0.2117985,
+          "endTime": 9.755083,
+          "startTime": 9.695083,
+          "word": "么。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "页面改好了，备课还没结束。课件主要给学生看，老师自己还需要知道：什么时候提问，留多少时间练习，学生卡住以后先检查什么。教师教案要把这些课堂动作组织起来，帮助老师把内容真正讲出去。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "教师教案要把这些课堂动作组织起来，帮助老师把内容真正讲出去。",
+      "words": [
+        {
+          "confidence": 0.92457587,
+          "endTime": 12.005125,
+          "startTime": 11.8151245,
+          "word": "教"
+        },
+        {
+          "confidence": 0.7716254,
+          "endTime": 12.205125,
+          "startTime": 12.005125,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8298073,
+          "endTime": 12.445125,
+          "startTime": 12.205125,
+          "word": "教"
+        },
+        {
+          "confidence": 0.858154,
+          "endTime": 12.665125,
+          "startTime": 12.445125,
+          "word": "案"
+        },
+        {
+          "confidence": 0.7846503,
+          "endTime": 12.795125,
+          "startTime": 12.665125,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9252995,
+          "endTime": 12.935125,
+          "startTime": 12.795125,
+          "word": "把"
+        },
+        {
+          "confidence": 0.969889,
+          "endTime": 13.055125,
+          "startTime": 12.935125,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9738339,
+          "endTime": 13.195126,
+          "startTime": 13.055125,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9457405,
+          "endTime": 13.385125,
+          "startTime": 13.195126,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9652801,
+          "endTime": 13.555125,
+          "startTime": 13.385125,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.96573687,
+          "endTime": 13.715125,
+          "startTime": 13.555125,
+          "word": "动"
+        },
+        {
+          "confidence": 0.97958684,
+          "endTime": 13.845125,
+          "startTime": 13.715125,
+          "word": "作"
+        },
+        {
+          "confidence": 0.9246724,
+          "endTime": 14.055125,
+          "startTime": 13.845125,
+          "word": "组"
+        },
+        {
+          "confidence": 0.90329546,
+          "endTime": 14.195126,
+          "startTime": 14.055125,
+          "word": "织"
+        },
+        {
+          "confidence": 0.84325767,
+          "endTime": 14.365125,
+          "startTime": 14.195126,
+          "word": "起"
+        },
+        {
+          "confidence": 0.97374105,
+          "endTime": 14.575125,
+          "startTime": 14.365125,
+          "word": "来，"
+        },
+        {
+          "confidence": 0.91197217,
+          "endTime": 15.0651245,
+          "startTime": 14.915125,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.95755,
+          "endTime": 15.235125,
+          "startTime": 15.0651245,
+          "word": "助"
+        },
+        {
+          "confidence": 0.9421045,
+          "endTime": 15.365126,
+          "startTime": 15.235125,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9850626,
+          "endTime": 15.645124,
+          "startTime": 15.365126,
+          "word": "师"
+        },
+        {
+          "confidence": 0.72114843,
+          "endTime": 15.805125,
+          "startTime": 15.675125,
+          "word": "把"
+        },
+        {
+          "confidence": 0.912513,
+          "endTime": 15.995125,
+          "startTime": 15.805125,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9552247,
+          "endTime": 16.135124,
+          "startTime": 15.995125,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9094667,
+          "endTime": 16.305126,
+          "startTime": 16.135124,
+          "word": "真"
+        },
+        {
+          "confidence": 0.96222013,
+          "endTime": 16.505125,
+          "startTime": 16.305126,
+          "word": "正"
+        },
+        {
+          "confidence": 0.9162815,
+          "endTime": 16.695126,
+          "startTime": 16.505125,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.951614,
+          "endTime": 16.875126,
+          "startTime": 16.695126,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9270512,
+          "endTime": 17.055126,
+          "startTime": 16.875126,
+          "word": "去。"
+        }
+      ]
+    }
+  ]
+}

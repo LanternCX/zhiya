@@ -1,0 +1,220 @@
+{
+  "duration": 7.319333333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师可以先检查这个顺序。",
+      "words": [
+        {
+          "confidence": 0.9410874,
+          "endTime": 0.415,
+          "startTime": 0.235,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9695402,
+          "endTime": 0.675,
+          "startTime": 0.415,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7468358,
+          "endTime": 0.825,
+          "startTime": 0.675,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6750431,
+          "endTime": 0.945,
+          "startTime": 0.825,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9534754,
+          "endTime": 1.195,
+          "startTime": 0.945,
+          "word": "先"
+        },
+        {
+          "confidence": 0.91312474,
+          "endTime": 1.375,
+          "startTime": 1.195,
+          "word": "检"
+        },
+        {
+          "confidence": 0.96112275,
+          "endTime": 1.585,
+          "startTime": 1.375,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9271227,
+          "endTime": 1.725,
+          "startTime": 1.585,
+          "word": "这"
+        },
+        {
+          "confidence": 0.4844896,
+          "endTime": 1.795,
+          "startTime": 1.725,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8077533,
+          "endTime": 2.015,
+          "startTime": 1.795,
+          "word": "顺"
+        },
+        {
+          "confidence": 0.79881084,
+          "endTime": 2.215,
+          "startTime": 2.015,
+          "word": "序。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以先检查这个顺序。把时间留给学生动手，比一口气讲完所有语法更重要。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "把时间留给学生动手，比一口气讲完所有语法更重要。",
+      "words": [
+        {
+          "confidence": 0.46983624,
+          "endTime": 2.8150418,
+          "startTime": 2.7400417,
+          "word": "把"
+        },
+        {
+          "confidence": 0.74419564,
+          "endTime": 2.9650416,
+          "startTime": 2.8150418,
+          "word": "时"
+        },
+        {
+          "confidence": 0.8831794,
+          "endTime": 3.2550416,
+          "startTime": 2.9650416,
+          "word": "间"
+        },
+        {
+          "confidence": 0.94409215,
+          "endTime": 3.3750417,
+          "startTime": 3.2550416,
+          "word": "留"
+        },
+        {
+          "confidence": 0.97903883,
+          "endTime": 3.4950418,
+          "startTime": 3.3750417,
+          "word": "给"
+        },
+        {
+          "confidence": 0.91040325,
+          "endTime": 3.6650417,
+          "startTime": 3.4950418,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8783904,
+          "endTime": 3.8650417,
+          "startTime": 3.6650417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9193293,
+          "endTime": 3.9950418,
+          "startTime": 3.8650417,
+          "word": "动"
+        },
+        {
+          "confidence": 0.9478818,
+          "endTime": 4.325042,
+          "startTime": 3.9950418,
+          "word": "手，"
+        },
+        {
+          "confidence": 0.9145844,
+          "endTime": 4.7750416,
+          "startTime": 4.6050415,
+          "word": "比"
+        },
+        {
+          "confidence": 0.89467144,
+          "endTime": 4.9250417,
+          "startTime": 4.7750416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9655993,
+          "endTime": 5.125042,
+          "startTime": 4.9250417,
+          "word": "口"
+        },
+        {
+          "confidence": 0.9389622,
+          "endTime": 5.335042,
+          "startTime": 5.125042,
+          "word": "气"
+        },
+        {
+          "confidence": 0.8995498,
+          "endTime": 5.495042,
+          "startTime": 5.335042,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9623175,
+          "endTime": 5.6350417,
+          "startTime": 5.495042,
+          "word": "完"
+        },
+        {
+          "confidence": 0.9525027,
+          "endTime": 5.8950415,
+          "startTime": 5.6350417,
+          "word": "所"
+        },
+        {
+          "confidence": 0.91434556,
+          "endTime": 6.045042,
+          "startTime": 5.8950415,
+          "word": "有"
+        },
+        {
+          "confidence": 0.60845864,
+          "endTime": 6.165042,
+          "startTime": 6.045042,
+          "word": "语"
+        },
+        {
+          "confidence": 0.94503146,
+          "endTime": 6.3950415,
+          "startTime": 6.165042,
+          "word": "法"
+        },
+        {
+          "confidence": 0.6033896,
+          "endTime": 6.505042,
+          "startTime": 6.3950415,
+          "word": "更"
+        },
+        {
+          "confidence": 0.21713883,
+          "endTime": 6.5650415,
+          "startTime": 6.505042,
+          "word": "重"
+        },
+        {
+          "confidence": 0.21670534,
+          "endTime": 6.5950418,
+          "startTime": 6.5650415,
+          "word": "要。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "duration": 5.543916666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师先看清楚这些材料，再决定哪些能直接用，哪些需要改。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师先看清楚这些材料，再决定哪些能直接用，哪些需要改。",
+      "words": [
+        {
+          "confidence": 0.957614,
+          "endTime": 0.435,
+          "startTime": 0.275,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9664216,
+          "endTime": 0.725,
+          "startTime": 0.435,
+          "word": "师"
+        },
+        {
+          "confidence": 0.85940444,
+          "endTime": 0.945,
+          "startTime": 0.725,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9737004,
+          "endTime": 1.175,
+          "startTime": 0.945,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9428668,
+          "endTime": 1.365,
+          "startTime": 1.175,
+          "word": "清"
+        },
+        {
+          "confidence": 0.91878146,
+          "endTime": 1.495,
+          "startTime": 1.365,
+          "word": "楚"
+        },
+        {
+          "confidence": 0.8546698,
+          "endTime": 1.605,
+          "startTime": 1.495,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9704665,
+          "endTime": 1.745,
+          "startTime": 1.605,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9395632,
+          "endTime": 1.985,
+          "startTime": 1.745,
+          "word": "材"
+        },
+        {
+          "confidence": 0.8964669,
+          "endTime": 2.195,
+          "startTime": 1.985,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.9318881,
+          "endTime": 2.715,
+          "startTime": 2.505,
+          "word": "再"
+        },
+        {
+          "confidence": 0.8658553,
+          "endTime": 2.885,
+          "startTime": 2.715,
+          "word": "决"
+        },
+        {
+          "confidence": 0.9630574,
+          "endTime": 3.095,
+          "startTime": 2.885,
+          "word": "定"
+        },
+        {
+          "confidence": 0.85731834,
+          "endTime": 3.325,
+          "startTime": 3.155,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9464721,
+          "endTime": 3.515,
+          "startTime": 3.325,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9553603,
+          "endTime": 3.655,
+          "startTime": 3.515,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9089351,
+          "endTime": 3.805,
+          "startTime": 3.655,
+          "word": "直"
+        },
+        {
+          "confidence": 0.94086194,
+          "endTime": 3.995,
+          "startTime": 3.805,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9539609,
+          "endTime": 4.205,
+          "startTime": 3.995,
+          "word": "用，"
+        },
+        {
+          "confidence": 0.9266192,
+          "endTime": 4.615,
+          "startTime": 4.465,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9736225,
+          "endTime": 4.765,
+          "startTime": 4.615,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9325525,
+          "endTime": 4.925,
+          "startTime": 4.765,
+          "word": "需"
+        },
+        {
+          "confidence": 0.7384663,
+          "endTime": 4.975,
+          "startTime": 4.925,
+          "word": "要"
+        },
+        {
+          "confidence": 0.1872057,
+          "endTime": 5.035,
+          "startTime": 4.975,
+          "word": "改。"
+        }
+      ]
+    }
+  ]
+}

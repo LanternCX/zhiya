@@ -1,0 +1,424 @@
+{
+  "duration": 14.655208333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "不过，代码写在纸面上是静止的。",
+      "words": [
+        {
+          "confidence": 0.88392663,
+          "endTime": 0.365,
+          "startTime": 0.235,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9452398,
+          "endTime": 0.645,
+          "startTime": 0.365,
+          "word": "过，"
+        },
+        {
+          "confidence": 0.95876294,
+          "endTime": 1.085,
+          "startTime": 0.905,
+          "word": "代"
+        },
+        {
+          "confidence": 0.90348196,
+          "endTime": 1.225,
+          "startTime": 1.085,
+          "word": "码"
+        },
+        {
+          "confidence": 0.8787432,
+          "endTime": 1.425,
+          "startTime": 1.225,
+          "word": "写"
+        },
+        {
+          "confidence": 0.9471099,
+          "endTime": 1.565,
+          "startTime": 1.425,
+          "word": "在"
+        },
+        {
+          "confidence": 0.91824865,
+          "endTime": 1.785,
+          "startTime": 1.565,
+          "word": "纸"
+        },
+        {
+          "confidence": 0.92831403,
+          "endTime": 1.995,
+          "startTime": 1.785,
+          "word": "面"
+        },
+        {
+          "confidence": 0.9339843,
+          "endTime": 2.235,
+          "startTime": 1.995,
+          "word": "上"
+        },
+        {
+          "confidence": 0.9705563,
+          "endTime": 2.425,
+          "startTime": 2.235,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9087989,
+          "endTime": 2.665,
+          "startTime": 2.425,
+          "word": "静"
+        },
+        {
+          "confidence": 0.9423722,
+          "endTime": 2.865,
+          "startTime": 2.665,
+          "word": "止"
+        },
+        {
+          "confidence": 0.9620813,
+          "endTime": 3.105,
+          "startTime": 2.905,
+          "word": "的。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "输入的数据从哪里来，后来存在哪里，又怎样出现在屏幕上？",
+      "words": [
+        {
+          "confidence": 0.6535838,
+          "endTime": 3.7150416,
+          "startTime": 3.6400416,
+          "word": "输"
+        },
+        {
+          "confidence": 0.72736967,
+          "endTime": 3.8450415,
+          "startTime": 3.7150416,
+          "word": "入"
+        },
+        {
+          "confidence": 0.87131023,
+          "endTime": 3.9550416,
+          "startTime": 3.8450415,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9213722,
+          "endTime": 4.2050414,
+          "startTime": 3.9550416,
+          "word": "数"
+        },
+        {
+          "confidence": 0.91727793,
+          "endTime": 4.4250417,
+          "startTime": 4.2050414,
+          "word": "据"
+        },
+        {
+          "confidence": 0.9327829,
+          "endTime": 4.6250415,
+          "startTime": 4.4250417,
+          "word": "从"
+        },
+        {
+          "confidence": 0.7665938,
+          "endTime": 4.785042,
+          "startTime": 4.6250415,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.95101416,
+          "endTime": 4.955042,
+          "startTime": 4.785042,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9370396,
+          "endTime": 5.205042,
+          "startTime": 4.955042,
+          "word": "来，"
+        },
+        {
+          "confidence": 0.87905276,
+          "endTime": 5.6350417,
+          "startTime": 5.4350414,
+          "word": "后"
+        },
+        {
+          "confidence": 0.97505325,
+          "endTime": 5.8150415,
+          "startTime": 5.6350417,
+          "word": "来"
+        },
+        {
+          "confidence": 0.8951328,
+          "endTime": 6.0650415,
+          "startTime": 5.8150415,
+          "word": "存"
+        },
+        {
+          "confidence": 0.9299386,
+          "endTime": 6.2550416,
+          "startTime": 6.0650415,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9655398,
+          "endTime": 6.4350414,
+          "startTime": 6.2550416,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9839565,
+          "endTime": 6.6450415,
+          "startTime": 6.4350414,
+          "word": "里，"
+        },
+        {
+          "confidence": 0.8780169,
+          "endTime": 7.0150414,
+          "startTime": 6.8950415,
+          "word": "又"
+        },
+        {
+          "confidence": 0.8666476,
+          "endTime": 7.2550416,
+          "startTime": 7.0150414,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.98805696,
+          "endTime": 7.3950415,
+          "startTime": 7.2550416,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9539931,
+          "endTime": 7.5650415,
+          "startTime": 7.3950415,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9624375,
+          "endTime": 7.715041,
+          "startTime": 7.5650415,
+          "word": "现"
+        },
+        {
+          "confidence": 0.932503,
+          "endTime": 7.835042,
+          "startTime": 7.715041,
+          "word": "在"
+        },
+        {
+          "confidence": 0.92553866,
+          "endTime": 8.045042,
+          "startTime": 7.835042,
+          "word": "屏"
+        },
+        {
+          "confidence": 0.95372474,
+          "endTime": 8.225041,
+          "startTime": 8.045042,
+          "word": "幕"
+        },
+        {
+          "confidence": 0.8779726,
+          "endTime": 8.465041,
+          "startTime": 8.225041,
+          "word": "上？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "只看几行文字，学生可能还是连不起来。",
+      "words": [
+        {
+          "confidence": 0.7884213,
+          "endTime": 8.995083,
+          "startTime": 8.840083,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9595015,
+          "endTime": 9.195083,
+          "startTime": 8.995083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.78758705,
+          "endTime": 9.345083,
+          "startTime": 9.195083,
+          "word": "几"
+        },
+        {
+          "confidence": 0.8584778,
+          "endTime": 9.525084,
+          "startTime": 9.345083,
+          "word": "行"
+        },
+        {
+          "confidence": 0.9425488,
+          "endTime": 9.715083,
+          "startTime": 9.525084,
+          "word": "文"
+        },
+        {
+          "confidence": 0.9193949,
+          "endTime": 9.955083,
+          "startTime": 9.715083,
+          "word": "字，"
+        },
+        {
+          "confidence": 0.9789441,
+          "endTime": 10.405083,
+          "startTime": 10.155083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.7916677,
+          "endTime": 10.675083,
+          "startTime": 10.405083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.91285855,
+          "endTime": 10.845083,
+          "startTime": 10.675083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.9748214,
+          "endTime": 10.965083,
+          "startTime": 10.845083,
+          "word": "能"
+        },
+        {
+          "confidence": 0.902908,
+          "endTime": 11.115084,
+          "startTime": 10.965083,
+          "word": "还"
+        },
+        {
+          "confidence": 0.2772434,
+          "endTime": 11.175083,
+          "startTime": 11.115084,
+          "word": "是"
+        },
+        {
+          "confidence": 0.052980557,
+          "endTime": 11.235083,
+          "startTime": 11.175083,
+          "word": "连"
+        },
+        {
+          "confidence": 0.16680829,
+          "endTime": 11.295083,
+          "startTime": 11.235083,
+          "word": "不"
+        },
+        {
+          "confidence": 0.20024253,
+          "endTime": 11.355083,
+          "startTime": 11.295083,
+          "word": "起"
+        },
+        {
+          "confidence": 0.27878022,
+          "endTime": 11.415083,
+          "startTime": 11.355083,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "不过，代码写在纸面上是静止的。输入的数据从哪里来，后来存在哪里，又怎样出现在屏幕上？只看几行文字，学生可能还是连不起来。接下来，就让这个过程动起来。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "接下来，就让这个过程动起来。",
+      "words": [
+        {
+          "confidence": 0.8869504,
+          "endTime": 12.535125,
+          "startTime": 12.355125,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9033999,
+          "endTime": 12.745125,
+          "startTime": 12.535125,
+          "word": "下"
+        },
+        {
+          "confidence": 0.96365255,
+          "endTime": 13.035125,
+          "startTime": 12.745125,
+          "word": "来，"
+        },
+        {
+          "confidence": 0.89849156,
+          "endTime": 13.215125,
+          "startTime": 13.0651245,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9432003,
+          "endTime": 13.335125,
+          "startTime": 13.215125,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9513975,
+          "endTime": 13.485125,
+          "startTime": 13.335125,
+          "word": "这"
+        },
+        {
+          "confidence": 0.56074786,
+          "endTime": 13.585125,
+          "startTime": 13.485125,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9516309,
+          "endTime": 13.735125,
+          "startTime": 13.585125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.96962583,
+          "endTime": 13.935125,
+          "startTime": 13.735125,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9359551,
+          "endTime": 14.155125,
+          "startTime": 13.935125,
+          "word": "动"
+        },
+        {
+          "confidence": 0.8294554,
+          "endTime": 14.335125,
+          "startTime": 14.155125,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9776331,
+          "endTime": 14.545125,
+          "startTime": 14.335125,
+          "word": "来。"
+        }
+      ]
+    }
+  ]
+}

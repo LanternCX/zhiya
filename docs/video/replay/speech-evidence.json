@@ -1,0 +1,91 @@
+{
+  "audio": "voice-compact/task.wav",
+  "events": [
+    {
+      "type": "ready"
+    },
+    {
+      "final": false,
+      "text": "现在",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零级",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零级础40十",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一击",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一击，用时",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输入和输出",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输入和输出，先",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输入和输出，先确认范围",
+      "type": "transcript"
+    },
+    {
+      "final": false,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输入和输出，先确认范围，再准备",
+      "type": "transcript"
+    },
+    {
+      "final": true,
+      "text": "现在提出这堂课的任务，初一零基础，40分钟，两人一机，用食堂点餐讲清楚变量、输入和输出，先确认范围，再准备材料。",
+      "type": "transcript"
+    },
+    {
+      "type": "complete"
+    }
+  ]
+}

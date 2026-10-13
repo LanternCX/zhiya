@@ -1,0 +1,262 @@
+{
+  "duration": 8.928083333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "已经有编程基础的学生，则可以进一步讨论名字、对象和输入类型。",
+      "words": [
+        {
+          "confidence": 0.9107365,
+          "endTime": 0.395,
+          "startTime": 0.285,
+          "word": "已"
+        },
+        {
+          "confidence": 0.9524463,
+          "endTime": 0.555,
+          "startTime": 0.395,
+          "word": "经"
+        },
+        {
+          "confidence": 0.96663266,
+          "endTime": 0.695,
+          "startTime": 0.555,
+          "word": "有"
+        },
+        {
+          "confidence": 0.8453575,
+          "endTime": 0.845,
+          "startTime": 0.695,
+          "word": "编"
+        },
+        {
+          "confidence": 0.93803024,
+          "endTime": 1.055,
+          "startTime": 0.845,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9355593,
+          "endTime": 1.205,
+          "startTime": 1.055,
+          "word": "基"
+        },
+        {
+          "confidence": 0.9508694,
+          "endTime": 1.355,
+          "startTime": 1.205,
+          "word": "础"
+        },
+        {
+          "confidence": 0.9650955,
+          "endTime": 1.445,
+          "startTime": 1.355,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9387284,
+          "endTime": 1.635,
+          "startTime": 1.445,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8438476,
+          "endTime": 1.925,
+          "startTime": 1.635,
+          "word": "生，"
+        },
+        {
+          "confidence": 0.6997904,
+          "endTime": 2.325,
+          "startTime": 2.165,
+          "word": "则"
+        },
+        {
+          "confidence": 0.8519111,
+          "endTime": 2.465,
+          "startTime": 2.325,
+          "word": "可"
+        },
+        {
+          "confidence": 0.75581074,
+          "endTime": 2.585,
+          "startTime": 2.465,
+          "word": "以"
+        },
+        {
+          "confidence": 0.91832215,
+          "endTime": 2.795,
+          "startTime": 2.585,
+          "word": "进"
+        },
+        {
+          "confidence": 0.856423,
+          "endTime": 2.925,
+          "startTime": 2.795,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9257628,
+          "endTime": 3.035,
+          "startTime": 2.925,
+          "word": "步"
+        },
+        {
+          "confidence": 0.87991935,
+          "endTime": 3.245,
+          "startTime": 3.035,
+          "word": "讨"
+        },
+        {
+          "confidence": 0.93584186,
+          "endTime": 3.455,
+          "startTime": 3.245,
+          "word": "论"
+        },
+        {
+          "confidence": 0.87413776,
+          "endTime": 3.725,
+          "startTime": 3.485,
+          "word": "名"
+        },
+        {
+          "confidence": 0.19131333,
+          "endTime": 3.915,
+          "startTime": 3.885,
+          "word": "字、"
+        },
+        {
+          "confidence": 0.9544707,
+          "endTime": 4.385,
+          "startTime": 4.235,
+          "word": "对"
+        },
+        {
+          "confidence": 0.95196515,
+          "endTime": 4.695,
+          "startTime": 4.385,
+          "word": "象"
+        },
+        {
+          "confidence": 0.9308766,
+          "endTime": 4.905,
+          "startTime": 4.755,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9323939,
+          "endTime": 5.115,
+          "startTime": 4.905,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9364147,
+          "endTime": 5.255,
+          "startTime": 5.115,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9589749,
+          "endTime": 5.395,
+          "startTime": 5.255,
+          "word": "类"
+        },
+        {
+          "confidence": 0.9640352,
+          "endTime": 5.675,
+          "startTime": 5.395,
+          "word": "型。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "已经有编程基础的学生，则可以进一步讨论名字、对象和输入类型。表达和深度随着学习需要改变。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "表达和深度随着学习需要改变。",
+      "words": [
+        {
+          "confidence": 0.6070058,
+          "endTime": 6.185042,
+          "startTime": 6.100042,
+          "word": "表"
+        },
+        {
+          "confidence": 0.9018165,
+          "endTime": 6.465042,
+          "startTime": 6.185042,
+          "word": "达"
+        },
+        {
+          "confidence": 0.94728184,
+          "endTime": 6.6150417,
+          "startTime": 6.465042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.8906124,
+          "endTime": 6.915042,
+          "startTime": 6.6150417,
+          "word": "深"
+        },
+        {
+          "confidence": 0.9605638,
+          "endTime": 7.1550417,
+          "startTime": 6.915042,
+          "word": "度"
+        },
+        {
+          "confidence": 0.8178962,
+          "endTime": 7.515042,
+          "startTime": 7.335042,
+          "word": "随"
+        },
+        {
+          "confidence": 0.821238,
+          "endTime": 7.625042,
+          "startTime": 7.515042,
+          "word": "着"
+        },
+        {
+          "confidence": 0.9240173,
+          "endTime": 7.805042,
+          "startTime": 7.625042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.95718545,
+          "endTime": 7.975042,
+          "startTime": 7.805042,
+          "word": "习"
+        },
+        {
+          "confidence": 0.37613907,
+          "endTime": 8.045042,
+          "startTime": 7.975042,
+          "word": "需"
+        },
+        {
+          "confidence": 0.14764653,
+          "endTime": 8.075042,
+          "startTime": 8.045042,
+          "word": "要"
+        },
+        {
+          "confidence": 0.10378027,
+          "endTime": 8.135042,
+          "startTime": 8.075042,
+          "word": "改"
+        },
+        {
+          "confidence": 0.32422993,
+          "endTime": 8.195042,
+          "startTime": 8.135042,
+          "word": "变。"
+        }
+      ]
+    }
+  ]
+}

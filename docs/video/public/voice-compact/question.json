@@ -1,0 +1,154 @@
+{
+  "duration": 5.3269166666666665,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "再用一道选择题，检查学生有没有混淆变量、输入和输出。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "再用一道选择题，检查学生有没有混淆变量、输入和输出。",
+      "words": [
+        {
+          "confidence": 0.92638254,
+          "endTime": 0.445,
+          "startTime": 0.225,
+          "word": "再"
+        },
+        {
+          "confidence": 0.89626884,
+          "endTime": 0.535,
+          "startTime": 0.445,
+          "word": "用"
+        },
+        {
+          "confidence": 0.8592171,
+          "endTime": 0.655,
+          "startTime": 0.535,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95056015,
+          "endTime": 0.795,
+          "startTime": 0.655,
+          "word": "道"
+        },
+        {
+          "confidence": 0.94250894,
+          "endTime": 1.015,
+          "startTime": 0.795,
+          "word": "选"
+        },
+        {
+          "confidence": 0.98121583,
+          "endTime": 1.205,
+          "startTime": 1.015,
+          "word": "择"
+        },
+        {
+          "confidence": 0.9415693,
+          "endTime": 1.525,
+          "startTime": 1.205,
+          "word": "题，"
+        },
+        {
+          "confidence": 0.9304626,
+          "endTime": 1.915,
+          "startTime": 1.725,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9762508,
+          "endTime": 2.165,
+          "startTime": 1.915,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9449994,
+          "endTime": 2.355,
+          "startTime": 2.165,
+          "word": "学"
+        },
+        {
+          "confidence": 0.93707573,
+          "endTime": 2.595,
+          "startTime": 2.355,
+          "word": "生"
+        },
+        {
+          "confidence": 0.926956,
+          "endTime": 2.755,
+          "startTime": 2.595,
+          "word": "有"
+        },
+        {
+          "confidence": 0.98599154,
+          "endTime": 2.945,
+          "startTime": 2.755,
+          "word": "没"
+        },
+        {
+          "confidence": 0.92602056,
+          "endTime": 2.985,
+          "startTime": 2.945,
+          "word": "有"
+        },
+        {
+          "confidence": 0.6796516,
+          "endTime": 3.135,
+          "startTime": 2.985,
+          "word": "混"
+        },
+        {
+          "confidence": 0.7214671,
+          "endTime": 3.345,
+          "startTime": 3.135,
+          "word": "淆"
+        },
+        {
+          "confidence": 0.6672261,
+          "endTime": 3.685,
+          "startTime": 3.345,
+          "word": "变"
+        },
+        {
+          "confidence": 0.24907593,
+          "endTime": 3.715,
+          "startTime": 3.685,
+          "word": "量、"
+        },
+        {
+          "confidence": 0.92668575,
+          "endTime": 4.165,
+          "startTime": 3.925,
+          "word": "输"
+        },
+        {
+          "confidence": 0.91117996,
+          "endTime": 4.405,
+          "startTime": 4.165,
+          "word": "入"
+        },
+        {
+          "confidence": 0.96279854,
+          "endTime": 4.615,
+          "startTime": 4.405,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9037577,
+          "endTime": 4.775,
+          "startTime": 4.615,
+          "word": "输"
+        },
+        {
+          "confidence": 0.56421316,
+          "endTime": 4.835,
+          "startTime": 4.775,
+          "word": "出。"
+        }
+      ]
+    }
+  ]
+}

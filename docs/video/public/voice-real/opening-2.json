@@ -1,0 +1,220 @@
+{
+  "duration": 6.804791666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "知芽希望帮老师把这些工作接起来。",
+      "words": [
+        {
+          "confidence": 0.8367028,
+          "endTime": 0.445,
+          "startTime": 0.255,
+          "word": "知"
+        },
+        {
+          "confidence": 0.88676286,
+          "endTime": 0.615,
+          "startTime": 0.445,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.95132405,
+          "endTime": 0.835,
+          "startTime": 0.615,
+          "word": "希"
+        },
+        {
+          "confidence": 0.9553373,
+          "endTime": 0.985,
+          "startTime": 0.835,
+          "word": "望"
+        },
+        {
+          "confidence": 0.8930381,
+          "endTime": 1.175,
+          "startTime": 0.985,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.9121678,
+          "endTime": 1.305,
+          "startTime": 1.175,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9902415,
+          "endTime": 1.525,
+          "startTime": 1.305,
+          "word": "师"
+        },
+        {
+          "confidence": 0.878706,
+          "endTime": 1.655,
+          "startTime": 1.525,
+          "word": "把"
+        },
+        {
+          "confidence": 0.97932094,
+          "endTime": 1.775,
+          "startTime": 1.655,
+          "word": "这"
+        },
+        {
+          "confidence": 0.97307944,
+          "endTime": 1.915,
+          "startTime": 1.775,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9622208,
+          "endTime": 2.075,
+          "startTime": 1.915,
+          "word": "工"
+        },
+        {
+          "confidence": 0.9420434,
+          "endTime": 2.205,
+          "startTime": 2.075,
+          "word": "作"
+        },
+        {
+          "confidence": 0.8750623,
+          "endTime": 2.425,
+          "startTime": 2.205,
+          "word": "接"
+        },
+        {
+          "confidence": 0.91249114,
+          "endTime": 2.595,
+          "startTime": 2.425,
+          "word": "起"
+        },
+        {
+          "confidence": 0.97430307,
+          "endTime": 2.815,
+          "startTime": 2.595,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽希望帮老师把这些工作接起来。我们就拿一节真实的 Python 入门课，看它怎么做。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "我们就拿一节真实的 Python 入门课，看它怎么做。",
+      "words": [
+        {
+          "confidence": 0.89048195,
+          "endTime": 3.3950415,
+          "startTime": 3.2750416,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9439581,
+          "endTime": 3.5150416,
+          "startTime": 3.3950415,
+          "word": "们"
+        },
+        {
+          "confidence": 0.7834204,
+          "endTime": 3.6650414,
+          "startTime": 3.5150416,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9203467,
+          "endTime": 3.8250415,
+          "startTime": 3.6650414,
+          "word": "拿"
+        },
+        {
+          "confidence": 0.8972756,
+          "endTime": 3.9650416,
+          "startTime": 3.8250415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.8733133,
+          "endTime": 4.1450415,
+          "startTime": 3.9650416,
+          "word": "节"
+        },
+        {
+          "confidence": 0.92177063,
+          "endTime": 4.3350415,
+          "startTime": 4.1450415,
+          "word": "真"
+        },
+        {
+          "confidence": 0.9602683,
+          "endTime": 4.5450416,
+          "startTime": 4.3350415,
+          "word": "实"
+        },
+        {
+          "confidence": 0.8749251,
+          "endTime": 4.6450415,
+          "startTime": 4.5450416,
+          "word": "的"
+        },
+        {
+          "confidence": 0.43008503,
+          "endTime": 4.995042,
+          "startTime": 4.6450415,
+          "word": "Python"
+        },
+        {
+          "confidence": 0.8949161,
+          "endTime": 5.1550417,
+          "startTime": 4.995042,
+          "word": "入"
+        },
+        {
+          "confidence": 0.90422976,
+          "endTime": 5.3150415,
+          "startTime": 5.1550417,
+          "word": "门"
+        },
+        {
+          "confidence": 0.9584067,
+          "endTime": 5.575042,
+          "startTime": 5.3150415,
+          "word": "课，"
+        },
+        {
+          "confidence": 0.93625945,
+          "endTime": 5.8650417,
+          "startTime": 5.6850414,
+          "word": "看"
+        },
+        {
+          "confidence": 0.96199584,
+          "endTime": 6.035042,
+          "startTime": 5.8650417,
+          "word": "它"
+        },
+        {
+          "confidence": 0.95789224,
+          "endTime": 6.1550417,
+          "startTime": 6.035042,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.7008182,
+          "endTime": 6.2150416,
+          "startTime": 6.1550417,
+          "word": "么"
+        },
+        {
+          "confidence": 0.27635515,
+          "endTime": 6.2750416,
+          "startTime": 6.2150416,
+          "word": "做。"
+        }
+      ]
+    }
+  ]
+}

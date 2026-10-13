@@ -1,0 +1,478 @@
+{
+  "duration": 16.415,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "我们保留刚才的点餐情境，把顾客、输入、变量和屏幕放进同一条路径。",
+      "words": [
+        {
+          "confidence": 0.9307444,
+          "endTime": 0.335,
+          "startTime": 0.215,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9389759,
+          "endTime": 0.455,
+          "startTime": 0.335,
+          "word": "们"
+        },
+        {
+          "confidence": 0.9186197,
+          "endTime": 0.645,
+          "startTime": 0.455,
+          "word": "保"
+        },
+        {
+          "confidence": 0.96939564,
+          "endTime": 0.845,
+          "startTime": 0.645,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9122099,
+          "endTime": 0.995,
+          "startTime": 0.845,
+          "word": "刚"
+        },
+        {
+          "confidence": 0.96031266,
+          "endTime": 1.195,
+          "startTime": 0.995,
+          "word": "才"
+        },
+        {
+          "confidence": 0.9092367,
+          "endTime": 1.285,
+          "startTime": 1.195,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9639044,
+          "endTime": 1.455,
+          "startTime": 1.285,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9297746,
+          "endTime": 1.625,
+          "startTime": 1.455,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.9093771,
+          "endTime": 1.875,
+          "startTime": 1.625,
+          "word": "情"
+        },
+        {
+          "confidence": 0.9324446,
+          "endTime": 2.075,
+          "startTime": 1.875,
+          "word": "境，"
+        },
+        {
+          "confidence": 0.84185404,
+          "endTime": 2.605,
+          "startTime": 2.445,
+          "word": "把"
+        },
+        {
+          "confidence": 0.8553438,
+          "endTime": 2.825,
+          "startTime": 2.605,
+          "word": "顾"
+        },
+        {
+          "confidence": 0.2100736,
+          "endTime": 2.855,
+          "startTime": 2.825,
+          "word": "客、"
+        },
+        {
+          "confidence": 0.8774362,
+          "endTime": 3.755,
+          "startTime": 3.365,
+          "word": "输"
+        },
+        {
+          "confidence": 0.12641528,
+          "endTime": 3.785,
+          "startTime": 3.755,
+          "word": "入、"
+        },
+        {
+          "confidence": 0.8620861,
+          "endTime": 4.305,
+          "startTime": 4.095,
+          "word": "变"
+        },
+        {
+          "confidence": 0.93449783,
+          "endTime": 4.535,
+          "startTime": 4.305,
+          "word": "量"
+        },
+        {
+          "confidence": 0.95305425,
+          "endTime": 4.695,
+          "startTime": 4.535,
+          "word": "和"
+        },
+        {
+          "confidence": 0.97071594,
+          "endTime": 4.905,
+          "startTime": 4.695,
+          "word": "屏"
+        },
+        {
+          "confidence": 0.95310795,
+          "endTime": 5.185,
+          "startTime": 4.905,
+          "word": "幕"
+        },
+        {
+          "confidence": 0.9186015,
+          "endTime": 5.365,
+          "startTime": 5.215,
+          "word": "放"
+        },
+        {
+          "confidence": 0.8461866,
+          "endTime": 5.515,
+          "startTime": 5.365,
+          "word": "进"
+        },
+        {
+          "confidence": 0.94602925,
+          "endTime": 5.745,
+          "startTime": 5.515,
+          "word": "同"
+        },
+        {
+          "confidence": 0.91566706,
+          "endTime": 5.835,
+          "startTime": 5.745,
+          "word": "一"
+        },
+        {
+          "confidence": 0.96144134,
+          "endTime": 6.035,
+          "startTime": 5.835,
+          "word": "条"
+        },
+        {
+          "confidence": 0.9457675,
+          "endTime": 6.185,
+          "startTime": 6.035,
+          "word": "路"
+        },
+        {
+          "confidence": 0.9010126,
+          "endTime": 6.405,
+          "startTime": 6.185,
+          "word": "径。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "需要强调的不是节点有多少，而是数据每次只走一步。",
+      "words": [
+        {
+          "confidence": 0.8967445,
+          "endTime": 6.9450417,
+          "startTime": 6.765042,
+          "word": "需"
+        },
+        {
+          "confidence": 0.8743187,
+          "endTime": 7.055042,
+          "startTime": 6.9450417,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9641177,
+          "endTime": 7.325042,
+          "startTime": 7.055042,
+          "word": "强"
+        },
+        {
+          "confidence": 0.96695924,
+          "endTime": 7.535042,
+          "startTime": 7.325042,
+          "word": "调"
+        },
+        {
+          "confidence": 0.891985,
+          "endTime": 7.7150416,
+          "startTime": 7.535042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.87780684,
+          "endTime": 7.8650417,
+          "startTime": 7.7550416,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9354773,
+          "endTime": 8.035042,
+          "startTime": 7.8650417,
+          "word": "是"
+        },
+        {
+          "confidence": 0.93642265,
+          "endTime": 8.225041,
+          "startTime": 8.035042,
+          "word": "节"
+        },
+        {
+          "confidence": 0.9688868,
+          "endTime": 8.375042,
+          "startTime": 8.225041,
+          "word": "点"
+        },
+        {
+          "confidence": 0.93248576,
+          "endTime": 8.525042,
+          "startTime": 8.375042,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9702191,
+          "endTime": 8.695042,
+          "startTime": 8.525042,
+          "word": "多"
+        },
+        {
+          "confidence": 0.9633796,
+          "endTime": 8.995042,
+          "startTime": 8.695042,
+          "word": "少，"
+        },
+        {
+          "confidence": 0.9178454,
+          "endTime": 9.425041,
+          "startTime": 9.345041,
+          "word": "而"
+        },
+        {
+          "confidence": 0.9602812,
+          "endTime": 9.6050415,
+          "startTime": 9.425041,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9381673,
+          "endTime": 9.835042,
+          "startTime": 9.6050415,
+          "word": "数"
+        },
+        {
+          "confidence": 0.8874567,
+          "endTime": 10.085042,
+          "startTime": 9.835042,
+          "word": "据"
+        },
+        {
+          "confidence": 0.9585019,
+          "endTime": 10.305042,
+          "startTime": 10.085042,
+          "word": "每"
+        },
+        {
+          "confidence": 0.977568,
+          "endTime": 10.505042,
+          "startTime": 10.305042,
+          "word": "次"
+        },
+        {
+          "confidence": 0.8735528,
+          "endTime": 10.665042,
+          "startTime": 10.505042,
+          "word": "只"
+        },
+        {
+          "confidence": 0.8046144,
+          "endTime": 10.785042,
+          "startTime": 10.665042,
+          "word": "走"
+        },
+        {
+          "confidence": 0.20865804,
+          "endTime": 10.815042,
+          "startTime": 10.785042,
+          "word": "一"
+        },
+        {
+          "confidence": 0.21312606,
+          "endTime": 10.875042,
+          "startTime": 10.815042,
+          "word": "步。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "我们保留刚才的点餐情境，把顾客、输入、变量和屏幕放进同一条路径。需要强调的不是节点有多少，而是数据每次只走一步。学生能看见变化发生在哪里，老师也有机会在关键位置提问。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "学生能看见变化发生在哪里，老师也有机会在关键位置提问。",
+      "words": [
+        {
+          "confidence": 0.9601549,
+          "endTime": 11.755083,
+          "startTime": 11.5650835,
+          "word": "学"
+        },
+        {
+          "confidence": 0.78062683,
+          "endTime": 11.935083,
+          "startTime": 11.755083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9036014,
+          "endTime": 12.075083,
+          "startTime": 11.935083,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9678338,
+          "endTime": 12.285083,
+          "startTime": 12.075083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.8919095,
+          "endTime": 12.425083,
+          "startTime": 12.285083,
+          "word": "见"
+        },
+        {
+          "confidence": 0.9606882,
+          "endTime": 12.625083,
+          "startTime": 12.425083,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9679255,
+          "endTime": 12.785083,
+          "startTime": 12.625083,
+          "word": "化"
+        },
+        {
+          "confidence": 0.9821621,
+          "endTime": 12.945084,
+          "startTime": 12.785083,
+          "word": "发"
+        },
+        {
+          "confidence": 0.97895545,
+          "endTime": 13.135083,
+          "startTime": 12.945084,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9215754,
+          "endTime": 13.265083,
+          "startTime": 13.135083,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9553821,
+          "endTime": 13.455083,
+          "startTime": 13.265083,
+          "word": "哪"
+        },
+        {
+          "confidence": 0.9815167,
+          "endTime": 13.655083,
+          "startTime": 13.455083,
+          "word": "里，"
+        },
+        {
+          "confidence": 0.96566075,
+          "endTime": 14.125083,
+          "startTime": 13.955083,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98445666,
+          "endTime": 14.385083,
+          "startTime": 14.125083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9439471,
+          "endTime": 14.495083,
+          "startTime": 14.385083,
+          "word": "也"
+        },
+        {
+          "confidence": 0.9610695,
+          "endTime": 14.625083,
+          "startTime": 14.495083,
+          "word": "有"
+        },
+        {
+          "confidence": 0.8764657,
+          "endTime": 14.845083,
+          "startTime": 14.625083,
+          "word": "机"
+        },
+        {
+          "confidence": 0.9639758,
+          "endTime": 15.055083,
+          "startTime": 14.845083,
+          "word": "会"
+        },
+        {
+          "confidence": 0.956743,
+          "endTime": 15.235083,
+          "startTime": 15.055083,
+          "word": "在"
+        },
+        {
+          "confidence": 0.96743506,
+          "endTime": 15.425083,
+          "startTime": 15.235083,
+          "word": "关"
+        },
+        {
+          "confidence": 0.9317984,
+          "endTime": 15.615084,
+          "startTime": 15.425083,
+          "word": "键"
+        },
+        {
+          "confidence": 0.8998993,
+          "endTime": 15.745083,
+          "startTime": 15.615084,
+          "word": "位"
+        },
+        {
+          "confidence": 0.9165475,
+          "endTime": 15.855083,
+          "startTime": 15.745083,
+          "word": "置"
+        },
+        {
+          "confidence": 0.9412936,
+          "endTime": 16.055084,
+          "startTime": 15.855083,
+          "word": "提"
+        },
+        {
+          "confidence": 0.97875327,
+          "endTime": 16.245083,
+          "startTime": 16.055084,
+          "word": "问。"
+        }
+      ]
+    }
+  ]
+}

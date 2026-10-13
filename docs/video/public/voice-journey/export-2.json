@@ -1,0 +1,514 @@
+{
+  "duration": 16.046,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "从提出需求，到查看材料，",
+      "words": [
+        {
+          "confidence": 0.94973534,
+          "endTime": 0.475,
+          "startTime": 0.235,
+          "word": "从"
+        },
+        {
+          "confidence": 0.89756703,
+          "endTime": 0.635,
+          "startTime": 0.475,
+          "word": "提"
+        },
+        {
+          "confidence": 0.96141315,
+          "endTime": 0.775,
+          "startTime": 0.635,
+          "word": "出"
+        },
+        {
+          "confidence": 0.8933951,
+          "endTime": 1.035,
+          "startTime": 0.775,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9091401,
+          "endTime": 1.355,
+          "startTime": 1.035,
+          "word": "求，"
+        },
+        {
+          "confidence": 0.9462371,
+          "endTime": 1.725,
+          "startTime": 1.565,
+          "word": "到"
+        },
+        {
+          "confidence": 0.95617133,
+          "endTime": 1.935,
+          "startTime": 1.725,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9758132,
+          "endTime": 2.095,
+          "startTime": 1.935,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9690863,
+          "endTime": 2.355,
+          "startTime": 2.095,
+          "word": "材"
+        },
+        {
+          "confidence": 0.90044904,
+          "endTime": 2.545,
+          "startTime": 2.355,
+          "word": "料，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再到调整讲法和带走文件，",
+      "words": [
+        {
+          "confidence": 0.51596695,
+          "endTime": 2.9950416,
+          "startTime": 2.9200416,
+          "word": "再"
+        },
+        {
+          "confidence": 0.8371186,
+          "endTime": 3.0950415,
+          "startTime": 2.9950416,
+          "word": "到"
+        },
+        {
+          "confidence": 0.89651716,
+          "endTime": 3.3050416,
+          "startTime": 3.0950415,
+          "word": "调"
+        },
+        {
+          "confidence": 0.9734692,
+          "endTime": 3.4750416,
+          "startTime": 3.3050416,
+          "word": "整"
+        },
+        {
+          "confidence": 0.9086149,
+          "endTime": 3.7050416,
+          "startTime": 3.4750416,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9372036,
+          "endTime": 3.9350414,
+          "startTime": 3.7050416,
+          "word": "法"
+        },
+        {
+          "confidence": 0.90780956,
+          "endTime": 4.0950413,
+          "startTime": 3.9350414,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9404592,
+          "endTime": 4.2350416,
+          "startTime": 4.0950413,
+          "word": "带"
+        },
+        {
+          "confidence": 0.9587076,
+          "endTime": 4.3850417,
+          "startTime": 4.2350416,
+          "word": "走"
+        },
+        {
+          "confidence": 0.94385576,
+          "endTime": 4.535042,
+          "startTime": 4.3850417,
+          "word": "文"
+        },
+        {
+          "confidence": 0.960543,
+          "endTime": 4.8050413,
+          "startTime": 4.535042,
+          "word": "件，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这些步骤围绕的是同一堂课。",
+      "words": [
+        {
+          "confidence": 0.91692734,
+          "endTime": 5.2450833,
+          "startTime": 5.1400833,
+          "word": "这"
+        },
+        {
+          "confidence": 0.93651986,
+          "endTime": 5.405083,
+          "startTime": 5.2450833,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9510903,
+          "endTime": 5.5650835,
+          "startTime": 5.405083,
+          "word": "步"
+        },
+        {
+          "confidence": 0.71788114,
+          "endTime": 5.7850833,
+          "startTime": 5.5650835,
+          "word": "骤"
+        },
+        {
+          "confidence": 0.80851436,
+          "endTime": 5.925083,
+          "startTime": 5.7850833,
+          "word": "围"
+        },
+        {
+          "confidence": 0.8780462,
+          "endTime": 6.0850835,
+          "startTime": 5.925083,
+          "word": "绕"
+        },
+        {
+          "confidence": 0.9708278,
+          "endTime": 6.1850834,
+          "startTime": 6.0850835,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8934005,
+          "endTime": 6.3150835,
+          "startTime": 6.1850834,
+          "word": "是"
+        },
+        {
+          "confidence": 0.95787245,
+          "endTime": 6.545083,
+          "startTime": 6.3150835,
+          "word": "同"
+        },
+        {
+          "confidence": 0.8015096,
+          "endTime": 6.635083,
+          "startTime": 6.545083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9123942,
+          "endTime": 6.8250833,
+          "startTime": 6.635083,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9676458,
+          "endTime": 7.095083,
+          "startTime": 6.8250833,
+          "word": "课。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "前面说过的限制，后面做过的修改，都有对应的内容可以检查。",
+      "words": [
+        {
+          "confidence": 0.9707746,
+          "endTime": 7.585125,
+          "startTime": 7.420125,
+          "word": "前"
+        },
+        {
+          "confidence": 0.9790926,
+          "endTime": 7.685125,
+          "startTime": 7.585125,
+          "word": "面"
+        },
+        {
+          "confidence": 0.944495,
+          "endTime": 7.875125,
+          "startTime": 7.685125,
+          "word": "说"
+        },
+        {
+          "confidence": 0.9467896,
+          "endTime": 7.985125,
+          "startTime": 7.875125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.97444105,
+          "endTime": 8.0651245,
+          "startTime": 7.985125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9471575,
+          "endTime": 8.345125,
+          "startTime": 8.0651245,
+          "word": "限"
+        },
+        {
+          "confidence": 0.95746374,
+          "endTime": 8.575125,
+          "startTime": 8.345125,
+          "word": "制，"
+        },
+        {
+          "confidence": 0.9186226,
+          "endTime": 8.985125,
+          "startTime": 8.805125,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9642655,
+          "endTime": 9.125125,
+          "startTime": 8.985125,
+          "word": "面"
+        },
+        {
+          "confidence": 0.92618567,
+          "endTime": 9.285125,
+          "startTime": 9.125125,
+          "word": "做"
+        },
+        {
+          "confidence": 0.953355,
+          "endTime": 9.385125,
+          "startTime": 9.285125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.95248634,
+          "endTime": 9.465125,
+          "startTime": 9.385125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9450264,
+          "endTime": 9.705125,
+          "startTime": 9.465125,
+          "word": "修"
+        },
+        {
+          "confidence": 0.93408257,
+          "endTime": 9.915125,
+          "startTime": 9.705125,
+          "word": "改，"
+        },
+        {
+          "confidence": 0.9266154,
+          "endTime": 10.3151245,
+          "startTime": 10.165125,
+          "word": "都"
+        },
+        {
+          "confidence": 0.9336754,
+          "endTime": 10.445126,
+          "startTime": 10.3151245,
+          "word": "有"
+        },
+        {
+          "confidence": 0.93984,
+          "endTime": 10.615125,
+          "startTime": 10.445126,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9581219,
+          "endTime": 10.725125,
+          "startTime": 10.615125,
+          "word": "应"
+        },
+        {
+          "confidence": 0.9477262,
+          "endTime": 10.825125,
+          "startTime": 10.725125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95593053,
+          "endTime": 10.975125,
+          "startTime": 10.825125,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9608577,
+          "endTime": 11.115125,
+          "startTime": 10.975125,
+          "word": "容"
+        },
+        {
+          "confidence": 0.49791828,
+          "endTime": 11.205125,
+          "startTime": 11.115125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.17839038,
+          "endTime": 11.235125,
+          "startTime": 11.205125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.116422564,
+          "endTime": 11.295125,
+          "startTime": 11.235125,
+          "word": "检"
+        },
+        {
+          "confidence": 0.235908,
+          "endTime": 11.355125,
+          "startTime": 11.295125,
+          "word": "查。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "从提出需求，到查看材料，再到调整讲法和带走文件，这些步骤围绕的是同一堂课。前面说过的限制，后面做过的修改，都有对应的内容可以检查。老师就能沿着自己的备课思路，把任务一步步推进。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师就能沿着自己的备课思路，把任务一步步推进。",
+      "words": [
+        {
+          "confidence": 0.9587639,
+          "endTime": 12.355166,
+          "startTime": 12.195167,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9506092,
+          "endTime": 12.655167,
+          "startTime": 12.355166,
+          "word": "师"
+        },
+        {
+          "confidence": 0.81554437,
+          "endTime": 12.7751665,
+          "startTime": 12.655167,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9359614,
+          "endTime": 12.935166,
+          "startTime": 12.7751665,
+          "word": "能"
+        },
+        {
+          "confidence": 0.887097,
+          "endTime": 13.075167,
+          "startTime": 12.935166,
+          "word": "沿"
+        },
+        {
+          "confidence": 0.7866834,
+          "endTime": 13.195167,
+          "startTime": 13.075167,
+          "word": "着"
+        },
+        {
+          "confidence": 0.9103106,
+          "endTime": 13.325167,
+          "startTime": 13.195167,
+          "word": "自"
+        },
+        {
+          "confidence": 0.98248315,
+          "endTime": 13.455167,
+          "startTime": 13.325167,
+          "word": "己"
+        },
+        {
+          "confidence": 0.9458808,
+          "endTime": 13.545166,
+          "startTime": 13.455167,
+          "word": "的"
+        },
+        {
+          "confidence": 0.96901524,
+          "endTime": 13.685166,
+          "startTime": 13.545166,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9568586,
+          "endTime": 13.875167,
+          "startTime": 13.685166,
+          "word": "课"
+        },
+        {
+          "confidence": 0.85250235,
+          "endTime": 14.105166,
+          "startTime": 13.875167,
+          "word": "思"
+        },
+        {
+          "confidence": 0.970655,
+          "endTime": 14.325167,
+          "startTime": 14.105166,
+          "word": "路，"
+        },
+        {
+          "confidence": 0.83793175,
+          "endTime": 14.675167,
+          "startTime": 14.515166,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9514055,
+          "endTime": 14.895166,
+          "startTime": 14.675167,
+          "word": "任"
+        },
+        {
+          "confidence": 0.7950702,
+          "endTime": 15.035167,
+          "startTime": 14.895166,
+          "word": "务"
+        },
+        {
+          "confidence": 0.88581836,
+          "endTime": 15.205167,
+          "startTime": 15.035167,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9477782,
+          "endTime": 15.345166,
+          "startTime": 15.205167,
+          "word": "步"
+        },
+        {
+          "confidence": 0.90548587,
+          "endTime": 15.475166,
+          "startTime": 15.345166,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9763326,
+          "endTime": 15.685166,
+          "startTime": 15.475166,
+          "word": "推"
+        },
+        {
+          "confidence": 0.91291946,
+          "endTime": 15.885166,
+          "startTime": 15.685166,
+          "word": "进。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "duration": 8.209416666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "知芽把对话、课堂内容、互动练习和备课文档放在一起，",
+      "words": [
+        {
+          "confidence": 0.7536071,
+          "endTime": 0.435,
+          "startTime": 0.245,
+          "word": "知"
+        },
+        {
+          "confidence": 0.81635654,
+          "endTime": 0.665,
+          "startTime": 0.435,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.69180495,
+          "endTime": 0.825,
+          "startTime": 0.665,
+          "word": "把"
+        },
+        {
+          "confidence": 0.7883011,
+          "endTime": 1.085,
+          "startTime": 0.825,
+          "word": "对"
+        },
+        {
+          "confidence": 0.19296351,
+          "endTime": 1.115,
+          "startTime": 1.085,
+          "word": "话、"
+        },
+        {
+          "confidence": 0.93384194,
+          "endTime": 1.765,
+          "startTime": 1.585,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96973956,
+          "endTime": 1.945,
+          "startTime": 1.765,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9140094,
+          "endTime": 2.165,
+          "startTime": 1.945,
+          "word": "内"
+        },
+        {
+          "confidence": 0.14205329,
+          "endTime": 2.195,
+          "startTime": 2.165,
+          "word": "容、"
+        },
+        {
+          "confidence": 0.83703595,
+          "endTime": 2.745,
+          "startTime": 2.555,
+          "word": "互"
+        },
+        {
+          "confidence": 0.7242529,
+          "endTime": 2.915,
+          "startTime": 2.745,
+          "word": "动"
+        },
+        {
+          "confidence": 0.90510845,
+          "endTime": 3.095,
+          "startTime": 2.915,
+          "word": "练"
+        },
+        {
+          "confidence": 0.96738285,
+          "endTime": 3.365,
+          "startTime": 3.095,
+          "word": "习"
+        },
+        {
+          "confidence": 0.93236893,
+          "endTime": 3.535,
+          "startTime": 3.365,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9572869,
+          "endTime": 3.675,
+          "startTime": 3.535,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9499934,
+          "endTime": 3.835,
+          "startTime": 3.675,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9654005,
+          "endTime": 3.985,
+          "startTime": 3.835,
+          "word": "文"
+        },
+        {
+          "confidence": 0.8146709,
+          "endTime": 4.125,
+          "startTime": 3.985,
+          "word": "档"
+        },
+        {
+          "confidence": 0.97621363,
+          "endTime": 4.305,
+          "startTime": 4.125,
+          "word": "放"
+        },
+        {
+          "confidence": 0.95758414,
+          "endTime": 4.425,
+          "startTime": 4.305,
+          "word": "在"
+        },
+        {
+          "confidence": 0.94535697,
+          "endTime": 4.565,
+          "startTime": 4.425,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9837142,
+          "endTime": 4.885,
+          "startTime": 4.565,
+          "word": "起，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽把对话、课堂内容、互动练习和备课文档放在一起，让老师可以边看，边改，边准备。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "让老师可以边看，边改，边准备。",
+      "words": [
+        {
+          "confidence": 0.92234653,
+          "endTime": 5.4250417,
+          "startTime": 5.2650414,
+          "word": "让"
+        },
+        {
+          "confidence": 0.93120307,
+          "endTime": 5.5550413,
+          "startTime": 5.4250417,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9752259,
+          "endTime": 5.7750416,
+          "startTime": 5.5550413,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7792198,
+          "endTime": 5.9150414,
+          "startTime": 5.7750416,
+          "word": "可"
+        },
+        {
+          "confidence": 0.78887856,
+          "endTime": 6.0550413,
+          "startTime": 5.9150414,
+          "word": "以"
+        },
+        {
+          "confidence": 0.86169463,
+          "endTime": 6.2550416,
+          "startTime": 6.0850415,
+          "word": "边"
+        },
+        {
+          "confidence": 0.95796984,
+          "endTime": 6.6250415,
+          "startTime": 6.2550416,
+          "word": "看，"
+        },
+        {
+          "confidence": 0.8819136,
+          "endTime": 6.9950414,
+          "startTime": 6.8050413,
+          "word": "边"
+        },
+        {
+          "confidence": 0.94702226,
+          "endTime": 7.2950416,
+          "startTime": 6.9950414,
+          "word": "改，"
+        },
+        {
+          "confidence": 0.38093513,
+          "endTime": 7.425041,
+          "startTime": 7.3550415,
+          "word": "边"
+        },
+        {
+          "confidence": 0.17310706,
+          "endTime": 7.4850416,
+          "startTime": 7.425041,
+          "word": "准"
+        },
+        {
+          "confidence": 0.33574554,
+          "endTime": 7.5450416,
+          "startTime": 7.4850416,
+          "word": "备。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "duration": 6.763583333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "备课完成以后，材料还需要带得走。",
+      "words": [
+        {
+          "confidence": 0.6562403,
+          "endTime": 0.395,
+          "startTime": 0.265,
+          "word": "备"
+        },
+        {
+          "confidence": 0.74984497,
+          "endTime": 0.555,
+          "startTime": 0.395,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9510451,
+          "endTime": 0.705,
+          "startTime": 0.555,
+          "word": "完"
+        },
+        {
+          "confidence": 0.97302103,
+          "endTime": 0.905,
+          "startTime": 0.705,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9691439,
+          "endTime": 1.025,
+          "startTime": 0.905,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96963906,
+          "endTime": 1.365,
+          "startTime": 1.025,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.93310887,
+          "endTime": 1.805,
+          "startTime": 1.545,
+          "word": "材"
+        },
+        {
+          "confidence": 0.88871944,
+          "endTime": 1.975,
+          "startTime": 1.805,
+          "word": "料"
+        },
+        {
+          "confidence": 0.9427467,
+          "endTime": 2.145,
+          "startTime": 1.975,
+          "word": "还"
+        },
+        {
+          "confidence": 0.93021196,
+          "endTime": 2.315,
+          "startTime": 2.145,
+          "word": "需"
+        },
+        {
+          "confidence": 0.97265714,
+          "endTime": 2.425,
+          "startTime": 2.315,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9370704,
+          "endTime": 2.595,
+          "startTime": 2.425,
+          "word": "带"
+        },
+        {
+          "confidence": 0.8851289,
+          "endTime": 2.705,
+          "startTime": 2.595,
+          "word": "得"
+        },
+        {
+          "confidence": 0.96625894,
+          "endTime": 2.995,
+          "startTime": 2.705,
+          "word": "走。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "备课完成以后，材料还需要带得走。工作区提供了课堂内容和文档的导出入口。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "工作区提供了课堂内容和文档的导出入口。",
+      "words": [
+        {
+          "confidence": 0.3305469,
+          "endTime": 3.4550416,
+          "startTime": 3.3800416,
+          "word": "工"
+        },
+        {
+          "confidence": 0.61009187,
+          "endTime": 3.5350416,
+          "startTime": 3.4550416,
+          "word": "作"
+        },
+        {
+          "confidence": 0.9079712,
+          "endTime": 3.8250415,
+          "startTime": 3.5350416,
+          "word": "区"
+        },
+        {
+          "confidence": 0.9263493,
+          "endTime": 4.055042,
+          "startTime": 3.8250415,
+          "word": "提"
+        },
+        {
+          "confidence": 0.950756,
+          "endTime": 4.2250414,
+          "startTime": 4.055042,
+          "word": "供"
+        },
+        {
+          "confidence": 0.8995927,
+          "endTime": 4.3350415,
+          "startTime": 4.2250414,
+          "word": "了"
+        },
+        {
+          "confidence": 0.9264382,
+          "endTime": 4.5250416,
+          "startTime": 4.3350415,
+          "word": "课"
+        },
+        {
+          "confidence": 0.965867,
+          "endTime": 4.745042,
+          "startTime": 4.5250416,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9260923,
+          "endTime": 4.9250417,
+          "startTime": 4.745042,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9510111,
+          "endTime": 5.1250415,
+          "startTime": 4.9250417,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9026864,
+          "endTime": 5.3150415,
+          "startTime": 5.1250415,
+          "word": "和"
+        },
+        {
+          "confidence": 0.933055,
+          "endTime": 5.495042,
+          "startTime": 5.3150415,
+          "word": "文"
+        },
+        {
+          "confidence": 0.89612025,
+          "endTime": 5.6350417,
+          "startTime": 5.495042,
+          "word": "档"
+        },
+        {
+          "confidence": 0.860011,
+          "endTime": 5.7350416,
+          "startTime": 5.6350417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8840219,
+          "endTime": 5.9050417,
+          "startTime": 5.7350416,
+          "word": "导"
+        },
+        {
+          "confidence": 0.9518008,
+          "endTime": 6.0850415,
+          "startTime": 5.9050417,
+          "word": "出"
+        },
+        {
+          "confidence": 0.95933706,
+          "endTime": 6.2350416,
+          "startTime": 6.0850415,
+          "word": "入"
+        },
+        {
+          "confidence": 0.8928342,
+          "endTime": 6.3950415,
+          "startTime": 6.2350416,
+          "word": "口。"
+        }
+      ]
+    }
+  ]
+}

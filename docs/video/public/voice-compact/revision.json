@@ -1,0 +1,340 @@
+{
+  "duration": 11.2485,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "变量这一页太复杂了？",
+      "words": [
+        {
+          "confidence": 0.8943276,
+          "endTime": 0.435,
+          "startTime": 0.225,
+          "word": "变"
+        },
+        {
+          "confidence": 0.974475,
+          "endTime": 0.645,
+          "startTime": 0.435,
+          "word": "量"
+        },
+        {
+          "confidence": 0.89324266,
+          "endTime": 0.805,
+          "startTime": 0.645,
+          "word": "这"
+        },
+        {
+          "confidence": 0.7918972,
+          "endTime": 0.915,
+          "startTime": 0.805,
+          "word": "一"
+        },
+        {
+          "confidence": 0.92154133,
+          "endTime": 1.045,
+          "startTime": 0.915,
+          "word": "页"
+        },
+        {
+          "confidence": 0.9408751,
+          "endTime": 1.305,
+          "startTime": 1.045,
+          "word": "太"
+        },
+        {
+          "confidence": 0.7719111,
+          "endTime": 1.455,
+          "startTime": 1.305,
+          "word": "复"
+        },
+        {
+          "confidence": 0.9588988,
+          "endTime": 1.665,
+          "startTime": 1.455,
+          "word": "杂"
+        },
+        {
+          "confidence": 0.9481667,
+          "endTime": 1.875,
+          "startTime": 1.665,
+          "word": "了？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "直接告诉知芽：只留一句解释、一行代码和一个追问。",
+      "words": [
+        {
+          "confidence": 0.5268186,
+          "endTime": 2.3950417,
+          "startTime": 2.3200417,
+          "word": "直"
+        },
+        {
+          "confidence": 0.2369407,
+          "endTime": 2.4550416,
+          "startTime": 2.3950417,
+          "word": "接"
+        },
+        {
+          "confidence": 0.8921025,
+          "endTime": 2.5750418,
+          "startTime": 2.4550416,
+          "word": "告"
+        },
+        {
+          "confidence": 0.97876906,
+          "endTime": 2.7250416,
+          "startTime": 2.5750418,
+          "word": "诉"
+        },
+        {
+          "confidence": 0.8111141,
+          "endTime": 2.9250417,
+          "startTime": 2.7250416,
+          "word": "知"
+        },
+        {
+          "confidence": 0.75381714,
+          "endTime": 3.1450417,
+          "startTime": 2.9250417,
+          "word": "芽："
+        },
+        {
+          "confidence": 0.9315847,
+          "endTime": 3.5850415,
+          "startTime": 3.4150417,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9305469,
+          "endTime": 3.7550416,
+          "startTime": 3.5850415,
+          "word": "留"
+        },
+        {
+          "confidence": 0.84970343,
+          "endTime": 3.8950417,
+          "startTime": 3.7550416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.89176136,
+          "endTime": 4.035042,
+          "startTime": 3.8950417,
+          "word": "句"
+        },
+        {
+          "confidence": 0.888086,
+          "endTime": 4.2150416,
+          "startTime": 4.035042,
+          "word": "解"
+        },
+        {
+          "confidence": 0.24434403,
+          "endTime": 4.245042,
+          "startTime": 4.2150416,
+          "word": "释、"
+        },
+        {
+          "confidence": 0.9238168,
+          "endTime": 4.9050417,
+          "startTime": 4.7550416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.91119444,
+          "endTime": 5.125042,
+          "startTime": 4.9050417,
+          "word": "行"
+        },
+        {
+          "confidence": 0.9356366,
+          "endTime": 5.335042,
+          "startTime": 5.125042,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8744241,
+          "endTime": 5.575042,
+          "startTime": 5.335042,
+          "word": "码"
+        },
+        {
+          "confidence": 0.8692909,
+          "endTime": 5.7950416,
+          "startTime": 5.6450415,
+          "word": "和"
+        },
+        {
+          "confidence": 0.8804737,
+          "endTime": 5.9050417,
+          "startTime": 5.7950416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.97234887,
+          "endTime": 6.0050416,
+          "startTime": 5.9050417,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9112131,
+          "endTime": 6.2350416,
+          "startTime": 6.0050416,
+          "word": "追"
+        },
+        {
+          "confidence": 0.9280432,
+          "endTime": 6.3850417,
+          "startTime": 6.2350416,
+          "word": "问。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "变量这一页太复杂了？直接告诉知芽：只留一句解释、一行代码和一个追问。修改要求发出后，再检查新的讲法是不是更适合学生。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "修改要求发出后，再检查新的讲法是不是更适合学生。",
+      "words": [
+        {
+          "confidence": 0.605179,
+          "endTime": 6.895083,
+          "startTime": 6.820083,
+          "word": "修"
+        },
+        {
+          "confidence": 0.9535085,
+          "endTime": 7.045083,
+          "startTime": 6.895083,
+          "word": "改"
+        },
+        {
+          "confidence": 0.91991925,
+          "endTime": 7.165083,
+          "startTime": 7.045083,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9769802,
+          "endTime": 7.3250833,
+          "startTime": 7.165083,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9846,
+          "endTime": 7.5350833,
+          "startTime": 7.3250833,
+          "word": "发"
+        },
+        {
+          "confidence": 0.9655487,
+          "endTime": 7.715083,
+          "startTime": 7.5350833,
+          "word": "出"
+        },
+        {
+          "confidence": 0.93858564,
+          "endTime": 8.035083,
+          "startTime": 7.715083,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9296294,
+          "endTime": 8.425083,
+          "startTime": 8.235083,
+          "word": "再"
+        },
+        {
+          "confidence": 0.8973392,
+          "endTime": 8.615083,
+          "startTime": 8.425083,
+          "word": "检"
+        },
+        {
+          "confidence": 0.960728,
+          "endTime": 8.845083,
+          "startTime": 8.615083,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9492768,
+          "endTime": 9.085083,
+          "startTime": 8.845083,
+          "word": "新"
+        },
+        {
+          "confidence": 0.9460803,
+          "endTime": 9.185083,
+          "startTime": 9.085083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9632039,
+          "endTime": 9.375083,
+          "startTime": 9.185083,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.94873065,
+          "endTime": 9.615084,
+          "startTime": 9.375083,
+          "word": "法"
+        },
+        {
+          "confidence": 0.9726225,
+          "endTime": 9.845083,
+          "startTime": 9.645083,
+          "word": "是"
+        },
+        {
+          "confidence": 0.66936904,
+          "endTime": 9.925083,
+          "startTime": 9.845083,
+          "word": "不"
+        },
+        {
+          "confidence": 0.95186055,
+          "endTime": 10.065083,
+          "startTime": 9.925083,
+          "word": "是"
+        },
+        {
+          "confidence": 0.94330376,
+          "endTime": 10.195084,
+          "startTime": 10.065083,
+          "word": "更"
+        },
+        {
+          "confidence": 0.21458831,
+          "endTime": 10.255083,
+          "startTime": 10.195084,
+          "word": "适"
+        },
+        {
+          "confidence": 0.17738833,
+          "endTime": 10.315083,
+          "startTime": 10.255083,
+          "word": "合"
+        },
+        {
+          "confidence": 0.27283663,
+          "endTime": 10.375083,
+          "startTime": 10.315083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.3678062,
+          "endTime": 10.435083,
+          "startTime": 10.375083,
+          "word": "生。"
+        }
+      ]
+    }
+  ]
+}

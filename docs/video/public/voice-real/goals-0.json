@@ -1,0 +1,196 @@
+{
+  "duration": 6.638041666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "有了条件，下一步是把想法变成课堂安排。",
+      "words": [
+        {
+          "confidence": 0.92350346,
+          "endTime": 0.385,
+          "startTime": 0.225,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9347934,
+          "endTime": 0.495,
+          "startTime": 0.385,
+          "word": "了"
+        },
+        {
+          "confidence": 0.95311135,
+          "endTime": 0.725,
+          "startTime": 0.495,
+          "word": "条"
+        },
+        {
+          "confidence": 0.95998913,
+          "endTime": 0.995,
+          "startTime": 0.725,
+          "word": "件，"
+        },
+        {
+          "confidence": 0.9430002,
+          "endTime": 1.515,
+          "startTime": 1.235,
+          "word": "下"
+        },
+        {
+          "confidence": 0.8932724,
+          "endTime": 1.635,
+          "startTime": 1.515,
+          "word": "一"
+        },
+        {
+          "confidence": 0.87393516,
+          "endTime": 1.895,
+          "startTime": 1.635,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9482759,
+          "endTime": 2.105,
+          "startTime": 1.895,
+          "word": "是"
+        },
+        {
+          "confidence": 0.92131996,
+          "endTime": 2.235,
+          "startTime": 2.105,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9359304,
+          "endTime": 2.525,
+          "startTime": 2.235,
+          "word": "想"
+        },
+        {
+          "confidence": 0.92391574,
+          "endTime": 2.795,
+          "startTime": 2.525,
+          "word": "法"
+        },
+        {
+          "confidence": 0.9415594,
+          "endTime": 2.965,
+          "startTime": 2.795,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9799501,
+          "endTime": 3.155,
+          "startTime": 2.965,
+          "word": "成"
+        },
+        {
+          "confidence": 0.96642977,
+          "endTime": 3.335,
+          "startTime": 3.155,
+          "word": "课"
+        },
+        {
+          "confidence": 0.91845554,
+          "endTime": 3.515,
+          "startTime": 3.335,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.90781933,
+          "endTime": 3.695,
+          "startTime": 3.515,
+          "word": "安"
+        },
+        {
+          "confidence": 0.9693402,
+          "endTime": 4.055,
+          "startTime": 3.695,
+          "word": "排。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "有了条件，下一步是把想法变成课堂安排。学生听完以后，应该能做什么？",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "学生听完以后，应该能做什么？",
+      "words": [
+        {
+          "confidence": 0.81332684,
+          "endTime": 4.5050416,
+          "startTime": 4.4200416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9058107,
+          "endTime": 4.6950417,
+          "startTime": 4.5050416,
+          "word": "生"
+        },
+        {
+          "confidence": 0.93421674,
+          "endTime": 4.8550415,
+          "startTime": 4.6950417,
+          "word": "听"
+        },
+        {
+          "confidence": 0.9039586,
+          "endTime": 4.9950414,
+          "startTime": 4.8550415,
+          "word": "完"
+        },
+        {
+          "confidence": 0.9659203,
+          "endTime": 5.1450415,
+          "startTime": 4.9950414,
+          "word": "以"
+        },
+        {
+          "confidence": 0.94905293,
+          "endTime": 5.4650416,
+          "startTime": 5.1450415,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.841345,
+          "endTime": 5.6350417,
+          "startTime": 5.5250416,
+          "word": "应"
+        },
+        {
+          "confidence": 0.61452484,
+          "endTime": 5.7150416,
+          "startTime": 5.6350417,
+          "word": "该"
+        },
+        {
+          "confidence": 0.20209132,
+          "endTime": 5.7750416,
+          "startTime": 5.7150416,
+          "word": "能"
+        },
+        {
+          "confidence": 0.1458765,
+          "endTime": 5.8350415,
+          "startTime": 5.7750416,
+          "word": "做"
+        },
+        {
+          "confidence": 0.15464014,
+          "endTime": 5.8950415,
+          "startTime": 5.8350415,
+          "word": "什"
+        },
+        {
+          "confidence": 0.29109463,
+          "endTime": 5.9550414,
+          "startTime": 5.8950415,
+          "word": "么？"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "duration": 10.894583333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "再用 PowerPoint 打开课件。",
+      "words": [
+        {
+          "confidence": 0.9247244,
+          "endTime": 0.425,
+          "startTime": 0.225,
+          "word": "再"
+        },
+        {
+          "confidence": 0.93530625,
+          "endTime": 0.565,
+          "startTime": 0.425,
+          "word": "用"
+        },
+        {
+          "confidence": 0.7865098,
+          "endTime": 1.175,
+          "startTime": 0.565,
+          "word": "PowerPoint"
+        },
+        {
+          "confidence": 0.4987503,
+          "endTime": 1.335,
+          "startTime": 1.205,
+          "word": "打"
+        },
+        {
+          "confidence": 0.68654317,
+          "endTime": 1.505,
+          "startTime": 1.335,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9379381,
+          "endTime": 1.665,
+          "startTime": 1.505,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9598738,
+          "endTime": 1.915,
+          "startTime": 1.665,
+          "word": "件。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "除了讲解内容，流程图的分步状态也导成了不同页面，",
+      "words": [
+        {
+          "confidence": 0.49949822,
+          "endTime": 2.5050416,
+          "startTime": 2.4300416,
+          "word": "除"
+        },
+        {
+          "confidence": 0.18394156,
+          "endTime": 2.5650415,
+          "startTime": 2.5050416,
+          "word": "了"
+        },
+        {
+          "confidence": 0.824226,
+          "endTime": 2.6950417,
+          "startTime": 2.5650415,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.81071264,
+          "endTime": 2.8850415,
+          "startTime": 2.6950417,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9192588,
+          "endTime": 3.0650415,
+          "startTime": 2.8850415,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9812948,
+          "endTime": 3.3450415,
+          "startTime": 3.0650415,
+          "word": "容，"
+        },
+        {
+          "confidence": 0.9654134,
+          "endTime": 3.7850416,
+          "startTime": 3.5850415,
+          "word": "流"
+        },
+        {
+          "confidence": 0.9667122,
+          "endTime": 3.9750414,
+          "startTime": 3.7850416,
+          "word": "程"
+        },
+        {
+          "confidence": 0.964386,
+          "endTime": 4.1650414,
+          "startTime": 3.9750414,
+          "word": "图"
+        },
+        {
+          "confidence": 0.95761746,
+          "endTime": 4.2650414,
+          "startTime": 4.1650414,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9716359,
+          "endTime": 4.4450417,
+          "startTime": 4.2650414,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9498501,
+          "endTime": 4.575042,
+          "startTime": 4.4450417,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9494959,
+          "endTime": 4.7750416,
+          "startTime": 4.575042,
+          "word": "状"
+        },
+        {
+          "confidence": 0.9553407,
+          "endTime": 5.035042,
+          "startTime": 4.7750416,
+          "word": "态"
+        },
+        {
+          "confidence": 0.8118011,
+          "endTime": 5.2250414,
+          "startTime": 5.075042,
+          "word": "也"
+        },
+        {
+          "confidence": 0.88941646,
+          "endTime": 5.385041,
+          "startTime": 5.2250414,
+          "word": "导"
+        },
+        {
+          "confidence": 0.9246163,
+          "endTime": 5.5550413,
+          "startTime": 5.385041,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9673364,
+          "endTime": 5.6550417,
+          "startTime": 5.5550413,
+          "word": "了"
+        },
+        {
+          "confidence": 0.9535225,
+          "endTime": 5.785042,
+          "startTime": 5.6550417,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9071678,
+          "endTime": 6.0050416,
+          "startTime": 5.785042,
+          "word": "同"
+        },
+        {
+          "confidence": 0.8711162,
+          "endTime": 6.1250415,
+          "startTime": 6.0050416,
+          "word": "页"
+        },
+        {
+          "confidence": 0.97839063,
+          "endTime": 6.3550415,
+          "startTime": 6.1250415,
+          "word": "面，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "生成的插图同样保留。",
+      "words": [
+        {
+          "confidence": 0.9550841,
+          "endTime": 6.915083,
+          "startTime": 6.710083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.95901585,
+          "endTime": 7.075083,
+          "startTime": 6.915083,
+          "word": "成"
+        },
+        {
+          "confidence": 0.91668475,
+          "endTime": 7.165083,
+          "startTime": 7.075083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9107192,
+          "endTime": 7.385083,
+          "startTime": 7.165083,
+          "word": "插"
+        },
+        {
+          "confidence": 0.9807923,
+          "endTime": 7.625083,
+          "startTime": 7.385083,
+          "word": "图"
+        },
+        {
+          "confidence": 0.9559306,
+          "endTime": 7.8650827,
+          "startTime": 7.625083,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9855972,
+          "endTime": 8.005083,
+          "startTime": 7.8650827,
+          "word": "样"
+        },
+        {
+          "confidence": 0.93244666,
+          "endTime": 8.185083,
+          "startTime": 8.005083,
+          "word": "保"
+        },
+        {
+          "confidence": 0.98066044,
+          "endTime": 8.435083,
+          "startTime": 8.185083,
+          "word": "留。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再用 PowerPoint 打开课件。除了讲解内容，流程图的分步状态也导成了不同页面，生成的插图同样保留。检查之后，就可以带进课堂。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "检查之后，就可以带进课堂。",
+      "words": [
+        {
+          "confidence": 0.9271225,
+          "endTime": 8.945125,
+          "startTime": 8.790125,
+          "word": "检"
+        },
+        {
+          "confidence": 0.96748,
+          "endTime": 9.145124,
+          "startTime": 8.945125,
+          "word": "查"
+        },
+        {
+          "confidence": 0.97338796,
+          "endTime": 9.295125,
+          "startTime": 9.145124,
+          "word": "之"
+        },
+        {
+          "confidence": 0.9639112,
+          "endTime": 9.585125,
+          "startTime": 9.295125,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.8583078,
+          "endTime": 9.765125,
+          "startTime": 9.615125,
+          "word": "就"
+        },
+        {
+          "confidence": 0.98314947,
+          "endTime": 9.895124,
+          "startTime": 9.765125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.872519,
+          "endTime": 9.965125,
+          "startTime": 9.895124,
+          "word": "以"
+        },
+        {
+          "confidence": 0.27469096,
+          "endTime": 10.025125,
+          "startTime": 9.965125,
+          "word": "带"
+        },
+        {
+          "confidence": 0.11167451,
+          "endTime": 10.085125,
+          "startTime": 10.025125,
+          "word": "进"
+        },
+        {
+          "confidence": 0.118967324,
+          "endTime": 10.145124,
+          "startTime": 10.085125,
+          "word": "课"
+        },
+        {
+          "confidence": 0.25690174,
+          "endTime": 10.205125,
+          "startTime": 10.145124,
+          "word": "堂。"
+        }
+      ]
+    }
+  ]
+}

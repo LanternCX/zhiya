@@ -1,0 +1,244 @@
+{
+  "duration": 8.761333333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "生成的教师教案把这些组织起来：课堂流程、",
+      "words": [
+        {
+          "confidence": 0.9035473,
+          "endTime": 0.475,
+          "startTime": 0.225,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9336193,
+          "endTime": 0.645,
+          "startTime": 0.475,
+          "word": "成"
+        },
+        {
+          "confidence": 0.93207186,
+          "endTime": 0.745,
+          "startTime": 0.645,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95952207,
+          "endTime": 0.895,
+          "startTime": 0.745,
+          "word": "教"
+        },
+        {
+          "confidence": 0.85217404,
+          "endTime": 1.065,
+          "startTime": 0.895,
+          "word": "师"
+        },
+        {
+          "confidence": 0.76969117,
+          "endTime": 1.315,
+          "startTime": 1.065,
+          "word": "教"
+        },
+        {
+          "confidence": 0.7764574,
+          "endTime": 1.535,
+          "startTime": 1.315,
+          "word": "案"
+        },
+        {
+          "confidence": 0.9429078,
+          "endTime": 1.735,
+          "startTime": 1.615,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9814832,
+          "endTime": 1.875,
+          "startTime": 1.735,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9276347,
+          "endTime": 2.045,
+          "startTime": 1.875,
+          "word": "些"
+        },
+        {
+          "confidence": 0.90224224,
+          "endTime": 2.255,
+          "startTime": 2.045,
+          "word": "组"
+        },
+        {
+          "confidence": 0.884893,
+          "endTime": 2.405,
+          "startTime": 2.255,
+          "word": "织"
+        },
+        {
+          "confidence": 0.73705,
+          "endTime": 2.595,
+          "startTime": 2.405,
+          "word": "起"
+        },
+        {
+          "confidence": 0.32889742,
+          "endTime": 2.755,
+          "startTime": 2.595,
+          "word": "来："
+        },
+        {
+          "confidence": 0.915954,
+          "endTime": 3.305,
+          "startTime": 3.105,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96655864,
+          "endTime": 3.525,
+          "startTime": 3.305,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.92285997,
+          "endTime": 3.715,
+          "startTime": 3.525,
+          "word": "流"
+        },
+        {
+          "confidence": 0.14007725,
+          "endTime": 3.745,
+          "startTime": 3.715,
+          "word": "程、"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "生成的教师教案把这些组织起来：课堂流程、关键话术、代码模板，以及常见错误和应对办法。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "关键话术、代码模板，以及常见错误和应对办法。",
+      "words": [
+        {
+          "confidence": 0.34968743,
+          "endTime": 4.5650415,
+          "startTime": 4.4900417,
+          "word": "关"
+        },
+        {
+          "confidence": 0.28432438,
+          "endTime": 4.625042,
+          "startTime": 4.5650415,
+          "word": "键"
+        },
+        {
+          "confidence": 0.8917302,
+          "endTime": 4.7950416,
+          "startTime": 4.625042,
+          "word": "话"
+        },
+        {
+          "confidence": 0.20211898,
+          "endTime": 4.825042,
+          "startTime": 4.7950416,
+          "word": "术、"
+        },
+        {
+          "confidence": 0.89784116,
+          "endTime": 5.6050415,
+          "startTime": 5.4250417,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8686662,
+          "endTime": 5.745042,
+          "startTime": 5.6050415,
+          "word": "码"
+        },
+        {
+          "confidence": 0.91949666,
+          "endTime": 5.955042,
+          "startTime": 5.745042,
+          "word": "模"
+        },
+        {
+          "confidence": 0.94612646,
+          "endTime": 6.1950417,
+          "startTime": 5.955042,
+          "word": "板，"
+        },
+        {
+          "confidence": 0.91733503,
+          "endTime": 6.5250416,
+          "startTime": 6.4050417,
+          "word": "以"
+        },
+        {
+          "confidence": 0.93614745,
+          "endTime": 6.765042,
+          "startTime": 6.5250416,
+          "word": "及"
+        },
+        {
+          "confidence": 0.9703716,
+          "endTime": 7.015042,
+          "startTime": 6.765042,
+          "word": "常"
+        },
+        {
+          "confidence": 0.97620046,
+          "endTime": 7.205042,
+          "startTime": 7.015042,
+          "word": "见"
+        },
+        {
+          "confidence": 0.9611189,
+          "endTime": 7.4250417,
+          "startTime": 7.205042,
+          "word": "错"
+        },
+        {
+          "confidence": 0.8747013,
+          "endTime": 7.625042,
+          "startTime": 7.4250417,
+          "word": "误"
+        },
+        {
+          "confidence": 0.91831666,
+          "endTime": 7.805042,
+          "startTime": 7.625042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.71289116,
+          "endTime": 7.8650417,
+          "startTime": 7.805042,
+          "word": "应"
+        },
+        {
+          "confidence": 0.16312067,
+          "endTime": 7.9250417,
+          "startTime": 7.8650417,
+          "word": "对"
+        },
+        {
+          "confidence": 0.18559374,
+          "endTime": 7.9850416,
+          "startTime": 7.9250417,
+          "word": "办"
+        },
+        {
+          "confidence": 0.19951786,
+          "endTime": 8.045042,
+          "startTime": 7.9850416,
+          "word": "法。"
+        }
+      ]
+    }
+  ]
+}

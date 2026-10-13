@@ -1,0 +1,1000 @@
+{
+  "duration": 33.604416666666665,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "进入工作区，",
+      "words": [
+        {
+          "confidence": 0.9697667,
+          "endTime": 0.395,
+          "startTime": 0.225,
+          "word": "进"
+        },
+        {
+          "confidence": 0.9624,
+          "endTime": 0.535,
+          "startTime": 0.395,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9633991,
+          "endTime": 0.705,
+          "startTime": 0.535,
+          "word": "工"
+        },
+        {
+          "confidence": 0.98264176,
+          "endTime": 0.865,
+          "startTime": 0.705,
+          "word": "作"
+        },
+        {
+          "confidence": 0.9407054,
+          "endTime": 1.175,
+          "startTime": 0.865,
+          "word": "区，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先说出备课任务：给初一零基础学生上一节四十分钟的编程入门课，",
+      "words": [
+        {
+          "confidence": 0.3810953,
+          "endTime": 1.8450418,
+          "startTime": 1.7700417,
+          "word": "先"
+        },
+        {
+          "confidence": 0.28381062,
+          "endTime": 1.9050417,
+          "startTime": 1.8450418,
+          "word": "说"
+        },
+        {
+          "confidence": 0.8746177,
+          "endTime": 2.1150417,
+          "startTime": 1.9050417,
+          "word": "出"
+        },
+        {
+          "confidence": 0.91853786,
+          "endTime": 2.2850418,
+          "startTime": 2.1150417,
+          "word": "备"
+        },
+        {
+          "confidence": 0.93329775,
+          "endTime": 2.4450417,
+          "startTime": 2.2850418,
+          "word": "课"
+        },
+        {
+          "confidence": 0.86096877,
+          "endTime": 2.7450418,
+          "startTime": 2.4450417,
+          "word": "任"
+        },
+        {
+          "confidence": 0.24078454,
+          "endTime": 2.7750416,
+          "startTime": 2.7450418,
+          "word": "务："
+        },
+        {
+          "confidence": 0.97223216,
+          "endTime": 3.3650417,
+          "startTime": 3.1750417,
+          "word": "给"
+        },
+        {
+          "confidence": 0.97680783,
+          "endTime": 3.5850418,
+          "startTime": 3.3650417,
+          "word": "初"
+        },
+        {
+          "confidence": 0.9070388,
+          "endTime": 3.7550416,
+          "startTime": 3.5850418,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9198189,
+          "endTime": 3.9350417,
+          "startTime": 3.7550416,
+          "word": "零"
+        },
+        {
+          "confidence": 0.912698,
+          "endTime": 4.085042,
+          "startTime": 3.9350417,
+          "word": "基"
+        },
+        {
+          "confidence": 0.9248139,
+          "endTime": 4.2250414,
+          "startTime": 4.085042,
+          "word": "础"
+        },
+        {
+          "confidence": 0.96929765,
+          "endTime": 4.4250417,
+          "startTime": 4.2250414,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9027515,
+          "endTime": 4.6850414,
+          "startTime": 4.4250417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.942518,
+          "endTime": 4.9450417,
+          "startTime": 4.7150416,
+          "word": "上"
+        },
+        {
+          "confidence": 0.88189745,
+          "endTime": 5.045042,
+          "startTime": 4.9450417,
+          "word": "一"
+        },
+        {
+          "confidence": 0.95481056,
+          "endTime": 5.2150416,
+          "startTime": 5.045042,
+          "word": "节"
+        },
+        {
+          "confidence": 0.9073181,
+          "endTime": 5.4050417,
+          "startTime": 5.2150416,
+          "word": "四"
+        },
+        {
+          "confidence": 0.974526,
+          "endTime": 5.555042,
+          "startTime": 5.4050417,
+          "word": "十"
+        },
+        {
+          "confidence": 0.9710967,
+          "endTime": 5.705042,
+          "startTime": 5.555042,
+          "word": "分"
+        },
+        {
+          "confidence": 0.96328837,
+          "endTime": 5.9050417,
+          "startTime": 5.705042,
+          "word": "钟"
+        },
+        {
+          "confidence": 0.8634813,
+          "endTime": 6.0550413,
+          "startTime": 5.9050417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.868619,
+          "endTime": 6.2250414,
+          "startTime": 6.0550413,
+          "word": "编"
+        },
+        {
+          "confidence": 0.93837476,
+          "endTime": 6.4450417,
+          "startTime": 6.2250414,
+          "word": "程"
+        },
+        {
+          "confidence": 0.95866084,
+          "endTime": 6.6050415,
+          "startTime": 6.4450417,
+          "word": "入"
+        },
+        {
+          "confidence": 0.933101,
+          "endTime": 6.755042,
+          "startTime": 6.6050415,
+          "word": "门"
+        },
+        {
+          "confidence": 0.9605325,
+          "endTime": 7.0150414,
+          "startTime": 6.755042,
+          "word": "课，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "从生活案例开始。\n\n",
+      "words": [
+        {
+          "confidence": 0.9063104,
+          "endTime": 7.635083,
+          "startTime": 7.4300833,
+          "word": "从"
+        },
+        {
+          "confidence": 0.90750223,
+          "endTime": 7.8350835,
+          "startTime": 7.635083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.94816506,
+          "endTime": 8.035084,
+          "startTime": 7.8350835,
+          "word": "活"
+        },
+        {
+          "confidence": 0.86481535,
+          "endTime": 8.145083,
+          "startTime": 8.035084,
+          "word": "案"
+        },
+        {
+          "confidence": 0.9230005,
+          "endTime": 8.285084,
+          "startTime": 8.145083,
+          "word": "例"
+        },
+        {
+          "confidence": 0.9383909,
+          "endTime": 8.465083,
+          "startTime": 8.285084,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9678639,
+          "endTime": 8.745083,
+          "startTime": 8.465083,
+          "word": "始。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再补充：不要堆术语，",
+      "words": [
+        {
+          "confidence": 0.47996533,
+          "endTime": 9.825125,
+          "startTime": 9.750125,
+          "word": "再"
+        },
+        {
+          "confidence": 0.8632821,
+          "endTime": 10.135125,
+          "startTime": 10.025125,
+          "word": "补"
+        },
+        {
+          "confidence": 0.121979535,
+          "endTime": 10.165125,
+          "startTime": 10.135125,
+          "word": "充："
+        },
+        {
+          "confidence": 0.15849656,
+          "endTime": 10.225125,
+          "startTime": 10.165125,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9539789,
+          "endTime": 10.305125,
+          "startTime": 10.225125,
+          "word": "要"
+        },
+        {
+          "confidence": 0.7375642,
+          "endTime": 10.465125,
+          "startTime": 10.305125,
+          "word": "堆"
+        },
+        {
+          "confidence": 0.87259555,
+          "endTime": 10.745125,
+          "startTime": 10.465125,
+          "word": "术"
+        },
+        {
+          "confidence": 0.9061051,
+          "endTime": 10.955125,
+          "startTime": 10.745125,
+          "word": "语，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先解释指令顺序，留一个动手环节，",
+      "words": [
+        {
+          "confidence": 0.5970297,
+          "endTime": 11.385166,
+          "startTime": 11.310166,
+          "word": "先"
+        },
+        {
+          "confidence": 0.89003253,
+          "endTime": 11.555166,
+          "startTime": 11.385166,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9477457,
+          "endTime": 11.785167,
+          "startTime": 11.555166,
+          "word": "释"
+        },
+        {
+          "confidence": 0.9555202,
+          "endTime": 11.955166,
+          "startTime": 11.785167,
+          "word": "指"
+        },
+        {
+          "confidence": 0.7979658,
+          "endTime": 12.065166,
+          "startTime": 11.955166,
+          "word": "令"
+        },
+        {
+          "confidence": 0.911264,
+          "endTime": 12.305166,
+          "startTime": 12.065166,
+          "word": "顺"
+        },
+        {
+          "confidence": 0.89269376,
+          "endTime": 12.555166,
+          "startTime": 12.305166,
+          "word": "序，"
+        },
+        {
+          "confidence": 0.9016573,
+          "endTime": 12.975166,
+          "startTime": 12.785167,
+          "word": "留"
+        },
+        {
+          "confidence": 0.82180774,
+          "endTime": 13.035167,
+          "startTime": 12.975166,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9665016,
+          "endTime": 13.145166,
+          "startTime": 13.035167,
+          "word": "个"
+        },
+        {
+          "confidence": 0.96478057,
+          "endTime": 13.255166,
+          "startTime": 13.145166,
+          "word": "动"
+        },
+        {
+          "confidence": 0.81988317,
+          "endTime": 13.405167,
+          "startTime": 13.255166,
+          "word": "手"
+        },
+        {
+          "confidence": 0.15574911,
+          "endTime": 13.465166,
+          "startTime": 13.405167,
+          "word": "环"
+        },
+        {
+          "confidence": 0.19442567,
+          "endTime": 13.5251665,
+          "startTime": 13.465166,
+          "word": "节，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "让学生看到自己写下的代码有什么结果。\n\n",
+      "words": [
+        {
+          "confidence": 0.9048941,
+          "endTime": 14.395208,
+          "startTime": 14.275208,
+          "word": "让"
+        },
+        {
+          "confidence": 0.96156496,
+          "endTime": 14.555208,
+          "startTime": 14.395208,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9260866,
+          "endTime": 14.715208,
+          "startTime": 14.555208,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9611899,
+          "endTime": 14.925209,
+          "startTime": 14.715208,
+          "word": "看"
+        },
+        {
+          "confidence": 0.95766264,
+          "endTime": 15.115209,
+          "startTime": 14.925209,
+          "word": "到"
+        },
+        {
+          "confidence": 0.9439042,
+          "endTime": 15.275208,
+          "startTime": 15.115209,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9827429,
+          "endTime": 15.425209,
+          "startTime": 15.275208,
+          "word": "己"
+        },
+        {
+          "confidence": 0.89594954,
+          "endTime": 15.595209,
+          "startTime": 15.425209,
+          "word": "写"
+        },
+        {
+          "confidence": 0.92338276,
+          "endTime": 15.755209,
+          "startTime": 15.595209,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9405044,
+          "endTime": 15.855208,
+          "startTime": 15.755209,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9598348,
+          "endTime": 16.045208,
+          "startTime": 15.855208,
+          "word": "代"
+        },
+        {
+          "confidence": 0.87266266,
+          "endTime": 16.255209,
+          "startTime": 16.045208,
+          "word": "码"
+        },
+        {
+          "confidence": 0.9531441,
+          "endTime": 16.395208,
+          "startTime": 16.255209,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9848521,
+          "endTime": 16.555208,
+          "startTime": 16.395208,
+          "word": "什"
+        },
+        {
+          "confidence": 0.9892356,
+          "endTime": 16.635208,
+          "startTime": 16.555208,
+          "word": "么"
+        },
+        {
+          "confidence": 0.93051136,
+          "endTime": 16.84521,
+          "startTime": 16.635208,
+          "word": "结"
+        },
+        {
+          "confidence": 0.97222394,
+          "endTime": 17.10521,
+          "startTime": 16.84521,
+          "word": "果。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "可以打字，也可以用语音表达。",
+      "words": [
+        {
+          "confidence": 0.5917539,
+          "endTime": 18.115252,
+          "startTime": 18.04025,
+          "word": "可"
+        },
+        {
+          "confidence": 0.28790876,
+          "endTime": 18.14525,
+          "startTime": 18.115252,
+          "word": "以"
+        },
+        {
+          "confidence": 0.26609725,
+          "endTime": 18.205252,
+          "startTime": 18.14525,
+          "word": "打"
+        },
+        {
+          "confidence": 0.28160268,
+          "endTime": 18.265251,
+          "startTime": 18.205252,
+          "word": "字，"
+        },
+        {
+          "confidence": 0.94476235,
+          "endTime": 18.515251,
+          "startTime": 18.38525,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7901772,
+          "endTime": 18.66525,
+          "startTime": 18.515251,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8031515,
+          "endTime": 18.81525,
+          "startTime": 18.66525,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96953726,
+          "endTime": 18.98525,
+          "startTime": 18.81525,
+          "word": "用"
+        },
+        {
+          "confidence": 0.76972437,
+          "endTime": 19.105251,
+          "startTime": 18.98525,
+          "word": "语"
+        },
+        {
+          "confidence": 0.8373133,
+          "endTime": 19.25525,
+          "startTime": 19.105251,
+          "word": "音"
+        },
+        {
+          "confidence": 0.96820396,
+          "endTime": 19.425251,
+          "startTime": 19.25525,
+          "word": "表"
+        },
+        {
+          "confidence": 0.97315127,
+          "endTime": 19.685251,
+          "startTime": 19.425251,
+          "word": "达。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这里用波形示意语音输入，重点是把教学目标和课堂安排说明白。\n\n",
+      "words": [
+        {
+          "confidence": 0.9441241,
+          "endTime": 20.285292,
+          "startTime": 20.100292,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9525985,
+          "endTime": 20.415293,
+          "startTime": 20.285292,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9814387,
+          "endTime": 20.555292,
+          "startTime": 20.415293,
+          "word": "用"
+        },
+        {
+          "confidence": 0.95611787,
+          "endTime": 20.725292,
+          "startTime": 20.555292,
+          "word": "波"
+        },
+        {
+          "confidence": 0.85769534,
+          "endTime": 20.975292,
+          "startTime": 20.725292,
+          "word": "形"
+        },
+        {
+          "confidence": 0.9065171,
+          "endTime": 21.185291,
+          "startTime": 20.975292,
+          "word": "示"
+        },
+        {
+          "confidence": 0.7977073,
+          "endTime": 21.335293,
+          "startTime": 21.185291,
+          "word": "意"
+        },
+        {
+          "confidence": 0.8352237,
+          "endTime": 21.465292,
+          "startTime": 21.335293,
+          "word": "语"
+        },
+        {
+          "confidence": 0.7628279,
+          "endTime": 21.595293,
+          "startTime": 21.465292,
+          "word": "音"
+        },
+        {
+          "confidence": 0.85152423,
+          "endTime": 21.795292,
+          "startTime": 21.595293,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9623466,
+          "endTime": 22.075293,
+          "startTime": 21.795292,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.9210223,
+          "endTime": 22.605293,
+          "startTime": 22.405293,
+          "word": "重"
+        },
+        {
+          "confidence": 0.9616188,
+          "endTime": 22.835293,
+          "startTime": 22.605293,
+          "word": "点"
+        },
+        {
+          "confidence": 0.94267726,
+          "endTime": 23.025291,
+          "startTime": 22.835293,
+          "word": "是"
+        },
+        {
+          "confidence": 0.70219004,
+          "endTime": 23.155293,
+          "startTime": 23.025291,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9348835,
+          "endTime": 23.335293,
+          "startTime": 23.155293,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9746837,
+          "endTime": 23.505293,
+          "startTime": 23.335293,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9594354,
+          "endTime": 23.665293,
+          "startTime": 23.505293,
+          "word": "目"
+        },
+        {
+          "confidence": 0.97343016,
+          "endTime": 23.925293,
+          "startTime": 23.665293,
+          "word": "标"
+        },
+        {
+          "confidence": 0.8754406,
+          "endTime": 24.115292,
+          "startTime": 23.955292,
+          "word": "和"
+        },
+        {
+          "confidence": 0.959465,
+          "endTime": 24.275291,
+          "startTime": 24.115292,
+          "word": "课"
+        },
+        {
+          "confidence": 0.8673526,
+          "endTime": 24.425293,
+          "startTime": 24.275291,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.95745075,
+          "endTime": 24.585293,
+          "startTime": 24.425293,
+          "word": "安"
+        },
+        {
+          "confidence": 0.97863096,
+          "endTime": 24.745293,
+          "startTime": 24.585293,
+          "word": "排"
+        },
+        {
+          "confidence": 0.9238278,
+          "endTime": 24.955292,
+          "startTime": 24.745293,
+          "word": "说"
+        },
+        {
+          "confidence": 0.9721883,
+          "endTime": 25.155293,
+          "startTime": 24.955292,
+          "word": "明"
+        },
+        {
+          "confidence": 0.8049509,
+          "endTime": 25.305292,
+          "startTime": 25.155293,
+          "word": "白。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "进入工作区，先说出备课任务：给初一零基础学生上一节四十分钟的编程入门课，从生活案例开始。\n\n再补充：不要堆术语，先解释指令顺序，留一个动手环节，让学生看到自己写下的代码有什么结果。\n\n可以打字，也可以用语音表达。这里用波形示意语音输入，重点是把教学目标和课堂安排说明白。\n\n提交之后，授课对象、时长、知识重点和活动要求归入同一个任务。老师随时可以补充和纠正。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "提交之后，授课对象、时长、知识重点和活动要求归入同一个任务。",
+      "words": [
+        {
+          "confidence": 0.30179247,
+          "endTime": 26.655334,
+          "startTime": 26.580334,
+          "word": "提"
+        },
+        {
+          "confidence": 0.15327792,
+          "endTime": 26.805334,
+          "startTime": 26.745335,
+          "word": "交"
+        },
+        {
+          "confidence": 0.21795186,
+          "endTime": 26.865334,
+          "startTime": 26.805334,
+          "word": "之"
+        },
+        {
+          "confidence": 0.31594878,
+          "endTime": 26.925333,
+          "startTime": 26.865334,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.20102073,
+          "endTime": 26.985334,
+          "startTime": 26.925333,
+          "word": "授"
+        },
+        {
+          "confidence": 0.75809616,
+          "endTime": 27.075335,
+          "startTime": 26.985334,
+          "word": "课"
+        },
+        {
+          "confidence": 0.8582398,
+          "endTime": 27.215334,
+          "startTime": 27.075335,
+          "word": "对"
+        },
+        {
+          "confidence": 0.1416516,
+          "endTime": 27.245335,
+          "startTime": 27.215334,
+          "word": "象、"
+        },
+        {
+          "confidence": 0.9356897,
+          "endTime": 27.905334,
+          "startTime": 27.665333,
+          "word": "时"
+        },
+        {
+          "confidence": 0.20171906,
+          "endTime": 27.935333,
+          "startTime": 27.905334,
+          "word": "长、"
+        },
+        {
+          "confidence": 0.8754065,
+          "endTime": 28.645334,
+          "startTime": 28.515333,
+          "word": "知"
+        },
+        {
+          "confidence": 0.81861377,
+          "endTime": 28.775333,
+          "startTime": 28.645334,
+          "word": "识"
+        },
+        {
+          "confidence": 0.9295185,
+          "endTime": 28.965334,
+          "startTime": 28.775333,
+          "word": "重"
+        },
+        {
+          "confidence": 0.9573053,
+          "endTime": 29.215334,
+          "startTime": 28.965334,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9082263,
+          "endTime": 29.415333,
+          "startTime": 29.265333,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9498137,
+          "endTime": 29.575333,
+          "startTime": 29.415333,
+          "word": "活"
+        },
+        {
+          "confidence": 0.9473006,
+          "endTime": 29.715334,
+          "startTime": 29.575333,
+          "word": "动"
+        },
+        {
+          "confidence": 0.9729728,
+          "endTime": 29.895334,
+          "startTime": 29.715334,
+          "word": "要"
+        },
+        {
+          "confidence": 0.98168576,
+          "endTime": 30.195333,
+          "startTime": 29.895334,
+          "word": "求"
+        },
+        {
+          "confidence": 0.95482725,
+          "endTime": 30.375334,
+          "startTime": 30.225334,
+          "word": "归"
+        },
+        {
+          "confidence": 0.8295485,
+          "endTime": 30.475334,
+          "startTime": 30.375334,
+          "word": "入"
+        },
+        {
+          "confidence": 0.921052,
+          "endTime": 30.725334,
+          "startTime": 30.475334,
+          "word": "同"
+        },
+        {
+          "confidence": 0.8735418,
+          "endTime": 30.805334,
+          "startTime": 30.725334,
+          "word": "一"
+        },
+        {
+          "confidence": 0.97638476,
+          "endTime": 30.915333,
+          "startTime": 30.805334,
+          "word": "个"
+        },
+        {
+          "confidence": 0.91127086,
+          "endTime": 31.075333,
+          "startTime": 30.915333,
+          "word": "任"
+        },
+        {
+          "confidence": 0.884321,
+          "endTime": 31.255333,
+          "startTime": 31.075333,
+          "word": "务。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师随时可以补充和纠正。",
+      "words": [
+        {
+          "confidence": 0.57131684,
+          "endTime": 31.811377,
+          "startTime": 31.736376,
+          "word": "老"
+        },
+        {
+          "confidence": 0.80779654,
+          "endTime": 31.991375,
+          "startTime": 31.811377,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8079547,
+          "endTime": 32.161377,
+          "startTime": 31.991375,
+          "word": "随"
+        },
+        {
+          "confidence": 0.8271497,
+          "endTime": 32.321377,
+          "startTime": 32.161377,
+          "word": "时"
+        },
+        {
+          "confidence": 0.8031257,
+          "endTime": 32.461376,
+          "startTime": 32.321377,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8691852,
+          "endTime": 32.551376,
+          "startTime": 32.461376,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9597471,
+          "endTime": 32.701374,
+          "startTime": 32.551376,
+          "word": "补"
+        },
+        {
+          "confidence": 0.90392643,
+          "endTime": 32.881374,
+          "startTime": 32.701374,
+          "word": "充"
+        },
+        {
+          "confidence": 0.9283161,
+          "endTime": 33.051376,
+          "startTime": 32.881374,
+          "word": "和"
+        },
+        {
+          "confidence": 0.87234527,
+          "endTime": 33.201374,
+          "startTime": 33.051376,
+          "word": "纠"
+        },
+        {
+          "confidence": 0.9200836,
+          "endTime": 33.371376,
+          "startTime": 33.201374,
+          "word": "正。"
+        }
+      ]
+    }
+  ]
+}

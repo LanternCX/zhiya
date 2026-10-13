@@ -1,0 +1,220 @@
+{
+  "duration": 7.4692083333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "同样讲变量，小学阶段可以先从名字标签的比喻入手，少量文字配合观察和提问。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "同样讲变量，小学阶段可以先从名字标签的比喻入手，",
+      "words": [
+        {
+          "confidence": 0.9348519,
+          "endTime": 0.465,
+          "startTime": 0.225,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9712169,
+          "endTime": 0.605,
+          "startTime": 0.465,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9542072,
+          "endTime": 0.795,
+          "startTime": 0.605,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.86351335,
+          "endTime": 0.975,
+          "startTime": 0.795,
+          "word": "变"
+        },
+        {
+          "confidence": 0.96885014,
+          "endTime": 1.205,
+          "startTime": 0.975,
+          "word": "量，"
+        },
+        {
+          "confidence": 0.975561,
+          "endTime": 1.705,
+          "startTime": 1.475,
+          "word": "小"
+        },
+        {
+          "confidence": 0.958417,
+          "endTime": 1.905,
+          "startTime": 1.705,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9332512,
+          "endTime": 2.085,
+          "startTime": 1.905,
+          "word": "阶"
+        },
+        {
+          "confidence": 0.9440096,
+          "endTime": 2.375,
+          "startTime": 2.085,
+          "word": "段"
+        },
+        {
+          "confidence": 0.77616936,
+          "endTime": 2.535,
+          "startTime": 2.415,
+          "word": "可"
+        },
+        {
+          "confidence": 0.74355155,
+          "endTime": 2.635,
+          "startTime": 2.535,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9493967,
+          "endTime": 2.835,
+          "startTime": 2.635,
+          "word": "先"
+        },
+        {
+          "confidence": 0.91424704,
+          "endTime": 3.055,
+          "startTime": 2.835,
+          "word": "从"
+        },
+        {
+          "confidence": 0.95753866,
+          "endTime": 3.265,
+          "startTime": 3.055,
+          "word": "名"
+        },
+        {
+          "confidence": 0.8170868,
+          "endTime": 3.405,
+          "startTime": 3.265,
+          "word": "字"
+        },
+        {
+          "confidence": 0.9679934,
+          "endTime": 3.595,
+          "startTime": 3.405,
+          "word": "标"
+        },
+        {
+          "confidence": 0.94004524,
+          "endTime": 3.785,
+          "startTime": 3.595,
+          "word": "签"
+        },
+        {
+          "confidence": 0.8974371,
+          "endTime": 3.895,
+          "startTime": 3.785,
+          "word": "的"
+        },
+        {
+          "confidence": 0.87004805,
+          "endTime": 4.105,
+          "startTime": 3.895,
+          "word": "比"
+        },
+        {
+          "confidence": 0.6877318,
+          "endTime": 4.165,
+          "startTime": 4.105,
+          "word": "喻"
+        },
+        {
+          "confidence": 0.90649766,
+          "endTime": 4.345,
+          "startTime": 4.165,
+          "word": "入"
+        },
+        {
+          "confidence": 0.91060233,
+          "endTime": 4.625,
+          "startTime": 4.345,
+          "word": "手，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "少量文字配合观察和提问。",
+      "words": [
+        {
+          "confidence": 0.7659466,
+          "endTime": 5.235042,
+          "startTime": 5.080042,
+          "word": "少"
+        },
+        {
+          "confidence": 0.94779074,
+          "endTime": 5.435042,
+          "startTime": 5.235042,
+          "word": "量"
+        },
+        {
+          "confidence": 0.9008284,
+          "endTime": 5.5950418,
+          "startTime": 5.435042,
+          "word": "文"
+        },
+        {
+          "confidence": 0.9283337,
+          "endTime": 5.825042,
+          "startTime": 5.5950418,
+          "word": "字"
+        },
+        {
+          "confidence": 0.9129815,
+          "endTime": 6.045042,
+          "startTime": 5.8850417,
+          "word": "配"
+        },
+        {
+          "confidence": 0.9347138,
+          "endTime": 6.225042,
+          "startTime": 6.045042,
+          "word": "合"
+        },
+        {
+          "confidence": 0.95008445,
+          "endTime": 6.4450417,
+          "startTime": 6.225042,
+          "word": "观"
+        },
+        {
+          "confidence": 0.92773414,
+          "endTime": 6.685042,
+          "startTime": 6.4450417,
+          "word": "察"
+        },
+        {
+          "confidence": 0.2506837,
+          "endTime": 6.745042,
+          "startTime": 6.685042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.15056583,
+          "endTime": 6.805042,
+          "startTime": 6.745042,
+          "word": "提"
+        },
+        {
+          "confidence": 0.22329424,
+          "endTime": 6.835042,
+          "startTime": 6.805042,
+          "word": "问。"
+        }
+      ]
+    }
+  ]
+}

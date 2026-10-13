@@ -1,0 +1,454 @@
+{
+  "duration": 15.351541666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这次我们提出的修改是：只留一句“变量就是给数据起个名字”，",
+      "words": [
+        {
+          "confidence": 0.9738841,
+          "endTime": 0.385,
+          "startTime": 0.225,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9656948,
+          "endTime": 0.575,
+          "startTime": 0.385,
+          "word": "次"
+        },
+        {
+          "confidence": 0.77780455,
+          "endTime": 0.685,
+          "startTime": 0.575,
+          "word": "我"
+        },
+        {
+          "confidence": 0.95340633,
+          "endTime": 0.795,
+          "startTime": 0.685,
+          "word": "们"
+        },
+        {
+          "confidence": 0.89359134,
+          "endTime": 0.965,
+          "startTime": 0.795,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9233773,
+          "endTime": 1.115,
+          "startTime": 0.965,
+          "word": "出"
+        },
+        {
+          "confidence": 0.96406424,
+          "endTime": 1.195,
+          "startTime": 1.115,
+          "word": "的"
+        },
+        {
+          "confidence": 0.87177247,
+          "endTime": 1.385,
+          "startTime": 1.195,
+          "word": "修"
+        },
+        {
+          "confidence": 0.90130585,
+          "endTime": 1.565,
+          "startTime": 1.385,
+          "word": "改"
+        },
+        {
+          "confidence": 0.24950394,
+          "endTime": 1.855,
+          "startTime": 1.825,
+          "word": "是："
+        },
+        {
+          "confidence": 0.9587049,
+          "endTime": 2.315,
+          "startTime": 2.125,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9571794,
+          "endTime": 2.525,
+          "startTime": 2.315,
+          "word": "留"
+        },
+        {
+          "confidence": 0.78460413,
+          "endTime": 2.695,
+          "startTime": 2.525,
+          "word": "一"
+        },
+        {
+          "confidence": 0.19508177,
+          "endTime": 2.895,
+          "startTime": 2.865,
+          "word": "句“"
+        },
+        {
+          "confidence": 0.8655199,
+          "endTime": 3.325,
+          "startTime": 3.115,
+          "word": "变"
+        },
+        {
+          "confidence": 0.93285394,
+          "endTime": 3.625,
+          "startTime": 3.325,
+          "word": "量"
+        },
+        {
+          "confidence": 0.8398806,
+          "endTime": 3.775,
+          "startTime": 3.625,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9718103,
+          "endTime": 3.925,
+          "startTime": 3.775,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9855017,
+          "endTime": 4.065,
+          "startTime": 3.925,
+          "word": "给"
+        },
+        {
+          "confidence": 0.8965664,
+          "endTime": 4.265,
+          "startTime": 4.065,
+          "word": "数"
+        },
+        {
+          "confidence": 0.8262041,
+          "endTime": 4.415,
+          "startTime": 4.265,
+          "word": "据"
+        },
+        {
+          "confidence": 0.9012781,
+          "endTime": 4.625,
+          "startTime": 4.415,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9430125,
+          "endTime": 4.725,
+          "startTime": 4.625,
+          "word": "个"
+        },
+        {
+          "confidence": 0.88829666,
+          "endTime": 4.935,
+          "startTime": 4.725,
+          "word": "名"
+        },
+        {
+          "confidence": 0.40445912,
+          "endTime": 5.515,
+          "startTime": 5.485,
+          "word": "字”，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "一行代码，以及一个追问：“把二改成三，",
+      "words": [
+        {
+          "confidence": 0.87265325,
+          "endTime": 5.5950413,
+          "startTime": 5.5200415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.8689918,
+          "endTime": 5.8050413,
+          "startTime": 5.5950413,
+          "word": "行"
+        },
+        {
+          "confidence": 0.9465526,
+          "endTime": 6.0050416,
+          "startTime": 5.8050413,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8085571,
+          "endTime": 6.2150416,
+          "startTime": 6.0050416,
+          "word": "码，"
+        },
+        {
+          "confidence": 0.9032803,
+          "endTime": 6.5850415,
+          "startTime": 6.4350414,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8256347,
+          "endTime": 6.885041,
+          "startTime": 6.5850415,
+          "word": "及"
+        },
+        {
+          "confidence": 0.84953046,
+          "endTime": 6.9550414,
+          "startTime": 6.885041,
+          "word": "一"
+        },
+        {
+          "confidence": 0.97199607,
+          "endTime": 7.0550413,
+          "startTime": 6.9550414,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8623446,
+          "endTime": 7.3450413,
+          "startTime": 7.0550413,
+          "word": "追"
+        },
+        {
+          "confidence": 0.21456799,
+          "endTime": 7.3750415,
+          "startTime": 7.3450413,
+          "word": "问：“"
+        },
+        {
+          "confidence": 0.7020543,
+          "endTime": 7.9950414,
+          "startTime": 7.8350415,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9242328,
+          "endTime": 8.295042,
+          "startTime": 8.085041,
+          "word": "二"
+        },
+        {
+          "confidence": 0.94297385,
+          "endTime": 8.465041,
+          "startTime": 8.295042,
+          "word": "改"
+        },
+        {
+          "confidence": 0.6847861,
+          "endTime": 8.575042,
+          "startTime": 8.465041,
+          "word": "成"
+        },
+        {
+          "confidence": 0.13693222,
+          "endTime": 8.635041,
+          "startTime": 8.575042,
+          "word": "三，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "会发生什么？”",
+      "words": [
+        {
+          "confidence": 0.36548394,
+          "endTime": 8.715083,
+          "startTime": 8.640083,
+          "word": "会"
+        },
+        {
+          "confidence": 0.17111039,
+          "endTime": 8.775084,
+          "startTime": 8.715083,
+          "word": "发"
+        },
+        {
+          "confidence": 0.22635277,
+          "endTime": 8.835083,
+          "startTime": 8.775084,
+          "word": "生"
+        },
+        {
+          "confidence": 0.17040153,
+          "endTime": 9.285084,
+          "startTime": 9.225083,
+          "word": "什"
+        },
+        {
+          "confidence": 0.34252453,
+          "endTime": 9.3150835,
+          "startTime": 9.285084,
+          "word": "么？”"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这次我们提出的修改是：只留一句“变量就是给数据起个名字”，一行代码，以及一个追问：“把二改成三，会发生什么？”发出这条要求之后，知芽修改对应的内容，再把结果展示回来。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "发出这条要求之后，知芽修改对应的内容，再把结果展示回来。",
+      "words": [
+        {
+          "confidence": 0.92215693,
+          "endTime": 10.335125,
+          "startTime": 10.175125,
+          "word": "发"
+        },
+        {
+          "confidence": 0.94825315,
+          "endTime": 10.465124,
+          "startTime": 10.335125,
+          "word": "出"
+        },
+        {
+          "confidence": 0.94432366,
+          "endTime": 10.615125,
+          "startTime": 10.465124,
+          "word": "这"
+        },
+        {
+          "confidence": 0.963176,
+          "endTime": 10.805124,
+          "startTime": 10.615125,
+          "word": "条"
+        },
+        {
+          "confidence": 0.87957656,
+          "endTime": 10.925125,
+          "startTime": 10.805124,
+          "word": "要"
+        },
+        {
+          "confidence": 0.97084147,
+          "endTime": 11.135124,
+          "startTime": 10.925125,
+          "word": "求"
+        },
+        {
+          "confidence": 0.959913,
+          "endTime": 11.285125,
+          "startTime": 11.135124,
+          "word": "之"
+        },
+        {
+          "confidence": 0.9562109,
+          "endTime": 11.625125,
+          "startTime": 11.285125,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.8309823,
+          "endTime": 12.035125,
+          "startTime": 11.825125,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9257071,
+          "endTime": 12.235125,
+          "startTime": 12.035125,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.89576674,
+          "endTime": 12.455125,
+          "startTime": 12.235125,
+          "word": "修"
+        },
+        {
+          "confidence": 0.97386515,
+          "endTime": 12.635124,
+          "startTime": 12.455125,
+          "word": "改"
+        },
+        {
+          "confidence": 0.91353446,
+          "endTime": 12.8151245,
+          "startTime": 12.635124,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9415309,
+          "endTime": 12.935124,
+          "startTime": 12.8151245,
+          "word": "应"
+        },
+        {
+          "confidence": 0.92428356,
+          "endTime": 13.045124,
+          "startTime": 12.935124,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9094593,
+          "endTime": 13.205125,
+          "startTime": 13.045124,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9750922,
+          "endTime": 13.445125,
+          "startTime": 13.205125,
+          "word": "容，"
+        },
+        {
+          "confidence": 0.95875967,
+          "endTime": 13.855124,
+          "startTime": 13.695125,
+          "word": "再"
+        },
+        {
+          "confidence": 0.79728043,
+          "endTime": 13.965124,
+          "startTime": 13.855124,
+          "word": "把"
+        },
+        {
+          "confidence": 0.89174956,
+          "endTime": 14.185124,
+          "startTime": 13.965124,
+          "word": "结"
+        },
+        {
+          "confidence": 0.8757873,
+          "endTime": 14.375124,
+          "startTime": 14.185124,
+          "word": "果"
+        },
+        {
+          "confidence": 0.9177413,
+          "endTime": 14.555124,
+          "startTime": 14.375124,
+          "word": "展"
+        },
+        {
+          "confidence": 0.9276453,
+          "endTime": 14.775125,
+          "startTime": 14.555124,
+          "word": "示"
+        },
+        {
+          "confidence": 0.9459014,
+          "endTime": 14.935124,
+          "startTime": 14.775125,
+          "word": "回"
+        },
+        {
+          "confidence": 0.9460395,
+          "endTime": 15.165125,
+          "startTime": 14.935124,
+          "word": "来。"
+        }
+      ]
+    }
+  ]
+}

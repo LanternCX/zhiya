@@ -1,0 +1,268 @@
+{
+  "duration": 9.873833333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师可以点击控制动画：顾客输入，存入变量，再打印输出。",
+      "words": [
+        {
+          "confidence": 0.95354533,
+          "endTime": 0.435,
+          "startTime": 0.235,
+          "word": "老"
+        },
+        {
+          "confidence": 0.92479956,
+          "endTime": 0.715,
+          "startTime": 0.435,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7763846,
+          "endTime": 0.875,
+          "startTime": 0.715,
+          "word": "可"
+        },
+        {
+          "confidence": 0.70656866,
+          "endTime": 1.015,
+          "startTime": 0.875,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96467674,
+          "endTime": 1.205,
+          "startTime": 1.015,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9335084,
+          "endTime": 1.405,
+          "startTime": 1.205,
+          "word": "击"
+        },
+        {
+          "confidence": 0.9357544,
+          "endTime": 1.625,
+          "startTime": 1.405,
+          "word": "控"
+        },
+        {
+          "confidence": 0.9136684,
+          "endTime": 1.745,
+          "startTime": 1.625,
+          "word": "制"
+        },
+        {
+          "confidence": 0.9247013,
+          "endTime": 1.905,
+          "startTime": 1.745,
+          "word": "动"
+        },
+        {
+          "confidence": 0.24985652,
+          "endTime": 1.935,
+          "startTime": 1.905,
+          "word": "画："
+        },
+        {
+          "confidence": 0.8494057,
+          "endTime": 2.675,
+          "startTime": 2.505,
+          "word": "顾"
+        },
+        {
+          "confidence": 0.9580434,
+          "endTime": 2.845,
+          "startTime": 2.675,
+          "word": "客"
+        },
+        {
+          "confidence": 0.92026246,
+          "endTime": 3.105,
+          "startTime": 2.845,
+          "word": "输"
+        },
+        {
+          "confidence": 0.95988894,
+          "endTime": 3.425,
+          "startTime": 3.105,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.93836683,
+          "endTime": 3.825,
+          "startTime": 3.555,
+          "word": "存"
+        },
+        {
+          "confidence": 0.8197455,
+          "endTime": 3.965,
+          "startTime": 3.825,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9411539,
+          "endTime": 4.175,
+          "startTime": 3.965,
+          "word": "变"
+        },
+        {
+          "confidence": 0.97986066,
+          "endTime": 4.405,
+          "startTime": 4.175,
+          "word": "量，"
+        },
+        {
+          "confidence": 0.9347451,
+          "endTime": 4.795,
+          "startTime": 4.605,
+          "word": "再"
+        },
+        {
+          "confidence": 0.93110925,
+          "endTime": 4.985,
+          "startTime": 4.795,
+          "word": "打"
+        },
+        {
+          "confidence": 0.915037,
+          "endTime": 5.095,
+          "startTime": 4.985,
+          "word": "印"
+        },
+        {
+          "confidence": 0.954547,
+          "endTime": 5.305,
+          "startTime": 5.095,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9780302,
+          "endTime": 5.585,
+          "startTime": 5.305,
+          "word": "出。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以点击控制动画：顾客输入，存入变量，再打印输出。每次只走一步，课堂可以在这里停下来追问。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "每次只走一步，课堂可以在这里停下来追问。",
+      "words": [
+        {
+          "confidence": 0.9646075,
+          "endTime": 6.055042,
+          "startTime": 5.9000416,
+          "word": "每"
+        },
+        {
+          "confidence": 0.9398721,
+          "endTime": 6.3150415,
+          "startTime": 6.055042,
+          "word": "次"
+        },
+        {
+          "confidence": 0.92352253,
+          "endTime": 6.4750414,
+          "startTime": 6.3150415,
+          "word": "只"
+        },
+        {
+          "confidence": 0.90189743,
+          "endTime": 6.6350417,
+          "startTime": 6.4750414,
+          "word": "走"
+        },
+        {
+          "confidence": 0.8586564,
+          "endTime": 6.8350415,
+          "startTime": 6.6350417,
+          "word": "一"
+        },
+        {
+          "confidence": 0.92391557,
+          "endTime": 7.0850415,
+          "startTime": 6.8350415,
+          "word": "步，"
+        },
+        {
+          "confidence": 0.9277999,
+          "endTime": 7.5850415,
+          "startTime": 7.3650417,
+          "word": "课"
+        },
+        {
+          "confidence": 0.91917944,
+          "endTime": 7.8950415,
+          "startTime": 7.5850415,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.8440981,
+          "endTime": 8.075042,
+          "startTime": 7.8950415,
+          "word": "可"
+        },
+        {
+          "confidence": 0.76659405,
+          "endTime": 8.165042,
+          "startTime": 8.075042,
+          "word": "以"
+        },
+        {
+          "confidence": 0.97124004,
+          "endTime": 8.325042,
+          "startTime": 8.165042,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9484669,
+          "endTime": 8.515041,
+          "startTime": 8.325042,
+          "word": "这"
+        },
+        {
+          "confidence": 0.90879977,
+          "endTime": 8.625042,
+          "startTime": 8.515041,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9296461,
+          "endTime": 8.865042,
+          "startTime": 8.625042,
+          "word": "停"
+        },
+        {
+          "confidence": 0.90797293,
+          "endTime": 9.005041,
+          "startTime": 8.865042,
+          "word": "下"
+        },
+        {
+          "confidence": 0.21648583,
+          "endTime": 9.065042,
+          "startTime": 9.005041,
+          "word": "来"
+        },
+        {
+          "confidence": 0.12284026,
+          "endTime": 9.125042,
+          "startTime": 9.065042,
+          "word": "追"
+        },
+        {
+          "confidence": 0.16872928,
+          "endTime": 9.155042,
+          "startTime": 9.125042,
+          "word": "问。"
+        }
+      ]
+    }
+  ]
+}

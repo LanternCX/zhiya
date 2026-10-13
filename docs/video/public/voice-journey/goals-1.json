@@ -1,0 +1,502 @@
+{
+  "duration": 16.277166666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "知芽根据刚才的要求，整理出了教学目标和课堂流程。",
+      "words": [
+        {
+          "confidence": 0.7438617,
+          "endTime": 0.365,
+          "startTime": 0.205,
+          "word": "知"
+        },
+        {
+          "confidence": 0.8122841,
+          "endTime": 0.535,
+          "startTime": 0.365,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.94448423,
+          "endTime": 0.665,
+          "startTime": 0.535,
+          "word": "根"
+        },
+        {
+          "confidence": 0.8418062,
+          "endTime": 0.805,
+          "startTime": 0.665,
+          "word": "据"
+        },
+        {
+          "confidence": 0.95662534,
+          "endTime": 0.955,
+          "startTime": 0.805,
+          "word": "刚"
+        },
+        {
+          "confidence": 0.9728304,
+          "endTime": 1.135,
+          "startTime": 0.955,
+          "word": "才"
+        },
+        {
+          "confidence": 0.9340414,
+          "endTime": 1.245,
+          "startTime": 1.135,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9111709,
+          "endTime": 1.395,
+          "startTime": 1.245,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9703017,
+          "endTime": 1.735,
+          "startTime": 1.395,
+          "word": "求，"
+        },
+        {
+          "confidence": 0.9034142,
+          "endTime": 2.195,
+          "startTime": 1.995,
+          "word": "整"
+        },
+        {
+          "confidence": 0.94806117,
+          "endTime": 2.335,
+          "startTime": 2.195,
+          "word": "理"
+        },
+        {
+          "confidence": 0.97505784,
+          "endTime": 2.525,
+          "startTime": 2.335,
+          "word": "出"
+        },
+        {
+          "confidence": 0.954916,
+          "endTime": 2.615,
+          "startTime": 2.525,
+          "word": "了"
+        },
+        {
+          "confidence": 0.9737381,
+          "endTime": 2.785,
+          "startTime": 2.615,
+          "word": "教"
+        },
+        {
+          "confidence": 0.9826487,
+          "endTime": 2.965,
+          "startTime": 2.785,
+          "word": "学"
+        },
+        {
+          "confidence": 0.94169,
+          "endTime": 3.125,
+          "startTime": 2.965,
+          "word": "目"
+        },
+        {
+          "confidence": 0.9331478,
+          "endTime": 3.335,
+          "startTime": 3.125,
+          "word": "标"
+        },
+        {
+          "confidence": 0.9077521,
+          "endTime": 3.525,
+          "startTime": 3.335,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9500001,
+          "endTime": 3.685,
+          "startTime": 3.525,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9675529,
+          "endTime": 3.855,
+          "startTime": 3.685,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.94125384,
+          "endTime": 4.055,
+          "startTime": 3.855,
+          "word": "流"
+        },
+        {
+          "confidence": 0.9575226,
+          "endTime": 4.295,
+          "startTime": 4.055,
+          "word": "程。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先用食堂点餐引入，再认识编程工具，",
+      "words": [
+        {
+          "confidence": 0.90726733,
+          "endTime": 4.8850417,
+          "startTime": 4.7400417,
+          "word": "先"
+        },
+        {
+          "confidence": 0.92731494,
+          "endTime": 4.9850416,
+          "startTime": 4.8850417,
+          "word": "用"
+        },
+        {
+          "confidence": 0.9471727,
+          "endTime": 5.1950417,
+          "startTime": 4.9850416,
+          "word": "食"
+        },
+        {
+          "confidence": 0.9518259,
+          "endTime": 5.3550415,
+          "startTime": 5.1950417,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9314017,
+          "endTime": 5.5250416,
+          "startTime": 5.3550415,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9010355,
+          "endTime": 5.745042,
+          "startTime": 5.5250416,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.8693458,
+          "endTime": 5.935042,
+          "startTime": 5.745042,
+          "word": "引"
+        },
+        {
+          "confidence": 0.96391076,
+          "endTime": 6.1950417,
+          "startTime": 5.935042,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.919754,
+          "endTime": 6.6750417,
+          "startTime": 6.455042,
+          "word": "再"
+        },
+        {
+          "confidence": 0.96582377,
+          "endTime": 6.795042,
+          "startTime": 6.6750417,
+          "word": "认"
+        },
+        {
+          "confidence": 0.96604913,
+          "endTime": 6.9450417,
+          "startTime": 6.795042,
+          "word": "识"
+        },
+        {
+          "confidence": 0.8423593,
+          "endTime": 7.075042,
+          "startTime": 6.9450417,
+          "word": "编"
+        },
+        {
+          "confidence": 0.9526796,
+          "endTime": 7.265042,
+          "startTime": 7.075042,
+          "word": "程"
+        },
+        {
+          "confidence": 0.96685594,
+          "endTime": 7.4450417,
+          "startTime": 7.265042,
+          "word": "工"
+        },
+        {
+          "confidence": 0.9096522,
+          "endTime": 7.705042,
+          "startTime": 7.4450417,
+          "word": "具，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "随后讲解三个概念，把后面的时间留给上机练习。",
+      "words": [
+        {
+          "confidence": 0.87682194,
+          "endTime": 8.245084,
+          "startTime": 8.060083,
+          "word": "随"
+        },
+        {
+          "confidence": 0.9331629,
+          "endTime": 8.495084,
+          "startTime": 8.245084,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9404363,
+          "endTime": 8.675083,
+          "startTime": 8.495084,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9501671,
+          "endTime": 8.825084,
+          "startTime": 8.675083,
+          "word": "解"
+        },
+        {
+          "confidence": 0.948937,
+          "endTime": 9.005083,
+          "startTime": 8.825084,
+          "word": "三"
+        },
+        {
+          "confidence": 0.90948236,
+          "endTime": 9.115084,
+          "startTime": 9.005083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.91248167,
+          "endTime": 9.3150835,
+          "startTime": 9.115084,
+          "word": "概"
+        },
+        {
+          "confidence": 0.90540504,
+          "endTime": 9.515083,
+          "startTime": 9.3150835,
+          "word": "念，"
+        },
+        {
+          "confidence": 0.86692226,
+          "endTime": 9.945084,
+          "startTime": 9.825084,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9620128,
+          "endTime": 10.135083,
+          "startTime": 9.945084,
+          "word": "后"
+        },
+        {
+          "confidence": 0.99217427,
+          "endTime": 10.255083,
+          "startTime": 10.135083,
+          "word": "面"
+        },
+        {
+          "confidence": 0.9794815,
+          "endTime": 10.345083,
+          "startTime": 10.255083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.94907004,
+          "endTime": 10.515083,
+          "startTime": 10.345083,
+          "word": "时"
+        },
+        {
+          "confidence": 0.9529274,
+          "endTime": 10.775084,
+          "startTime": 10.515083,
+          "word": "间"
+        },
+        {
+          "confidence": 0.90324366,
+          "endTime": 10.955084,
+          "startTime": 10.805083,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9769825,
+          "endTime": 11.075084,
+          "startTime": 10.955084,
+          "word": "给"
+        },
+        {
+          "confidence": 0.79122084,
+          "endTime": 11.215083,
+          "startTime": 11.075084,
+          "word": "上"
+        },
+        {
+          "confidence": 0.12236947,
+          "endTime": 11.275084,
+          "startTime": 11.215083,
+          "word": "机"
+        },
+        {
+          "confidence": 0.15096802,
+          "endTime": 11.335083,
+          "startTime": 11.275084,
+          "word": "练"
+        },
+        {
+          "confidence": 0.42906904,
+          "endTime": 11.395083,
+          "startTime": 11.335083,
+          "word": "习。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "知芽根据刚才的要求，整理出了教学目标和课堂流程。先用食堂点餐引入，再认识编程工具，随后讲解三个概念，把后面的时间留给上机练习。老师可以沿着这条顺序，检查每一步是不是接得上。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以沿着这条顺序，检查每一步是不是接得上。",
+      "words": [
+        {
+          "confidence": 0.97992325,
+          "endTime": 12.435125,
+          "startTime": 12.285126,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96982586,
+          "endTime": 12.705126,
+          "startTime": 12.435125,
+          "word": "师"
+        },
+        {
+          "confidence": 0.76138866,
+          "endTime": 12.845125,
+          "startTime": 12.705126,
+          "word": "可"
+        },
+        {
+          "confidence": 0.77918047,
+          "endTime": 12.995126,
+          "startTime": 12.845125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8484868,
+          "endTime": 13.085125,
+          "startTime": 12.995126,
+          "word": "沿"
+        },
+        {
+          "confidence": 0.8096912,
+          "endTime": 13.205126,
+          "startTime": 13.085125,
+          "word": "着"
+        },
+        {
+          "confidence": 0.9472883,
+          "endTime": 13.335125,
+          "startTime": 13.205126,
+          "word": "这"
+        },
+        {
+          "confidence": 0.96419054,
+          "endTime": 13.505125,
+          "startTime": 13.335125,
+          "word": "条"
+        },
+        {
+          "confidence": 0.9149172,
+          "endTime": 13.745126,
+          "startTime": 13.505125,
+          "word": "顺"
+        },
+        {
+          "confidence": 0.8674312,
+          "endTime": 13.945126,
+          "startTime": 13.745126,
+          "word": "序，"
+        },
+        {
+          "confidence": 0.9375739,
+          "endTime": 14.335125,
+          "startTime": 14.165126,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9742268,
+          "endTime": 14.585125,
+          "startTime": 14.335125,
+          "word": "查"
+        },
+        {
+          "confidence": 0.94643956,
+          "endTime": 14.765125,
+          "startTime": 14.585125,
+          "word": "每"
+        },
+        {
+          "confidence": 0.8795336,
+          "endTime": 14.895125,
+          "startTime": 14.765125,
+          "word": "一"
+        },
+        {
+          "confidence": 0.93593913,
+          "endTime": 15.115126,
+          "startTime": 14.895125,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9281556,
+          "endTime": 15.345125,
+          "startTime": 15.145125,
+          "word": "是"
+        },
+        {
+          "confidence": 0.77870923,
+          "endTime": 15.415125,
+          "startTime": 15.345125,
+          "word": "不"
+        },
+        {
+          "confidence": 0.95429766,
+          "endTime": 15.555126,
+          "startTime": 15.415125,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9168679,
+          "endTime": 15.725125,
+          "startTime": 15.555126,
+          "word": "接"
+        },
+        {
+          "confidence": 0.72969836,
+          "endTime": 15.795126,
+          "startTime": 15.725125,
+          "word": "得"
+        },
+        {
+          "confidence": 0.90854406,
+          "endTime": 16.055126,
+          "startTime": 15.795126,
+          "word": "上。"
+        }
+      ]
+    }
+  ]
+}

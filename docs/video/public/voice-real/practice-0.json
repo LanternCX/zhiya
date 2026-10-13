@@ -1,0 +1,196 @@
+{
+  "duration": 6.274791666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "讲解之后，还要确认学生能不能做出来。",
+      "words": [
+        {
+          "confidence": 0.9474622,
+          "endTime": 0.425,
+          "startTime": 0.245,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9552642,
+          "endTime": 0.585,
+          "startTime": 0.425,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9560035,
+          "endTime": 0.755,
+          "startTime": 0.585,
+          "word": "之"
+        },
+        {
+          "confidence": 0.9801027,
+          "endTime": 1.085,
+          "startTime": 0.755,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.97128075,
+          "endTime": 1.415,
+          "startTime": 1.225,
+          "word": "还"
+        },
+        {
+          "confidence": 0.9324095,
+          "endTime": 1.535,
+          "startTime": 1.415,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8329224,
+          "endTime": 1.735,
+          "startTime": 1.535,
+          "word": "确"
+        },
+        {
+          "confidence": 0.886527,
+          "endTime": 1.885,
+          "startTime": 1.735,
+          "word": "认"
+        },
+        {
+          "confidence": 0.92124474,
+          "endTime": 2.095,
+          "startTime": 1.885,
+          "word": "学"
+        },
+        {
+          "confidence": 0.89061207,
+          "endTime": 2.355,
+          "startTime": 2.095,
+          "word": "生"
+        },
+        {
+          "confidence": 0.85432273,
+          "endTime": 2.505,
+          "startTime": 2.355,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9866291,
+          "endTime": 2.605,
+          "startTime": 2.505,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9735072,
+          "endTime": 2.735,
+          "startTime": 2.605,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9430721,
+          "endTime": 2.925,
+          "startTime": 2.735,
+          "word": "做"
+        },
+        {
+          "confidence": 0.80835104,
+          "endTime": 3.115,
+          "startTime": 2.925,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9820313,
+          "endTime": 3.325,
+          "startTime": 3.115,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "讲解之后，还要确认学生能不能做出来。知芽把练习放在同一个课堂里。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "知芽把练习放在同一个课堂里。",
+      "words": [
+        {
+          "confidence": 0.7441377,
+          "endTime": 3.8750417,
+          "startTime": 3.7600417,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9220579,
+          "endTime": 4.1350417,
+          "startTime": 3.8750417,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.83392745,
+          "endTime": 4.2750416,
+          "startTime": 4.1350417,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9046709,
+          "endTime": 4.4650416,
+          "startTime": 4.2750416,
+          "word": "练"
+        },
+        {
+          "confidence": 0.9766867,
+          "endTime": 4.725042,
+          "startTime": 4.4650416,
+          "word": "习"
+        },
+        {
+          "confidence": 0.9733804,
+          "endTime": 4.8950415,
+          "startTime": 4.725042,
+          "word": "放"
+        },
+        {
+          "confidence": 0.9378347,
+          "endTime": 5.0650415,
+          "startTime": 4.8950415,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9641341,
+          "endTime": 5.2950416,
+          "startTime": 5.0650415,
+          "word": "同"
+        },
+        {
+          "confidence": 0.89905983,
+          "endTime": 5.3650417,
+          "startTime": 5.2950416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.94451344,
+          "endTime": 5.4850416,
+          "startTime": 5.3650417,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9656462,
+          "endTime": 5.665042,
+          "startTime": 5.4850416,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9484738,
+          "endTime": 5.8950415,
+          "startTime": 5.665042,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.46102703,
+          "endTime": 5.955042,
+          "startTime": 5.8950415,
+          "word": "里。"
+        }
+      ]
+    }
+  ]
+}

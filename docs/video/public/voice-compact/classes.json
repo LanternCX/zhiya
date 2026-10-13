@@ -1,0 +1,478 @@
+{
+  "duration": 15.735708333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "材料准备好了，还要让学生找得到。",
+      "words": [
+        {
+          "confidence": 0.9598142,
+          "endTime": 0.435,
+          "startTime": 0.245,
+          "word": "材"
+        },
+        {
+          "confidence": 0.9407944,
+          "endTime": 0.545,
+          "startTime": 0.435,
+          "word": "料"
+        },
+        {
+          "confidence": 0.9399838,
+          "endTime": 0.695,
+          "startTime": 0.545,
+          "word": "准"
+        },
+        {
+          "confidence": 0.9829616,
+          "endTime": 0.825,
+          "startTime": 0.695,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9221123,
+          "endTime": 1.065,
+          "startTime": 0.825,
+          "word": "好"
+        },
+        {
+          "confidence": 0.91053313,
+          "endTime": 1.245,
+          "startTime": 1.065,
+          "word": "了，"
+        },
+        {
+          "confidence": 0.97208637,
+          "endTime": 1.665,
+          "startTime": 1.465,
+          "word": "还"
+        },
+        {
+          "confidence": 0.95507455,
+          "endTime": 1.795,
+          "startTime": 1.665,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9540431,
+          "endTime": 1.915,
+          "startTime": 1.795,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9558775,
+          "endTime": 2.125,
+          "startTime": 1.915,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9132309,
+          "endTime": 2.325,
+          "startTime": 2.125,
+          "word": "生"
+        },
+        {
+          "confidence": 0.89555067,
+          "endTime": 2.505,
+          "startTime": 2.325,
+          "word": "找"
+        },
+        {
+          "confidence": 0.75127584,
+          "endTime": 2.615,
+          "startTime": 2.505,
+          "word": "得"
+        },
+        {
+          "confidence": 0.9188735,
+          "endTime": 2.875,
+          "startTime": 2.615,
+          "word": "到。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师先创建班级，通过邀请码邀请学生加入。",
+      "words": [
+        {
+          "confidence": 0.7597136,
+          "endTime": 3.3350418,
+          "startTime": 3.2600417,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96662295,
+          "endTime": 3.5450418,
+          "startTime": 3.3350418,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9264596,
+          "endTime": 3.7050416,
+          "startTime": 3.5450418,
+          "word": "先"
+        },
+        {
+          "confidence": 0.8734957,
+          "endTime": 3.8750417,
+          "startTime": 3.7050416,
+          "word": "创"
+        },
+        {
+          "confidence": 0.9071483,
+          "endTime": 4.035042,
+          "startTime": 3.8750417,
+          "word": "建"
+        },
+        {
+          "confidence": 0.95907086,
+          "endTime": 4.205042,
+          "startTime": 4.035042,
+          "word": "班"
+        },
+        {
+          "confidence": 0.9590281,
+          "endTime": 4.5050416,
+          "startTime": 4.205042,
+          "word": "级，"
+        },
+        {
+          "confidence": 0.92716676,
+          "endTime": 4.955042,
+          "startTime": 4.7750416,
+          "word": "通"
+        },
+        {
+          "confidence": 0.9207021,
+          "endTime": 5.1150417,
+          "startTime": 4.955042,
+          "word": "过"
+        },
+        {
+          "confidence": 0.85943115,
+          "endTime": 5.2550416,
+          "startTime": 5.1150417,
+          "word": "邀"
+        },
+        {
+          "confidence": 0.908041,
+          "endTime": 5.455042,
+          "startTime": 5.2550416,
+          "word": "请"
+        },
+        {
+          "confidence": 0.95768535,
+          "endTime": 5.6550417,
+          "startTime": 5.455042,
+          "word": "码"
+        },
+        {
+          "confidence": 0.8519587,
+          "endTime": 5.875042,
+          "startTime": 5.7350416,
+          "word": "邀"
+        },
+        {
+          "confidence": 0.9547323,
+          "endTime": 6.035042,
+          "startTime": 5.875042,
+          "word": "请"
+        },
+        {
+          "confidence": 0.9358141,
+          "endTime": 6.1750417,
+          "startTime": 6.035042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9309109,
+          "endTime": 6.3550415,
+          "startTime": 6.1750417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9692877,
+          "endTime": 6.545042,
+          "startTime": 6.3550415,
+          "word": "加"
+        },
+        {
+          "confidence": 0.9792386,
+          "endTime": 6.795042,
+          "startTime": 6.545042,
+          "word": "入。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "班级面板把班主任、任课老师和学生分开显示。",
+      "words": [
+        {
+          "confidence": 0.7696048,
+          "endTime": 7.3750834,
+          "startTime": 7.2450833,
+          "word": "班"
+        },
+        {
+          "confidence": 0.86923236,
+          "endTime": 7.5250835,
+          "startTime": 7.3750834,
+          "word": "级"
+        },
+        {
+          "confidence": 0.91604507,
+          "endTime": 7.6850834,
+          "startTime": 7.5250835,
+          "word": "面"
+        },
+        {
+          "confidence": 0.9386529,
+          "endTime": 7.9550834,
+          "startTime": 7.6850834,
+          "word": "板"
+        },
+        {
+          "confidence": 0.86286765,
+          "endTime": 8.125083,
+          "startTime": 7.9550834,
+          "word": "把"
+        },
+        {
+          "confidence": 0.90762305,
+          "endTime": 8.325083,
+          "startTime": 8.185083,
+          "word": "班"
+        },
+        {
+          "confidence": 0.9152752,
+          "endTime": 8.515083,
+          "startTime": 8.325083,
+          "word": "主"
+        },
+        {
+          "confidence": 0.22624217,
+          "endTime": 8.545083,
+          "startTime": 8.515083,
+          "word": "任、"
+        },
+        {
+          "confidence": 0.9082545,
+          "endTime": 8.785084,
+          "startTime": 8.545083,
+          "word": "任"
+        },
+        {
+          "confidence": 0.8441756,
+          "endTime": 9.205084,
+          "startTime": 9.035084,
+          "word": "课"
+        },
+        {
+          "confidence": 0.8998355,
+          "endTime": 9.355083,
+          "startTime": 9.205084,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9789285,
+          "endTime": 9.645083,
+          "startTime": 9.355083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.83765256,
+          "endTime": 9.795083,
+          "startTime": 9.705084,
+          "word": "和"
+        },
+        {
+          "confidence": 0.7849575,
+          "endTime": 9.995083,
+          "startTime": 9.795083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8271535,
+          "endTime": 10.195084,
+          "startTime": 9.995083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.97225463,
+          "endTime": 10.385083,
+          "startTime": 10.195084,
+          "word": "分"
+        },
+        {
+          "confidence": 0.75539684,
+          "endTime": 10.515083,
+          "startTime": 10.385083,
+          "word": "开"
+        },
+        {
+          "confidence": 0.13312142,
+          "endTime": 10.575083,
+          "startTime": 10.515083,
+          "word": "显"
+        },
+        {
+          "confidence": 0.29016268,
+          "endTime": 10.635083,
+          "startTime": 10.575083,
+          "word": "示。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "材料准备好了，还要让学生找得到。老师先创建班级，通过邀请码邀请学生加入。班级面板把班主任、任课老师和学生分开显示。人员组织在一起，后面分享材料，就可以直接选择这个班。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "人员组织在一起，后面分享材料，就可以直接选择这个班。",
+      "words": [
+        {
+          "confidence": 0.94134605,
+          "endTime": 11.635125,
+          "startTime": 11.475125,
+          "word": "人"
+        },
+        {
+          "confidence": 0.9277112,
+          "endTime": 11.745125,
+          "startTime": 11.635125,
+          "word": "员"
+        },
+        {
+          "confidence": 0.9228366,
+          "endTime": 11.905126,
+          "startTime": 11.745125,
+          "word": "组"
+        },
+        {
+          "confidence": 0.9174756,
+          "endTime": 12.035126,
+          "startTime": 11.905126,
+          "word": "织"
+        },
+        {
+          "confidence": 0.9543704,
+          "endTime": 12.155126,
+          "startTime": 12.035126,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9613372,
+          "endTime": 12.295125,
+          "startTime": 12.155126,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9660802,
+          "endTime": 12.595125,
+          "startTime": 12.295125,
+          "word": "起，"
+        },
+        {
+          "confidence": 0.8802402,
+          "endTime": 13.015125,
+          "startTime": 12.815125,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9621464,
+          "endTime": 13.175125,
+          "startTime": 13.015125,
+          "word": "面"
+        },
+        {
+          "confidence": 0.94011253,
+          "endTime": 13.335125,
+          "startTime": 13.175125,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9858648,
+          "endTime": 13.515125,
+          "startTime": 13.335125,
+          "word": "享"
+        },
+        {
+          "confidence": 0.91802263,
+          "endTime": 13.745125,
+          "startTime": 13.515125,
+          "word": "材"
+        },
+        {
+          "confidence": 0.89351135,
+          "endTime": 13.945126,
+          "startTime": 13.745125,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.9484543,
+          "endTime": 14.105125,
+          "startTime": 13.995125,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9844908,
+          "endTime": 14.245125,
+          "startTime": 14.105125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.9652061,
+          "endTime": 14.355125,
+          "startTime": 14.245125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.8807277,
+          "endTime": 14.5251255,
+          "startTime": 14.355125,
+          "word": "直"
+        },
+        {
+          "confidence": 0.92665946,
+          "endTime": 14.695126,
+          "startTime": 14.5251255,
+          "word": "接"
+        },
+        {
+          "confidence": 0.89449507,
+          "endTime": 14.875126,
+          "startTime": 14.695126,
+          "word": "选"
+        },
+        {
+          "confidence": 0.9540552,
+          "endTime": 15.005125,
+          "startTime": 14.875126,
+          "word": "择"
+        },
+        {
+          "confidence": 0.92772704,
+          "endTime": 15.125126,
+          "startTime": 15.005125,
+          "word": "这"
+        },
+        {
+          "confidence": 0.6209342,
+          "endTime": 15.205126,
+          "startTime": 15.125126,
+          "word": "个"
+        },
+        {
+          "confidence": 0.93403435,
+          "endTime": 15.425125,
+          "startTime": 15.205126,
+          "word": "班。"
+        }
+      ]
+    }
+  ]
+}

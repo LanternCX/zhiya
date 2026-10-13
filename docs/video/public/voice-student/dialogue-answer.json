@@ -1,0 +1,244 @@
+{
+  "duration": 8.415083333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "变量让程序记住一个值，输出才把它显示出来。",
+      "words": [
+        {
+          "confidence": 0.92484033,
+          "endTime": 0.425,
+          "startTime": 0.225,
+          "word": "变"
+        },
+        {
+          "confidence": 0.8753555,
+          "endTime": 0.725,
+          "startTime": 0.425,
+          "word": "量"
+        },
+        {
+          "confidence": 0.92814535,
+          "endTime": 0.895,
+          "startTime": 0.725,
+          "word": "让"
+        },
+        {
+          "confidence": 0.96641713,
+          "endTime": 1.125,
+          "startTime": 0.895,
+          "word": "程"
+        },
+        {
+          "confidence": 0.908218,
+          "endTime": 1.305,
+          "startTime": 1.125,
+          "word": "序"
+        },
+        {
+          "confidence": 0.89494663,
+          "endTime": 1.475,
+          "startTime": 1.305,
+          "word": "记"
+        },
+        {
+          "confidence": 0.965288,
+          "endTime": 1.595,
+          "startTime": 1.475,
+          "word": "住"
+        },
+        {
+          "confidence": 0.91126436,
+          "endTime": 1.715,
+          "startTime": 1.595,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9680589,
+          "endTime": 1.825,
+          "startTime": 1.715,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8867413,
+          "endTime": 2.165,
+          "startTime": 1.825,
+          "word": "值，"
+        },
+        {
+          "confidence": 0.9698449,
+          "endTime": 2.655,
+          "startTime": 2.405,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9562949,
+          "endTime": 2.915,
+          "startTime": 2.655,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9107201,
+          "endTime": 3.135,
+          "startTime": 2.965,
+          "word": "才"
+        },
+        {
+          "confidence": 0.9280965,
+          "endTime": 3.235,
+          "startTime": 3.135,
+          "word": "把"
+        },
+        {
+          "confidence": 0.96049994,
+          "endTime": 3.355,
+          "startTime": 3.235,
+          "word": "它"
+        },
+        {
+          "confidence": 0.9323811,
+          "endTime": 3.525,
+          "startTime": 3.355,
+          "word": "显"
+        },
+        {
+          "confidence": 0.9371059,
+          "endTime": 3.725,
+          "startTime": 3.525,
+          "word": "示"
+        },
+        {
+          "confidence": 0.9784723,
+          "endTime": 3.895,
+          "startTime": 3.725,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9835056,
+          "endTime": 4.115,
+          "startTime": 3.895,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "变量让程序记住一个值，输出才把它显示出来。比如先记住包子单价是二元，再用 print 显示它。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "比如先记住包子单价是二元，再用 print 显示它。",
+      "words": [
+        {
+          "confidence": 0.81663805,
+          "endTime": 4.555042,
+          "startTime": 4.3800416,
+          "word": "比"
+        },
+        {
+          "confidence": 0.96808505,
+          "endTime": 4.7550416,
+          "startTime": 4.555042,
+          "word": "如"
+        },
+        {
+          "confidence": 0.95061755,
+          "endTime": 4.995042,
+          "startTime": 4.7550416,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9232242,
+          "endTime": 5.1550417,
+          "startTime": 4.995042,
+          "word": "记"
+        },
+        {
+          "confidence": 0.93399996,
+          "endTime": 5.2950416,
+          "startTime": 5.1550417,
+          "word": "住"
+        },
+        {
+          "confidence": 0.92507046,
+          "endTime": 5.4750414,
+          "startTime": 5.2950416,
+          "word": "包"
+        },
+        {
+          "confidence": 0.85130453,
+          "endTime": 5.5850415,
+          "startTime": 5.4750414,
+          "word": "子"
+        },
+        {
+          "confidence": 0.90282536,
+          "endTime": 5.7650414,
+          "startTime": 5.5850415,
+          "word": "单"
+        },
+        {
+          "confidence": 0.9608675,
+          "endTime": 5.9450417,
+          "startTime": 5.7650414,
+          "word": "价"
+        },
+        {
+          "confidence": 0.88000816,
+          "endTime": 6.1450415,
+          "startTime": 5.9450417,
+          "word": "是"
+        },
+        {
+          "confidence": 0.90397054,
+          "endTime": 6.3550415,
+          "startTime": 6.1450415,
+          "word": "二"
+        },
+        {
+          "confidence": 0.8897898,
+          "endTime": 6.535042,
+          "startTime": 6.3550415,
+          "word": "元，"
+        },
+        {
+          "confidence": 0.97091806,
+          "endTime": 7.0450416,
+          "startTime": 6.8950415,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9745834,
+          "endTime": 7.1850414,
+          "startTime": 7.0450416,
+          "word": "用"
+        },
+        {
+          "confidence": 0.8952631,
+          "endTime": 7.5550413,
+          "startTime": 7.1850414,
+          "word": "print"
+        },
+        {
+          "confidence": 0.7612132,
+          "endTime": 7.7950416,
+          "startTime": 7.5850415,
+          "word": "显"
+        },
+        {
+          "confidence": 0.8859938,
+          "endTime": 8.015041,
+          "startTime": 7.7950416,
+          "word": "示"
+        },
+        {
+          "confidence": 0.826401,
+          "endTime": 8.115042,
+          "startTime": 8.015041,
+          "word": "它。"
+        }
+      ]
+    }
+  ]
+}

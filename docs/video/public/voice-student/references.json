@@ -1,0 +1,484 @@
+{
+  "duration": 16.294708333333332,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师给的文档和图片，也可以放进对话。",
+      "words": [
+        {
+          "confidence": 0.95891804,
+          "endTime": 0.405,
+          "startTime": 0.245,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9723567,
+          "endTime": 0.605,
+          "startTime": 0.405,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9676822,
+          "endTime": 0.765,
+          "startTime": 0.605,
+          "word": "给"
+        },
+        {
+          "confidence": 0.8536198,
+          "endTime": 0.865,
+          "startTime": 0.765,
+          "word": "的"
+        },
+        {
+          "confidence": 0.912124,
+          "endTime": 1.035,
+          "startTime": 0.865,
+          "word": "文"
+        },
+        {
+          "confidence": 0.79711604,
+          "endTime": 1.195,
+          "startTime": 1.035,
+          "word": "档"
+        },
+        {
+          "confidence": 0.935618,
+          "endTime": 1.325,
+          "startTime": 1.195,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9783453,
+          "endTime": 1.515,
+          "startTime": 1.325,
+          "word": "图"
+        },
+        {
+          "confidence": 0.98383445,
+          "endTime": 1.825,
+          "startTime": 1.515,
+          "word": "片，"
+        },
+        {
+          "confidence": 0.97294796,
+          "endTime": 2.185,
+          "startTime": 2.035,
+          "word": "也"
+        },
+        {
+          "confidence": 0.74723434,
+          "endTime": 2.335,
+          "startTime": 2.185,
+          "word": "可"
+        },
+        {
+          "confidence": 0.70194083,
+          "endTime": 2.435,
+          "startTime": 2.335,
+          "word": "以"
+        },
+        {
+          "confidence": 0.98012173,
+          "endTime": 2.615,
+          "startTime": 2.435,
+          "word": "放"
+        },
+        {
+          "confidence": 0.77228403,
+          "endTime": 2.765,
+          "startTime": 2.615,
+          "word": "进"
+        },
+        {
+          "confidence": 0.7628759,
+          "endTime": 2.925,
+          "startTime": 2.795,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9564111,
+          "endTime": 3.195,
+          "startTime": 2.925,
+          "word": "话。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "上传以后，系统依次解析材料，再结合你的问题组织回复。",
+      "words": [
+        {
+          "confidence": 0.88598275,
+          "endTime": 3.7750416,
+          "startTime": 3.6400416,
+          "word": "上"
+        },
+        {
+          "confidence": 0.8981321,
+          "endTime": 3.9450417,
+          "startTime": 3.7750416,
+          "word": "传"
+        },
+        {
+          "confidence": 0.9571242,
+          "endTime": 4.1250415,
+          "startTime": 3.9450417,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9731943,
+          "endTime": 4.4850416,
+          "startTime": 4.1250415,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.8320355,
+          "endTime": 4.8750415,
+          "startTime": 4.6050415,
+          "word": "系"
+        },
+        {
+          "confidence": 0.856417,
+          "endTime": 5.1350417,
+          "startTime": 4.8750415,
+          "word": "统"
+        },
+        {
+          "confidence": 0.8737684,
+          "endTime": 5.325042,
+          "startTime": 5.1350417,
+          "word": "依"
+        },
+        {
+          "confidence": 0.92345405,
+          "endTime": 5.5150414,
+          "startTime": 5.325042,
+          "word": "次"
+        },
+        {
+          "confidence": 0.93424815,
+          "endTime": 5.6850414,
+          "startTime": 5.5150414,
+          "word": "解"
+        },
+        {
+          "confidence": 0.95216477,
+          "endTime": 5.8650417,
+          "startTime": 5.6850414,
+          "word": "析"
+        },
+        {
+          "confidence": 0.9496362,
+          "endTime": 6.1050415,
+          "startTime": 5.8650417,
+          "word": "材"
+        },
+        {
+          "confidence": 0.90978366,
+          "endTime": 6.2950416,
+          "startTime": 6.1050415,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.96787286,
+          "endTime": 6.7950416,
+          "startTime": 6.635041,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9544082,
+          "endTime": 6.955042,
+          "startTime": 6.7950416,
+          "word": "结"
+        },
+        {
+          "confidence": 0.9428981,
+          "endTime": 7.1150417,
+          "startTime": 6.955042,
+          "word": "合"
+        },
+        {
+          "confidence": 0.96477526,
+          "endTime": 7.245042,
+          "startTime": 7.1150417,
+          "word": "你"
+        },
+        {
+          "confidence": 0.9619712,
+          "endTime": 7.3550415,
+          "startTime": 7.245042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97717476,
+          "endTime": 7.5050416,
+          "startTime": 7.3550415,
+          "word": "问"
+        },
+        {
+          "confidence": 0.9822518,
+          "endTime": 7.7250414,
+          "startTime": 7.5050416,
+          "word": "题"
+        },
+        {
+          "confidence": 0.93005455,
+          "endTime": 7.875042,
+          "startTime": 7.7250414,
+          "word": "组"
+        },
+        {
+          "confidence": 0.9538759,
+          "endTime": 8.025042,
+          "startTime": 7.875042,
+          "word": "织"
+        },
+        {
+          "confidence": 0.9420917,
+          "endTime": 8.205042,
+          "startTime": 8.025042,
+          "word": "回"
+        },
+        {
+          "confidence": 0.9807532,
+          "endTime": 8.495042,
+          "startTime": 8.205042,
+          "word": "复。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "文字和图里的内容，可以一起作为学习参考。",
+      "words": [
+        {
+          "confidence": 0.75305444,
+          "endTime": 9.015083,
+          "startTime": 8.935083,
+          "word": "文"
+        },
+        {
+          "confidence": 0.85184616,
+          "endTime": 9.235083,
+          "startTime": 9.015083,
+          "word": "字"
+        },
+        {
+          "confidence": 0.9265165,
+          "endTime": 9.385083,
+          "startTime": 9.235083,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9745536,
+          "endTime": 9.605083,
+          "startTime": 9.385083,
+          "word": "图"
+        },
+        {
+          "confidence": 0.9604626,
+          "endTime": 9.715083,
+          "startTime": 9.605083,
+          "word": "里"
+        },
+        {
+          "confidence": 0.97116077,
+          "endTime": 9.835083,
+          "startTime": 9.715083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.92695785,
+          "endTime": 9.985083,
+          "startTime": 9.835083,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9732593,
+          "endTime": 10.215083,
+          "startTime": 9.985083,
+          "word": "容，"
+        },
+        {
+          "confidence": 0.82464474,
+          "endTime": 10.545083,
+          "startTime": 10.405083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.75142485,
+          "endTime": 10.695084,
+          "startTime": 10.545083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.86586976,
+          "endTime": 10.855083,
+          "startTime": 10.725083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9627585,
+          "endTime": 11.085083,
+          "startTime": 10.855083,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9618251,
+          "endTime": 11.285083,
+          "startTime": 11.085083,
+          "word": "作"
+        },
+        {
+          "confidence": 0.9803605,
+          "endTime": 11.355083,
+          "startTime": 11.285083,
+          "word": "为"
+        },
+        {
+          "confidence": 0.5473538,
+          "endTime": 11.455083,
+          "startTime": 11.355083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.45389402,
+          "endTime": 11.515083,
+          "startTime": 11.455083,
+          "word": "习"
+        },
+        {
+          "confidence": 0.144317,
+          "endTime": 11.575083,
+          "startTime": 11.515083,
+          "word": "参"
+        },
+        {
+          "confidence": 0.21775168,
+          "endTime": 11.635083,
+          "startTime": 11.575083,
+          "word": "考。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师给的文档和图片，也可以放进对话。上传以后，系统依次解析材料，再结合你的问题组织回复。文字和图里的内容，可以一起作为学习参考。点开引用，可以回到具体内容，检查回答依据。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "点开引用，可以回到具体内容，检查回答依据。",
+      "words": [
+        {
+          "confidence": 0.9658208,
+          "endTime": 12.675125,
+          "startTime": 12.5251255,
+          "word": "点"
+        },
+        {
+          "confidence": 0.92340523,
+          "endTime": 12.895125,
+          "startTime": 12.675125,
+          "word": "开"
+        },
+        {
+          "confidence": 0.8446823,
+          "endTime": 13.055125,
+          "startTime": 12.895125,
+          "word": "引"
+        },
+        {
+          "confidence": 0.95550424,
+          "endTime": 13.305125,
+          "startTime": 13.055125,
+          "word": "用，"
+        },
+        {
+          "confidence": 0.8631281,
+          "endTime": 13.515125,
+          "startTime": 13.355125,
+          "word": "可"
+        },
+        {
+          "confidence": 0.849244,
+          "endTime": 13.625125,
+          "startTime": 13.515125,
+          "word": "以"
+        },
+        {
+          "confidence": 0.97826123,
+          "endTime": 13.795125,
+          "startTime": 13.625125,
+          "word": "回"
+        },
+        {
+          "confidence": 0.9844311,
+          "endTime": 13.945126,
+          "startTime": 13.795125,
+          "word": "到"
+        },
+        {
+          "confidence": 0.850906,
+          "endTime": 14.105125,
+          "startTime": 13.945126,
+          "word": "具"
+        },
+        {
+          "confidence": 0.89687085,
+          "endTime": 14.285126,
+          "startTime": 14.105125,
+          "word": "体"
+        },
+        {
+          "confidence": 0.934913,
+          "endTime": 14.475125,
+          "startTime": 14.285126,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97669405,
+          "endTime": 14.685125,
+          "startTime": 14.475125,
+          "word": "容，"
+        },
+        {
+          "confidence": 0.9592485,
+          "endTime": 15.075125,
+          "startTime": 14.885125,
+          "word": "检"
+        },
+        {
+          "confidence": 0.97110105,
+          "endTime": 15.315125,
+          "startTime": 15.075125,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9658184,
+          "endTime": 15.485126,
+          "startTime": 15.315125,
+          "word": "回"
+        },
+        {
+          "confidence": 0.9459601,
+          "endTime": 15.665125,
+          "startTime": 15.485126,
+          "word": "答"
+        },
+        {
+          "confidence": 0.7868438,
+          "endTime": 15.815125,
+          "startTime": 15.665125,
+          "word": "依"
+        },
+        {
+          "confidence": 0.9038281,
+          "endTime": 16.075125,
+          "startTime": 15.815125,
+          "word": "据。"
+        }
+      ]
+    }
+  ]
+}

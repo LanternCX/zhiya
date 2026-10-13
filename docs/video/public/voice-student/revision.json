@@ -1,0 +1,364 @@
+{
+  "duration": 11.975583333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "变量没听懂，就直接说出来。",
+      "words": [
+        {
+          "confidence": 0.91998476,
+          "endTime": 0.415,
+          "startTime": 0.235,
+          "word": "变"
+        },
+        {
+          "confidence": 0.8932878,
+          "endTime": 0.585,
+          "startTime": 0.415,
+          "word": "量"
+        },
+        {
+          "confidence": 0.94906765,
+          "endTime": 0.745,
+          "startTime": 0.585,
+          "word": "没"
+        },
+        {
+          "confidence": 0.9736546,
+          "endTime": 0.955,
+          "startTime": 0.745,
+          "word": "听"
+        },
+        {
+          "confidence": 0.97962105,
+          "endTime": 1.255,
+          "startTime": 0.955,
+          "word": "懂，"
+        },
+        {
+          "confidence": 0.7530334,
+          "endTime": 1.475,
+          "startTime": 1.325,
+          "word": "就"
+        },
+        {
+          "confidence": 0.8971331,
+          "endTime": 1.625,
+          "startTime": 1.475,
+          "word": "直"
+        },
+        {
+          "confidence": 0.9760537,
+          "endTime": 1.755,
+          "startTime": 1.625,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9128141,
+          "endTime": 1.955,
+          "startTime": 1.755,
+          "word": "说"
+        },
+        {
+          "confidence": 0.94360363,
+          "endTime": 2.125,
+          "startTime": 1.955,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9788131,
+          "endTime": 2.335,
+          "startTime": 2.125,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "要求只留一句解释、一行代码和一个问题。",
+      "words": [
+        {
+          "confidence": 0.5803477,
+          "endTime": 2.8050418,
+          "startTime": 2.7600417,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8746658,
+          "endTime": 3.0350418,
+          "startTime": 2.8050418,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9323673,
+          "endTime": 3.2050416,
+          "startTime": 3.0350418,
+          "word": "只"
+        },
+        {
+          "confidence": 0.9684457,
+          "endTime": 3.3650417,
+          "startTime": 3.2050416,
+          "word": "留"
+        },
+        {
+          "confidence": 0.8757862,
+          "endTime": 3.4950418,
+          "startTime": 3.3650417,
+          "word": "一"
+        },
+        {
+          "confidence": 0.8948018,
+          "endTime": 3.6450417,
+          "startTime": 3.4950418,
+          "word": "句"
+        },
+        {
+          "confidence": 0.91836226,
+          "endTime": 3.8450418,
+          "startTime": 3.6450417,
+          "word": "解"
+        },
+        {
+          "confidence": 0.28219447,
+          "endTime": 3.8750417,
+          "startTime": 3.8450418,
+          "word": "释、"
+        },
+        {
+          "confidence": 0.9256005,
+          "endTime": 4.5250416,
+          "startTime": 4.3950415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9189471,
+          "endTime": 4.7350416,
+          "startTime": 4.5250416,
+          "word": "行"
+        },
+        {
+          "confidence": 0.93429375,
+          "endTime": 4.9350414,
+          "startTime": 4.7350416,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8923711,
+          "endTime": 5.1950417,
+          "startTime": 4.9350414,
+          "word": "码"
+        },
+        {
+          "confidence": 0.875915,
+          "endTime": 5.3950415,
+          "startTime": 5.2350416,
+          "word": "和"
+        },
+        {
+          "confidence": 0.88906324,
+          "endTime": 5.495042,
+          "startTime": 5.3950415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9567874,
+          "endTime": 5.625042,
+          "startTime": 5.495042,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9823866,
+          "endTime": 5.7550416,
+          "startTime": 5.625042,
+          "word": "问"
+        },
+        {
+          "confidence": 0.9894058,
+          "endTime": 6.085042,
+          "startTime": 5.7550416,
+          "word": "题。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "观察右侧内容怎样改变。",
+      "words": [
+        {
+          "confidence": 0.7574205,
+          "endTime": 6.5650835,
+          "startTime": 6.4050837,
+          "word": "观"
+        },
+        {
+          "confidence": 0.9322757,
+          "endTime": 6.765084,
+          "startTime": 6.5650835,
+          "word": "察"
+        },
+        {
+          "confidence": 0.8806576,
+          "endTime": 6.9050837,
+          "startTime": 6.765084,
+          "word": "右"
+        },
+        {
+          "confidence": 0.85224456,
+          "endTime": 7.0850835,
+          "startTime": 6.9050837,
+          "word": "侧"
+        },
+        {
+          "confidence": 0.930435,
+          "endTime": 7.2550836,
+          "startTime": 7.0850835,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9634499,
+          "endTime": 7.4450836,
+          "startTime": 7.2550836,
+          "word": "容"
+        },
+        {
+          "confidence": 0.876136,
+          "endTime": 7.6450834,
+          "startTime": 7.4450836,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9550454,
+          "endTime": 7.7750835,
+          "startTime": 7.6450834,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9403235,
+          "endTime": 7.9650836,
+          "startTime": 7.7750835,
+          "word": "改"
+        },
+        {
+          "confidence": 0.97934544,
+          "endTime": 8.195084,
+          "startTime": 7.9650836,
+          "word": "变。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "变量没听懂，就直接说出来。要求只留一句解释、一行代码和一个问题。观察右侧内容怎样改变。学生的反馈，能够继续影响接下来怎么讲。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "学生的反馈，能够继续影响接下来怎么讲。",
+      "words": [
+        {
+          "confidence": 0.79258126,
+          "endTime": 8.705126,
+          "startTime": 8.520125,
+          "word": "学"
+        },
+        {
+          "confidence": 0.84660137,
+          "endTime": 8.875125,
+          "startTime": 8.705126,
+          "word": "生"
+        },
+        {
+          "confidence": 0.95179486,
+          "endTime": 8.975125,
+          "startTime": 8.875125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95894885,
+          "endTime": 9.185125,
+          "startTime": 8.975125,
+          "word": "反"
+        },
+        {
+          "confidence": 0.83196497,
+          "endTime": 9.465125,
+          "startTime": 9.185125,
+          "word": "馈，"
+        },
+        {
+          "confidence": 0.968739,
+          "endTime": 9.825126,
+          "startTime": 9.655126,
+          "word": "能"
+        },
+        {
+          "confidence": 0.97278917,
+          "endTime": 9.995126,
+          "startTime": 9.825126,
+          "word": "够"
+        },
+        {
+          "confidence": 0.9108933,
+          "endTime": 10.215125,
+          "startTime": 9.995126,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9185026,
+          "endTime": 10.435125,
+          "startTime": 10.215125,
+          "word": "续"
+        },
+        {
+          "confidence": 0.7668635,
+          "endTime": 10.555125,
+          "startTime": 10.435125,
+          "word": "影"
+        },
+        {
+          "confidence": 0.91345894,
+          "endTime": 10.805125,
+          "startTime": 10.555125,
+          "word": "响"
+        },
+        {
+          "confidence": 0.93166995,
+          "endTime": 10.975125,
+          "startTime": 10.805125,
+          "word": "接"
+        },
+        {
+          "confidence": 0.2571604,
+          "endTime": 11.035126,
+          "startTime": 10.975125,
+          "word": "下"
+        },
+        {
+          "confidence": 0.093899444,
+          "endTime": 11.095125,
+          "startTime": 11.035126,
+          "word": "来"
+        },
+        {
+          "confidence": 0.14055353,
+          "endTime": 11.155126,
+          "startTime": 11.095125,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.13600199,
+          "endTime": 11.215125,
+          "startTime": 11.155126,
+          "word": "么"
+        },
+        {
+          "confidence": 0.16901065,
+          "endTime": 11.2751255,
+          "startTime": 11.215125,
+          "word": "讲。"
+        }
+      ]
+    }
+  ]
+}

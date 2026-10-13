@@ -1,0 +1,550 @@
+{
+  "duration": 18.535041666666668,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "刚才变量页精简以后，我们又要求知芽同步调整教案中的讲法。",
+      "words": [
+        {
+          "confidence": 0.96777,
+          "endTime": 0.405,
+          "startTime": 0.215,
+          "word": "刚"
+        },
+        {
+          "confidence": 0.9474572,
+          "endTime": 0.735,
+          "startTime": 0.405,
+          "word": "才"
+        },
+        {
+          "confidence": 0.91669965,
+          "endTime": 0.955,
+          "startTime": 0.765,
+          "word": "变"
+        },
+        {
+          "confidence": 0.96726614,
+          "endTime": 1.115,
+          "startTime": 0.955,
+          "word": "量"
+        },
+        {
+          "confidence": 0.8930576,
+          "endTime": 1.275,
+          "startTime": 1.115,
+          "word": "页"
+        },
+        {
+          "confidence": 0.9413659,
+          "endTime": 1.475,
+          "startTime": 1.275,
+          "word": "精"
+        },
+        {
+          "confidence": 0.84768283,
+          "endTime": 1.625,
+          "startTime": 1.475,
+          "word": "简"
+        },
+        {
+          "confidence": 0.9166005,
+          "endTime": 1.785,
+          "startTime": 1.625,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9778023,
+          "endTime": 2.095,
+          "startTime": 1.785,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9188219,
+          "endTime": 2.495,
+          "startTime": 2.365,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9642191,
+          "endTime": 2.635,
+          "startTime": 2.495,
+          "word": "们"
+        },
+        {
+          "confidence": 0.8769319,
+          "endTime": 2.805,
+          "startTime": 2.635,
+          "word": "又"
+        },
+        {
+          "confidence": 0.94399786,
+          "endTime": 2.975,
+          "startTime": 2.805,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9823465,
+          "endTime": 3.195,
+          "startTime": 2.975,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9419417,
+          "endTime": 3.415,
+          "startTime": 3.195,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9301991,
+          "endTime": 3.665,
+          "startTime": 3.415,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.9261355,
+          "endTime": 3.915,
+          "startTime": 3.665,
+          "word": "同"
+        },
+        {
+          "confidence": 0.96130985,
+          "endTime": 4.065,
+          "startTime": 3.915,
+          "word": "步"
+        },
+        {
+          "confidence": 0.9607109,
+          "endTime": 4.285,
+          "startTime": 4.065,
+          "word": "调"
+        },
+        {
+          "confidence": 0.9816041,
+          "endTime": 4.465,
+          "startTime": 4.285,
+          "word": "整"
+        },
+        {
+          "confidence": 0.9018109,
+          "endTime": 4.705,
+          "startTime": 4.465,
+          "word": "教"
+        },
+        {
+          "confidence": 0.94420874,
+          "endTime": 4.815,
+          "startTime": 4.705,
+          "word": "案"
+        },
+        {
+          "confidence": 0.97632414,
+          "endTime": 4.955,
+          "startTime": 4.815,
+          "word": "中"
+        },
+        {
+          "confidence": 0.9493278,
+          "endTime": 5.055,
+          "startTime": 4.955,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9163466,
+          "endTime": 5.275,
+          "startTime": 5.055,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.97258866,
+          "endTime": 5.585,
+          "startTime": 5.275,
+          "word": "法。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "文档里也改成了先猜、再改、运行检查的过程。",
+      "words": [
+        {
+          "confidence": 0.9123327,
+          "endTime": 6.1750417,
+          "startTime": 6.0200415,
+          "word": "文"
+        },
+        {
+          "confidence": 0.87666523,
+          "endTime": 6.3950415,
+          "startTime": 6.1750417,
+          "word": "档"
+        },
+        {
+          "confidence": 0.85101646,
+          "endTime": 6.6150417,
+          "startTime": 6.3950415,
+          "word": "里"
+        },
+        {
+          "confidence": 0.8701964,
+          "endTime": 6.7850413,
+          "startTime": 6.6450415,
+          "word": "也"
+        },
+        {
+          "confidence": 0.95450914,
+          "endTime": 6.9650416,
+          "startTime": 6.7850413,
+          "word": "改"
+        },
+        {
+          "confidence": 0.975199,
+          "endTime": 7.135041,
+          "startTime": 6.9650416,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9678104,
+          "endTime": 7.2650414,
+          "startTime": 7.135041,
+          "word": "了"
+        },
+        {
+          "confidence": 0.86539626,
+          "endTime": 7.5150414,
+          "startTime": 7.2650414,
+          "word": "先"
+        },
+        {
+          "confidence": 0.2574055,
+          "endTime": 7.7450414,
+          "startTime": 7.7150416,
+          "word": "猜、"
+        },
+        {
+          "confidence": 0.84505385,
+          "endTime": 8.325042,
+          "startTime": 8.085041,
+          "word": "再"
+        },
+        {
+          "confidence": 0.2114907,
+          "endTime": 8.525042,
+          "startTime": 8.495041,
+          "word": "改、"
+        },
+        {
+          "confidence": 0.935281,
+          "endTime": 8.985042,
+          "startTime": 8.865042,
+          "word": "运"
+        },
+        {
+          "confidence": 0.95861906,
+          "endTime": 9.215041,
+          "startTime": 8.985042,
+          "word": "行"
+        },
+        {
+          "confidence": 0.8778986,
+          "endTime": 9.395041,
+          "startTime": 9.215041,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9763566,
+          "endTime": 9.645041,
+          "startTime": 9.395041,
+          "word": "查"
+        },
+        {
+          "confidence": 0.84230703,
+          "endTime": 9.725041,
+          "startTime": 9.645041,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9652603,
+          "endTime": 9.895041,
+          "startTime": 9.725041,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9798623,
+          "endTime": 10.175041,
+          "startTime": 9.895041,
+          "word": "程。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这样老师查看的页面和准备使用的话术才能接得上。",
+      "words": [
+        {
+          "confidence": 0.876582,
+          "endTime": 10.835083,
+          "startTime": 10.555083,
+          "word": "这"
+        },
+        {
+          "confidence": 0.94822556,
+          "endTime": 11.005083,
+          "startTime": 10.835083,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9339455,
+          "endTime": 11.175083,
+          "startTime": 11.005083,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9774987,
+          "endTime": 11.375084,
+          "startTime": 11.175083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9339238,
+          "endTime": 11.595083,
+          "startTime": 11.375084,
+          "word": "查"
+        },
+        {
+          "confidence": 0.97449815,
+          "endTime": 11.745084,
+          "startTime": 11.595083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.910571,
+          "endTime": 11.875084,
+          "startTime": 11.745084,
+          "word": "的"
+        },
+        {
+          "confidence": 0.928532,
+          "endTime": 12.015083,
+          "startTime": 11.875084,
+          "word": "页"
+        },
+        {
+          "confidence": 0.91962093,
+          "endTime": 12.265083,
+          "startTime": 12.015083,
+          "word": "面"
+        },
+        {
+          "confidence": 0.95376295,
+          "endTime": 12.455084,
+          "startTime": 12.265083,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9698749,
+          "endTime": 12.635083,
+          "startTime": 12.455084,
+          "word": "准"
+        },
+        {
+          "confidence": 0.9813932,
+          "endTime": 12.765083,
+          "startTime": 12.635083,
+          "word": "备"
+        },
+        {
+          "confidence": 0.8639813,
+          "endTime": 12.955084,
+          "startTime": 12.765083,
+          "word": "使"
+        },
+        {
+          "confidence": 0.9893498,
+          "endTime": 13.0650835,
+          "startTime": 12.955084,
+          "word": "用"
+        },
+        {
+          "confidence": 0.9724875,
+          "endTime": 13.175083,
+          "startTime": 13.0650835,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9523975,
+          "endTime": 13.385083,
+          "startTime": 13.175083,
+          "word": "话"
+        },
+        {
+          "confidence": 0.8769504,
+          "endTime": 13.605083,
+          "startTime": 13.385083,
+          "word": "术"
+        },
+        {
+          "confidence": 0.9560316,
+          "endTime": 13.785084,
+          "startTime": 13.605083,
+          "word": "才"
+        },
+        {
+          "confidence": 0.97776896,
+          "endTime": 13.895083,
+          "startTime": 13.785084,
+          "word": "能"
+        },
+        {
+          "confidence": 0.2155444,
+          "endTime": 13.955084,
+          "startTime": 13.895083,
+          "word": "接"
+        },
+        {
+          "confidence": 0.08487841,
+          "endTime": 14.015083,
+          "startTime": 13.955084,
+          "word": "得"
+        },
+        {
+          "confidence": 0.23322149,
+          "endTime": 14.075084,
+          "startTime": 14.015083,
+          "word": "上。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "刚才变量页精简以后，我们又要求知芽同步调整教案中的讲法。文档里也改成了先猜、再改、运行检查的过程。这样老师查看的页面和准备使用的话术才能接得上。最后再通读一遍，确认这套材料适合自己的班级。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "最后再通读一遍，确认这套材料适合自己的班级。",
+      "words": [
+        {
+          "confidence": 0.8799438,
+          "endTime": 14.945125,
+          "startTime": 14.775125,
+          "word": "最"
+        },
+        {
+          "confidence": 0.9782634,
+          "endTime": 15.165125,
+          "startTime": 14.945125,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9535896,
+          "endTime": 15.285125,
+          "startTime": 15.165125,
+          "word": "再"
+        },
+        {
+          "confidence": 0.96137446,
+          "endTime": 15.505125,
+          "startTime": 15.285125,
+          "word": "通"
+        },
+        {
+          "confidence": 0.813422,
+          "endTime": 15.675125,
+          "startTime": 15.505125,
+          "word": "读"
+        },
+        {
+          "confidence": 0.896768,
+          "endTime": 15.745125,
+          "startTime": 15.675125,
+          "word": "一"
+        },
+        {
+          "confidence": 0.8849059,
+          "endTime": 15.945125,
+          "startTime": 15.745125,
+          "word": "遍，"
+        },
+        {
+          "confidence": 0.92720026,
+          "endTime": 16.425125,
+          "startTime": 16.195126,
+          "word": "确"
+        },
+        {
+          "confidence": 0.8576789,
+          "endTime": 16.605125,
+          "startTime": 16.425125,
+          "word": "认"
+        },
+        {
+          "confidence": 0.7859314,
+          "endTime": 16.735125,
+          "startTime": 16.605125,
+          "word": "这"
+        },
+        {
+          "confidence": 0.86261576,
+          "endTime": 16.875126,
+          "startTime": 16.735125,
+          "word": "套"
+        },
+        {
+          "confidence": 0.95601416,
+          "endTime": 17.115126,
+          "startTime": 16.875126,
+          "word": "材"
+        },
+        {
+          "confidence": 0.9461058,
+          "endTime": 17.255125,
+          "startTime": 17.115126,
+          "word": "料"
+        },
+        {
+          "confidence": 0.96761197,
+          "endTime": 17.475124,
+          "startTime": 17.255125,
+          "word": "适"
+        },
+        {
+          "confidence": 0.94848996,
+          "endTime": 17.635124,
+          "startTime": 17.475124,
+          "word": "合"
+        },
+        {
+          "confidence": 0.9559577,
+          "endTime": 17.755125,
+          "startTime": 17.635124,
+          "word": "自"
+        },
+        {
+          "confidence": 0.97479594,
+          "endTime": 17.865126,
+          "startTime": 17.755125,
+          "word": "己"
+        },
+        {
+          "confidence": 0.90421176,
+          "endTime": 17.955124,
+          "startTime": 17.865126,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9685534,
+          "endTime": 18.125126,
+          "startTime": 17.955124,
+          "word": "班"
+        },
+        {
+          "confidence": 0.8449082,
+          "endTime": 18.395124,
+          "startTime": 18.125126,
+          "word": "级。"
+        }
+      ]
+    }
+  ]
+}

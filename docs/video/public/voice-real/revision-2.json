@@ -1,0 +1,256 @@
+{
+  "duration": 8.933833333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "修改后，页面只留下理解变量最需要的内容。",
+      "words": [
+        {
+          "confidence": 0.9567159,
+          "endTime": 0.475,
+          "startTime": 0.235,
+          "word": "修"
+        },
+        {
+          "confidence": 0.9264924,
+          "endTime": 0.665,
+          "startTime": 0.475,
+          "word": "改"
+        },
+        {
+          "confidence": 0.90096015,
+          "endTime": 0.975,
+          "startTime": 0.665,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.5871239,
+          "endTime": 1.415,
+          "startTime": 1.285,
+          "word": "页"
+        },
+        {
+          "confidence": 0.92350286,
+          "endTime": 1.665,
+          "startTime": 1.415,
+          "word": "面"
+        },
+        {
+          "confidence": 0.8728481,
+          "endTime": 1.875,
+          "startTime": 1.665,
+          "word": "只"
+        },
+        {
+          "confidence": 0.96341383,
+          "endTime": 2.025,
+          "startTime": 1.875,
+          "word": "留"
+        },
+        {
+          "confidence": 0.8949272,
+          "endTime": 2.245,
+          "startTime": 2.025,
+          "word": "下"
+        },
+        {
+          "confidence": 0.7665706,
+          "endTime": 2.405,
+          "startTime": 2.245,
+          "word": "理"
+        },
+        {
+          "confidence": 0.9051274,
+          "endTime": 2.575,
+          "startTime": 2.405,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9238816,
+          "endTime": 2.775,
+          "startTime": 2.575,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9585028,
+          "endTime": 2.955,
+          "startTime": 2.775,
+          "word": "量"
+        },
+        {
+          "confidence": 0.9488959,
+          "endTime": 3.125,
+          "startTime": 2.955,
+          "word": "最"
+        },
+        {
+          "confidence": 0.8512177,
+          "endTime": 3.345,
+          "startTime": 3.125,
+          "word": "需"
+        },
+        {
+          "confidence": 0.92383295,
+          "endTime": 3.475,
+          "startTime": 3.345,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9598794,
+          "endTime": 3.585,
+          "startTime": 3.475,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8298243,
+          "endTime": 3.735,
+          "startTime": 3.585,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97876745,
+          "endTime": 3.965,
+          "startTime": 3.735,
+          "word": "容。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "把二改成三，会发生什么？",
+      "words": [
+        {
+          "confidence": 0.7658791,
+          "endTime": 4.4550414,
+          "startTime": 4.3400416,
+          "word": "把"
+        },
+        {
+          "confidence": 0.8488679,
+          "endTime": 4.765042,
+          "startTime": 4.4550414,
+          "word": "二"
+        },
+        {
+          "confidence": 0.8535864,
+          "endTime": 4.9250417,
+          "startTime": 4.765042,
+          "word": "改"
+        },
+        {
+          "confidence": 0.96669716,
+          "endTime": 5.1150417,
+          "startTime": 4.9250417,
+          "word": "成"
+        },
+        {
+          "confidence": 0.933107,
+          "endTime": 5.3950415,
+          "startTime": 5.1150417,
+          "word": "三，"
+        },
+        {
+          "confidence": 0.94827664,
+          "endTime": 5.6950417,
+          "startTime": 5.5250416,
+          "word": "会"
+        },
+        {
+          "confidence": 0.9343801,
+          "endTime": 5.8350415,
+          "startTime": 5.6950417,
+          "word": "发"
+        },
+        {
+          "confidence": 0.93014324,
+          "endTime": 5.9650416,
+          "startTime": 5.8350415,
+          "word": "生"
+        },
+        {
+          "confidence": 0.93194884,
+          "endTime": 6.165042,
+          "startTime": 5.9650416,
+          "word": "什"
+        },
+        {
+          "confidence": 0.9608227,
+          "endTime": 6.3350415,
+          "startTime": 6.165042,
+          "word": "么？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "修改后，页面只留下理解变量最需要的内容。把二改成三，会发生什么？这就把观看变成了思考。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这就把观看变成了思考。",
+      "words": [
+        {
+          "confidence": 0.8578677,
+          "endTime": 6.8550835,
+          "startTime": 6.6850834,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9643504,
+          "endTime": 6.9850836,
+          "startTime": 6.8550835,
+          "word": "就"
+        },
+        {
+          "confidence": 0.8419079,
+          "endTime": 7.1450834,
+          "startTime": 6.9850836,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9462104,
+          "endTime": 7.345083,
+          "startTime": 7.1450834,
+          "word": "观"
+        },
+        {
+          "confidence": 0.9422093,
+          "endTime": 7.6950836,
+          "startTime": 7.345083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.95729864,
+          "endTime": 7.8950834,
+          "startTime": 7.7350836,
+          "word": "变"
+        },
+        {
+          "confidence": 0.787565,
+          "endTime": 8.035084,
+          "startTime": 7.8950834,
+          "word": "成"
+        },
+        {
+          "confidence": 0.21581677,
+          "endTime": 8.095083,
+          "startTime": 8.035084,
+          "word": "了"
+        },
+        {
+          "confidence": 0.15938391,
+          "endTime": 8.155084,
+          "startTime": 8.095083,
+          "word": "思"
+        },
+        {
+          "confidence": 0.19884905,
+          "endTime": 8.215083,
+          "startTime": 8.155084,
+          "word": "考。"
+        }
+      ]
+    }
+  ]
+}

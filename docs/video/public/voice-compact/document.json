@@ -1,0 +1,310 @@
+{
+  "duration": 10.194291666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "讲解材料之外，",
+      "words": [
+        {
+          "confidence": 0.9313709,
+          "endTime": 0.415,
+          "startTime": 0.225,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.95479536,
+          "endTime": 0.565,
+          "startTime": 0.415,
+          "word": "解"
+        },
+        {
+          "confidence": 0.96633077,
+          "endTime": 0.755,
+          "startTime": 0.565,
+          "word": "材"
+        },
+        {
+          "confidence": 0.9314501,
+          "endTime": 0.895,
+          "startTime": 0.755,
+          "word": "料"
+        },
+        {
+          "confidence": 0.9616303,
+          "endTime": 1.065,
+          "startTime": 0.895,
+          "word": "之"
+        },
+        {
+          "confidence": 0.9579397,
+          "endTime": 1.305,
+          "startTime": 1.065,
+          "word": "外，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "教师教案把目标、课堂安排、",
+      "words": [
+        {
+          "confidence": 0.43867755,
+          "endTime": 1.9150417,
+          "startTime": 1.8400416,
+          "word": "教"
+        },
+        {
+          "confidence": 0.25061253,
+          "endTime": 1.9750416,
+          "startTime": 1.9150417,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7932369,
+          "endTime": 2.1750417,
+          "startTime": 1.9750416,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8880917,
+          "endTime": 2.4250417,
+          "startTime": 2.1750417,
+          "word": "案"
+        },
+        {
+          "confidence": 0.76708865,
+          "endTime": 2.6350417,
+          "startTime": 2.4250417,
+          "word": "把"
+        },
+        {
+          "confidence": 0.8982778,
+          "endTime": 2.8350415,
+          "startTime": 2.6350417,
+          "word": "目"
+        },
+        {
+          "confidence": 0.19480702,
+          "endTime": 2.8650417,
+          "startTime": 2.8350415,
+          "word": "标、"
+        },
+        {
+          "confidence": 0.9496962,
+          "endTime": 3.5650415,
+          "startTime": 3.3850417,
+          "word": "课"
+        },
+        {
+          "confidence": 0.975416,
+          "endTime": 3.7450416,
+          "startTime": 3.5650415,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.7534583,
+          "endTime": 3.9450417,
+          "startTime": 3.7850418,
+          "word": "安"
+        },
+        {
+          "confidence": 0.19424392,
+          "endTime": 3.9750416,
+          "startTime": 3.9450417,
+          "word": "排、"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "代码模板和常见错误组织起来。",
+      "words": [
+        {
+          "confidence": 0.40189072,
+          "endTime": 4.755083,
+          "startTime": 4.6800833,
+          "word": "代"
+        },
+        {
+          "confidence": 0.5374248,
+          "endTime": 4.845083,
+          "startTime": 4.755083,
+          "word": "码"
+        },
+        {
+          "confidence": 0.92487055,
+          "endTime": 5.0550833,
+          "startTime": 4.845083,
+          "word": "模"
+        },
+        {
+          "confidence": 0.9133895,
+          "endTime": 5.3050833,
+          "startTime": 5.0550833,
+          "word": "板"
+        },
+        {
+          "confidence": 0.9628554,
+          "endTime": 5.4750834,
+          "startTime": 5.3050833,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9812013,
+          "endTime": 5.675083,
+          "startTime": 5.4750834,
+          "word": "常"
+        },
+        {
+          "confidence": 0.9636644,
+          "endTime": 5.835083,
+          "startTime": 5.675083,
+          "word": "见"
+        },
+        {
+          "confidence": 0.9476584,
+          "endTime": 6.0350833,
+          "startTime": 5.835083,
+          "word": "错"
+        },
+        {
+          "confidence": 0.9397218,
+          "endTime": 6.1850834,
+          "startTime": 6.0350833,
+          "word": "误"
+        },
+        {
+          "confidence": 0.9191486,
+          "endTime": 6.345083,
+          "startTime": 6.1850834,
+          "word": "组"
+        },
+        {
+          "confidence": 0.91905814,
+          "endTime": 6.4750834,
+          "startTime": 6.345083,
+          "word": "织"
+        },
+        {
+          "confidence": 0.84929883,
+          "endTime": 6.6450834,
+          "startTime": 6.4750834,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9765525,
+          "endTime": 6.8550835,
+          "startTime": 6.6450834,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "讲解材料之外，教师教案把目标、课堂安排、代码模板和常见错误组织起来。修改过的讲法，也可以继续同步进教案。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "修改过的讲法，也可以继续同步进教案。",
+      "words": [
+        {
+          "confidence": 0.9382601,
+          "endTime": 7.435125,
+          "startTime": 7.2001247,
+          "word": "修"
+        },
+        {
+          "confidence": 0.97865087,
+          "endTime": 7.5751247,
+          "startTime": 7.435125,
+          "word": "改"
+        },
+        {
+          "confidence": 0.94181025,
+          "endTime": 7.6951246,
+          "startTime": 7.5751247,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9497732,
+          "endTime": 7.785125,
+          "startTime": 7.6951246,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9470403,
+          "endTime": 7.975125,
+          "startTime": 7.785125,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.92795664,
+          "endTime": 8.255125,
+          "startTime": 7.975125,
+          "word": "法，"
+        },
+        {
+          "confidence": 0.9366774,
+          "endTime": 8.475124,
+          "startTime": 8.335125,
+          "word": "也"
+        },
+        {
+          "confidence": 0.74241906,
+          "endTime": 8.635124,
+          "startTime": 8.475124,
+          "word": "可"
+        },
+        {
+          "confidence": 0.714325,
+          "endTime": 8.735125,
+          "startTime": 8.635124,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9722143,
+          "endTime": 8.915125,
+          "startTime": 8.735125,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9533465,
+          "endTime": 9.075125,
+          "startTime": 8.915125,
+          "word": "续"
+        },
+        {
+          "confidence": 0.96752423,
+          "endTime": 9.275125,
+          "startTime": 9.075125,
+          "word": "同"
+        },
+        {
+          "confidence": 0.96814275,
+          "endTime": 9.385124,
+          "startTime": 9.275125,
+          "word": "步"
+        },
+        {
+          "confidence": 0.94901514,
+          "endTime": 9.535125,
+          "startTime": 9.385124,
+          "word": "进"
+        },
+        {
+          "confidence": 0.80187505,
+          "endTime": 9.725124,
+          "startTime": 9.535125,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8145382,
+          "endTime": 9.905125,
+          "startTime": 9.725124,
+          "word": "案。"
+        }
+      ]
+    }
+  ]
+}

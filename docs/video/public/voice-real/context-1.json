@@ -1,0 +1,256 @@
+{
+  "duration": 10.911791666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师把条件告诉知芽：初一，四十分钟，两人一机。",
+      "words": [
+        {
+          "confidence": 0.9365212,
+          "endTime": 0.425,
+          "startTime": 0.265,
+          "word": "老"
+        },
+        {
+          "confidence": 0.97563285,
+          "endTime": 0.635,
+          "startTime": 0.425,
+          "word": "师"
+        },
+        {
+          "confidence": 0.83514506,
+          "endTime": 0.775,
+          "startTime": 0.635,
+          "word": "把"
+        },
+        {
+          "confidence": 0.86864376,
+          "endTime": 1.005,
+          "startTime": 0.775,
+          "word": "条"
+        },
+        {
+          "confidence": 0.9550615,
+          "endTime": 1.265,
+          "startTime": 1.005,
+          "word": "件"
+        },
+        {
+          "confidence": 0.935333,
+          "endTime": 1.455,
+          "startTime": 1.265,
+          "word": "告"
+        },
+        {
+          "confidence": 0.97820866,
+          "endTime": 1.595,
+          "startTime": 1.455,
+          "word": "诉"
+        },
+        {
+          "confidence": 0.79023486,
+          "endTime": 1.875,
+          "startTime": 1.595,
+          "word": "知"
+        },
+        {
+          "confidence": 0.583257,
+          "endTime": 2.055,
+          "startTime": 1.875,
+          "word": "芽："
+        },
+        {
+          "confidence": 0.94550055,
+          "endTime": 2.635,
+          "startTime": 2.385,
+          "word": "初"
+        },
+        {
+          "confidence": 0.8737084,
+          "endTime": 2.875,
+          "startTime": 2.635,
+          "word": "一，"
+        },
+        {
+          "confidence": 0.8429267,
+          "endTime": 3.325,
+          "startTime": 3.145,
+          "word": "四"
+        },
+        {
+          "confidence": 0.96617675,
+          "endTime": 3.475,
+          "startTime": 3.325,
+          "word": "十"
+        },
+        {
+          "confidence": 0.95404005,
+          "endTime": 3.635,
+          "startTime": 3.475,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9618741,
+          "endTime": 3.895,
+          "startTime": 3.635,
+          "word": "钟，"
+        },
+        {
+          "confidence": 0.9525941,
+          "endTime": 4.415,
+          "startTime": 4.185,
+          "word": "两"
+        },
+        {
+          "confidence": 0.93006366,
+          "endTime": 4.655,
+          "startTime": 4.415,
+          "word": "人"
+        },
+        {
+          "confidence": 0.9369983,
+          "endTime": 4.805,
+          "startTime": 4.655,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9252501,
+          "endTime": 5.065,
+          "startTime": 4.805,
+          "word": "机。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师把条件告诉知芽：初一，四十分钟，两人一机。用食堂点餐讲变量、输入和输出，不讲循环和函数。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "用食堂点餐讲变量、输入和输出，不讲循环和函数。",
+      "words": [
+        {
+          "confidence": 0.88443303,
+          "endTime": 5.635041,
+          "startTime": 5.5400414,
+          "word": "用"
+        },
+        {
+          "confidence": 0.9143675,
+          "endTime": 5.8450413,
+          "startTime": 5.635041,
+          "word": "食"
+        },
+        {
+          "confidence": 0.9443613,
+          "endTime": 6.0350413,
+          "startTime": 5.8450413,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9307661,
+          "endTime": 6.2650414,
+          "startTime": 6.0350413,
+          "word": "点"
+        },
+        {
+          "confidence": 0.88719225,
+          "endTime": 6.5650415,
+          "startTime": 6.2650414,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.9542048,
+          "endTime": 6.8550415,
+          "startTime": 6.6150417,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.60473406,
+          "endTime": 7.3050413,
+          "startTime": 6.8550415,
+          "word": "变"
+        },
+        {
+          "confidence": 0.20279257,
+          "endTime": 7.3350415,
+          "startTime": 7.3050413,
+          "word": "量、"
+        },
+        {
+          "confidence": 0.94607955,
+          "endTime": 7.8650417,
+          "startTime": 7.5450416,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9714989,
+          "endTime": 8.145041,
+          "startTime": 7.8650417,
+          "word": "入"
+        },
+        {
+          "confidence": 0.88827556,
+          "endTime": 8.345041,
+          "startTime": 8.195042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.89077264,
+          "endTime": 8.555041,
+          "startTime": 8.345041,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9677543,
+          "endTime": 8.865042,
+          "startTime": 8.555041,
+          "word": "出，"
+        },
+        {
+          "confidence": 0.9213307,
+          "endTime": 9.335041,
+          "startTime": 9.215041,
+          "word": "不"
+        },
+        {
+          "confidence": 0.96510947,
+          "endTime": 9.505041,
+          "startTime": 9.335041,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.90249485,
+          "endTime": 9.805041,
+          "startTime": 9.505041,
+          "word": "循"
+        },
+        {
+          "confidence": 0.87856716,
+          "endTime": 10.065042,
+          "startTime": 9.805041,
+          "word": "环"
+        },
+        {
+          "confidence": 0.85357195,
+          "endTime": 10.225041,
+          "startTime": 10.065042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9244031,
+          "endTime": 10.455042,
+          "startTime": 10.225041,
+          "word": "函"
+        },
+        {
+          "confidence": 0.97643846,
+          "endTime": 10.765041,
+          "startTime": 10.455042,
+          "word": "数。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,436 @@
+{
+  "duration": 14.626041666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "比如两人一机，就需要有人操作、有人检查，中途再交换。",
+      "words": [
+        {
+          "confidence": 0.86992157,
+          "endTime": 0.335,
+          "startTime": 0.205,
+          "word": "比"
+        },
+        {
+          "confidence": 0.95889866,
+          "endTime": 0.635,
+          "startTime": 0.335,
+          "word": "如"
+        },
+        {
+          "confidence": 0.96647406,
+          "endTime": 0.835,
+          "startTime": 0.635,
+          "word": "两"
+        },
+        {
+          "confidence": 0.96146786,
+          "endTime": 0.985,
+          "startTime": 0.835,
+          "word": "人"
+        },
+        {
+          "confidence": 0.95403427,
+          "endTime": 1.145,
+          "startTime": 0.985,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9160568,
+          "endTime": 1.385,
+          "startTime": 1.145,
+          "word": "机，"
+        },
+        {
+          "confidence": 0.9148467,
+          "endTime": 1.805,
+          "startTime": 1.645,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9539146,
+          "endTime": 1.985,
+          "startTime": 1.805,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9562298,
+          "endTime": 2.125,
+          "startTime": 1.985,
+          "word": "要"
+        },
+        {
+          "confidence": 0.955504,
+          "endTime": 2.245,
+          "startTime": 2.125,
+          "word": "有"
+        },
+        {
+          "confidence": 0.969438,
+          "endTime": 2.395,
+          "startTime": 2.245,
+          "word": "人"
+        },
+        {
+          "confidence": 0.91567945,
+          "endTime": 2.635,
+          "startTime": 2.395,
+          "word": "操"
+        },
+        {
+          "confidence": 0.14353138,
+          "endTime": 2.665,
+          "startTime": 2.635,
+          "word": "作、"
+        },
+        {
+          "confidence": 0.9201335,
+          "endTime": 3.165,
+          "startTime": 3.025,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9747542,
+          "endTime": 3.325,
+          "startTime": 3.165,
+          "word": "人"
+        },
+        {
+          "confidence": 0.9150494,
+          "endTime": 3.545,
+          "startTime": 3.325,
+          "word": "检"
+        },
+        {
+          "confidence": 0.977728,
+          "endTime": 3.905,
+          "startTime": 3.545,
+          "word": "查，"
+        },
+        {
+          "confidence": 0.8945948,
+          "endTime": 4.385,
+          "startTime": 4.185,
+          "word": "中"
+        },
+        {
+          "confidence": 0.93607473,
+          "endTime": 4.595,
+          "startTime": 4.385,
+          "word": "途"
+        },
+        {
+          "confidence": 0.97571975,
+          "endTime": 4.725,
+          "startTime": 4.595,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9336143,
+          "endTime": 4.925,
+          "startTime": 4.725,
+          "word": "交"
+        },
+        {
+          "confidence": 0.9022817,
+          "endTime": 5.195,
+          "startTime": 4.925,
+          "word": "换。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课堂条件不只是开头填过的信息，它会影响这份备课材料怎么组织。",
+      "words": [
+        {
+          "confidence": 0.6379255,
+          "endTime": 5.6950417,
+          "startTime": 5.620042,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9083618,
+          "endTime": 5.855042,
+          "startTime": 5.6950417,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9084716,
+          "endTime": 6.085042,
+          "startTime": 5.855042,
+          "word": "条"
+        },
+        {
+          "confidence": 0.9488136,
+          "endTime": 6.3850417,
+          "startTime": 6.085042,
+          "word": "件"
+        },
+        {
+          "confidence": 0.8167972,
+          "endTime": 6.605042,
+          "startTime": 6.3850417,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9372549,
+          "endTime": 6.725042,
+          "startTime": 6.605042,
+          "word": "只"
+        },
+        {
+          "confidence": 0.958979,
+          "endTime": 6.875042,
+          "startTime": 6.725042,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9729465,
+          "endTime": 7.065042,
+          "startTime": 6.875042,
+          "word": "开"
+        },
+        {
+          "confidence": 0.99070376,
+          "endTime": 7.245042,
+          "startTime": 7.065042,
+          "word": "头"
+        },
+        {
+          "confidence": 0.95889425,
+          "endTime": 7.455042,
+          "startTime": 7.245042,
+          "word": "填"
+        },
+        {
+          "confidence": 0.9488331,
+          "endTime": 7.575042,
+          "startTime": 7.455042,
+          "word": "过"
+        },
+        {
+          "confidence": 0.97371745,
+          "endTime": 7.665042,
+          "startTime": 7.575042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9042364,
+          "endTime": 7.825042,
+          "startTime": 7.665042,
+          "word": "信"
+        },
+        {
+          "confidence": 0.9845808,
+          "endTime": 8.155042,
+          "startTime": 7.825042,
+          "word": "息，"
+        },
+        {
+          "confidence": 0.9822836,
+          "endTime": 8.645042,
+          "startTime": 8.485042,
+          "word": "它"
+        },
+        {
+          "confidence": 0.9344638,
+          "endTime": 8.815042,
+          "startTime": 8.645042,
+          "word": "会"
+        },
+        {
+          "confidence": 0.75284964,
+          "endTime": 8.925042,
+          "startTime": 8.815042,
+          "word": "影"
+        },
+        {
+          "confidence": 0.97800124,
+          "endTime": 9.195042,
+          "startTime": 8.925042,
+          "word": "响"
+        },
+        {
+          "confidence": 0.902833,
+          "endTime": 9.335042,
+          "startTime": 9.195042,
+          "word": "这"
+        },
+        {
+          "confidence": 0.880946,
+          "endTime": 9.495042,
+          "startTime": 9.335042,
+          "word": "份"
+        },
+        {
+          "confidence": 0.9573003,
+          "endTime": 9.635042,
+          "startTime": 9.495042,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9734445,
+          "endTime": 9.775042,
+          "startTime": 9.635042,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9544893,
+          "endTime": 9.985042,
+          "startTime": 9.775042,
+          "word": "材"
+        },
+        {
+          "confidence": 0.94932526,
+          "endTime": 10.145042,
+          "startTime": 9.985042,
+          "word": "料"
+        },
+        {
+          "confidence": 0.95814854,
+          "endTime": 10.285042,
+          "startTime": 10.145042,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.97296304,
+          "endTime": 10.375042,
+          "startTime": 10.285042,
+          "word": "么"
+        },
+        {
+          "confidence": 0.3874815,
+          "endTime": 10.445042,
+          "startTime": 10.375042,
+          "word": "组"
+        },
+        {
+          "confidence": 0.4302127,
+          "endTime": 10.515041,
+          "startTime": 10.445042,
+          "word": "织。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "比如两人一机，就需要有人操作、有人检查，中途再交换。课堂条件不只是开头填过的信息，它会影响这份备课材料怎么组织。现在有了共同的目标，我们再往里面补内容。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "现在有了共同的目标，我们再往里面补内容。",
+      "words": [
+        {
+          "confidence": 0.95511013,
+          "endTime": 11.435083,
+          "startTime": 11.155084,
+          "word": "现"
+        },
+        {
+          "confidence": 0.85966575,
+          "endTime": 11.705084,
+          "startTime": 11.435083,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9333697,
+          "endTime": 11.845083,
+          "startTime": 11.705084,
+          "word": "有"
+        },
+        {
+          "confidence": 0.9718739,
+          "endTime": 11.955084,
+          "startTime": 11.845083,
+          "word": "了"
+        },
+        {
+          "confidence": 0.89951783,
+          "endTime": 12.115084,
+          "startTime": 11.955084,
+          "word": "共"
+        },
+        {
+          "confidence": 0.96486825,
+          "endTime": 12.295083,
+          "startTime": 12.115084,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9641724,
+          "endTime": 12.385083,
+          "startTime": 12.295083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9438133,
+          "endTime": 12.535084,
+          "startTime": 12.385083,
+          "word": "目"
+        },
+        {
+          "confidence": 0.9789093,
+          "endTime": 12.765083,
+          "startTime": 12.535084,
+          "word": "标，"
+        },
+        {
+          "confidence": 0.92158026,
+          "endTime": 13.165083,
+          "startTime": 13.055083,
+          "word": "我"
+        },
+        {
+          "confidence": 0.96062326,
+          "endTime": 13.275084,
+          "startTime": 13.165083,
+          "word": "们"
+        },
+        {
+          "confidence": 0.93106204,
+          "endTime": 13.445084,
+          "startTime": 13.275084,
+          "word": "再"
+        },
+        {
+          "confidence": 0.748817,
+          "endTime": 13.5650835,
+          "startTime": 13.445084,
+          "word": "往"
+        },
+        {
+          "confidence": 0.96099186,
+          "endTime": 13.675083,
+          "startTime": 13.5650835,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9784522,
+          "endTime": 13.825084,
+          "startTime": 13.675083,
+          "word": "面"
+        },
+        {
+          "confidence": 0.94853616,
+          "endTime": 14.015083,
+          "startTime": 13.825084,
+          "word": "补"
+        },
+        {
+          "confidence": 0.93719923,
+          "endTime": 14.205084,
+          "startTime": 14.015083,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9793713,
+          "endTime": 14.425083,
+          "startTime": 14.205084,
+          "word": "容。"
+        }
+      ]
+    }
+  ]
+}

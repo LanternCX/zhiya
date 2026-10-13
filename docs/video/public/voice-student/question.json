@@ -1,0 +1,424 @@
+{
+  "duration": 13.395416666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "再做一道小测验，检查自己是不是真的理解。",
+      "words": [
+        {
+          "confidence": 0.96249646,
+          "endTime": 0.405,
+          "startTime": 0.205,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9773297,
+          "endTime": 0.525,
+          "startTime": 0.405,
+          "word": "做"
+        },
+        {
+          "confidence": 0.9389476,
+          "endTime": 0.625,
+          "startTime": 0.525,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9352257,
+          "endTime": 0.745,
+          "startTime": 0.625,
+          "word": "道"
+        },
+        {
+          "confidence": 0.9738967,
+          "endTime": 0.905,
+          "startTime": 0.745,
+          "word": "小"
+        },
+        {
+          "confidence": 0.8718131,
+          "endTime": 1.095,
+          "startTime": 0.905,
+          "word": "测"
+        },
+        {
+          "confidence": 0.8997056,
+          "endTime": 1.295,
+          "startTime": 1.095,
+          "word": "验，"
+        },
+        {
+          "confidence": 0.9349028,
+          "endTime": 1.765,
+          "startTime": 1.575,
+          "word": "检"
+        },
+        {
+          "confidence": 0.97483546,
+          "endTime": 2.015,
+          "startTime": 1.765,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9477085,
+          "endTime": 2.165,
+          "startTime": 2.015,
+          "word": "自"
+        },
+        {
+          "confidence": 0.98842317,
+          "endTime": 2.335,
+          "startTime": 2.165,
+          "word": "己"
+        },
+        {
+          "confidence": 0.9476104,
+          "endTime": 2.515,
+          "startTime": 2.335,
+          "word": "是"
+        },
+        {
+          "confidence": 0.67250425,
+          "endTime": 2.585,
+          "startTime": 2.515,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9505469,
+          "endTime": 2.715,
+          "startTime": 2.585,
+          "word": "是"
+        },
+        {
+          "confidence": 0.95859045,
+          "endTime": 2.885,
+          "startTime": 2.715,
+          "word": "真"
+        },
+        {
+          "confidence": 0.9400517,
+          "endTime": 2.985,
+          "startTime": 2.885,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8619031,
+          "endTime": 3.135,
+          "startTime": 2.985,
+          "word": "理"
+        },
+        {
+          "confidence": 0.9146869,
+          "endTime": 3.375,
+          "startTime": 3.135,
+          "word": "解。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这里把变量误认为输出，提交后得到针对这处混淆的解释。",
+      "words": [
+        {
+          "confidence": 0.9547645,
+          "endTime": 3.8550417,
+          "startTime": 3.7000418,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9210096,
+          "endTime": 3.955042,
+          "startTime": 3.8550417,
+          "word": "里"
+        },
+        {
+          "confidence": 0.8393366,
+          "endTime": 4.1150417,
+          "startTime": 3.955042,
+          "word": "把"
+        },
+        {
+          "confidence": 0.8942121,
+          "endTime": 4.3550415,
+          "startTime": 4.1150417,
+          "word": "变"
+        },
+        {
+          "confidence": 0.92654145,
+          "endTime": 4.6050415,
+          "startTime": 4.3550415,
+          "word": "量"
+        },
+        {
+          "confidence": 0.9080367,
+          "endTime": 4.765042,
+          "startTime": 4.6050415,
+          "word": "误"
+        },
+        {
+          "confidence": 0.9169149,
+          "endTime": 4.895042,
+          "startTime": 4.765042,
+          "word": "认"
+        },
+        {
+          "confidence": 0.970412,
+          "endTime": 5.015042,
+          "startTime": 4.895042,
+          "word": "为"
+        },
+        {
+          "confidence": 0.9696104,
+          "endTime": 5.2350416,
+          "startTime": 5.015042,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9801921,
+          "endTime": 5.5050416,
+          "startTime": 5.2350416,
+          "word": "出，"
+        },
+        {
+          "confidence": 0.9317067,
+          "endTime": 6.005042,
+          "startTime": 5.825042,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9196219,
+          "endTime": 6.1950417,
+          "startTime": 6.005042,
+          "word": "交"
+        },
+        {
+          "confidence": 0.8422284,
+          "endTime": 6.465042,
+          "startTime": 6.1950417,
+          "word": "后"
+        },
+        {
+          "confidence": 0.8667535,
+          "endTime": 6.625042,
+          "startTime": 6.465042,
+          "word": "得"
+        },
+        {
+          "confidence": 0.9412296,
+          "endTime": 6.765042,
+          "startTime": 6.625042,
+          "word": "到"
+        },
+        {
+          "confidence": 0.93930817,
+          "endTime": 6.955042,
+          "startTime": 6.765042,
+          "word": "针"
+        },
+        {
+          "confidence": 0.9517655,
+          "endTime": 7.1050415,
+          "startTime": 6.955042,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9160187,
+          "endTime": 7.245042,
+          "startTime": 7.1050415,
+          "word": "这"
+        },
+        {
+          "confidence": 0.8080644,
+          "endTime": 7.4050417,
+          "startTime": 7.245042,
+          "word": "处"
+        },
+        {
+          "confidence": 0.85417575,
+          "endTime": 7.5950418,
+          "startTime": 7.4050417,
+          "word": "混"
+        },
+        {
+          "confidence": 0.7597024,
+          "endTime": 7.7950416,
+          "startTime": 7.5950418,
+          "word": "淆"
+        },
+        {
+          "confidence": 0.94390875,
+          "endTime": 7.9050417,
+          "startTime": 7.7950416,
+          "word": "的"
+        },
+        {
+          "confidence": 0.94214803,
+          "endTime": 8.065042,
+          "startTime": 7.9050417,
+          "word": "解"
+        },
+        {
+          "confidence": 0.95699453,
+          "endTime": 8.335042,
+          "startTime": 8.065042,
+          "word": "释。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再做一道小测验，检查自己是不是真的理解。这里把变量误认为输出，提交后得到针对这处混淆的解释。下一步先补这个概念，再继续，而不是只得到一个对错标记。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "下一步先补这个概念，再继续，而不是只得到一个对错标记。",
+      "words": [
+        {
+          "confidence": 0.9316456,
+          "endTime": 8.915083,
+          "startTime": 8.680083,
+          "word": "下"
+        },
+        {
+          "confidence": 0.8474049,
+          "endTime": 9.025084,
+          "startTime": 8.915083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.92472684,
+          "endTime": 9.235084,
+          "startTime": 9.025084,
+          "word": "步"
+        },
+        {
+          "confidence": 0.95638,
+          "endTime": 9.425083,
+          "startTime": 9.235084,
+          "word": "先"
+        },
+        {
+          "confidence": 0.90808064,
+          "endTime": 9.615084,
+          "startTime": 9.425083,
+          "word": "补"
+        },
+        {
+          "confidence": 0.6808759,
+          "endTime": 9.745083,
+          "startTime": 9.615084,
+          "word": "这"
+        },
+        {
+          "confidence": 0.60409075,
+          "endTime": 9.835083,
+          "startTime": 9.745083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8100857,
+          "endTime": 10.015083,
+          "startTime": 9.835083,
+          "word": "概"
+        },
+        {
+          "confidence": 0.92892313,
+          "endTime": 10.225083,
+          "startTime": 10.015083,
+          "word": "念，"
+        },
+        {
+          "confidence": 0.9388903,
+          "endTime": 10.515083,
+          "startTime": 10.335083,
+          "word": "再"
+        },
+        {
+          "confidence": 0.6854658,
+          "endTime": 10.665083,
+          "startTime": 10.515083,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9726786,
+          "endTime": 10.945084,
+          "startTime": 10.665083,
+          "word": "续，"
+        },
+        {
+          "confidence": 0.95106125,
+          "endTime": 11.435083,
+          "startTime": 11.275084,
+          "word": "而"
+        },
+        {
+          "confidence": 0.9416615,
+          "endTime": 11.555083,
+          "startTime": 11.435083,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9667117,
+          "endTime": 11.735084,
+          "startTime": 11.555083,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9524067,
+          "endTime": 11.875083,
+          "startTime": 11.735084,
+          "word": "只"
+        },
+        {
+          "confidence": 0.8876666,
+          "endTime": 12.035084,
+          "startTime": 11.875083,
+          "word": "得"
+        },
+        {
+          "confidence": 0.95850384,
+          "endTime": 12.175083,
+          "startTime": 12.035084,
+          "word": "到"
+        },
+        {
+          "confidence": 0.93676794,
+          "endTime": 12.275084,
+          "startTime": 12.175083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9824523,
+          "endTime": 12.385083,
+          "startTime": 12.275084,
+          "word": "个"
+        },
+        {
+          "confidence": 0.95925915,
+          "endTime": 12.535084,
+          "startTime": 12.385083,
+          "word": "对"
+        },
+        {
+          "confidence": 0.31733522,
+          "endTime": 12.595083,
+          "startTime": 12.535084,
+          "word": "错"
+        },
+        {
+          "confidence": 0.07954221,
+          "endTime": 12.655083,
+          "startTime": 12.595083,
+          "word": "标"
+        },
+        {
+          "confidence": 0.18200459,
+          "endTime": 12.715083,
+          "startTime": 12.655083,
+          "word": "记。"
+        }
+      ]
+    }
+  ]
+}

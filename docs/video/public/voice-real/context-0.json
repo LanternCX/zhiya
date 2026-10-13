@@ -1,0 +1,166 @@
+{
+  "duration": 5.341458333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "先别急着要课件。",
+      "words": [
+        {
+          "confidence": 0.94113594,
+          "endTime": 0.485,
+          "startTime": 0.225,
+          "word": "先"
+        },
+        {
+          "confidence": 0.92540294,
+          "endTime": 0.655,
+          "startTime": 0.485,
+          "word": "别"
+        },
+        {
+          "confidence": 0.8699269,
+          "endTime": 0.805,
+          "startTime": 0.655,
+          "word": "急"
+        },
+        {
+          "confidence": 0.822923,
+          "endTime": 0.925,
+          "startTime": 0.805,
+          "word": "着"
+        },
+        {
+          "confidence": 0.93844527,
+          "endTime": 1.045,
+          "startTime": 0.925,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9617362,
+          "endTime": 1.235,
+          "startTime": 1.045,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9594175,
+          "endTime": 1.525,
+          "startTime": 1.235,
+          "word": "件。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先别急着要课件。面对零基础学生，一节课究竟应该讲多少？",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "面对零基础学生，一节课究竟应该讲多少？",
+      "words": [
+        {
+          "confidence": 0.5064026,
+          "endTime": 2.0850418,
+          "startTime": 2.0100417,
+          "word": "面"
+        },
+        {
+          "confidence": 0.31016988,
+          "endTime": 2.1450417,
+          "startTime": 2.0850418,
+          "word": "对"
+        },
+        {
+          "confidence": 0.91852355,
+          "endTime": 2.2850418,
+          "startTime": 2.1450417,
+          "word": "零"
+        },
+        {
+          "confidence": 0.9076248,
+          "endTime": 2.4450417,
+          "startTime": 2.2850418,
+          "word": "基"
+        },
+        {
+          "confidence": 0.94342726,
+          "endTime": 2.5950418,
+          "startTime": 2.4450417,
+          "word": "础"
+        },
+        {
+          "confidence": 0.9034968,
+          "endTime": 2.7850418,
+          "startTime": 2.5950418,
+          "word": "学"
+        },
+        {
+          "confidence": 0.83819073,
+          "endTime": 3.0550418,
+          "startTime": 2.7850418,
+          "word": "生，"
+        },
+        {
+          "confidence": 0.8798952,
+          "endTime": 3.4650416,
+          "startTime": 3.3350418,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9698863,
+          "endTime": 3.6550417,
+          "startTime": 3.4650416,
+          "word": "节"
+        },
+        {
+          "confidence": 0.957254,
+          "endTime": 3.955042,
+          "startTime": 3.6550417,
+          "word": "课"
+        },
+        {
+          "confidence": 0.8722234,
+          "endTime": 4.1350417,
+          "startTime": 3.955042,
+          "word": "究"
+        },
+        {
+          "confidence": 0.79556197,
+          "endTime": 4.3150415,
+          "startTime": 4.1350417,
+          "word": "竟"
+        },
+        {
+          "confidence": 0.5949508,
+          "endTime": 4.3950415,
+          "startTime": 4.3150415,
+          "word": "应"
+        },
+        {
+          "confidence": 0.85617006,
+          "endTime": 4.5250416,
+          "startTime": 4.3950415,
+          "word": "该"
+        },
+        {
+          "confidence": 0.9561681,
+          "endTime": 4.6850414,
+          "startTime": 4.5250416,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.92780584,
+          "endTime": 4.8650417,
+          "startTime": 4.6850414,
+          "word": "多"
+        },
+        {
+          "confidence": 0.96772546,
+          "endTime": 5.165042,
+          "startTime": 4.8650417,
+          "word": "少？"
+        }
+      ]
+    }
+  ]
+}

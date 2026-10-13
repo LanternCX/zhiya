@@ -1,0 +1,592 @@
+{
+  "duration": 18.94175,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "发送以后，对话里会显示模型正在处理的内容，",
+      "words": [
+        {
+          "confidence": 0.8315704,
+          "endTime": 0.435,
+          "startTime": 0.275,
+          "word": "发"
+        },
+        {
+          "confidence": 0.91511106,
+          "endTime": 0.585,
+          "startTime": 0.435,
+          "word": "送"
+        },
+        {
+          "confidence": 0.9111694,
+          "endTime": 0.705,
+          "startTime": 0.585,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9718615,
+          "endTime": 1.035,
+          "startTime": 0.705,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.942123,
+          "endTime": 1.405,
+          "startTime": 1.255,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9104463,
+          "endTime": 1.665,
+          "startTime": 1.405,
+          "word": "话"
+        },
+        {
+          "confidence": 0.9072748,
+          "endTime": 1.855,
+          "startTime": 1.665,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9664372,
+          "endTime": 2.005,
+          "startTime": 1.855,
+          "word": "会"
+        },
+        {
+          "confidence": 0.904083,
+          "endTime": 2.195,
+          "startTime": 2.005,
+          "word": "显"
+        },
+        {
+          "confidence": 0.94524413,
+          "endTime": 2.405,
+          "startTime": 2.195,
+          "word": "示"
+        },
+        {
+          "confidence": 0.9568524,
+          "endTime": 2.555,
+          "startTime": 2.405,
+          "word": "模"
+        },
+        {
+          "confidence": 0.96534914,
+          "endTime": 2.805,
+          "startTime": 2.555,
+          "word": "型"
+        },
+        {
+          "confidence": 0.91335523,
+          "endTime": 2.965,
+          "startTime": 2.805,
+          "word": "正"
+        },
+        {
+          "confidence": 0.9766573,
+          "endTime": 3.095,
+          "startTime": 2.965,
+          "word": "在"
+        },
+        {
+          "confidence": 0.83545655,
+          "endTime": 3.295,
+          "startTime": 3.095,
+          "word": "处"
+        },
+        {
+          "confidence": 0.9336393,
+          "endTime": 3.445,
+          "startTime": 3.295,
+          "word": "理"
+        },
+        {
+          "confidence": 0.9627141,
+          "endTime": 3.565,
+          "startTime": 3.445,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8893494,
+          "endTime": 3.735,
+          "startTime": 3.565,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9506983,
+          "endTime": 3.955,
+          "startTime": 3.735,
+          "word": "容，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课堂区逐步出现生成结果。",
+      "words": [
+        {
+          "confidence": 0.879715,
+          "endTime": 4.5450416,
+          "startTime": 4.4200416,
+          "word": "课"
+        },
+        {
+          "confidence": 0.93928826,
+          "endTime": 4.7350416,
+          "startTime": 4.5450416,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9214458,
+          "endTime": 4.9950414,
+          "startTime": 4.7350416,
+          "word": "区"
+        },
+        {
+          "confidence": 0.927002,
+          "endTime": 5.285042,
+          "startTime": 5.0850415,
+          "word": "逐"
+        },
+        {
+          "confidence": 0.96947277,
+          "endTime": 5.4750414,
+          "startTime": 5.285042,
+          "word": "步"
+        },
+        {
+          "confidence": 0.98265976,
+          "endTime": 5.6450415,
+          "startTime": 5.4750414,
+          "word": "出"
+        },
+        {
+          "confidence": 0.96668667,
+          "endTime": 5.7950416,
+          "startTime": 5.6450415,
+          "word": "现"
+        },
+        {
+          "confidence": 0.8912468,
+          "endTime": 5.9750414,
+          "startTime": 5.7950416,
+          "word": "生"
+        },
+        {
+          "confidence": 0.94510305,
+          "endTime": 6.1650414,
+          "startTime": 5.9750414,
+          "word": "成"
+        },
+        {
+          "confidence": 0.89179856,
+          "endTime": 6.3750415,
+          "startTime": 6.1650414,
+          "word": "结"
+        },
+        {
+          "confidence": 0.97598755,
+          "endTime": 6.635041,
+          "startTime": 6.3750415,
+          "word": "果。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这里值得观察的是，文字讲解和课堂材料出现在同一个工作区。",
+      "words": [
+        {
+          "confidence": 0.9700595,
+          "endTime": 7.0350833,
+          "startTime": 6.880083,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9641472,
+          "endTime": 7.135083,
+          "startTime": 7.0350833,
+          "word": "里"
+        },
+        {
+          "confidence": 0.8207125,
+          "endTime": 7.2650833,
+          "startTime": 7.135083,
+          "word": "值"
+        },
+        {
+          "confidence": 0.8224653,
+          "endTime": 7.365083,
+          "startTime": 7.2650833,
+          "word": "得"
+        },
+        {
+          "confidence": 0.9685256,
+          "endTime": 7.535083,
+          "startTime": 7.365083,
+          "word": "观"
+        },
+        {
+          "confidence": 0.93735415,
+          "endTime": 7.7250834,
+          "startTime": 7.535083,
+          "word": "察"
+        },
+        {
+          "confidence": 0.9834268,
+          "endTime": 7.815083,
+          "startTime": 7.7250834,
+          "word": "的"
+        },
+        {
+          "confidence": 0.94966143,
+          "endTime": 8.145083,
+          "startTime": 7.815083,
+          "word": "是，"
+        },
+        {
+          "confidence": 0.8656352,
+          "endTime": 8.565083,
+          "startTime": 8.425083,
+          "word": "文"
+        },
+        {
+          "confidence": 0.9586845,
+          "endTime": 8.715083,
+          "startTime": 8.565083,
+          "word": "字"
+        },
+        {
+          "confidence": 0.9344556,
+          "endTime": 8.955083,
+          "startTime": 8.715083,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9019498,
+          "endTime": 9.275084,
+          "startTime": 8.955083,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9475948,
+          "endTime": 9.505083,
+          "startTime": 9.325083,
+          "word": "和"
+        },
+        {
+          "confidence": 0.94448036,
+          "endTime": 9.675083,
+          "startTime": 9.505083,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9752984,
+          "endTime": 9.845083,
+          "startTime": 9.675083,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.97105163,
+          "endTime": 10.095083,
+          "startTime": 9.845083,
+          "word": "材"
+        },
+        {
+          "confidence": 0.94292253,
+          "endTime": 10.285083,
+          "startTime": 10.095083,
+          "word": "料"
+        },
+        {
+          "confidence": 0.9735882,
+          "endTime": 10.495083,
+          "startTime": 10.335083,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9646577,
+          "endTime": 10.665083,
+          "startTime": 10.495083,
+          "word": "现"
+        },
+        {
+          "confidence": 0.9215148,
+          "endTime": 10.805083,
+          "startTime": 10.665083,
+          "word": "在"
+        },
+        {
+          "confidence": 0.95594585,
+          "endTime": 11.045083,
+          "startTime": 10.805083,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9127625,
+          "endTime": 11.125083,
+          "startTime": 11.045083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.5938656,
+          "endTime": 11.205083,
+          "startTime": 11.125083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.19519836,
+          "endTime": 11.265083,
+          "startTime": 11.205083,
+          "word": "工"
+        },
+        {
+          "confidence": 0.189985,
+          "endTime": 11.325083,
+          "startTime": 11.265083,
+          "word": "作"
+        },
+        {
+          "confidence": 0.40624076,
+          "endTime": 11.355083,
+          "startTime": 11.325083,
+          "word": "区。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师不用先把回复复制出来，",
+      "words": [
+        {
+          "confidence": 0.9739055,
+          "endTime": 12.415125,
+          "startTime": 12.275125,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9707269,
+          "endTime": 12.675125,
+          "startTime": 12.415125,
+          "word": "师"
+        },
+        {
+          "confidence": 0.91243434,
+          "endTime": 12.8151245,
+          "startTime": 12.675125,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9862991,
+          "endTime": 12.945125,
+          "startTime": 12.8151245,
+          "word": "用"
+        },
+        {
+          "confidence": 0.97293156,
+          "endTime": 13.115125,
+          "startTime": 12.945125,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9550486,
+          "endTime": 13.255125,
+          "startTime": 13.115125,
+          "word": "把"
+        },
+        {
+          "confidence": 0.94374484,
+          "endTime": 13.445125,
+          "startTime": 13.255125,
+          "word": "回"
+        },
+        {
+          "confidence": 0.98723745,
+          "endTime": 13.625125,
+          "startTime": 13.445125,
+          "word": "复"
+        },
+        {
+          "confidence": 0.927527,
+          "endTime": 13.825125,
+          "startTime": 13.625125,
+          "word": "复"
+        },
+        {
+          "confidence": 0.91220075,
+          "endTime": 13.995125,
+          "startTime": 13.825125,
+          "word": "制"
+        },
+        {
+          "confidence": 0.92054445,
+          "endTime": 14.215124,
+          "startTime": 13.995125,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9705903,
+          "endTime": 14.445125,
+          "startTime": 14.215124,
+          "word": "来，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再去另一个工具里重新排版，",
+      "words": [
+        {
+          "confidence": 0.36483157,
+          "endTime": 14.915166,
+          "startTime": 14.840166,
+          "word": "再"
+        },
+        {
+          "confidence": 0.2731201,
+          "endTime": 14.975166,
+          "startTime": 14.915166,
+          "word": "去"
+        },
+        {
+          "confidence": 0.91170853,
+          "endTime": 15.145166,
+          "startTime": 14.975166,
+          "word": "另"
+        },
+        {
+          "confidence": 0.9073482,
+          "endTime": 15.255166,
+          "startTime": 15.145166,
+          "word": "一"
+        },
+        {
+          "confidence": 0.96197474,
+          "endTime": 15.375166,
+          "startTime": 15.255166,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9604328,
+          "endTime": 15.565166,
+          "startTime": 15.375166,
+          "word": "工"
+        },
+        {
+          "confidence": 0.91629267,
+          "endTime": 15.695166,
+          "startTime": 15.565166,
+          "word": "具"
+        },
+        {
+          "confidence": 0.92725825,
+          "endTime": 15.805166,
+          "startTime": 15.695166,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9180095,
+          "endTime": 15.995166,
+          "startTime": 15.805166,
+          "word": "重"
+        },
+        {
+          "confidence": 0.95370656,
+          "endTime": 16.185165,
+          "startTime": 15.995166,
+          "word": "新"
+        },
+        {
+          "confidence": 0.979027,
+          "endTime": 16.405167,
+          "startTime": 16.185165,
+          "word": "排"
+        },
+        {
+          "confidence": 0.9756054,
+          "endTime": 16.615166,
+          "startTime": 16.405167,
+          "word": "版，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "发送以后，对话里会显示模型正在处理的内容，课堂区逐步出现生成结果。这里值得观察的是，文字讲解和课堂材料出现在同一个工作区。老师不用先把回复复制出来，再去另一个工具里重新排版，才能看见一张能讲的页面。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "才能看见一张能讲的页面。",
+      "words": [
+        {
+          "confidence": 0.45214018,
+          "endTime": 17.075209,
+          "startTime": 17.000208,
+          "word": "才"
+        },
+        {
+          "confidence": 0.58736354,
+          "endTime": 17.135208,
+          "startTime": 17.075209,
+          "word": "能"
+        },
+        {
+          "confidence": 0.96705246,
+          "endTime": 17.335207,
+          "startTime": 17.135208,
+          "word": "看"
+        },
+        {
+          "confidence": 0.919407,
+          "endTime": 17.505207,
+          "startTime": 17.335207,
+          "word": "见"
+        },
+        {
+          "confidence": 0.88052696,
+          "endTime": 17.575209,
+          "startTime": 17.505207,
+          "word": "一"
+        },
+        {
+          "confidence": 0.98047453,
+          "endTime": 17.775208,
+          "startTime": 17.575209,
+          "word": "张"
+        },
+        {
+          "confidence": 0.927675,
+          "endTime": 17.935207,
+          "startTime": 17.775208,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9288728,
+          "endTime": 18.175207,
+          "startTime": 17.935207,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.88342285,
+          "endTime": 18.305208,
+          "startTime": 18.175207,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9462305,
+          "endTime": 18.445208,
+          "startTime": 18.305208,
+          "word": "页"
+        },
+        {
+          "confidence": 0.9720622,
+          "endTime": 18.675207,
+          "startTime": 18.445208,
+          "word": "面。"
+        }
+      ]
+    }
+  ]
+}

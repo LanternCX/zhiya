@@ -1,0 +1,214 @@
+{
+  "duration": 8.216833333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "从了解老师，到生成、检查和修改材料。",
+      "words": [
+        {
+          "confidence": 0.8958398,
+          "endTime": 0.605,
+          "startTime": 0.235,
+          "word": "从"
+        },
+        {
+          "confidence": 0.46209842,
+          "endTime": 0.735,
+          "startTime": 0.605,
+          "word": "了"
+        },
+        {
+          "confidence": 0.9009534,
+          "endTime": 0.935,
+          "startTime": 0.735,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9422102,
+          "endTime": 1.085,
+          "startTime": 0.935,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98628473,
+          "endTime": 1.395,
+          "startTime": 1.085,
+          "word": "师，"
+        },
+        {
+          "confidence": 0.9062694,
+          "endTime": 1.845,
+          "startTime": 1.645,
+          "word": "到"
+        },
+        {
+          "confidence": 0.80884975,
+          "endTime": 2.115,
+          "startTime": 1.845,
+          "word": "生"
+        },
+        {
+          "confidence": 0.15308002,
+          "endTime": 2.145,
+          "startTime": 2.115,
+          "word": "成、"
+        },
+        {
+          "confidence": 0.92345124,
+          "endTime": 2.855,
+          "startTime": 2.625,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9472163,
+          "endTime": 3.175,
+          "startTime": 2.855,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9314476,
+          "endTime": 3.335,
+          "startTime": 3.175,
+          "word": "和"
+        },
+        {
+          "confidence": 0.90583086,
+          "endTime": 3.495,
+          "startTime": 3.335,
+          "word": "修"
+        },
+        {
+          "confidence": 0.94875795,
+          "endTime": 3.645,
+          "startTime": 3.495,
+          "word": "改"
+        },
+        {
+          "confidence": 0.9531621,
+          "endTime": 3.895,
+          "startTime": 3.645,
+          "word": "材"
+        },
+        {
+          "confidence": 0.89644504,
+          "endTime": 4.085,
+          "startTime": 3.895,
+          "word": "料。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "从了解老师，到生成、检查和修改材料。知芽协助备课，这堂课怎么教，由老师决定。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "知芽协助备课，这堂课怎么教，由老师决定。",
+      "words": [
+        {
+          "confidence": 0.6270426,
+          "endTime": 4.6350417,
+          "startTime": 4.560042,
+          "word": "知"
+        },
+        {
+          "confidence": 0.9126478,
+          "endTime": 4.8650417,
+          "startTime": 4.6350417,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.8784831,
+          "endTime": 5.055042,
+          "startTime": 4.8650417,
+          "word": "协"
+        },
+        {
+          "confidence": 0.88435,
+          "endTime": 5.1950417,
+          "startTime": 5.055042,
+          "word": "助"
+        },
+        {
+          "confidence": 0.96381944,
+          "endTime": 5.3450418,
+          "startTime": 5.1950417,
+          "word": "备"
+        },
+        {
+          "confidence": 0.97795194,
+          "endTime": 5.6550417,
+          "startTime": 5.3450418,
+          "word": "课，"
+        },
+        {
+          "confidence": 0.86456466,
+          "endTime": 6.0950418,
+          "startTime": 5.9450417,
+          "word": "这"
+        },
+        {
+          "confidence": 0.8703237,
+          "endTime": 6.255042,
+          "startTime": 6.0950418,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.95667744,
+          "endTime": 6.4450417,
+          "startTime": 6.255042,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96185935,
+          "endTime": 6.565042,
+          "startTime": 6.4450417,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9856411,
+          "endTime": 6.645042,
+          "startTime": 6.565042,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9521901,
+          "endTime": 6.9050417,
+          "startTime": 6.645042,
+          "word": "教，"
+        },
+        {
+          "confidence": 0.8548902,
+          "endTime": 7.325042,
+          "startTime": 7.165042,
+          "word": "由"
+        },
+        {
+          "confidence": 0.945327,
+          "endTime": 7.465042,
+          "startTime": 7.325042,
+          "word": "老"
+        },
+        {
+          "confidence": 0.8421861,
+          "endTime": 7.635042,
+          "startTime": 7.465042,
+          "word": "师"
+        },
+        {
+          "confidence": 0.08086878,
+          "endTime": 7.6950417,
+          "startTime": 7.635042,
+          "word": "决"
+        },
+        {
+          "confidence": 0.23802309,
+          "endTime": 7.755042,
+          "startTime": 7.6950417,
+          "word": "定。"
+        }
+      ]
+    }
+  ]
+}

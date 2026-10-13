@@ -1,0 +1,364 @@
+{
+  "duration": 12.1125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "同一个知识点，也能配上生成的插图。",
+      "words": [
+        {
+          "confidence": 0.9530668,
+          "endTime": 0.485,
+          "startTime": 0.245,
+          "word": "同"
+        },
+        {
+          "confidence": 0.848188,
+          "endTime": 0.585,
+          "startTime": 0.485,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9124112,
+          "endTime": 0.695,
+          "startTime": 0.585,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9285754,
+          "endTime": 0.835,
+          "startTime": 0.695,
+          "word": "知"
+        },
+        {
+          "confidence": 0.8221456,
+          "endTime": 0.985,
+          "startTime": 0.835,
+          "word": "识"
+        },
+        {
+          "confidence": 0.88398266,
+          "endTime": 1.205,
+          "startTime": 0.985,
+          "word": "点，"
+        },
+        {
+          "confidence": 0.8910374,
+          "endTime": 1.595,
+          "startTime": 1.455,
+          "word": "也"
+        },
+        {
+          "confidence": 0.9694798,
+          "endTime": 1.755,
+          "startTime": 1.595,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9194548,
+          "endTime": 1.955,
+          "startTime": 1.755,
+          "word": "配"
+        },
+        {
+          "confidence": 0.84337217,
+          "endTime": 2.145,
+          "startTime": 1.955,
+          "word": "上"
+        },
+        {
+          "confidence": 0.9521115,
+          "endTime": 2.375,
+          "startTime": 2.145,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9668634,
+          "endTime": 2.565,
+          "startTime": 2.375,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9556626,
+          "endTime": 2.655,
+          "startTime": 2.565,
+          "word": "的"
+        },
+        {
+          "confidence": 0.91910917,
+          "endTime": 2.845,
+          "startTime": 2.655,
+          "word": "插"
+        },
+        {
+          "confidence": 0.9775171,
+          "endTime": 3.145,
+          "startTime": 2.845,
+          "word": "图。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "把顾客说的话、程序保存的数据和显示的结果对应起来，",
+      "words": [
+        {
+          "confidence": 0.3998357,
+          "endTime": 3.6650417,
+          "startTime": 3.5900416,
+          "word": "把"
+        },
+        {
+          "confidence": 0.7259293,
+          "endTime": 3.7450416,
+          "startTime": 3.6650417,
+          "word": "顾"
+        },
+        {
+          "confidence": 0.94942236,
+          "endTime": 3.9150417,
+          "startTime": 3.7450416,
+          "word": "客"
+        },
+        {
+          "confidence": 0.897709,
+          "endTime": 4.0950418,
+          "startTime": 3.9150417,
+          "word": "说"
+        },
+        {
+          "confidence": 0.6660618,
+          "endTime": 4.2150416,
+          "startTime": 4.0950418,
+          "word": "的"
+        },
+        {
+          "confidence": 0.23763679,
+          "endTime": 4.4250417,
+          "startTime": 4.3850417,
+          "word": "话、"
+        },
+        {
+          "confidence": 0.96139437,
+          "endTime": 4.915042,
+          "startTime": 4.665042,
+          "word": "程"
+        },
+        {
+          "confidence": 0.90457493,
+          "endTime": 5.1250415,
+          "startTime": 4.915042,
+          "word": "序"
+        },
+        {
+          "confidence": 0.91222876,
+          "endTime": 5.305042,
+          "startTime": 5.1250415,
+          "word": "保"
+        },
+        {
+          "confidence": 0.95311093,
+          "endTime": 5.4850416,
+          "startTime": 5.305042,
+          "word": "存"
+        },
+        {
+          "confidence": 0.9044229,
+          "endTime": 5.5650415,
+          "startTime": 5.4850416,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8590246,
+          "endTime": 5.8150415,
+          "startTime": 5.5650415,
+          "word": "数"
+        },
+        {
+          "confidence": 0.878332,
+          "endTime": 6.0650415,
+          "startTime": 5.8150415,
+          "word": "据"
+        },
+        {
+          "confidence": 0.92889446,
+          "endTime": 6.3450418,
+          "startTime": 6.1950417,
+          "word": "和"
+        },
+        {
+          "confidence": 0.92233515,
+          "endTime": 6.5450416,
+          "startTime": 6.3450418,
+          "word": "显"
+        },
+        {
+          "confidence": 0.94113445,
+          "endTime": 6.7250414,
+          "startTime": 6.5450416,
+          "word": "示"
+        },
+        {
+          "confidence": 0.952009,
+          "endTime": 6.8150415,
+          "startTime": 6.7250414,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9686152,
+          "endTime": 7.0050416,
+          "startTime": 6.8150415,
+          "word": "结"
+        },
+        {
+          "confidence": 0.9315542,
+          "endTime": 7.1750417,
+          "startTime": 7.0050416,
+          "word": "果"
+        },
+        {
+          "confidence": 0.9166984,
+          "endTime": 7.3450418,
+          "startTime": 7.1750417,
+          "word": "对"
+        },
+        {
+          "confidence": 0.9521698,
+          "endTime": 7.5150414,
+          "startTime": 7.3450418,
+          "word": "应"
+        },
+        {
+          "confidence": 0.8695,
+          "endTime": 7.6950417,
+          "startTime": 7.5150414,
+          "word": "起"
+        },
+        {
+          "confidence": 0.96824414,
+          "endTime": 7.9250417,
+          "startTime": 7.6950417,
+          "word": "来，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "同一个知识点，也能配上生成的插图。把顾客说的话、程序保存的数据和显示的结果对应起来，帮助学生把抽象概念放回熟悉的生活场景。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "帮助学生把抽象概念放回熟悉的生活场景。",
+      "words": [
+        {
+          "confidence": 0.8845048,
+          "endTime": 8.425083,
+          "startTime": 8.230083,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.95504993,
+          "endTime": 8.5650835,
+          "startTime": 8.425083,
+          "word": "助"
+        },
+        {
+          "confidence": 0.9376632,
+          "endTime": 8.765083,
+          "startTime": 8.5650835,
+          "word": "学"
+        },
+        {
+          "confidence": 0.912115,
+          "endTime": 9.0650835,
+          "startTime": 8.765083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.85732085,
+          "endTime": 9.245084,
+          "startTime": 9.095083,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9265845,
+          "endTime": 9.475083,
+          "startTime": 9.245084,
+          "word": "抽"
+        },
+        {
+          "confidence": 0.921105,
+          "endTime": 9.685083,
+          "startTime": 9.475083,
+          "word": "象"
+        },
+        {
+          "confidence": 0.9335533,
+          "endTime": 9.885083,
+          "startTime": 9.685083,
+          "word": "概"
+        },
+        {
+          "confidence": 0.82579106,
+          "endTime": 10.0650835,
+          "startTime": 9.885083,
+          "word": "念"
+        },
+        {
+          "confidence": 0.9226419,
+          "endTime": 10.475083,
+          "startTime": 10.265083,
+          "word": "放"
+        },
+        {
+          "confidence": 0.92581695,
+          "endTime": 10.665083,
+          "startTime": 10.475083,
+          "word": "回"
+        },
+        {
+          "confidence": 0.91419995,
+          "endTime": 10.905084,
+          "startTime": 10.665083,
+          "word": "熟"
+        },
+        {
+          "confidence": 0.9516076,
+          "endTime": 11.095083,
+          "startTime": 10.905084,
+          "word": "悉"
+        },
+        {
+          "confidence": 0.96821845,
+          "endTime": 11.185083,
+          "startTime": 11.095083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.7628888,
+          "endTime": 11.305083,
+          "startTime": 11.185083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.18819042,
+          "endTime": 11.365084,
+          "startTime": 11.305083,
+          "word": "活"
+        },
+        {
+          "confidence": 0.1504132,
+          "endTime": 11.425083,
+          "startTime": 11.365084,
+          "word": "场"
+        },
+        {
+          "confidence": 0.17582335,
+          "endTime": 11.485084,
+          "startTime": 11.425083,
+          "word": "景。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,406 @@
+{
+  "duration": 13.571791666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "学编程和人工智能，不只是听一段解释。",
+      "words": [
+        {
+          "confidence": 0.862021,
+          "endTime": 0.485,
+          "startTime": 0.215,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8031783,
+          "endTime": 0.665,
+          "startTime": 0.485,
+          "word": "编"
+        },
+        {
+          "confidence": 0.9501567,
+          "endTime": 0.955,
+          "startTime": 0.665,
+          "word": "程"
+        },
+        {
+          "confidence": 0.95003325,
+          "endTime": 1.125,
+          "startTime": 0.955,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9629391,
+          "endTime": 1.265,
+          "startTime": 1.125,
+          "word": "人"
+        },
+        {
+          "confidence": 0.95788014,
+          "endTime": 1.415,
+          "startTime": 1.265,
+          "word": "工"
+        },
+        {
+          "confidence": 0.9213227,
+          "endTime": 1.595,
+          "startTime": 1.415,
+          "word": "智"
+        },
+        {
+          "confidence": 0.97416234,
+          "endTime": 1.835,
+          "startTime": 1.595,
+          "word": "能，"
+        },
+        {
+          "confidence": 0.9833276,
+          "endTime": 2.255,
+          "startTime": 2.115,
+          "word": "不"
+        },
+        {
+          "confidence": 0.979025,
+          "endTime": 2.395,
+          "startTime": 2.255,
+          "word": "只"
+        },
+        {
+          "confidence": 0.95595235,
+          "endTime": 2.545,
+          "startTime": 2.395,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9741753,
+          "endTime": 2.705,
+          "startTime": 2.545,
+          "word": "听"
+        },
+        {
+          "confidence": 0.90292144,
+          "endTime": 2.815,
+          "startTime": 2.705,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9029803,
+          "endTime": 2.945,
+          "startTime": 2.815,
+          "word": "段"
+        },
+        {
+          "confidence": 0.7502463,
+          "endTime": 3.165,
+          "startTime": 2.945,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9644842,
+          "endTime": 3.465,
+          "startTime": 3.165,
+          "word": "释。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "遇到不懂的地方，能不能换个讲法？",
+      "words": [
+        {
+          "confidence": 0.73233867,
+          "endTime": 3.9150417,
+          "startTime": 3.8500416,
+          "word": "遇"
+        },
+        {
+          "confidence": 0.9062807,
+          "endTime": 4.055042,
+          "startTime": 3.9150417,
+          "word": "到"
+        },
+        {
+          "confidence": 0.88830185,
+          "endTime": 4.1950417,
+          "startTime": 4.055042,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9684734,
+          "endTime": 4.3850417,
+          "startTime": 4.1950417,
+          "word": "懂"
+        },
+        {
+          "confidence": 0.88747925,
+          "endTime": 4.495042,
+          "startTime": 4.3850417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.95370406,
+          "endTime": 4.6450415,
+          "startTime": 4.495042,
+          "word": "地"
+        },
+        {
+          "confidence": 0.97240853,
+          "endTime": 4.955042,
+          "startTime": 4.6450415,
+          "word": "方，"
+        },
+        {
+          "confidence": 0.96530163,
+          "endTime": 5.1550417,
+          "startTime": 4.995042,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9766636,
+          "endTime": 5.2550416,
+          "startTime": 5.1550417,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9699208,
+          "endTime": 5.3750415,
+          "startTime": 5.2550416,
+          "word": "能"
+        },
+        {
+          "confidence": 0.878152,
+          "endTime": 5.575042,
+          "startTime": 5.3750415,
+          "word": "换"
+        },
+        {
+          "confidence": 0.90776575,
+          "endTime": 5.6750417,
+          "startTime": 5.575042,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8932068,
+          "endTime": 5.8450418,
+          "startTime": 5.6750417,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9252154,
+          "endTime": 6.0650415,
+          "startTime": 5.8450418,
+          "word": "法？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "学完以后，能不能马上动手验证？",
+      "words": [
+        {
+          "confidence": 0.87682617,
+          "endTime": 6.655083,
+          "startTime": 6.470083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8518948,
+          "endTime": 6.7850833,
+          "startTime": 6.655083,
+          "word": "完"
+        },
+        {
+          "confidence": 0.9119178,
+          "endTime": 6.9350834,
+          "startTime": 6.7850833,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9524894,
+          "endTime": 7.255083,
+          "startTime": 6.9350834,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9172124,
+          "endTime": 7.4350834,
+          "startTime": 7.2850833,
+          "word": "能"
+        },
+        {
+          "confidence": 0.97690773,
+          "endTime": 7.5350833,
+          "startTime": 7.4350834,
+          "word": "不"
+        },
+        {
+          "confidence": 0.955375,
+          "endTime": 7.6650834,
+          "startTime": 7.5350833,
+          "word": "能"
+        },
+        {
+          "confidence": 0.8405129,
+          "endTime": 7.795083,
+          "startTime": 7.6650834,
+          "word": "马"
+        },
+        {
+          "confidence": 0.9524812,
+          "endTime": 8.015083,
+          "startTime": 7.795083,
+          "word": "上"
+        },
+        {
+          "confidence": 0.9325033,
+          "endTime": 8.135083,
+          "startTime": 8.015083,
+          "word": "动"
+        },
+        {
+          "confidence": 0.91490954,
+          "endTime": 8.355083,
+          "startTime": 8.135083,
+          "word": "手"
+        },
+        {
+          "confidence": 0.93532693,
+          "endTime": 8.505083,
+          "startTime": 8.355083,
+          "word": "验"
+        },
+        {
+          "confidence": 0.90215665,
+          "endTime": 8.705083,
+          "startTime": 8.505083,
+          "word": "证？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "学编程和人工智能，不只是听一段解释。遇到不懂的地方，能不能换个讲法？学完以后，能不能马上动手验证？知芽把对话、讲解和实践放在同一个学习空间。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "知芽把对话、讲解和实践放在同一个学习空间。",
+      "words": [
+        {
+          "confidence": 0.7434991,
+          "endTime": 9.365125,
+          "startTime": 9.210125,
+          "word": "知"
+        },
+        {
+          "confidence": 0.89510405,
+          "endTime": 9.625125,
+          "startTime": 9.365125,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.7644261,
+          "endTime": 9.765125,
+          "startTime": 9.625125,
+          "word": "把"
+        },
+        {
+          "confidence": 0.56676614,
+          "endTime": 10.195125,
+          "startTime": 9.825125,
+          "word": "对"
+        },
+        {
+          "confidence": 0.36572275,
+          "endTime": 10.305125,
+          "startTime": 10.195125,
+          "word": "话、"
+        },
+        {
+          "confidence": 0.93943524,
+          "endTime": 10.755125,
+          "startTime": 10.5251255,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9432423,
+          "endTime": 11.085125,
+          "startTime": 10.755125,
+          "word": "解"
+        },
+        {
+          "confidence": 0.87845683,
+          "endTime": 11.235125,
+          "startTime": 11.125125,
+          "word": "和"
+        },
+        {
+          "confidence": 0.930024,
+          "endTime": 11.475125,
+          "startTime": 11.235125,
+          "word": "实"
+        },
+        {
+          "confidence": 0.9706556,
+          "endTime": 11.715125,
+          "startTime": 11.475125,
+          "word": "践"
+        },
+        {
+          "confidence": 0.9624479,
+          "endTime": 12.085125,
+          "startTime": 11.935125,
+          "word": "放"
+        },
+        {
+          "confidence": 0.95049167,
+          "endTime": 12.215125,
+          "startTime": 12.085125,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9578711,
+          "endTime": 12.445125,
+          "startTime": 12.215125,
+          "word": "同"
+        },
+        {
+          "confidence": 0.89505553,
+          "endTime": 12.545125,
+          "startTime": 12.445125,
+          "word": "一"
+        },
+        {
+          "confidence": 0.29796243,
+          "endTime": 12.605125,
+          "startTime": 12.545125,
+          "word": "个"
+        },
+        {
+          "confidence": 0.13486767,
+          "endTime": 12.665125,
+          "startTime": 12.605125,
+          "word": "学"
+        },
+        {
+          "confidence": 0.21922779,
+          "endTime": 12.725125,
+          "startTime": 12.665125,
+          "word": "习"
+        },
+        {
+          "confidence": 0.11429107,
+          "endTime": 12.785125,
+          "startTime": 12.725125,
+          "word": "空"
+        },
+        {
+          "confidence": 0.2277181,
+          "endTime": 12.845125,
+          "startTime": 12.785125,
+          "word": "间。"
+        }
+      ]
+    }
+  ]
+}

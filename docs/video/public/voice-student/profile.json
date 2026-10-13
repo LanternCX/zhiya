@@ -1,0 +1,364 @@
+{
+  "duration": 12.123083333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这些信息会整理成学习档案。",
+      "words": [
+        {
+          "confidence": 0.97812533,
+          "endTime": 0.385,
+          "startTime": 0.235,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9835626,
+          "endTime": 0.525,
+          "startTime": 0.385,
+          "word": "些"
+        },
+        {
+          "confidence": 0.9162235,
+          "endTime": 0.705,
+          "startTime": 0.525,
+          "word": "信"
+        },
+        {
+          "confidence": 0.9465391,
+          "endTime": 1.005,
+          "startTime": 0.705,
+          "word": "息"
+        },
+        {
+          "confidence": 0.8438634,
+          "endTime": 1.215,
+          "startTime": 1.045,
+          "word": "会"
+        },
+        {
+          "confidence": 0.8957873,
+          "endTime": 1.405,
+          "startTime": 1.215,
+          "word": "整"
+        },
+        {
+          "confidence": 0.9045095,
+          "endTime": 1.525,
+          "startTime": 1.405,
+          "word": "理"
+        },
+        {
+          "confidence": 0.97103226,
+          "endTime": 1.705,
+          "startTime": 1.525,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9051804,
+          "endTime": 1.895,
+          "startTime": 1.705,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9638028,
+          "endTime": 2.065,
+          "startTime": 1.895,
+          "word": "习"
+        },
+        {
+          "confidence": 0.86276054,
+          "endTime": 2.225,
+          "startTime": 2.065,
+          "word": "档"
+        },
+        {
+          "confidence": 0.913365,
+          "endTime": 2.455,
+          "startTime": 2.225,
+          "word": "案。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "年级不等于水平，已有基础和表达偏好同样重要。",
+      "words": [
+        {
+          "confidence": 0.4584209,
+          "endTime": 3.0750418,
+          "startTime": 3.0000417,
+          "word": "年"
+        },
+        {
+          "confidence": 0.8065572,
+          "endTime": 3.2950418,
+          "startTime": 3.0750418,
+          "word": "级"
+        },
+        {
+          "confidence": 0.8984188,
+          "endTime": 3.4450417,
+          "startTime": 3.2950418,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9714719,
+          "endTime": 3.6250417,
+          "startTime": 3.4450417,
+          "word": "等"
+        },
+        {
+          "confidence": 0.97434556,
+          "endTime": 3.6850417,
+          "startTime": 3.6250417,
+          "word": "于"
+        },
+        {
+          "confidence": 0.89681256,
+          "endTime": 3.9350417,
+          "startTime": 3.6850417,
+          "word": "水"
+        },
+        {
+          "confidence": 0.9493221,
+          "endTime": 4.225042,
+          "startTime": 3.9350417,
+          "word": "平，"
+        },
+        {
+          "confidence": 0.6935189,
+          "endTime": 4.705042,
+          "startTime": 4.5950418,
+          "word": "已"
+        },
+        {
+          "confidence": 0.8585803,
+          "endTime": 4.825042,
+          "startTime": 4.705042,
+          "word": "有"
+        },
+        {
+          "confidence": 0.87849814,
+          "endTime": 5.035042,
+          "startTime": 4.825042,
+          "word": "基"
+        },
+        {
+          "confidence": 0.9628035,
+          "endTime": 5.285042,
+          "startTime": 5.035042,
+          "word": "础"
+        },
+        {
+          "confidence": 0.9504954,
+          "endTime": 5.4650416,
+          "startTime": 5.285042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9736815,
+          "endTime": 5.6350417,
+          "startTime": 5.4650416,
+          "word": "表"
+        },
+        {
+          "confidence": 0.9522624,
+          "endTime": 5.785042,
+          "startTime": 5.6350417,
+          "word": "达"
+        },
+        {
+          "confidence": 0.9093751,
+          "endTime": 5.9850416,
+          "startTime": 5.785042,
+          "word": "偏"
+        },
+        {
+          "confidence": 0.9247886,
+          "endTime": 6.2350416,
+          "startTime": 5.9850416,
+          "word": "好"
+        },
+        {
+          "confidence": 0.90306246,
+          "endTime": 6.4750414,
+          "startTime": 6.2350416,
+          "word": "同"
+        },
+        {
+          "confidence": 0.9625482,
+          "endTime": 6.625042,
+          "startTime": 6.4750414,
+          "word": "样"
+        },
+        {
+          "confidence": 0.90066814,
+          "endTime": 6.825042,
+          "startTime": 6.625042,
+          "word": "重"
+        },
+        {
+          "confidence": 0.8658997,
+          "endTime": 6.9850416,
+          "startTime": 6.825042,
+          "word": "要。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这些信息会整理成学习档案。年级不等于水平，已有基础和表达偏好同样重要。你可以查看记录，也可以提出修改，或者要求忘记某条信息。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "你可以查看记录，也可以提出修改，或者要求忘记某条信息。",
+      "words": [
+        {
+          "confidence": 0.9642696,
+          "endTime": 7.5050836,
+          "startTime": 7.3750834,
+          "word": "你"
+        },
+        {
+          "confidence": 0.75493324,
+          "endTime": 7.6350837,
+          "startTime": 7.5050836,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6740775,
+          "endTime": 7.725084,
+          "startTime": 7.6350837,
+          "word": "以"
+        },
+        {
+          "confidence": 0.97097194,
+          "endTime": 7.9050837,
+          "startTime": 7.725084,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9446122,
+          "endTime": 8.055083,
+          "startTime": 7.9050837,
+          "word": "看"
+        },
+        {
+          "confidence": 0.7426402,
+          "endTime": 8.245084,
+          "startTime": 8.055083,
+          "word": "记"
+        },
+        {
+          "confidence": 0.95417774,
+          "endTime": 8.495084,
+          "startTime": 8.245084,
+          "word": "录，"
+        },
+        {
+          "confidence": 0.96471137,
+          "endTime": 8.835084,
+          "startTime": 8.695084,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7855594,
+          "endTime": 8.975083,
+          "startTime": 8.835084,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7279448,
+          "endTime": 9.0650835,
+          "startTime": 8.975083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.95148855,
+          "endTime": 9.225083,
+          "startTime": 9.0650835,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9715558,
+          "endTime": 9.365084,
+          "startTime": 9.225083,
+          "word": "出"
+        },
+        {
+          "confidence": 0.8767818,
+          "endTime": 9.585084,
+          "startTime": 9.365084,
+          "word": "修"
+        },
+        {
+          "confidence": 0.9339373,
+          "endTime": 9.8150835,
+          "startTime": 9.585084,
+          "word": "改，"
+        },
+        {
+          "confidence": 0.90933734,
+          "endTime": 10.165084,
+          "startTime": 9.975083,
+          "word": "或"
+        },
+        {
+          "confidence": 0.95019203,
+          "endTime": 10.405084,
+          "startTime": 10.165084,
+          "word": "者"
+        },
+        {
+          "confidence": 0.90063155,
+          "endTime": 10.5650835,
+          "startTime": 10.405084,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9586715,
+          "endTime": 10.805083,
+          "startTime": 10.5650835,
+          "word": "求"
+        },
+        {
+          "confidence": 0.9396719,
+          "endTime": 10.935083,
+          "startTime": 10.805083,
+          "word": "忘"
+        },
+        {
+          "confidence": 0.92889965,
+          "endTime": 11.075084,
+          "startTime": 10.935083,
+          "word": "记"
+        },
+        {
+          "confidence": 0.17159778,
+          "endTime": 11.135084,
+          "startTime": 11.075084,
+          "word": "某"
+        },
+        {
+          "confidence": 0.18268842,
+          "endTime": 11.195084,
+          "startTime": 11.135084,
+          "word": "条"
+        },
+        {
+          "confidence": 0.16459036,
+          "endTime": 11.255083,
+          "startTime": 11.195084,
+          "word": "信"
+        },
+        {
+          "confidence": 0.27488723,
+          "endTime": 11.3150835,
+          "startTime": 11.255083,
+          "word": "息。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,538 @@
+{
+  "duration": 18.068791666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "这种分步控制，让讲解节奏留在老师手里。",
+      "words": [
+        {
+          "confidence": 0.96560687,
+          "endTime": 0.385,
+          "startTime": 0.215,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9699464,
+          "endTime": 0.515,
+          "startTime": 0.385,
+          "word": "种"
+        },
+        {
+          "confidence": 0.96448004,
+          "endTime": 0.765,
+          "startTime": 0.515,
+          "word": "分"
+        },
+        {
+          "confidence": 0.959998,
+          "endTime": 0.925,
+          "startTime": 0.765,
+          "word": "步"
+        },
+        {
+          "confidence": 0.84908456,
+          "endTime": 1.175,
+          "startTime": 0.925,
+          "word": "控"
+        },
+        {
+          "confidence": 0.8768509,
+          "endTime": 1.415,
+          "startTime": 1.175,
+          "word": "制，"
+        },
+        {
+          "confidence": 0.90669036,
+          "endTime": 1.825,
+          "startTime": 1.645,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9110208,
+          "endTime": 2.065,
+          "startTime": 1.825,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9751833,
+          "endTime": 2.235,
+          "startTime": 2.065,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9633474,
+          "endTime": 2.455,
+          "startTime": 2.235,
+          "word": "节"
+        },
+        {
+          "confidence": 0.9621013,
+          "endTime": 2.675,
+          "startTime": 2.455,
+          "word": "奏"
+        },
+        {
+          "confidence": 0.97663546,
+          "endTime": 2.835,
+          "startTime": 2.675,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9287199,
+          "endTime": 3.005,
+          "startTime": 2.835,
+          "word": "在"
+        },
+        {
+          "confidence": 0.91965854,
+          "endTime": 3.135,
+          "startTime": 3.005,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98733664,
+          "endTime": 3.355,
+          "startTime": 3.135,
+          "word": "师"
+        },
+        {
+          "confidence": 0.95403355,
+          "endTime": 3.615,
+          "startTime": 3.355,
+          "word": "手"
+        },
+        {
+          "confidence": 0.9297458,
+          "endTime": 3.805,
+          "startTime": 3.615,
+          "word": "里。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "讲得快的班，可以连着演示；",
+      "words": [
+        {
+          "confidence": 0.8044783,
+          "endTime": 4.3650417,
+          "startTime": 4.2200418,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.93848217,
+          "endTime": 4.475042,
+          "startTime": 4.3650417,
+          "word": "得"
+        },
+        {
+          "confidence": 0.9454015,
+          "endTime": 4.7150416,
+          "startTime": 4.475042,
+          "word": "快"
+        },
+        {
+          "confidence": 0.92083305,
+          "endTime": 4.825042,
+          "startTime": 4.7150416,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8932981,
+          "endTime": 5.0650415,
+          "startTime": 4.825042,
+          "word": "班，"
+        },
+        {
+          "confidence": 0.86685133,
+          "endTime": 5.3950415,
+          "startTime": 5.2350416,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6967172,
+          "endTime": 5.5250416,
+          "startTime": 5.3950415,
+          "word": "以"
+        },
+        {
+          "confidence": 0.93468285,
+          "endTime": 5.705042,
+          "startTime": 5.5250416,
+          "word": "连"
+        },
+        {
+          "confidence": 0.69023544,
+          "endTime": 5.8450418,
+          "startTime": 5.705042,
+          "word": "着"
+        },
+        {
+          "confidence": 0.93320733,
+          "endTime": 6.015042,
+          "startTime": 5.8450418,
+          "word": "演"
+        },
+        {
+          "confidence": 0.9516233,
+          "endTime": 6.335042,
+          "startTime": 6.015042,
+          "word": "示；"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "需要多想一下的班，就在中间停下来。",
+      "words": [
+        {
+          "confidence": 0.94964284,
+          "endTime": 6.7550836,
+          "startTime": 6.5600834,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9539105,
+          "endTime": 6.8750834,
+          "startTime": 6.7550836,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9604134,
+          "endTime": 7.0450835,
+          "startTime": 6.8750834,
+          "word": "多"
+        },
+        {
+          "confidence": 0.9428321,
+          "endTime": 7.345083,
+          "startTime": 7.0450835,
+          "word": "想"
+        },
+        {
+          "confidence": 0.8761767,
+          "endTime": 7.4050837,
+          "startTime": 7.345083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9759877,
+          "endTime": 7.6050835,
+          "startTime": 7.4050837,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9451941,
+          "endTime": 7.6950836,
+          "startTime": 7.6050835,
+          "word": "的"
+        },
+        {
+          "confidence": 0.93801427,
+          "endTime": 7.9450836,
+          "startTime": 7.6950836,
+          "word": "班，"
+        },
+        {
+          "confidence": 0.8992946,
+          "endTime": 8.295083,
+          "startTime": 8.165083,
+          "word": "就"
+        },
+        {
+          "confidence": 0.9413819,
+          "endTime": 8.435083,
+          "startTime": 8.295083,
+          "word": "在"
+        },
+        {
+          "confidence": 0.89530736,
+          "endTime": 8.575084,
+          "startTime": 8.435083,
+          "word": "中"
+        },
+        {
+          "confidence": 0.9424979,
+          "endTime": 8.755083,
+          "startTime": 8.575084,
+          "word": "间"
+        },
+        {
+          "confidence": 0.9330805,
+          "endTime": 9.015083,
+          "startTime": 8.755083,
+          "word": "停"
+        },
+        {
+          "confidence": 0.97165304,
+          "endTime": 9.235084,
+          "startTime": 9.015083,
+          "word": "下"
+        },
+        {
+          "confidence": 0.9837804,
+          "endTime": 9.425083,
+          "startTime": 9.235084,
+          "word": "来。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "动画负责把过程展开，老师负责决定什么时候继续。",
+      "words": [
+        {
+          "confidence": 0.9055425,
+          "endTime": 9.945126,
+          "startTime": 9.800125,
+          "word": "动"
+        },
+        {
+          "confidence": 0.9374726,
+          "endTime": 10.185125,
+          "startTime": 9.945126,
+          "word": "画"
+        },
+        {
+          "confidence": 0.8860947,
+          "endTime": 10.375125,
+          "startTime": 10.185125,
+          "word": "负"
+        },
+        {
+          "confidence": 0.9544984,
+          "endTime": 10.5251255,
+          "startTime": 10.375125,
+          "word": "责"
+        },
+        {
+          "confidence": 0.85045403,
+          "endTime": 10.655125,
+          "startTime": 10.5251255,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9081749,
+          "endTime": 10.815125,
+          "startTime": 10.655125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.97650546,
+          "endTime": 10.985125,
+          "startTime": 10.815125,
+          "word": "程"
+        },
+        {
+          "confidence": 0.80467314,
+          "endTime": 11.175125,
+          "startTime": 10.985125,
+          "word": "展"
+        },
+        {
+          "confidence": 0.9472781,
+          "endTime": 11.455125,
+          "startTime": 11.175125,
+          "word": "开，"
+        },
+        {
+          "confidence": 0.9704792,
+          "endTime": 11.925125,
+          "startTime": 11.765125,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9566926,
+          "endTime": 12.215125,
+          "startTime": 11.925125,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8067268,
+          "endTime": 12.395125,
+          "startTime": 12.215125,
+          "word": "负"
+        },
+        {
+          "confidence": 0.88078517,
+          "endTime": 12.535125,
+          "startTime": 12.395125,
+          "word": "责"
+        },
+        {
+          "confidence": 0.8573823,
+          "endTime": 12.725125,
+          "startTime": 12.535125,
+          "word": "决"
+        },
+        {
+          "confidence": 0.97838724,
+          "endTime": 12.905125,
+          "startTime": 12.725125,
+          "word": "定"
+        },
+        {
+          "confidence": 0.8535663,
+          "endTime": 13.125125,
+          "startTime": 12.905125,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98261184,
+          "endTime": 13.205125,
+          "startTime": 13.125125,
+          "word": "么"
+        },
+        {
+          "confidence": 0.68475205,
+          "endTime": 13.295125,
+          "startTime": 13.205125,
+          "word": "时"
+        },
+        {
+          "confidence": 0.109320715,
+          "endTime": 13.355125,
+          "startTime": 13.295125,
+          "word": "候"
+        },
+        {
+          "confidence": 0.06955094,
+          "endTime": 13.415125,
+          "startTime": 13.355125,
+          "word": "继"
+        },
+        {
+          "confidence": 0.1447537,
+          "endTime": 13.475125,
+          "startTime": 13.415125,
+          "word": "续。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这种分步控制，让讲解节奏留在老师手里。讲得快的班，可以连着演示；需要多想一下的班，就在中间停下来。动画负责把过程展开，老师负责决定什么时候继续。看清过程以后，我们再让学生自己写一点代码。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "看清过程以后，我们再让学生自己写一点代码。",
+      "words": [
+        {
+          "confidence": 0.9821178,
+          "endTime": 14.485167,
+          "startTime": 14.315166,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9213554,
+          "endTime": 14.635166,
+          "startTime": 14.485167,
+          "word": "清"
+        },
+        {
+          "confidence": 0.937311,
+          "endTime": 14.795166,
+          "startTime": 14.635166,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9755591,
+          "endTime": 14.965166,
+          "startTime": 14.795166,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9227904,
+          "endTime": 15.095166,
+          "startTime": 14.965166,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9738986,
+          "endTime": 15.435166,
+          "startTime": 15.095166,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.9318454,
+          "endTime": 15.705166,
+          "startTime": 15.565166,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9829203,
+          "endTime": 15.815166,
+          "startTime": 15.705166,
+          "word": "们"
+        },
+        {
+          "confidence": 0.9433571,
+          "endTime": 15.975166,
+          "startTime": 15.815166,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9307803,
+          "endTime": 16.085167,
+          "startTime": 15.975166,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9351288,
+          "endTime": 16.295166,
+          "startTime": 16.085167,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9010821,
+          "endTime": 16.575167,
+          "startTime": 16.295166,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9492833,
+          "endTime": 16.765167,
+          "startTime": 16.615166,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9828193,
+          "endTime": 16.985167,
+          "startTime": 16.765167,
+          "word": "己"
+        },
+        {
+          "confidence": 0.8657941,
+          "endTime": 17.205166,
+          "startTime": 16.985167,
+          "word": "写"
+        },
+        {
+          "confidence": 0.8754287,
+          "endTime": 17.265167,
+          "startTime": 17.205166,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9547055,
+          "endTime": 17.425167,
+          "startTime": 17.265167,
+          "word": "点"
+        },
+        {
+          "confidence": 0.96843237,
+          "endTime": 17.615166,
+          "startTime": 17.425167,
+          "word": "代"
+        },
+        {
+          "confidence": 0.83355284,
+          "endTime": 17.825167,
+          "startTime": 17.615166,
+          "word": "码。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+{
+  "duration": 11.061958333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "自己的学习笔记也能分享。",
+      "words": [
+        {
+          "confidence": 0.9159456,
+          "endTime": 0.365,
+          "startTime": 0.215,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9807921,
+          "endTime": 0.515,
+          "startTime": 0.365,
+          "word": "己"
+        },
+        {
+          "confidence": 0.94308615,
+          "endTime": 0.605,
+          "startTime": 0.515,
+          "word": "的"
+        },
+        {
+          "confidence": 0.94318175,
+          "endTime": 0.765,
+          "startTime": 0.605,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9611155,
+          "endTime": 0.925,
+          "startTime": 0.765,
+          "word": "习"
+        },
+        {
+          "confidence": 0.94937086,
+          "endTime": 1.075,
+          "startTime": 0.925,
+          "word": "笔"
+        },
+        {
+          "confidence": 0.878543,
+          "endTime": 1.355,
+          "startTime": 1.075,
+          "word": "记"
+        },
+        {
+          "confidence": 0.7757006,
+          "endTime": 1.455,
+          "startTime": 1.355,
+          "word": "也"
+        },
+        {
+          "confidence": 0.9767256,
+          "endTime": 1.585,
+          "startTime": 1.455,
+          "word": "能"
+        },
+        {
+          "confidence": 0.97130543,
+          "endTime": 1.765,
+          "startTime": 1.585,
+          "word": "分"
+        },
+        {
+          "confidence": 0.97012836,
+          "endTime": 2.035,
+          "startTime": 1.765,
+          "word": "享。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "打开分享设置，选择班级，勾选后保存。",
+      "words": [
+        {
+          "confidence": 0.47258025,
+          "endTime": 2.5350418,
+          "startTime": 2.4600418,
+          "word": "打"
+        },
+        {
+          "confidence": 0.6197206,
+          "endTime": 2.6650417,
+          "startTime": 2.5350418,
+          "word": "开"
+        },
+        {
+          "confidence": 0.7835402,
+          "endTime": 2.7850418,
+          "startTime": 2.6650417,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9767572,
+          "endTime": 2.955042,
+          "startTime": 2.7850418,
+          "word": "享"
+        },
+        {
+          "confidence": 0.9414093,
+          "endTime": 3.1950417,
+          "startTime": 2.955042,
+          "word": "设"
+        },
+        {
+          "confidence": 0.9245048,
+          "endTime": 3.4250417,
+          "startTime": 3.1950417,
+          "word": "置，"
+        },
+        {
+          "confidence": 0.9238274,
+          "endTime": 3.8350418,
+          "startTime": 3.6250417,
+          "word": "选"
+        },
+        {
+          "confidence": 0.9348919,
+          "endTime": 3.9850416,
+          "startTime": 3.8350418,
+          "word": "择"
+        },
+        {
+          "confidence": 0.96640384,
+          "endTime": 4.165042,
+          "startTime": 3.9850416,
+          "word": "班"
+        },
+        {
+          "confidence": 0.95424527,
+          "endTime": 4.465042,
+          "startTime": 4.165042,
+          "word": "级，"
+        },
+        {
+          "confidence": 0.8214266,
+          "endTime": 4.8950415,
+          "startTime": 4.755042,
+          "word": "勾"
+        },
+        {
+          "confidence": 0.8840231,
+          "endTime": 5.0950418,
+          "startTime": 4.8950415,
+          "word": "选"
+        },
+        {
+          "confidence": 0.88732296,
+          "endTime": 5.335042,
+          "startTime": 5.0950418,
+          "word": "后"
+        },
+        {
+          "confidence": 0.91163325,
+          "endTime": 5.505042,
+          "startTime": 5.335042,
+          "word": "保"
+        },
+        {
+          "confidence": 0.7196466,
+          "endTime": 5.795042,
+          "startTime": 5.505042,
+          "word": "存。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "自己的学习笔记也能分享。打开分享设置，选择班级，勾选后保存。分享的是选中的材料，个人学习档案和聊天记录不会一起公开。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "分享的是选中的材料，个人学习档案和聊天记录不会一起公开。",
+      "words": [
+        {
+          "confidence": 0.87937057,
+          "endTime": 6.365083,
+          "startTime": 6.2450833,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9621607,
+          "endTime": 6.615083,
+          "startTime": 6.365083,
+          "word": "享"
+        },
+        {
+          "confidence": 0.9322315,
+          "endTime": 6.7450833,
+          "startTime": 6.615083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9759504,
+          "endTime": 6.8950834,
+          "startTime": 6.7450833,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9390023,
+          "endTime": 7.0750833,
+          "startTime": 6.8950834,
+          "word": "选"
+        },
+        {
+          "confidence": 0.9431366,
+          "endTime": 7.235083,
+          "startTime": 7.0750833,
+          "word": "中"
+        },
+        {
+          "confidence": 0.90558565,
+          "endTime": 7.335083,
+          "startTime": 7.235083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9282577,
+          "endTime": 7.5550833,
+          "startTime": 7.335083,
+          "word": "材"
+        },
+        {
+          "confidence": 0.881927,
+          "endTime": 7.755083,
+          "startTime": 7.5550833,
+          "word": "料，"
+        },
+        {
+          "confidence": 0.89177203,
+          "endTime": 8.265083,
+          "startTime": 8.105083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.958574,
+          "endTime": 8.365084,
+          "startTime": 8.265083,
+          "word": "人"
+        },
+        {
+          "confidence": 0.8828207,
+          "endTime": 8.515083,
+          "startTime": 8.365084,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9104298,
+          "endTime": 8.645083,
+          "startTime": 8.515083,
+          "word": "习"
+        },
+        {
+          "confidence": 0.7426471,
+          "endTime": 8.8150835,
+          "startTime": 8.645083,
+          "word": "档"
+        },
+        {
+          "confidence": 0.80959404,
+          "endTime": 8.995083,
+          "startTime": 8.8150835,
+          "word": "案"
+        },
+        {
+          "confidence": 0.9253804,
+          "endTime": 9.155083,
+          "startTime": 8.995083,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9633993,
+          "endTime": 9.285084,
+          "startTime": 9.155083,
+          "word": "聊"
+        },
+        {
+          "confidence": 0.982883,
+          "endTime": 9.455084,
+          "startTime": 9.285084,
+          "word": "天"
+        },
+        {
+          "confidence": 0.8340625,
+          "endTime": 9.655083,
+          "startTime": 9.455084,
+          "word": "记"
+        },
+        {
+          "confidence": 0.919961,
+          "endTime": 9.875083,
+          "startTime": 9.655083,
+          "word": "录"
+        },
+        {
+          "confidence": 0.813293,
+          "endTime": 10.025084,
+          "startTime": 9.915083,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9464624,
+          "endTime": 10.225083,
+          "startTime": 10.025084,
+          "word": "会"
+        },
+        {
+          "confidence": 0.49726114,
+          "endTime": 10.255083,
+          "startTime": 10.225083,
+          "word": "一"
+        },
+        {
+          "confidence": 0.28572777,
+          "endTime": 10.3150835,
+          "startTime": 10.255083,
+          "word": "起"
+        },
+        {
+          "confidence": 0.09471473,
+          "endTime": 10.375084,
+          "startTime": 10.3150835,
+          "word": "公"
+        },
+        {
+          "confidence": 0.14573283,
+          "endTime": 10.435083,
+          "startTime": 10.375084,
+          "word": "开。"
+        }
+      ]
+    }
+  ]
+}

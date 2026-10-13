@@ -1,0 +1,196 @@
+{
+  "duration": 6.0495833333333335,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "老师决定这堂课怎么教。",
+      "words": [
+        {
+          "confidence": 0.975392,
+          "endTime": 0.375,
+          "startTime": 0.225,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96926206,
+          "endTime": 0.585,
+          "startTime": 0.375,
+          "word": "师"
+        },
+        {
+          "confidence": 0.83506334,
+          "endTime": 0.745,
+          "startTime": 0.585,
+          "word": "决"
+        },
+        {
+          "confidence": 0.951537,
+          "endTime": 1.005,
+          "startTime": 0.745,
+          "word": "定"
+        },
+        {
+          "confidence": 0.87752044,
+          "endTime": 1.155,
+          "startTime": 1.005,
+          "word": "这"
+        },
+        {
+          "confidence": 0.90475863,
+          "endTime": 1.325,
+          "startTime": 1.155,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.96559316,
+          "endTime": 1.515,
+          "startTime": 1.325,
+          "word": "课"
+        },
+        {
+          "confidence": 0.8799863,
+          "endTime": 1.665,
+          "startTime": 1.515,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9671901,
+          "endTime": 1.745,
+          "startTime": 1.665,
+          "word": "么"
+        },
+        {
+          "confidence": 0.8650369,
+          "endTime": 1.995,
+          "startTime": 1.745,
+          "word": "教。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师决定这堂课怎么教。知芽帮助这些决定，变成可以使用的教学材料。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "知芽帮助这些决定，变成可以使用的教学材料。",
+      "words": [
+        {
+          "confidence": 0.55384135,
+          "endTime": 2.6350417,
+          "startTime": 2.5600417,
+          "word": "知"
+        },
+        {
+          "confidence": 0.8486889,
+          "endTime": 2.7850416,
+          "startTime": 2.6350417,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.89937097,
+          "endTime": 2.9550416,
+          "startTime": 2.7850416,
+          "word": "帮"
+        },
+        {
+          "confidence": 0.9727344,
+          "endTime": 3.0850415,
+          "startTime": 2.9550416,
+          "word": "助"
+        },
+        {
+          "confidence": 0.96162635,
+          "endTime": 3.1950417,
+          "startTime": 3.0850415,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9749384,
+          "endTime": 3.3450418,
+          "startTime": 3.1950417,
+          "word": "些"
+        },
+        {
+          "confidence": 0.87615645,
+          "endTime": 3.5450416,
+          "startTime": 3.3450418,
+          "word": "决"
+        },
+        {
+          "confidence": 0.9274096,
+          "endTime": 3.7850418,
+          "startTime": 3.5450416,
+          "word": "定，"
+        },
+        {
+          "confidence": 0.9355398,
+          "endTime": 4.015042,
+          "startTime": 3.8450418,
+          "word": "变"
+        },
+        {
+          "confidence": 0.97991824,
+          "endTime": 4.245042,
+          "startTime": 4.015042,
+          "word": "成"
+        },
+        {
+          "confidence": 0.77999,
+          "endTime": 4.415042,
+          "startTime": 4.245042,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6750606,
+          "endTime": 4.5250416,
+          "startTime": 4.415042,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96415234,
+          "endTime": 4.7550416,
+          "startTime": 4.5250416,
+          "word": "使"
+        },
+        {
+          "confidence": 0.98944974,
+          "endTime": 4.915042,
+          "startTime": 4.7550416,
+          "word": "用"
+        },
+        {
+          "confidence": 0.95527184,
+          "endTime": 5.0150414,
+          "startTime": 4.915042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.82434845,
+          "endTime": 5.1350417,
+          "startTime": 5.0150414,
+          "word": "教"
+        },
+        {
+          "confidence": 0.19918892,
+          "endTime": 5.1950417,
+          "startTime": 5.1350417,
+          "word": "学"
+        },
+        {
+          "confidence": 0.10989329,
+          "endTime": 5.2550416,
+          "startTime": 5.1950417,
+          "word": "材"
+        },
+        {
+          "confidence": 0.17114967,
+          "endTime": 5.3150415,
+          "startTime": 5.2550416,
+          "word": "料。"
+        }
+      ]
+    }
+  ]
+}

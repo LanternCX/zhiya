@@ -1,0 +1,27 @@
+{
+  "name": "zhiya-video",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio src/index.ts --port=3100",
+    "check": "tsc --noEmit",
+    "dev:replay": "node ../../node_modules/vite/bin/vite.js --config replay/vite.config.mjs",
+    "build:replay": "node ../../node_modules/vite/bin/vite.js build --config replay/vite.config.mjs",
+    "check:replay": "node scripts/check-replay.mjs",
+    "render:sample": "remotion render src/index.ts TeacherSample out/teacher-sample-mg-qwen.mp4 --codec=h264 --crf=18",
+    "render:full": "remotion render src/index.ts TeacherFilm out/zhiya-teacher-introduction.mp4 --codec=h264 --crf=18",
+    "render:student": "remotion render src/index.ts StudentFilm out/zhiya-student-introduction.mp4 --codec=h264 --crf=18",
+    "still": "remotion still src/index.ts TeacherSample out/preview.png --frame=180"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "lucide-react": "1.53.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}

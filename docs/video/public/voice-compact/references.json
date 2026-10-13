@@ -1,0 +1,508 @@
+{
+  "duration": 16.989125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "已有的材料也能一起参考。",
+      "words": [
+        {
+          "confidence": 0.63149315,
+          "endTime": 0.465,
+          "startTime": 0.295,
+          "word": "已"
+        },
+        {
+          "confidence": 0.7945319,
+          "endTime": 0.585,
+          "startTime": 0.465,
+          "word": "有"
+        },
+        {
+          "confidence": 0.92311966,
+          "endTime": 0.695,
+          "startTime": 0.585,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9415877,
+          "endTime": 0.945,
+          "startTime": 0.695,
+          "word": "材"
+        },
+        {
+          "confidence": 0.85029954,
+          "endTime": 1.205,
+          "startTime": 0.945,
+          "word": "料"
+        },
+        {
+          "confidence": 0.84473103,
+          "endTime": 1.345,
+          "startTime": 1.205,
+          "word": "也"
+        },
+        {
+          "confidence": 0.9695206,
+          "endTime": 1.485,
+          "startTime": 1.345,
+          "word": "能"
+        },
+        {
+          "confidence": 0.85463524,
+          "endTime": 1.635,
+          "startTime": 1.485,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9646466,
+          "endTime": 1.815,
+          "startTime": 1.635,
+          "word": "起"
+        },
+        {
+          "confidence": 0.953253,
+          "endTime": 1.995,
+          "startTime": 1.815,
+          "word": "参"
+        },
+        {
+          "confidence": 0.90128344,
+          "endTime": 2.305,
+          "startTime": 1.995,
+          "word": "考。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "上传教案和图片，再告诉知芽要怎样使用。",
+      "words": [
+        {
+          "confidence": 0.6355536,
+          "endTime": 2.9350417,
+          "startTime": 2.8600416,
+          "word": "上"
+        },
+        {
+          "confidence": 0.86171174,
+          "endTime": 3.1450417,
+          "startTime": 2.9350417,
+          "word": "传"
+        },
+        {
+          "confidence": 0.826193,
+          "endTime": 3.4050417,
+          "startTime": 3.1450417,
+          "word": "教"
+        },
+        {
+          "confidence": 0.7884387,
+          "endTime": 3.5650415,
+          "startTime": 3.4050417,
+          "word": "案"
+        },
+        {
+          "confidence": 0.91531235,
+          "endTime": 3.7050416,
+          "startTime": 3.5650415,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9653409,
+          "endTime": 3.8850417,
+          "startTime": 3.7050416,
+          "word": "图"
+        },
+        {
+          "confidence": 0.97968155,
+          "endTime": 4.1550417,
+          "startTime": 3.8850417,
+          "word": "片，"
+        },
+        {
+          "confidence": 0.93502945,
+          "endTime": 4.5950418,
+          "startTime": 4.4250417,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9497538,
+          "endTime": 4.7350416,
+          "startTime": 4.5950418,
+          "word": "告"
+        },
+        {
+          "confidence": 0.9859983,
+          "endTime": 4.8650417,
+          "startTime": 4.7350416,
+          "word": "诉"
+        },
+        {
+          "confidence": 0.8055286,
+          "endTime": 5.0650415,
+          "startTime": 4.8650417,
+          "word": "知"
+        },
+        {
+          "confidence": 0.7678213,
+          "endTime": 5.2650414,
+          "startTime": 5.0650415,
+          "word": "芽"
+        },
+        {
+          "confidence": 0.9615018,
+          "endTime": 5.375042,
+          "startTime": 5.2650414,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8831447,
+          "endTime": 5.5550413,
+          "startTime": 5.375042,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9809836,
+          "endTime": 5.665042,
+          "startTime": 5.5550413,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9101807,
+          "endTime": 5.9050417,
+          "startTime": 5.665042,
+          "word": "使"
+        },
+        {
+          "confidence": 0.9789808,
+          "endTime": 6.1350417,
+          "startTime": 5.9050417,
+          "word": "用。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "它读取教案里的活动，识别图片中的点餐场景，",
+      "words": [
+        {
+          "confidence": 0.81031096,
+          "endTime": 6.6750836,
+          "startTime": 6.4800835,
+          "word": "它"
+        },
+        {
+          "confidence": 0.9420106,
+          "endTime": 6.845083,
+          "startTime": 6.6750836,
+          "word": "读"
+        },
+        {
+          "confidence": 0.8067765,
+          "endTime": 7.0150833,
+          "startTime": 6.845083,
+          "word": "取"
+        },
+        {
+          "confidence": 0.9007523,
+          "endTime": 7.2350836,
+          "startTime": 7.0150833,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8541368,
+          "endTime": 7.3650837,
+          "startTime": 7.2350836,
+          "word": "案"
+        },
+        {
+          "confidence": 0.9448203,
+          "endTime": 7.4650836,
+          "startTime": 7.3650837,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9736791,
+          "endTime": 7.5650835,
+          "startTime": 7.4650836,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9410383,
+          "endTime": 7.7750835,
+          "startTime": 7.5650835,
+          "word": "活"
+        },
+        {
+          "confidence": 0.980096,
+          "endTime": 7.9950833,
+          "startTime": 7.7750835,
+          "word": "动，"
+        },
+        {
+          "confidence": 0.9358879,
+          "endTime": 8.445084,
+          "startTime": 8.215083,
+          "word": "识"
+        },
+        {
+          "confidence": 0.91281986,
+          "endTime": 8.605083,
+          "startTime": 8.445084,
+          "word": "别"
+        },
+        {
+          "confidence": 0.9896412,
+          "endTime": 8.775084,
+          "startTime": 8.605083,
+          "word": "图"
+        },
+        {
+          "confidence": 0.98826855,
+          "endTime": 9.005083,
+          "startTime": 8.775084,
+          "word": "片"
+        },
+        {
+          "confidence": 0.94706273,
+          "endTime": 9.145083,
+          "startTime": 9.005083,
+          "word": "中"
+        },
+        {
+          "confidence": 0.9738498,
+          "endTime": 9.255083,
+          "startTime": 9.145083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9758911,
+          "endTime": 9.395083,
+          "startTime": 9.255083,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9733229,
+          "endTime": 9.585083,
+          "startTime": 9.395083,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.97679675,
+          "endTime": 9.825084,
+          "startTime": 9.585083,
+          "word": "场"
+        },
+        {
+          "confidence": 0.8861762,
+          "endTime": 10.025084,
+          "startTime": 9.825084,
+          "word": "景，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "结合这堂课的目标提出安排。",
+      "words": [
+        {
+          "confidence": 0.92743075,
+          "endTime": 10.605125,
+          "startTime": 10.480125,
+          "word": "结"
+        },
+        {
+          "confidence": 0.9577076,
+          "endTime": 10.805125,
+          "startTime": 10.605125,
+          "word": "合"
+        },
+        {
+          "confidence": 0.960583,
+          "endTime": 10.935125,
+          "startTime": 10.805125,
+          "word": "这"
+        },
+        {
+          "confidence": 0.95600516,
+          "endTime": 11.095125,
+          "startTime": 10.935125,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.9673702,
+          "endTime": 11.265125,
+          "startTime": 11.095125,
+          "word": "课"
+        },
+        {
+          "confidence": 0.89267117,
+          "endTime": 11.345125,
+          "startTime": 11.265125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9718637,
+          "endTime": 11.505125,
+          "startTime": 11.345125,
+          "word": "目"
+        },
+        {
+          "confidence": 0.9046311,
+          "endTime": 11.715125,
+          "startTime": 11.505125,
+          "word": "标"
+        },
+        {
+          "confidence": 0.3855608,
+          "endTime": 11.805125,
+          "startTime": 11.715125,
+          "word": "提"
+        },
+        {
+          "confidence": 0.0916921,
+          "endTime": 11.865126,
+          "startTime": 11.805125,
+          "word": "出"
+        },
+        {
+          "confidence": 0.12956358,
+          "endTime": 11.895125,
+          "startTime": 11.865126,
+          "word": "安"
+        },
+        {
+          "confidence": 0.2918777,
+          "endTime": 11.955126,
+          "startTime": 11.895125,
+          "word": "排。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "已有的材料也能一起参考。上传教案和图片，再告诉知芽要怎样使用。它读取教案里的活动，识别图片中的点餐场景，结合这堂课的目标提出安排。识别不清楚的地方会保留提示，引用也能回看。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "识别不清楚的地方会保留提示，引用也能回看。",
+      "words": [
+        {
+          "confidence": 0.92719805,
+          "endTime": 13.115167,
+          "startTime": 12.885167,
+          "word": "识"
+        },
+        {
+          "confidence": 0.85167366,
+          "endTime": 13.265167,
+          "startTime": 13.115167,
+          "word": "别"
+        },
+        {
+          "confidence": 0.9409994,
+          "endTime": 13.385167,
+          "startTime": 13.265167,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9497699,
+          "endTime": 13.605167,
+          "startTime": 13.385167,
+          "word": "清"
+        },
+        {
+          "confidence": 0.9218223,
+          "endTime": 13.755167,
+          "startTime": 13.605167,
+          "word": "楚"
+        },
+        {
+          "confidence": 0.92631465,
+          "endTime": 13.855167,
+          "startTime": 13.755167,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9634211,
+          "endTime": 14.025167,
+          "startTime": 13.855167,
+          "word": "地"
+        },
+        {
+          "confidence": 0.84835124,
+          "endTime": 14.245167,
+          "startTime": 14.025167,
+          "word": "方"
+        },
+        {
+          "confidence": 0.90564346,
+          "endTime": 14.455167,
+          "startTime": 14.245167,
+          "word": "会"
+        },
+        {
+          "confidence": 0.9196993,
+          "endTime": 14.615167,
+          "startTime": 14.455167,
+          "word": "保"
+        },
+        {
+          "confidence": 0.9324975,
+          "endTime": 14.755167,
+          "startTime": 14.615167,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9267888,
+          "endTime": 14.935167,
+          "startTime": 14.755167,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9580928,
+          "endTime": 15.245167,
+          "startTime": 14.935167,
+          "word": "示，"
+        },
+        {
+          "confidence": 0.8654241,
+          "endTime": 15.785167,
+          "startTime": 15.625167,
+          "word": "引"
+        },
+        {
+          "confidence": 0.9134572,
+          "endTime": 15.985167,
+          "startTime": 15.785167,
+          "word": "用"
+        },
+        {
+          "confidence": 0.81040686,
+          "endTime": 16.135166,
+          "startTime": 16.065166,
+          "word": "也"
+        },
+        {
+          "confidence": 0.9674212,
+          "endTime": 16.245167,
+          "startTime": 16.135166,
+          "word": "能"
+        },
+        {
+          "confidence": 0.8604785,
+          "endTime": 16.425167,
+          "startTime": 16.245167,
+          "word": "回"
+        },
+        {
+          "confidence": 0.9799286,
+          "endTime": 16.725166,
+          "startTime": 16.425167,
+          "word": "看。"
+        }
+      ]
+    }
+  ]
+}

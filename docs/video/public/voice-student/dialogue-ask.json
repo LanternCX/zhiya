@@ -1,0 +1,130 @@
+{
+  "duration": 3.8945416666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "变量和输出有什么区别？我还是有点分不清。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "变量和输出有什么区别？",
+      "words": [
+        {
+          "confidence": 0.915935,
+          "endTime": 0.445,
+          "startTime": 0.215,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9325822,
+          "endTime": 0.665,
+          "startTime": 0.445,
+          "word": "量"
+        },
+        {
+          "confidence": 0.963608,
+          "endTime": 0.815,
+          "startTime": 0.665,
+          "word": "和"
+        },
+        {
+          "confidence": 0.97528046,
+          "endTime": 1.025,
+          "startTime": 0.815,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9525091,
+          "endTime": 1.295,
+          "startTime": 1.025,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9081343,
+          "endTime": 1.415,
+          "startTime": 1.295,
+          "word": "有"
+        },
+        {
+          "confidence": 0.990389,
+          "endTime": 1.585,
+          "startTime": 1.415,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98992723,
+          "endTime": 1.665,
+          "startTime": 1.585,
+          "word": "么"
+        },
+        {
+          "confidence": 0.95408744,
+          "endTime": 1.875,
+          "startTime": 1.665,
+          "word": "区"
+        },
+        {
+          "confidence": 0.97084415,
+          "endTime": 2.085,
+          "startTime": 1.875,
+          "word": "别？"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "我还是有点分不清。",
+      "words": [
+        {
+          "confidence": 0.5497914,
+          "endTime": 2.6050417,
+          "startTime": 2.5600417,
+          "word": "我"
+        },
+        {
+          "confidence": 0.82124287,
+          "endTime": 2.7450416,
+          "startTime": 2.6050417,
+          "word": "还"
+        },
+        {
+          "confidence": 0.9650452,
+          "endTime": 2.9150417,
+          "startTime": 2.7450416,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9701916,
+          "endTime": 3.0350416,
+          "startTime": 2.9150417,
+          "word": "有"
+        },
+        {
+          "confidence": 0.92662865,
+          "endTime": 3.1550417,
+          "startTime": 3.0350416,
+          "word": "点"
+        },
+        {
+          "confidence": 0.94966394,
+          "endTime": 3.3450418,
+          "startTime": 3.1550417,
+          "word": "分"
+        },
+        {
+          "confidence": 0.88925195,
+          "endTime": 3.4450417,
+          "startTime": 3.3450418,
+          "word": "不"
+        },
+        {
+          "confidence": 0.922241,
+          "endTime": 3.7050416,
+          "startTime": 3.4450417,
+          "word": "清。"
+        }
+      ]
+    }
+  ]
+}

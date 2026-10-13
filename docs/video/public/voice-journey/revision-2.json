@@ -1,0 +1,562 @@
+{
+  "duration": 17.841833333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "现在页面里的注意力就集中起来了。",
+      "words": [
+        {
+          "confidence": 0.97515196,
+          "endTime": 0.445,
+          "startTime": 0.215,
+          "word": "现"
+        },
+        {
+          "confidence": 0.9652509,
+          "endTime": 0.635,
+          "startTime": 0.445,
+          "word": "在"
+        },
+        {
+          "confidence": 0.94601965,
+          "endTime": 0.755,
+          "startTime": 0.635,
+          "word": "页"
+        },
+        {
+          "confidence": 0.92432404,
+          "endTime": 0.925,
+          "startTime": 0.755,
+          "word": "面"
+        },
+        {
+          "confidence": 0.95949394,
+          "endTime": 1.035,
+          "startTime": 0.925,
+          "word": "里"
+        },
+        {
+          "confidence": 0.98046935,
+          "endTime": 1.135,
+          "startTime": 1.035,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97680575,
+          "endTime": 1.295,
+          "startTime": 1.135,
+          "word": "注"
+        },
+        {
+          "confidence": 0.91955876,
+          "endTime": 1.425,
+          "startTime": 1.295,
+          "word": "意"
+        },
+        {
+          "confidence": 0.94319725,
+          "endTime": 1.585,
+          "startTime": 1.425,
+          "word": "力"
+        },
+        {
+          "confidence": 0.9643277,
+          "endTime": 1.725,
+          "startTime": 1.585,
+          "word": "就"
+        },
+        {
+          "confidence": 0.905555,
+          "endTime": 1.905,
+          "startTime": 1.725,
+          "word": "集"
+        },
+        {
+          "confidence": 0.9476145,
+          "endTime": 2.075,
+          "startTime": 1.905,
+          "word": "中"
+        },
+        {
+          "confidence": 0.9051113,
+          "endTime": 2.255,
+          "startTime": 2.075,
+          "word": "起"
+        },
+        {
+          "confidence": 0.9643895,
+          "endTime": 2.425,
+          "startTime": 2.255,
+          "word": "来"
+        },
+        {
+          "confidence": 0.979003,
+          "endTime": 2.575,
+          "startTime": 2.425,
+          "word": "了。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先理解一句话，再看代码，最后带着问题思考。",
+      "words": [
+        {
+          "confidence": 0.731159,
+          "endTime": 3.2250416,
+          "startTime": 3.0600417,
+          "word": "先"
+        },
+        {
+          "confidence": 0.8402872,
+          "endTime": 3.4050417,
+          "startTime": 3.2250416,
+          "word": "理"
+        },
+        {
+          "confidence": 0.93288547,
+          "endTime": 3.5850415,
+          "startTime": 3.4050417,
+          "word": "解"
+        },
+        {
+          "confidence": 0.82689404,
+          "endTime": 3.6950417,
+          "startTime": 3.5850415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9008053,
+          "endTime": 3.8550417,
+          "startTime": 3.6950417,
+          "word": "句"
+        },
+        {
+          "confidence": 0.9773735,
+          "endTime": 4.1750417,
+          "startTime": 3.8550417,
+          "word": "话，"
+        },
+        {
+          "confidence": 0.9707727,
+          "endTime": 4.575042,
+          "startTime": 4.4050417,
+          "word": "再"
+        },
+        {
+          "confidence": 0.96323895,
+          "endTime": 4.7750416,
+          "startTime": 4.575042,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9168221,
+          "endTime": 4.9650416,
+          "startTime": 4.7750416,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8360184,
+          "endTime": 5.2250414,
+          "startTime": 4.9650416,
+          "word": "码，"
+        },
+        {
+          "confidence": 0.84779274,
+          "endTime": 5.6350417,
+          "startTime": 5.4050417,
+          "word": "最"
+        },
+        {
+          "confidence": 0.9405814,
+          "endTime": 5.8650417,
+          "startTime": 5.6350417,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9587395,
+          "endTime": 6.0550413,
+          "startTime": 5.8650417,
+          "word": "带"
+        },
+        {
+          "confidence": 0.8675014,
+          "endTime": 6.1750417,
+          "startTime": 6.0550413,
+          "word": "着"
+        },
+        {
+          "confidence": 0.958968,
+          "endTime": 6.3050413,
+          "startTime": 6.1750417,
+          "word": "问"
+        },
+        {
+          "confidence": 0.992107,
+          "endTime": 6.4750414,
+          "startTime": 6.3050413,
+          "word": "题"
+        },
+        {
+          "confidence": 0.86352724,
+          "endTime": 6.665042,
+          "startTime": 6.4750414,
+          "word": "思"
+        },
+        {
+          "confidence": 0.9275473,
+          "endTime": 6.9350414,
+          "startTime": 6.665042,
+          "word": "考。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师可以继续检查这个版本，也可以接着提出意见。",
+      "words": [
+        {
+          "confidence": 0.9700584,
+          "endTime": 7.5350833,
+          "startTime": 7.385083,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9655774,
+          "endTime": 7.775083,
+          "startTime": 7.5350833,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8193893,
+          "endTime": 7.925083,
+          "startTime": 7.775083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6685722,
+          "endTime": 8.025084,
+          "startTime": 7.925083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.92263824,
+          "endTime": 8.195084,
+          "startTime": 8.025084,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9668955,
+          "endTime": 8.345083,
+          "startTime": 8.195084,
+          "word": "续"
+        },
+        {
+          "confidence": 0.9180387,
+          "endTime": 8.495083,
+          "startTime": 8.345083,
+          "word": "检"
+        },
+        {
+          "confidence": 0.932283,
+          "endTime": 8.705083,
+          "startTime": 8.495083,
+          "word": "查"
+        },
+        {
+          "confidence": 0.8758904,
+          "endTime": 8.825083,
+          "startTime": 8.705083,
+          "word": "这"
+        },
+        {
+          "confidence": 0.47522926,
+          "endTime": 8.895083,
+          "startTime": 8.825083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9469453,
+          "endTime": 9.095083,
+          "startTime": 8.895083,
+          "word": "版"
+        },
+        {
+          "confidence": 0.9513827,
+          "endTime": 9.265083,
+          "startTime": 9.095083,
+          "word": "本，"
+        },
+        {
+          "confidence": 0.9641293,
+          "endTime": 9.725083,
+          "startTime": 9.585083,
+          "word": "也"
+        },
+        {
+          "confidence": 0.7826819,
+          "endTime": 9.865084,
+          "startTime": 9.725083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7740687,
+          "endTime": 9.965083,
+          "startTime": 9.865084,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9683138,
+          "endTime": 10.155083,
+          "startTime": 9.965083,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9378358,
+          "endTime": 10.275084,
+          "startTime": 10.155083,
+          "word": "着"
+        },
+        {
+          "confidence": 0.916641,
+          "endTime": 10.425083,
+          "startTime": 10.275084,
+          "word": "提"
+        },
+        {
+          "confidence": 0.97551084,
+          "endTime": 10.575083,
+          "startTime": 10.425083,
+          "word": "出"
+        },
+        {
+          "confidence": 0.9324219,
+          "endTime": 10.715083,
+          "startTime": 10.575083,
+          "word": "意"
+        },
+        {
+          "confidence": 0.97131133,
+          "endTime": 10.965083,
+          "startTime": 10.715083,
+          "word": "见。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "现在页面里的注意力就集中起来了。先理解一句话，再看代码，最后带着问题思考。老师可以继续检查这个版本，也可以接着提出意见。这个过程里，生成内容和修改内容是连在一起的，老师的判断能继续落到材料上。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这个过程里，生成内容和修改内容是连在一起的，",
+      "words": [
+        {
+          "confidence": 0.9351972,
+          "endTime": 11.455125,
+          "startTime": 11.2751255,
+          "word": "这"
+        },
+        {
+          "confidence": 0.45834404,
+          "endTime": 11.535125,
+          "startTime": 11.455125,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9203482,
+          "endTime": 11.685125,
+          "startTime": 11.535125,
+          "word": "过"
+        },
+        {
+          "confidence": 0.9722573,
+          "endTime": 11.925125,
+          "startTime": 11.685125,
+          "word": "程"
+        },
+        {
+          "confidence": 0.96632415,
+          "endTime": 12.175125,
+          "startTime": 11.925125,
+          "word": "里，"
+        },
+        {
+          "confidence": 0.9268246,
+          "endTime": 12.465125,
+          "startTime": 12.205125,
+          "word": "生"
+        },
+        {
+          "confidence": 0.94498056,
+          "endTime": 12.695126,
+          "startTime": 12.465125,
+          "word": "成"
+        },
+        {
+          "confidence": 0.8966824,
+          "endTime": 12.875125,
+          "startTime": 12.695126,
+          "word": "内"
+        },
+        {
+          "confidence": 0.96441185,
+          "endTime": 13.085125,
+          "startTime": 12.875125,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9512615,
+          "endTime": 13.235126,
+          "startTime": 13.085125,
+          "word": "和"
+        },
+        {
+          "confidence": 0.8678971,
+          "endTime": 13.435125,
+          "startTime": 13.235126,
+          "word": "修"
+        },
+        {
+          "confidence": 0.88723844,
+          "endTime": 13.625125,
+          "startTime": 13.435125,
+          "word": "改"
+        },
+        {
+          "confidence": 0.9097189,
+          "endTime": 13.765125,
+          "startTime": 13.625125,
+          "word": "内"
+        },
+        {
+          "confidence": 0.97755456,
+          "endTime": 13.925125,
+          "startTime": 13.765125,
+          "word": "容"
+        },
+        {
+          "confidence": 0.84274995,
+          "endTime": 14.105125,
+          "startTime": 13.925125,
+          "word": "是"
+        },
+        {
+          "confidence": 0.9368852,
+          "endTime": 14.255125,
+          "startTime": 14.105125,
+          "word": "连"
+        },
+        {
+          "confidence": 0.39727217,
+          "endTime": 14.325125,
+          "startTime": 14.255125,
+          "word": "在"
+        },
+        {
+          "confidence": 0.16074996,
+          "endTime": 14.355125,
+          "startTime": 14.325125,
+          "word": "一"
+        },
+        {
+          "confidence": 0.15008919,
+          "endTime": 14.415125,
+          "startTime": 14.355125,
+          "word": "起"
+        },
+        {
+          "confidence": 0.37018475,
+          "endTime": 14.475125,
+          "startTime": 14.415125,
+          "word": "的，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "老师的判断能继续落到材料上。",
+      "words": [
+        {
+          "confidence": 0.9489065,
+          "endTime": 15.4851675,
+          "startTime": 15.325168,
+          "word": "老"
+        },
+        {
+          "confidence": 0.98174924,
+          "endTime": 15.645167,
+          "startTime": 15.4851675,
+          "word": "师"
+        },
+        {
+          "confidence": 0.8547186,
+          "endTime": 15.725167,
+          "startTime": 15.645167,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9562852,
+          "endTime": 15.945168,
+          "startTime": 15.725167,
+          "word": "判"
+        },
+        {
+          "confidence": 0.96133536,
+          "endTime": 16.195168,
+          "startTime": 15.945168,
+          "word": "断"
+        },
+        {
+          "confidence": 0.90937203,
+          "endTime": 16.345167,
+          "startTime": 16.195168,
+          "word": "能"
+        },
+        {
+          "confidence": 0.8698579,
+          "endTime": 16.535168,
+          "startTime": 16.345167,
+          "word": "继"
+        },
+        {
+          "confidence": 0.95069516,
+          "endTime": 16.725166,
+          "startTime": 16.535168,
+          "word": "续"
+        },
+        {
+          "confidence": 0.9019688,
+          "endTime": 16.865168,
+          "startTime": 16.725166,
+          "word": "落"
+        },
+        {
+          "confidence": 0.74465513,
+          "endTime": 16.965168,
+          "startTime": 16.865168,
+          "word": "到"
+        },
+        {
+          "confidence": 0.95490414,
+          "endTime": 17.185167,
+          "startTime": 16.965168,
+          "word": "材"
+        },
+        {
+          "confidence": 0.93735886,
+          "endTime": 17.335167,
+          "startTime": 17.185167,
+          "word": "料"
+        },
+        {
+          "confidence": 0.95018363,
+          "endTime": 17.605167,
+          "startTime": 17.335167,
+          "word": "上。"
+        }
+      ]
+    }
+  ]
+}

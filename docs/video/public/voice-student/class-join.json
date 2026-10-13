@@ -1,0 +1,244 @@
+{
+  "duration": 8.033541666666666,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "课外自学之外，也能连接班级。",
+      "words": [
+        {
+          "confidence": 0.75223815,
+          "endTime": 0.415,
+          "startTime": 0.245,
+          "word": "课"
+        },
+        {
+          "confidence": 0.6759869,
+          "endTime": 0.555,
+          "startTime": 0.415,
+          "word": "外"
+        },
+        {
+          "confidence": 0.7892329,
+          "endTime": 0.705,
+          "startTime": 0.555,
+          "word": "自"
+        },
+        {
+          "confidence": 0.8985253,
+          "endTime": 0.905,
+          "startTime": 0.705,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9148772,
+          "endTime": 1.085,
+          "startTime": 0.905,
+          "word": "之"
+        },
+        {
+          "confidence": 0.8826174,
+          "endTime": 1.325,
+          "startTime": 1.085,
+          "word": "外，"
+        },
+        {
+          "confidence": 0.8691779,
+          "endTime": 1.535,
+          "startTime": 1.385,
+          "word": "也"
+        },
+        {
+          "confidence": 0.935702,
+          "endTime": 1.725,
+          "startTime": 1.535,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9144973,
+          "endTime": 1.865,
+          "startTime": 1.725,
+          "word": "连"
+        },
+        {
+          "confidence": 0.93598545,
+          "endTime": 2.045,
+          "startTime": 1.865,
+          "word": "接"
+        },
+        {
+          "confidence": 0.9119919,
+          "endTime": 2.225,
+          "startTime": 2.045,
+          "word": "班"
+        },
+        {
+          "confidence": 0.9687566,
+          "endTime": 2.525,
+          "startTime": 2.225,
+          "word": "级。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课外自学之外，也能连接班级。输入老师给的邀请码，加入班级，找到一起学习的老师和同学。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "输入老师给的邀请码，加入班级，找到一起学习的老师和同学。",
+      "words": [
+        {
+          "confidence": 0.64187413,
+          "endTime": 3.1250417,
+          "startTime": 3.0500417,
+          "word": "输"
+        },
+        {
+          "confidence": 0.6502998,
+          "endTime": 3.2150416,
+          "startTime": 3.1250417,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9532866,
+          "endTime": 3.3550417,
+          "startTime": 3.2150416,
+          "word": "老"
+        },
+        {
+          "confidence": 0.96853507,
+          "endTime": 3.5550418,
+          "startTime": 3.3550417,
+          "word": "师"
+        },
+        {
+          "confidence": 0.94888604,
+          "endTime": 3.6750417,
+          "startTime": 3.5550418,
+          "word": "给"
+        },
+        {
+          "confidence": 0.94631094,
+          "endTime": 3.7850418,
+          "startTime": 3.6750417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9074894,
+          "endTime": 3.8950417,
+          "startTime": 3.7850418,
+          "word": "邀"
+        },
+        {
+          "confidence": 0.90889955,
+          "endTime": 4.1050415,
+          "startTime": 3.8950417,
+          "word": "请"
+        },
+        {
+          "confidence": 0.93943805,
+          "endTime": 4.3150415,
+          "startTime": 4.1050415,
+          "word": "码，"
+        },
+        {
+          "confidence": 0.9622409,
+          "endTime": 4.5950418,
+          "startTime": 4.3950415,
+          "word": "加"
+        },
+        {
+          "confidence": 0.9610424,
+          "endTime": 4.7350416,
+          "startTime": 4.5950418,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9580152,
+          "endTime": 4.9250417,
+          "startTime": 4.7350416,
+          "word": "班"
+        },
+        {
+          "confidence": 0.8985453,
+          "endTime": 5.085042,
+          "startTime": 4.9250417,
+          "word": "级，"
+        },
+        {
+          "confidence": 0.12658033,
+          "endTime": 5.1450415,
+          "startTime": 5.085042,
+          "word": "找"
+        },
+        {
+          "confidence": 0.09685283,
+          "endTime": 5.205042,
+          "startTime": 5.1450415,
+          "word": "到"
+        },
+        {
+          "confidence": 0.17455493,
+          "endTime": 5.2350416,
+          "startTime": 5.205042,
+          "word": "一"
+        },
+        {
+          "confidence": 0.23169443,
+          "endTime": 5.2950416,
+          "startTime": 5.2350416,
+          "word": "起"
+        },
+        {
+          "confidence": 0.20725079,
+          "endTime": 5.3850417,
+          "startTime": 5.325042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.20299254,
+          "endTime": 5.4450417,
+          "startTime": 5.3850417,
+          "word": "习"
+        },
+        {
+          "confidence": 0.23077224,
+          "endTime": 5.5050416,
+          "startTime": 5.4450417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.39768922,
+          "endTime": 5.7350416,
+          "startTime": 5.625042,
+          "word": "老"
+        },
+        {
+          "confidence": 0.13324937,
+          "endTime": 5.7950416,
+          "startTime": 5.7350416,
+          "word": "师"
+        },
+        {
+          "confidence": 0.1726578,
+          "endTime": 5.8550415,
+          "startTime": 5.7950416,
+          "word": "和"
+        },
+        {
+          "confidence": 0.16578962,
+          "endTime": 5.915042,
+          "startTime": 5.8550415,
+          "word": "同"
+        },
+        {
+          "confidence": 0.61223227,
+          "endTime": 6.4650416,
+          "startTime": 6.285042,
+          "word": "学。"
+        }
+      ]
+    }
+  ]
+}

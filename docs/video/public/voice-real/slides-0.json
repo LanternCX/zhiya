@@ -1,0 +1,268 @@
+{
+  "duration": 9.810916666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "先看讲解页。",
+      "words": [
+        {
+          "confidence": 0.97536933,
+          "endTime": 0.435,
+          "startTime": 0.215,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9637059,
+          "endTime": 0.625,
+          "startTime": 0.435,
+          "word": "看"
+        },
+        {
+          "confidence": 0.8914259,
+          "endTime": 0.805,
+          "startTime": 0.625,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.92024887,
+          "endTime": 1.045,
+          "startTime": 0.805,
+          "word": "解"
+        },
+        {
+          "confidence": 0.8461049,
+          "endTime": 1.235,
+          "startTime": 1.045,
+          "word": "页。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "输出，让程序把话显示在屏幕上。",
+      "words": [
+        {
+          "confidence": 0.6583289,
+          "endTime": 2.0350416,
+          "startTime": 1.9400417,
+          "word": "输"
+        },
+        {
+          "confidence": 0.55089194,
+          "endTime": 2.1350417,
+          "startTime": 2.0350416,
+          "word": "出，"
+        },
+        {
+          "confidence": 0.9404173,
+          "endTime": 2.5750418,
+          "startTime": 2.4150417,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9677308,
+          "endTime": 2.7950416,
+          "startTime": 2.5750418,
+          "word": "程"
+        },
+        {
+          "confidence": 0.9469346,
+          "endTime": 3.0350418,
+          "startTime": 2.7950416,
+          "word": "序"
+        },
+        {
+          "confidence": 0.7737119,
+          "endTime": 3.1850417,
+          "startTime": 3.0350418,
+          "word": "把"
+        },
+        {
+          "confidence": 0.90946215,
+          "endTime": 3.3850417,
+          "startTime": 3.1850417,
+          "word": "话"
+        },
+        {
+          "confidence": 0.8905409,
+          "endTime": 3.5650415,
+          "startTime": 3.3850417,
+          "word": "显"
+        },
+        {
+          "confidence": 0.91607547,
+          "endTime": 3.7250416,
+          "startTime": 3.5650415,
+          "word": "示"
+        },
+        {
+          "confidence": 0.93877363,
+          "endTime": 3.8350415,
+          "startTime": 3.7250416,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9448219,
+          "endTime": 4.015042,
+          "startTime": 3.8350415,
+          "word": "屏"
+        },
+        {
+          "confidence": 0.94361913,
+          "endTime": 4.1850414,
+          "startTime": 4.015042,
+          "word": "幕"
+        },
+        {
+          "confidence": 0.91597444,
+          "endTime": 4.3950415,
+          "startTime": 4.1850414,
+          "word": "上。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "变量，给数据起个名字。",
+      "words": [
+        {
+          "confidence": 0.56659305,
+          "endTime": 4.935083,
+          "startTime": 4.860083,
+          "word": "变"
+        },
+        {
+          "confidence": 0.8558891,
+          "endTime": 5.205083,
+          "startTime": 4.935083,
+          "word": "量，"
+        },
+        {
+          "confidence": 0.9738384,
+          "endTime": 5.605083,
+          "startTime": 5.455083,
+          "word": "给"
+        },
+        {
+          "confidence": 0.8613891,
+          "endTime": 5.815083,
+          "startTime": 5.605083,
+          "word": "数"
+        },
+        {
+          "confidence": 0.85216886,
+          "endTime": 6.005083,
+          "startTime": 5.815083,
+          "word": "据"
+        },
+        {
+          "confidence": 0.9210496,
+          "endTime": 6.195083,
+          "startTime": 6.005083,
+          "word": "起"
+        },
+        {
+          "confidence": 0.91662073,
+          "endTime": 6.3050833,
+          "startTime": 6.195083,
+          "word": "个"
+        },
+        {
+          "confidence": 0.94771403,
+          "endTime": 6.505083,
+          "startTime": 6.3050833,
+          "word": "名"
+        },
+        {
+          "confidence": 0.6479701,
+          "endTime": 6.675083,
+          "startTime": 6.505083,
+          "word": "字。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "先看讲解页。输出，让程序把话显示在屏幕上。变量，给数据起个名字。输入，让程序接收顾客的回答。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "输入，让程序接收顾客的回答。",
+      "words": [
+        {
+          "confidence": 0.883473,
+          "endTime": 7.295125,
+          "startTime": 7.100125,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9440068,
+          "endTime": 7.5951247,
+          "startTime": 7.295125,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.9010934,
+          "endTime": 7.935125,
+          "startTime": 7.785125,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9553674,
+          "endTime": 8.155125,
+          "startTime": 7.935125,
+          "word": "程"
+        },
+        {
+          "confidence": 0.84051806,
+          "endTime": 8.355124,
+          "startTime": 8.155125,
+          "word": "序"
+        },
+        {
+          "confidence": 0.894485,
+          "endTime": 8.525125,
+          "startTime": 8.355124,
+          "word": "接"
+        },
+        {
+          "confidence": 0.96884745,
+          "endTime": 8.715125,
+          "startTime": 8.525125,
+          "word": "收"
+        },
+        {
+          "confidence": 0.8249153,
+          "endTime": 8.835125,
+          "startTime": 8.715125,
+          "word": "顾"
+        },
+        {
+          "confidence": 0.22735788,
+          "endTime": 8.895124,
+          "startTime": 8.835125,
+          "word": "客"
+        },
+        {
+          "confidence": 0.16609317,
+          "endTime": 8.955125,
+          "startTime": 8.895124,
+          "word": "的"
+        },
+        {
+          "confidence": 0.16642009,
+          "endTime": 9.015125,
+          "startTime": 8.955125,
+          "word": "回"
+        },
+        {
+          "confidence": 0.24448179,
+          "endTime": 9.075125,
+          "startTime": 9.015125,
+          "word": "答。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ask",
+    "role": "user",
+    "text": "变量和输出有什么区别？我还是有点分不清。",
+    "file": "voice-student/dialogue-ask.wav",
+    "duration": 3.8945416666666666,
+    "captions": [
+      {
+        "text": "学生：变量和输出有什么区别？",
+        "start": 0.215,
+        "end": 2.085
+      },
+      {
+        "text": "学生：我还是有点分不清。",
+        "start": 2.5600417,
+        "end": 3.7050416
+      }
+    ],
+    "from": 7.366666666666666
+  },
+  {
+    "id": "answer",
+    "role": "assistant",
+    "text": "变量让程序记住一个值，输出才把它显示出来。比如先记住包子单价是二元，再用 print 显示它。",
+    "file": "voice-student/dialogue-answer.wav",
+    "duration": 8.415083333333333,
+    "captions": [
+      {
+        "text": "知芽：变量让程序记住一个值，输出才把它显示出来。",
+        "start": 0.225,
+        "end": 4.115
+      },
+      {
+        "text": "知芽：比如先记住包子单价是二元，再用 print 显示它。",
+        "start": 4.3800416,
+        "end": 8.115042
+      }
+    ],
+    "from": 12.566666666666666
+  },
+  {
+    "id": "followup",
+    "role": "user",
+    "text": "那我只写包子单价等于二，屏幕上会有数字吗？",
+    "file": "voice-student/dialogue-followup.wav",
+    "duration": 4.11525,
+    "captions": [
+      {
+        "text": "学生：那我只写包子单价等于二，屏幕上会有数字吗？",
+        "start": 0.205,
+        "end": 3.935
+      }
+    ],
+    "from": 21.466666666666665
+  },
+  {
+    "id": "reply",
+    "role": "assistant",
+    "text": "不会，这一步只是赋值。想看到数字，还要调用 print。你可以先预测，再运行右侧的代码验证。",
+    "file": "voice-student/dialogue-reply.wav",
+    "duration": 8.400416666666667,
+    "captions": [
+      {
+        "text": "知芽：不会，这一步只是赋值。",
+        "start": 0.225,
+        "end": 2.375
+      },
+      {
+        "text": "知芽：想看到数字，还要调用 print。",
+        "start": 2.8800416,
+        "end": 4.8350415
+      },
+      {
+        "text": "知芽：你可以先预测，再运行右侧的代码验证。",
+        "start": 5.220083,
+        "end": 8.025084
+      }
+    ],
+    "from": 26.866666666666667
+  }
+]

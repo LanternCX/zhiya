@@ -1,0 +1,304 @@
+{
+  "duration": 10.557791666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "讲到数据怎样流动，老师可以分步演示。",
+      "words": [
+        {
+          "confidence": 0.94355273,
+          "endTime": 0.435,
+          "startTime": 0.245,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.94259334,
+          "endTime": 0.555,
+          "startTime": 0.435,
+          "word": "到"
+        },
+        {
+          "confidence": 0.95602345,
+          "endTime": 0.795,
+          "startTime": 0.555,
+          "word": "数"
+        },
+        {
+          "confidence": 0.87232584,
+          "endTime": 0.955,
+          "startTime": 0.795,
+          "word": "据"
+        },
+        {
+          "confidence": 0.94848275,
+          "endTime": 1.125,
+          "startTime": 0.955,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9688344,
+          "endTime": 1.255,
+          "startTime": 1.125,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9535094,
+          "endTime": 1.475,
+          "startTime": 1.255,
+          "word": "流"
+        },
+        {
+          "confidence": 0.96200156,
+          "endTime": 1.715,
+          "startTime": 1.475,
+          "word": "动，"
+        },
+        {
+          "confidence": 0.93994,
+          "endTime": 2.165,
+          "startTime": 1.995,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9631832,
+          "endTime": 2.375,
+          "startTime": 2.165,
+          "word": "师"
+        },
+        {
+          "confidence": 0.7777541,
+          "endTime": 2.505,
+          "startTime": 2.375,
+          "word": "可"
+        },
+        {
+          "confidence": 0.72955906,
+          "endTime": 2.605,
+          "startTime": 2.505,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9700052,
+          "endTime": 2.815,
+          "startTime": 2.605,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9601961,
+          "endTime": 2.985,
+          "startTime": 2.815,
+          "word": "步"
+        },
+        {
+          "confidence": 0.94533116,
+          "endTime": 3.135,
+          "startTime": 2.985,
+          "word": "演"
+        },
+        {
+          "confidence": 0.9548044,
+          "endTime": 3.455,
+          "startTime": 3.135,
+          "word": "示。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "点击输入，观察数据；",
+      "words": [
+        {
+          "confidence": 0.79923034,
+          "endTime": 3.9350417,
+          "startTime": 3.8400416,
+          "word": "点"
+        },
+        {
+          "confidence": 0.88435614,
+          "endTime": 4.075042,
+          "startTime": 3.9350417,
+          "word": "击"
+        },
+        {
+          "confidence": 0.89697266,
+          "endTime": 4.3150415,
+          "startTime": 4.075042,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9470993,
+          "endTime": 4.6250415,
+          "startTime": 4.3150415,
+          "word": "入，"
+        },
+        {
+          "confidence": 0.97114176,
+          "endTime": 4.8750415,
+          "startTime": 4.7250414,
+          "word": "观"
+        },
+        {
+          "confidence": 0.96217066,
+          "endTime": 5.055042,
+          "startTime": 4.8750415,
+          "word": "察"
+        },
+        {
+          "confidence": 0.9107435,
+          "endTime": 5.305042,
+          "startTime": 5.055042,
+          "word": "数"
+        },
+        {
+          "confidence": 0.8601518,
+          "endTime": 5.5150414,
+          "startTime": 5.305042,
+          "word": "据；"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "再存进变量，最后看输出。",
+      "words": [
+        {
+          "confidence": 0.92088467,
+          "endTime": 5.9750834,
+          "startTime": 5.8600836,
+          "word": "再"
+        },
+        {
+          "confidence": 0.88074917,
+          "endTime": 6.1650834,
+          "startTime": 5.9750834,
+          "word": "存"
+        },
+        {
+          "confidence": 0.83227015,
+          "endTime": 6.3150835,
+          "startTime": 6.1650834,
+          "word": "进"
+        },
+        {
+          "confidence": 0.9281494,
+          "endTime": 6.5150833,
+          "startTime": 6.3150835,
+          "word": "变"
+        },
+        {
+          "confidence": 0.97932,
+          "endTime": 6.7350836,
+          "startTime": 6.5150833,
+          "word": "量，"
+        },
+        {
+          "confidence": 0.9114664,
+          "endTime": 7.1750836,
+          "startTime": 6.995084,
+          "word": "最"
+        },
+        {
+          "confidence": 0.8704466,
+          "endTime": 7.4050837,
+          "startTime": 7.1750836,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9435806,
+          "endTime": 7.5750837,
+          "startTime": 7.4050837,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9072672,
+          "endTime": 7.7750835,
+          "startTime": 7.5750837,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9691562,
+          "endTime": 8.045084,
+          "startTime": 7.7750835,
+          "word": "出。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "讲到数据怎样流动，老师可以分步演示。点击输入，观察数据；再存进变量，最后看输出。什么时候继续，由老师决定。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "什么时候继续，由老师决定。",
+      "words": [
+        {
+          "confidence": 0.95814836,
+          "endTime": 8.555125,
+          "startTime": 8.385125,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98166525,
+          "endTime": 8.635125,
+          "startTime": 8.555125,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9820685,
+          "endTime": 8.7751255,
+          "startTime": 8.635125,
+          "word": "时"
+        },
+        {
+          "confidence": 0.8460141,
+          "endTime": 8.895125,
+          "startTime": 8.7751255,
+          "word": "候"
+        },
+        {
+          "confidence": 0.9173669,
+          "endTime": 9.055125,
+          "startTime": 8.895125,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9498416,
+          "endTime": 9.365125,
+          "startTime": 9.055125,
+          "word": "续，"
+        },
+        {
+          "confidence": 0.87623185,
+          "endTime": 9.635125,
+          "startTime": 9.505125,
+          "word": "由"
+        },
+        {
+          "confidence": 0.3586669,
+          "endTime": 9.695126,
+          "startTime": 9.635125,
+          "word": "老"
+        },
+        {
+          "confidence": 0.21821478,
+          "endTime": 9.755125,
+          "startTime": 9.695126,
+          "word": "师"
+        },
+        {
+          "confidence": 0.06861547,
+          "endTime": 9.815125,
+          "startTime": 9.755125,
+          "word": "决"
+        },
+        {
+          "confidence": 0.17849198,
+          "endTime": 9.875125,
+          "startTime": 9.815125,
+          "word": "定。"
+        }
+      ]
+    }
+  ]
+}

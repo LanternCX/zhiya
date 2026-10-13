@@ -1,0 +1,256 @@
+{
+  "duration": 8.403458333333333,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "能投影的页面，还不是完整的备课。",
+      "words": [
+        {
+          "confidence": 0.8562825,
+          "endTime": 0.475,
+          "startTime": 0.265,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9045951,
+          "endTime": 0.725,
+          "startTime": 0.475,
+          "word": "投"
+        },
+        {
+          "confidence": 0.7976829,
+          "endTime": 0.885,
+          "startTime": 0.725,
+          "word": "影"
+        },
+        {
+          "confidence": 0.8554565,
+          "endTime": 1.025,
+          "startTime": 0.885,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9050071,
+          "endTime": 1.175,
+          "startTime": 1.025,
+          "word": "页"
+        },
+        {
+          "confidence": 0.9788102,
+          "endTime": 1.475,
+          "startTime": 1.175,
+          "word": "面，"
+        },
+        {
+          "confidence": 0.95867515,
+          "endTime": 1.835,
+          "startTime": 1.645,
+          "word": "还"
+        },
+        {
+          "confidence": 0.9289078,
+          "endTime": 1.965,
+          "startTime": 1.835,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9354326,
+          "endTime": 2.135,
+          "startTime": 1.965,
+          "word": "是"
+        },
+        {
+          "confidence": 0.97682405,
+          "endTime": 2.335,
+          "startTime": 2.135,
+          "word": "完"
+        },
+        {
+          "confidence": 0.91410005,
+          "endTime": 2.505,
+          "startTime": 2.335,
+          "word": "整"
+        },
+        {
+          "confidence": 0.8620458,
+          "endTime": 2.605,
+          "startTime": 2.505,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9707924,
+          "endTime": 2.765,
+          "startTime": 2.605,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9774134,
+          "endTime": 3.035,
+          "startTime": 2.765,
+          "word": "课。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "能投影的页面，还不是完整的备课。老师还要知道什么时候提问，什么时候巡视，学生出错怎么办。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "老师还要知道什么时候提问，什么时候巡视，学生出错怎么办。",
+      "words": [
+        {
+          "confidence": 0.8615035,
+          "endTime": 3.5850418,
+          "startTime": 3.5000417,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9380229,
+          "endTime": 3.8050418,
+          "startTime": 3.5850418,
+          "word": "师"
+        },
+        {
+          "confidence": 0.84084064,
+          "endTime": 3.9450417,
+          "startTime": 3.8050418,
+          "word": "还"
+        },
+        {
+          "confidence": 0.97344404,
+          "endTime": 4.075042,
+          "startTime": 3.9450417,
+          "word": "要"
+        },
+        {
+          "confidence": 0.7845365,
+          "endTime": 4.245042,
+          "startTime": 4.075042,
+          "word": "知"
+        },
+        {
+          "confidence": 0.92344123,
+          "endTime": 4.4250417,
+          "startTime": 4.245042,
+          "word": "道"
+        },
+        {
+          "confidence": 0.9488294,
+          "endTime": 4.625042,
+          "startTime": 4.4250417,
+          "word": "什"
+        },
+        {
+          "confidence": 0.98892236,
+          "endTime": 4.6850414,
+          "startTime": 4.625042,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9718556,
+          "endTime": 4.8150415,
+          "startTime": 4.6850414,
+          "word": "时"
+        },
+        {
+          "confidence": 0.90229994,
+          "endTime": 4.955042,
+          "startTime": 4.8150415,
+          "word": "候"
+        },
+        {
+          "confidence": 0.9471576,
+          "endTime": 5.1450415,
+          "startTime": 4.955042,
+          "word": "提"
+        },
+        {
+          "confidence": 0.95023483,
+          "endTime": 5.3950415,
+          "startTime": 5.1450415,
+          "word": "问，"
+        },
+        {
+          "confidence": 0.97335905,
+          "endTime": 5.825042,
+          "startTime": 5.625042,
+          "word": "什"
+        },
+        {
+          "confidence": 0.99002546,
+          "endTime": 5.9050417,
+          "startTime": 5.825042,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9573063,
+          "endTime": 6.0250416,
+          "startTime": 5.9050417,
+          "word": "时"
+        },
+        {
+          "confidence": 0.9418622,
+          "endTime": 6.1450415,
+          "startTime": 6.0250416,
+          "word": "候"
+        },
+        {
+          "confidence": 0.7646209,
+          "endTime": 6.3950415,
+          "startTime": 6.1450415,
+          "word": "巡"
+        },
+        {
+          "confidence": 0.8771911,
+          "endTime": 6.6950417,
+          "startTime": 6.3950415,
+          "word": "视，"
+        },
+        {
+          "confidence": 0.9496434,
+          "endTime": 7.1050415,
+          "startTime": 6.915042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8845694,
+          "endTime": 7.295042,
+          "startTime": 7.1050415,
+          "word": "生"
+        },
+        {
+          "confidence": 0.6433649,
+          "endTime": 7.3950415,
+          "startTime": 7.295042,
+          "word": "出"
+        },
+        {
+          "confidence": 0.20873082,
+          "endTime": 7.455042,
+          "startTime": 7.3950415,
+          "word": "错"
+        },
+        {
+          "confidence": 0.18439509,
+          "endTime": 7.5150414,
+          "startTime": 7.455042,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.09915885,
+          "endTime": 7.575042,
+          "startTime": 7.5150414,
+          "word": "么"
+        },
+        {
+          "confidence": 0.19310103,
+          "endTime": 7.635042,
+          "startTime": 7.575042,
+          "word": "办。"
+        }
+      ]
+    }
+  ]
+}

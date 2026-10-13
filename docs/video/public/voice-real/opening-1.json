@@ -1,0 +1,196 @@
+{
+  "duration": 6.262041666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "找一个他们听得懂的案例，做课件，准备练习，还要安排四十分钟的课堂。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "找一个他们听得懂的案例，做课件，准备练习，",
+      "words": [
+        {
+          "confidence": 0.91600585,
+          "endTime": 0.455,
+          "startTime": 0.225,
+          "word": "找"
+        },
+        {
+          "confidence": 0.93326604,
+          "endTime": 0.545,
+          "startTime": 0.455,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9447375,
+          "endTime": 0.725,
+          "startTime": 0.545,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9052507,
+          "endTime": 0.865,
+          "startTime": 0.725,
+          "word": "他"
+        },
+        {
+          "confidence": 0.97550476,
+          "endTime": 0.955,
+          "startTime": 0.865,
+          "word": "们"
+        },
+        {
+          "confidence": 0.9737357,
+          "endTime": 1.175,
+          "startTime": 0.955,
+          "word": "听"
+        },
+        {
+          "confidence": 0.9211658,
+          "endTime": 1.265,
+          "startTime": 1.175,
+          "word": "得"
+        },
+        {
+          "confidence": 0.93107945,
+          "endTime": 1.445,
+          "startTime": 1.265,
+          "word": "懂"
+        },
+        {
+          "confidence": 0.7460659,
+          "endTime": 1.565,
+          "startTime": 1.445,
+          "word": "的"
+        },
+        {
+          "confidence": 0.8235641,
+          "endTime": 1.725,
+          "startTime": 1.565,
+          "word": "案"
+        },
+        {
+          "confidence": 0.9648375,
+          "endTime": 1.965,
+          "startTime": 1.725,
+          "word": "例，"
+        },
+        {
+          "confidence": 0.84699434,
+          "endTime": 2.485,
+          "startTime": 2.285,
+          "word": "做"
+        },
+        {
+          "confidence": 0.91010386,
+          "endTime": 2.695,
+          "startTime": 2.485,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96371186,
+          "endTime": 3.035,
+          "startTime": 2.695,
+          "word": "件，"
+        },
+        {
+          "confidence": 0.91672146,
+          "endTime": 3.335,
+          "startTime": 3.155,
+          "word": "准"
+        },
+        {
+          "confidence": 0.97773397,
+          "endTime": 3.485,
+          "startTime": 3.335,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9617259,
+          "endTime": 3.635,
+          "startTime": 3.485,
+          "word": "练"
+        },
+        {
+          "confidence": 0.97587407,
+          "endTime": 3.995,
+          "startTime": 3.635,
+          "word": "习，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "还要安排四十分钟的课堂。",
+      "words": [
+        {
+          "confidence": 0.88383573,
+          "endTime": 4.4450417,
+          "startTime": 4.3000417,
+          "word": "还"
+        },
+        {
+          "confidence": 0.8778603,
+          "endTime": 4.5650415,
+          "startTime": 4.4450417,
+          "word": "要"
+        },
+        {
+          "confidence": 0.7526177,
+          "endTime": 4.6850414,
+          "startTime": 4.5650415,
+          "word": "安"
+        },
+        {
+          "confidence": 0.93035877,
+          "endTime": 4.9050417,
+          "startTime": 4.6850414,
+          "word": "排"
+        },
+        {
+          "confidence": 0.6516445,
+          "endTime": 5.0850415,
+          "startTime": 4.9050417,
+          "word": "四"
+        },
+        {
+          "confidence": 0.9689733,
+          "endTime": 5.2350416,
+          "startTime": 5.0850415,
+          "word": "十"
+        },
+        {
+          "confidence": 0.6102575,
+          "endTime": 5.3150415,
+          "startTime": 5.2350416,
+          "word": "分"
+        },
+        {
+          "confidence": 0.17982781,
+          "endTime": 5.375042,
+          "startTime": 5.3150415,
+          "word": "钟"
+        },
+        {
+          "confidence": 0.19124039,
+          "endTime": 5.4350414,
+          "startTime": 5.375042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.13275163,
+          "endTime": 5.495042,
+          "startTime": 5.4350414,
+          "word": "课"
+        },
+        {
+          "confidence": 0.28916535,
+          "endTime": 5.555042,
+          "startTime": 5.495042,
+          "word": "堂。"
+        }
+      ]
+    }
+  ]
+}

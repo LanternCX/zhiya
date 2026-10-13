@@ -1,0 +1,232 @@
+{
+  "duration": 8.769125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "生成完成以后，我们先看结果。",
+      "words": [
+        {
+          "confidence": 0.9415113,
+          "endTime": 0.445,
+          "startTime": 0.215,
+          "word": "生"
+        },
+        {
+          "confidence": 0.92715967,
+          "endTime": 0.605,
+          "startTime": 0.445,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9755789,
+          "endTime": 0.755,
+          "startTime": 0.605,
+          "word": "完"
+        },
+        {
+          "confidence": 0.98449993,
+          "endTime": 0.955,
+          "startTime": 0.755,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9510639,
+          "endTime": 1.085,
+          "startTime": 0.955,
+          "word": "以"
+        },
+        {
+          "confidence": 0.97367567,
+          "endTime": 1.405,
+          "startTime": 1.085,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.91927594,
+          "endTime": 1.695,
+          "startTime": 1.565,
+          "word": "我"
+        },
+        {
+          "confidence": 0.9865024,
+          "endTime": 1.795,
+          "startTime": 1.695,
+          "word": "们"
+        },
+        {
+          "confidence": 0.97255176,
+          "endTime": 1.965,
+          "startTime": 1.795,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9668755,
+          "endTime": 2.165,
+          "startTime": 1.965,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9252573,
+          "endTime": 2.365,
+          "startTime": 2.165,
+          "word": "结"
+        },
+        {
+          "confidence": 0.97762173,
+          "endTime": 2.605,
+          "startTime": 2.365,
+          "word": "果。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "生成完成以后，我们先看结果。课件、动画和文档，分别解决讲什么、怎么讲、怎样组织课堂。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "课件、动画和文档，分别解决讲什么、怎么讲、怎样组织课堂。",
+      "words": [
+        {
+          "confidence": 0.34777018,
+          "endTime": 3.1550417,
+          "startTime": 3.0800416,
+          "word": "课"
+        },
+        {
+          "confidence": 0.18109523,
+          "endTime": 3.1850417,
+          "startTime": 3.1550417,
+          "word": "件、"
+        },
+        {
+          "confidence": 0.9277515,
+          "endTime": 3.7450416,
+          "startTime": 3.5650415,
+          "word": "动"
+        },
+        {
+          "confidence": 0.9029845,
+          "endTime": 4.0050416,
+          "startTime": 3.7450416,
+          "word": "画"
+        },
+        {
+          "confidence": 0.87776923,
+          "endTime": 4.1750417,
+          "startTime": 4.0050416,
+          "word": "和"
+        },
+        {
+          "confidence": 0.94166654,
+          "endTime": 4.3650417,
+          "startTime": 4.1750417,
+          "word": "文"
+        },
+        {
+          "confidence": 0.8625516,
+          "endTime": 4.5850415,
+          "startTime": 4.3650417,
+          "word": "档，"
+        },
+        {
+          "confidence": 0.8629775,
+          "endTime": 5.0450416,
+          "startTime": 4.8450418,
+          "word": "分"
+        },
+        {
+          "confidence": 0.9159054,
+          "endTime": 5.1950417,
+          "startTime": 5.0450416,
+          "word": "别"
+        },
+        {
+          "confidence": 0.9736975,
+          "endTime": 5.375042,
+          "startTime": 5.1950417,
+          "word": "解"
+        },
+        {
+          "confidence": 0.9336095,
+          "endTime": 5.6350417,
+          "startTime": 5.375042,
+          "word": "决"
+        },
+        {
+          "confidence": 0.8801447,
+          "endTime": 5.915042,
+          "startTime": 5.6350417,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.6384555,
+          "endTime": 6.1950417,
+          "startTime": 5.915042,
+          "word": "什"
+        },
+        {
+          "confidence": 0.32683071,
+          "endTime": 6.2550416,
+          "startTime": 6.1950417,
+          "word": "么、"
+        },
+        {
+          "confidence": 0.9330659,
+          "endTime": 6.745042,
+          "startTime": 6.5650415,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.77917993,
+          "endTime": 6.8550415,
+          "startTime": 6.745042,
+          "word": "么"
+        },
+        {
+          "confidence": 0.20241469,
+          "endTime": 7.085042,
+          "startTime": 7.0550413,
+          "word": "讲、"
+        },
+        {
+          "confidence": 0.86228424,
+          "endTime": 7.6050415,
+          "startTime": 7.3650417,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.9666739,
+          "endTime": 7.7350416,
+          "startTime": 7.6050415,
+          "word": "样"
+        },
+        {
+          "confidence": 0.9162019,
+          "endTime": 7.8950415,
+          "startTime": 7.7350416,
+          "word": "组"
+        },
+        {
+          "confidence": 0.26751462,
+          "endTime": 7.955042,
+          "startTime": 7.8950415,
+          "word": "织"
+        },
+        {
+          "confidence": 0.2652261,
+          "endTime": 8.015041,
+          "startTime": 7.955042,
+          "word": "课"
+        },
+        {
+          "confidence": 0.36115474,
+          "endTime": 8.075042,
+          "startTime": 8.015041,
+          "word": "堂。"
+        }
+      ]
+    }
+  ]
+}

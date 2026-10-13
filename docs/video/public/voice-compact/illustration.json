@@ -1,0 +1,214 @@
+{
+  "duration": 6.944541666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "课堂导入还可以配上实际生成的插图，",
+      "words": [
+        {
+          "confidence": 0.883535,
+          "endTime": 0.415,
+          "startTime": 0.245,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9599529,
+          "endTime": 0.585,
+          "startTime": 0.415,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.93268913,
+          "endTime": 0.805,
+          "startTime": 0.585,
+          "word": "导"
+        },
+        {
+          "confidence": 0.9715922,
+          "endTime": 1.095,
+          "startTime": 0.805,
+          "word": "入"
+        },
+        {
+          "confidence": 0.98140454,
+          "endTime": 1.415,
+          "startTime": 1.215,
+          "word": "还"
+        },
+        {
+          "confidence": 0.983604,
+          "endTime": 1.565,
+          "startTime": 1.415,
+          "word": "可"
+        },
+        {
+          "confidence": 0.8443779,
+          "endTime": 1.675,
+          "startTime": 1.565,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9355691,
+          "endTime": 1.855,
+          "startTime": 1.675,
+          "word": "配"
+        },
+        {
+          "confidence": 0.72546566,
+          "endTime": 2.055,
+          "startTime": 1.855,
+          "word": "上"
+        },
+        {
+          "confidence": 0.93064743,
+          "endTime": 2.335,
+          "startTime": 2.055,
+          "word": "实"
+        },
+        {
+          "confidence": 0.9312315,
+          "endTime": 2.525,
+          "startTime": 2.335,
+          "word": "际"
+        },
+        {
+          "confidence": 0.9579767,
+          "endTime": 2.725,
+          "startTime": 2.525,
+          "word": "生"
+        },
+        {
+          "confidence": 0.96509963,
+          "endTime": 2.905,
+          "startTime": 2.725,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9372101,
+          "endTime": 2.995,
+          "startTime": 2.905,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9331091,
+          "endTime": 3.205,
+          "startTime": 2.995,
+          "word": "插"
+        },
+        {
+          "confidence": 0.9802013,
+          "endTime": 3.505,
+          "startTime": 3.205,
+          "word": "图，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课堂导入还可以配上实际生成的插图，让几个概念围绕同一个生活场景展开。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "让几个概念围绕同一个生活场景展开。",
+      "words": [
+        {
+          "confidence": 0.771978,
+          "endTime": 4.0350413,
+          "startTime": 3.9200416,
+          "word": "让"
+        },
+        {
+          "confidence": 0.8719959,
+          "endTime": 4.1850414,
+          "startTime": 4.0350413,
+          "word": "几"
+        },
+        {
+          "confidence": 0.9403016,
+          "endTime": 4.285042,
+          "startTime": 4.1850414,
+          "word": "个"
+        },
+        {
+          "confidence": 0.946192,
+          "endTime": 4.5050416,
+          "startTime": 4.285042,
+          "word": "概"
+        },
+        {
+          "confidence": 0.8863554,
+          "endTime": 4.7350416,
+          "startTime": 4.5050416,
+          "word": "念"
+        },
+        {
+          "confidence": 0.65866596,
+          "endTime": 4.9150414,
+          "startTime": 4.8050413,
+          "word": "围"
+        },
+        {
+          "confidence": 0.8528855,
+          "endTime": 5.1050415,
+          "startTime": 4.9150414,
+          "word": "绕"
+        },
+        {
+          "confidence": 0.94407886,
+          "endTime": 5.3650417,
+          "startTime": 5.1050415,
+          "word": "同"
+        },
+        {
+          "confidence": 0.89209896,
+          "endTime": 5.4750414,
+          "startTime": 5.3650417,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9666997,
+          "endTime": 5.575042,
+          "startTime": 5.4750414,
+          "word": "个"
+        },
+        {
+          "confidence": 0.9437348,
+          "endTime": 5.7550416,
+          "startTime": 5.575042,
+          "word": "生"
+        },
+        {
+          "confidence": 0.980777,
+          "endTime": 5.9050417,
+          "startTime": 5.7550416,
+          "word": "活"
+        },
+        {
+          "confidence": 0.9476732,
+          "endTime": 6.0850415,
+          "startTime": 5.9050417,
+          "word": "场"
+        },
+        {
+          "confidence": 0.4347176,
+          "endTime": 6.1750417,
+          "startTime": 6.0850415,
+          "word": "景"
+        },
+        {
+          "confidence": 0.15045908,
+          "endTime": 6.2350416,
+          "startTime": 6.1750417,
+          "word": "展"
+        },
+        {
+          "confidence": 0.30220273,
+          "endTime": 6.2950416,
+          "startTime": 6.2350416,
+          "word": "开。"
+        }
+      ]
+    }
+  ]
+}

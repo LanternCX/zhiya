@@ -1,0 +1,418 @@
+{
+  "duration": 15.179333333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "提出想学的主题，系统组织课程小节，并逐步生成讲解页。",
+      "words": [
+        {
+          "confidence": 0.90658206,
+          "endTime": 0.415,
+          "startTime": 0.235,
+          "word": "提"
+        },
+        {
+          "confidence": 0.9721535,
+          "endTime": 0.575,
+          "startTime": 0.415,
+          "word": "出"
+        },
+        {
+          "confidence": 0.92255276,
+          "endTime": 0.755,
+          "startTime": 0.575,
+          "word": "想"
+        },
+        {
+          "confidence": 0.97384095,
+          "endTime": 0.955,
+          "startTime": 0.755,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8987416,
+          "endTime": 1.045,
+          "startTime": 0.955,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9593104,
+          "endTime": 1.225,
+          "startTime": 1.045,
+          "word": "主"
+        },
+        {
+          "confidence": 0.98118764,
+          "endTime": 1.565,
+          "startTime": 1.225,
+          "word": "题，"
+        },
+        {
+          "confidence": 0.95224035,
+          "endTime": 2.115,
+          "startTime": 1.855,
+          "word": "系"
+        },
+        {
+          "confidence": 0.8368545,
+          "endTime": 2.335,
+          "startTime": 2.115,
+          "word": "统"
+        },
+        {
+          "confidence": 0.9263838,
+          "endTime": 2.525,
+          "startTime": 2.335,
+          "word": "组"
+        },
+        {
+          "confidence": 0.92878914,
+          "endTime": 2.665,
+          "startTime": 2.525,
+          "word": "织"
+        },
+        {
+          "confidence": 0.9437619,
+          "endTime": 2.835,
+          "startTime": 2.665,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96305376,
+          "endTime": 2.995,
+          "startTime": 2.835,
+          "word": "程"
+        },
+        {
+          "confidence": 0.90274435,
+          "endTime": 3.215,
+          "startTime": 2.995,
+          "word": "小"
+        },
+        {
+          "confidence": 0.9194977,
+          "endTime": 3.495,
+          "startTime": 3.215,
+          "word": "节，"
+        },
+        {
+          "confidence": 0.7696863,
+          "endTime": 4.025,
+          "startTime": 3.785,
+          "word": "并"
+        },
+        {
+          "confidence": 0.9233448,
+          "endTime": 4.215,
+          "startTime": 4.025,
+          "word": "逐"
+        },
+        {
+          "confidence": 0.9638149,
+          "endTime": 4.365,
+          "startTime": 4.215,
+          "word": "步"
+        },
+        {
+          "confidence": 0.907862,
+          "endTime": 4.565,
+          "startTime": 4.365,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9652713,
+          "endTime": 4.785,
+          "startTime": 4.565,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9219825,
+          "endTime": 4.985,
+          "startTime": 4.785,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9087446,
+          "endTime": 5.215,
+          "startTime": 4.985,
+          "word": "解"
+        },
+        {
+          "confidence": 0.8714999,
+          "endTime": 5.425,
+          "startTime": 5.215,
+          "word": "页。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这里从输出一句话开始，再认识变量，最后接收输入。",
+      "words": [
+        {
+          "confidence": 0.957505,
+          "endTime": 6.015042,
+          "startTime": 5.8400416,
+          "word": "这"
+        },
+        {
+          "confidence": 0.9350845,
+          "endTime": 6.2150416,
+          "startTime": 6.015042,
+          "word": "里"
+        },
+        {
+          "confidence": 0.97095877,
+          "endTime": 6.4250417,
+          "startTime": 6.2150416,
+          "word": "从"
+        },
+        {
+          "confidence": 0.96521455,
+          "endTime": 6.6450415,
+          "startTime": 6.4250417,
+          "word": "输"
+        },
+        {
+          "confidence": 0.9573896,
+          "endTime": 6.8150415,
+          "startTime": 6.6450415,
+          "word": "出"
+        },
+        {
+          "confidence": 0.8563568,
+          "endTime": 6.9650416,
+          "startTime": 6.8150415,
+          "word": "一"
+        },
+        {
+          "confidence": 0.878462,
+          "endTime": 7.0850415,
+          "startTime": 6.9650416,
+          "word": "句"
+        },
+        {
+          "confidence": 0.96710217,
+          "endTime": 7.3150415,
+          "startTime": 7.0850415,
+          "word": "话"
+        },
+        {
+          "confidence": 0.7694606,
+          "endTime": 7.4850416,
+          "startTime": 7.3150415,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9215674,
+          "endTime": 7.745042,
+          "startTime": 7.4850416,
+          "word": "始，"
+        },
+        {
+          "confidence": 0.86310035,
+          "endTime": 8.325042,
+          "startTime": 8.075042,
+          "word": "再"
+        },
+        {
+          "confidence": 0.94689834,
+          "endTime": 8.445042,
+          "startTime": 8.325042,
+          "word": "认"
+        },
+        {
+          "confidence": 0.94619167,
+          "endTime": 8.6050415,
+          "startTime": 8.445042,
+          "word": "识"
+        },
+        {
+          "confidence": 0.9119395,
+          "endTime": 8.815042,
+          "startTime": 8.6050415,
+          "word": "变"
+        },
+        {
+          "confidence": 0.9705585,
+          "endTime": 9.055041,
+          "startTime": 8.815042,
+          "word": "量，"
+        },
+        {
+          "confidence": 0.90941083,
+          "endTime": 9.485042,
+          "startTime": 9.295042,
+          "word": "最"
+        },
+        {
+          "confidence": 0.9734601,
+          "endTime": 9.735042,
+          "startTime": 9.485042,
+          "word": "后"
+        },
+        {
+          "confidence": 0.9541359,
+          "endTime": 9.925041,
+          "startTime": 9.735042,
+          "word": "接"
+        },
+        {
+          "confidence": 0.28872353,
+          "endTime": 9.995042,
+          "startTime": 9.925041,
+          "word": "收"
+        },
+        {
+          "confidence": 0.20332779,
+          "endTime": 10.055042,
+          "startTime": 9.995042,
+          "word": "输"
+        },
+        {
+          "confidence": 0.32718298,
+          "endTime": 10.115042,
+          "startTime": 10.055042,
+          "word": "入。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "提出想学的主题，系统组织课程小节，并逐步生成讲解页。这里从输出一句话开始，再认识变量，最后接收输入。你可以边看边问，不需要等整门课程准备完才开始。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "你可以边看边问，不需要等整门课程准备完才开始。",
+      "words": [
+        {
+          "confidence": 0.97701126,
+          "endTime": 11.065083,
+          "startTime": 10.895082,
+          "word": "你"
+        },
+        {
+          "confidence": 0.7095951,
+          "endTime": 11.185083,
+          "startTime": 11.065083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.6972011,
+          "endTime": 11.325083,
+          "startTime": 11.185083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.85714114,
+          "endTime": 11.495083,
+          "startTime": 11.325083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.92226255,
+          "endTime": 11.735083,
+          "startTime": 11.495083,
+          "word": "看"
+        },
+        {
+          "confidence": 0.9149719,
+          "endTime": 11.935083,
+          "startTime": 11.735083,
+          "word": "边"
+        },
+        {
+          "confidence": 0.9688268,
+          "endTime": 12.145082,
+          "startTime": 11.935083,
+          "word": "问，"
+        },
+        {
+          "confidence": 0.9591391,
+          "endTime": 12.565083,
+          "startTime": 12.455083,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9777437,
+          "endTime": 12.755083,
+          "startTime": 12.565083,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9656515,
+          "endTime": 12.895082,
+          "startTime": 12.755083,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8840185,
+          "endTime": 13.065083,
+          "startTime": 12.895082,
+          "word": "等"
+        },
+        {
+          "confidence": 0.910275,
+          "endTime": 13.235083,
+          "startTime": 13.065083,
+          "word": "整"
+        },
+        {
+          "confidence": 0.8395485,
+          "endTime": 13.3550825,
+          "startTime": 13.235083,
+          "word": "门"
+        },
+        {
+          "confidence": 0.9182446,
+          "endTime": 13.535083,
+          "startTime": 13.3550825,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9641627,
+          "endTime": 13.715083,
+          "startTime": 13.535083,
+          "word": "程"
+        },
+        {
+          "confidence": 0.91559106,
+          "endTime": 13.895082,
+          "startTime": 13.715083,
+          "word": "准"
+        },
+        {
+          "confidence": 0.96727693,
+          "endTime": 14.065083,
+          "startTime": 13.895082,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9419144,
+          "endTime": 14.235083,
+          "startTime": 14.065083,
+          "word": "完"
+        },
+        {
+          "confidence": 0.92059565,
+          "endTime": 14.395082,
+          "startTime": 14.235083,
+          "word": "才"
+        },
+        {
+          "confidence": 0.966217,
+          "endTime": 14.565083,
+          "startTime": 14.395082,
+          "word": "开"
+        },
+        {
+          "confidence": 0.9417972,
+          "endTime": 14.835083,
+          "startTime": 14.565083,
+          "word": "始。"
+        }
+      ]
+    }
+  ]
+}

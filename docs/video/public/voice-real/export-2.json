@@ -1,0 +1,208 @@
+{
+  "duration": 7.50225,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "从最初的一句话，",
+      "words": [
+        {
+          "confidence": 0.9624556,
+          "endTime": 0.485,
+          "startTime": 0.235,
+          "word": "从"
+        },
+        {
+          "confidence": 0.84930307,
+          "endTime": 0.685,
+          "startTime": 0.485,
+          "word": "最"
+        },
+        {
+          "confidence": 0.92201614,
+          "endTime": 0.865,
+          "startTime": 0.685,
+          "word": "初"
+        },
+        {
+          "confidence": 0.9320467,
+          "endTime": 0.995,
+          "startTime": 0.865,
+          "word": "的"
+        },
+        {
+          "confidence": 0.7997282,
+          "endTime": 1.125,
+          "startTime": 0.995,
+          "word": "一"
+        },
+        {
+          "confidence": 0.96742874,
+          "endTime": 1.285,
+          "startTime": 1.125,
+          "word": "句"
+        },
+        {
+          "confidence": 0.97089803,
+          "endTime": 1.605,
+          "startTime": 1.285,
+          "word": "话，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "从最初的一句话，到看得见、能修改、能使用的材料，这次备课才真正连起来。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "到看得见、能修改、能使用的材料，",
+      "words": [
+        {
+          "confidence": 0.46932968,
+          "endTime": 2.1750417,
+          "startTime": 2.1000416,
+          "word": "到"
+        },
+        {
+          "confidence": 0.8406333,
+          "endTime": 2.3250415,
+          "startTime": 2.1750417,
+          "word": "看"
+        },
+        {
+          "confidence": 0.6833021,
+          "endTime": 2.4150417,
+          "startTime": 2.3250415,
+          "word": "得"
+        },
+        {
+          "confidence": 0.2085466,
+          "endTime": 2.6550417,
+          "startTime": 2.6250415,
+          "word": "见、"
+        },
+        {
+          "confidence": 0.9534316,
+          "endTime": 3.1450415,
+          "startTime": 2.9650416,
+          "word": "能"
+        },
+        {
+          "confidence": 0.81650805,
+          "endTime": 3.3650417,
+          "startTime": 3.1450415,
+          "word": "修"
+        },
+        {
+          "confidence": 0.2438911,
+          "endTime": 3.3950415,
+          "startTime": 3.3650417,
+          "word": "改、"
+        },
+        {
+          "confidence": 0.9492934,
+          "endTime": 3.9550416,
+          "startTime": 3.7950416,
+          "word": "能"
+        },
+        {
+          "confidence": 0.9026717,
+          "endTime": 4.1950417,
+          "startTime": 3.9550416,
+          "word": "使"
+        },
+        {
+          "confidence": 0.98109293,
+          "endTime": 4.3650417,
+          "startTime": 4.1950417,
+          "word": "用"
+        },
+        {
+          "confidence": 0.95912695,
+          "endTime": 4.4650416,
+          "startTime": 4.3650417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9406178,
+          "endTime": 4.6950417,
+          "startTime": 4.4650416,
+          "word": "材"
+        },
+        {
+          "confidence": 0.7810602,
+          "endTime": 4.875042,
+          "startTime": 4.6950417,
+          "word": "料，"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "这次备课才真正连起来。",
+      "words": [
+        {
+          "confidence": 0.91227156,
+          "endTime": 5.425083,
+          "startTime": 5.260083,
+          "word": "这"
+        },
+        {
+          "confidence": 0.85627663,
+          "endTime": 5.585083,
+          "startTime": 5.425083,
+          "word": "次"
+        },
+        {
+          "confidence": 0.8873875,
+          "endTime": 5.755083,
+          "startTime": 5.585083,
+          "word": "备"
+        },
+        {
+          "confidence": 0.87985975,
+          "endTime": 6.045083,
+          "startTime": 5.755083,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9211032,
+          "endTime": 6.2850833,
+          "startTime": 6.095083,
+          "word": "才"
+        },
+        {
+          "confidence": 0.95306677,
+          "endTime": 6.4750834,
+          "startTime": 6.2850833,
+          "word": "真"
+        },
+        {
+          "confidence": 0.95430624,
+          "endTime": 6.655083,
+          "startTime": 6.4750834,
+          "word": "正"
+        },
+        {
+          "confidence": 0.155954,
+          "endTime": 6.715083,
+          "startTime": 6.655083,
+          "word": "连"
+        },
+        {
+          "confidence": 0.19657375,
+          "endTime": 6.775083,
+          "startTime": 6.715083,
+          "word": "起"
+        },
+        {
+          "confidence": 0.2963162,
+          "endTime": 6.835083,
+          "startTime": 6.775083,
+          "word": "来。"
+        }
+      ]
+    }
+  ]
+}

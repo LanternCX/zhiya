@@ -1,0 +1,238 @@
+{
+  "duration": 8.563375,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "需要离线整理时，可以下载 Word 文档或 PPT 课件。",
+      "words": [
+        {
+          "confidence": 0.8631751,
+          "endTime": 0.435,
+          "startTime": 0.225,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9117324,
+          "endTime": 0.555,
+          "startTime": 0.435,
+          "word": "要"
+        },
+        {
+          "confidence": 0.8535593,
+          "endTime": 0.685,
+          "startTime": 0.555,
+          "word": "离"
+        },
+        {
+          "confidence": 0.95680815,
+          "endTime": 0.895,
+          "startTime": 0.685,
+          "word": "线"
+        },
+        {
+          "confidence": 0.9051428,
+          "endTime": 1.105,
+          "startTime": 0.895,
+          "word": "整"
+        },
+        {
+          "confidence": 0.9491929,
+          "endTime": 1.235,
+          "startTime": 1.105,
+          "word": "理"
+        },
+        {
+          "confidence": 0.94746226,
+          "endTime": 1.575,
+          "startTime": 1.235,
+          "word": "时，"
+        },
+        {
+          "confidence": 0.84726924,
+          "endTime": 1.945,
+          "startTime": 1.795,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7132358,
+          "endTime": 2.055,
+          "startTime": 1.945,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9620102,
+          "endTime": 2.285,
+          "startTime": 2.055,
+          "word": "下"
+        },
+        {
+          "confidence": 0.86098945,
+          "endTime": 2.455,
+          "startTime": 2.285,
+          "word": "载"
+        },
+        {
+          "confidence": 0.6503828,
+          "endTime": 2.715,
+          "startTime": 2.455,
+          "word": "Word"
+        },
+        {
+          "confidence": 0.8312129,
+          "endTime": 2.915,
+          "startTime": 2.715,
+          "word": "文"
+        },
+        {
+          "confidence": 0.8314421,
+          "endTime": 3.135,
+          "startTime": 2.915,
+          "word": "档"
+        },
+        {
+          "confidence": 0.8388269,
+          "endTime": 3.405,
+          "startTime": 3.245,
+          "word": "或"
+        },
+        {
+          "confidence": 0.21517752,
+          "endTime": 3.435,
+          "startTime": 3.405,
+          "word": "PPT"
+        },
+        {
+          "confidence": 0.9217146,
+          "endTime": 4.085,
+          "startTime": 3.925,
+          "word": "课"
+        },
+        {
+          "confidence": 0.95249677,
+          "endTime": 4.335,
+          "startTime": 4.085,
+          "word": "件。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "需要离线整理时，可以下载 Word 文档或 PPT 课件。让学习成果留在自己手里，继续修改和复习。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "让学习成果留在自己手里，继续修改和复习。",
+      "words": [
+        {
+          "confidence": 0.47893485,
+          "endTime": 4.8550415,
+          "startTime": 4.7800417,
+          "word": "让"
+        },
+        {
+          "confidence": 0.7670034,
+          "endTime": 4.9850416,
+          "startTime": 4.8550415,
+          "word": "学"
+        },
+        {
+          "confidence": 0.9302003,
+          "endTime": 5.1350417,
+          "startTime": 4.9850416,
+          "word": "习"
+        },
+        {
+          "confidence": 0.94296086,
+          "endTime": 5.3650417,
+          "startTime": 5.1350417,
+          "word": "成"
+        },
+        {
+          "confidence": 0.88878137,
+          "endTime": 5.5850415,
+          "startTime": 5.3650417,
+          "word": "果"
+        },
+        {
+          "confidence": 0.96353346,
+          "endTime": 5.745042,
+          "startTime": 5.5850415,
+          "word": "留"
+        },
+        {
+          "confidence": 0.9328045,
+          "endTime": 5.8850417,
+          "startTime": 5.745042,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9266992,
+          "endTime": 6.0250416,
+          "startTime": 5.8850417,
+          "word": "自"
+        },
+        {
+          "confidence": 0.9895648,
+          "endTime": 6.1850414,
+          "startTime": 6.0250416,
+          "word": "己"
+        },
+        {
+          "confidence": 0.89703,
+          "endTime": 6.455042,
+          "startTime": 6.1850414,
+          "word": "手"
+        },
+        {
+          "confidence": 0.9488701,
+          "endTime": 6.6450415,
+          "startTime": 6.455042,
+          "word": "里，"
+        },
+        {
+          "confidence": 0.9687165,
+          "endTime": 7.045042,
+          "startTime": 6.875042,
+          "word": "继"
+        },
+        {
+          "confidence": 0.9673301,
+          "endTime": 7.205042,
+          "startTime": 7.045042,
+          "word": "续"
+        },
+        {
+          "confidence": 0.924697,
+          "endTime": 7.4850416,
+          "startTime": 7.205042,
+          "word": "修"
+        },
+        {
+          "confidence": 0.91538954,
+          "endTime": 7.6950417,
+          "startTime": 7.4850416,
+          "word": "改"
+        },
+        {
+          "confidence": 0.27058047,
+          "endTime": 7.7550416,
+          "startTime": 7.6950417,
+          "word": "和"
+        },
+        {
+          "confidence": 0.15357953,
+          "endTime": 7.8150415,
+          "startTime": 7.7550416,
+          "word": "复"
+        },
+        {
+          "confidence": 0.19143216,
+          "endTime": 7.875042,
+          "startTime": 7.8150415,
+          "word": "习。"
+        }
+      ]
+    }
+  ]
+}

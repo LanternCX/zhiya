@@ -1,0 +1,460 @@
+{
+  "duration": 14.669916666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "入门课的第一个练习，不一定要写复杂的程序。",
+      "words": [
+        {
+          "confidence": 0.8477539,
+          "endTime": 0.435,
+          "startTime": 0.255,
+          "word": "入"
+        },
+        {
+          "confidence": 0.89803606,
+          "endTime": 0.595,
+          "startTime": 0.435,
+          "word": "门"
+        },
+        {
+          "confidence": 0.8956707,
+          "endTime": 0.825,
+          "startTime": 0.595,
+          "word": "课"
+        },
+        {
+          "confidence": 0.9258091,
+          "endTime": 0.935,
+          "startTime": 0.825,
+          "word": "的"
+        },
+        {
+          "confidence": 0.92836213,
+          "endTime": 1.155,
+          "startTime": 0.935,
+          "word": "第"
+        },
+        {
+          "confidence": 0.9210281,
+          "endTime": 1.215,
+          "startTime": 1.155,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9492112,
+          "endTime": 1.335,
+          "startTime": 1.215,
+          "word": "个"
+        },
+        {
+          "confidence": 0.7363879,
+          "endTime": 1.485,
+          "startTime": 1.335,
+          "word": "练"
+        },
+        {
+          "confidence": 0.97109336,
+          "endTime": 1.835,
+          "startTime": 1.485,
+          "word": "习，"
+        },
+        {
+          "confidence": 0.91842175,
+          "endTime": 2.235,
+          "startTime": 2.055,
+          "word": "不"
+        },
+        {
+          "confidence": 0.9074785,
+          "endTime": 2.345,
+          "startTime": 2.235,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9785457,
+          "endTime": 2.555,
+          "startTime": 2.345,
+          "word": "定"
+        },
+        {
+          "confidence": 0.92476153,
+          "endTime": 2.625,
+          "startTime": 2.555,
+          "word": "要"
+        },
+        {
+          "confidence": 0.90191317,
+          "endTime": 2.805,
+          "startTime": 2.625,
+          "word": "写"
+        },
+        {
+          "confidence": 0.9689265,
+          "endTime": 3.035,
+          "startTime": 2.805,
+          "word": "复"
+        },
+        {
+          "confidence": 0.92488986,
+          "endTime": 3.185,
+          "startTime": 3.035,
+          "word": "杂"
+        },
+        {
+          "confidence": 0.9510508,
+          "endTime": 3.275,
+          "startTime": 3.185,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97815025,
+          "endTime": 3.475,
+          "startTime": 3.275,
+          "word": "程"
+        },
+        {
+          "confidence": 0.8704725,
+          "endTime": 3.715,
+          "startTime": 3.475,
+          "word": "序。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "入门课的第一个练习，不一定要写复杂的程序。这里先让屏幕显示欢迎词，再请学生补一行，让程序说出自己的名字。任务足够小，学生才容易把注意力放在代码和结果的关系上。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "这里先让屏幕显示欢迎词，再请学生补一行，让程序说出自己的名字。",
+      "words": [
+        {
+          "confidence": 0.9446762,
+          "endTime": 4.2350416,
+          "startTime": 4.0700417,
+          "word": "这"
+        },
+        {
+          "confidence": 0.94852585,
+          "endTime": 4.4250417,
+          "startTime": 4.2350416,
+          "word": "里"
+        },
+        {
+          "confidence": 0.9428915,
+          "endTime": 4.6250415,
+          "startTime": 4.4250417,
+          "word": "先"
+        },
+        {
+          "confidence": 0.9666579,
+          "endTime": 4.785042,
+          "startTime": 4.6250415,
+          "word": "让"
+        },
+        {
+          "confidence": 0.94917905,
+          "endTime": 5.0050416,
+          "startTime": 4.785042,
+          "word": "屏"
+        },
+        {
+          "confidence": 0.9594849,
+          "endTime": 5.165042,
+          "startTime": 5.0050416,
+          "word": "幕"
+        },
+        {
+          "confidence": 0.9490747,
+          "endTime": 5.3450418,
+          "startTime": 5.165042,
+          "word": "显"
+        },
+        {
+          "confidence": 0.94431126,
+          "endTime": 5.5250416,
+          "startTime": 5.3450418,
+          "word": "示"
+        },
+        {
+          "confidence": 0.87636256,
+          "endTime": 5.7350416,
+          "startTime": 5.5250416,
+          "word": "欢"
+        },
+        {
+          "confidence": 0.90290356,
+          "endTime": 5.825042,
+          "startTime": 5.7350416,
+          "word": "迎"
+        },
+        {
+          "confidence": 0.90110826,
+          "endTime": 6.1550417,
+          "startTime": 5.8550415,
+          "word": "词，"
+        },
+        {
+          "confidence": 0.93236333,
+          "endTime": 6.6350417,
+          "startTime": 6.4750414,
+          "word": "再"
+        },
+        {
+          "confidence": 0.9477642,
+          "endTime": 6.785042,
+          "startTime": 6.6350417,
+          "word": "请"
+        },
+        {
+          "confidence": 0.9477443,
+          "endTime": 6.955042,
+          "startTime": 6.785042,
+          "word": "学"
+        },
+        {
+          "confidence": 0.8812757,
+          "endTime": 7.1350417,
+          "startTime": 6.955042,
+          "word": "生"
+        },
+        {
+          "confidence": 0.6275504,
+          "endTime": 7.3650417,
+          "startTime": 7.1350417,
+          "word": "补"
+        },
+        {
+          "confidence": 0.8983933,
+          "endTime": 7.4650416,
+          "startTime": 7.3650417,
+          "word": "一"
+        },
+        {
+          "confidence": 0.85480547,
+          "endTime": 7.6350417,
+          "startTime": 7.4650416,
+          "word": "行，"
+        },
+        {
+          "confidence": 0.20748751,
+          "endTime": 7.6950417,
+          "startTime": 7.6350417,
+          "word": "让"
+        },
+        {
+          "confidence": 0.27798977,
+          "endTime": 7.7550416,
+          "startTime": 7.6950417,
+          "word": "程"
+        },
+        {
+          "confidence": 0.34400705,
+          "endTime": 8.045042,
+          "startTime": 7.9650416,
+          "word": "序"
+        },
+        {
+          "confidence": 0.17280166,
+          "endTime": 8.1050415,
+          "startTime": 8.045042,
+          "word": "说"
+        },
+        {
+          "confidence": 0.37712866,
+          "endTime": 8.325042,
+          "startTime": 8.185041,
+          "word": "出"
+        },
+        {
+          "confidence": 0.09547737,
+          "endTime": 8.385042,
+          "startTime": 8.325042,
+          "word": "自"
+        },
+        {
+          "confidence": 0.15586199,
+          "endTime": 8.485042,
+          "startTime": 8.425041,
+          "word": "己"
+        },
+        {
+          "confidence": 0.2731736,
+          "endTime": 8.545042,
+          "startTime": 8.485042,
+          "word": "的"
+        },
+        {
+          "confidence": 0.1542592,
+          "endTime": 8.6050415,
+          "startTime": 8.545042,
+          "word": "名"
+        },
+        {
+          "confidence": 0.69693965,
+          "endTime": 9.085041,
+          "startTime": 8.955042,
+          "word": "字。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "任务足够小，学生才容易把注意力放在代码和结果的关系上。",
+      "words": [
+        {
+          "confidence": 0.88801825,
+          "endTime": 10.265083,
+          "startTime": 10.085083,
+          "word": "任"
+        },
+        {
+          "confidence": 0.79706615,
+          "endTime": 10.335083,
+          "startTime": 10.265083,
+          "word": "务"
+        },
+        {
+          "confidence": 0.8982773,
+          "endTime": 10.475083,
+          "startTime": 10.335083,
+          "word": "足"
+        },
+        {
+          "confidence": 0.9260411,
+          "endTime": 10.635083,
+          "startTime": 10.475083,
+          "word": "够"
+        },
+        {
+          "confidence": 0.9011757,
+          "endTime": 10.925083,
+          "startTime": 10.635083,
+          "word": "小，"
+        },
+        {
+          "confidence": 0.85658705,
+          "endTime": 11.335083,
+          "startTime": 11.095083,
+          "word": "学"
+        },
+        {
+          "confidence": 0.78448087,
+          "endTime": 11.575084,
+          "startTime": 11.335083,
+          "word": "生"
+        },
+        {
+          "confidence": 0.9320052,
+          "endTime": 11.775084,
+          "startTime": 11.575084,
+          "word": "才"
+        },
+        {
+          "confidence": 0.97628665,
+          "endTime": 11.905084,
+          "startTime": 11.775084,
+          "word": "容"
+        },
+        {
+          "confidence": 0.9856868,
+          "endTime": 12.005083,
+          "startTime": 11.905084,
+          "word": "易"
+        },
+        {
+          "confidence": 0.8306844,
+          "endTime": 12.135083,
+          "startTime": 12.005083,
+          "word": "把"
+        },
+        {
+          "confidence": 0.85116893,
+          "endTime": 12.3150835,
+          "startTime": 12.135083,
+          "word": "注"
+        },
+        {
+          "confidence": 0.94847274,
+          "endTime": 12.455084,
+          "startTime": 12.3150835,
+          "word": "意"
+        },
+        {
+          "confidence": 0.9343664,
+          "endTime": 12.645083,
+          "startTime": 12.455084,
+          "word": "力"
+        },
+        {
+          "confidence": 0.97623724,
+          "endTime": 12.8150835,
+          "startTime": 12.645083,
+          "word": "放"
+        },
+        {
+          "confidence": 0.9613946,
+          "endTime": 12.965084,
+          "startTime": 12.8150835,
+          "word": "在"
+        },
+        {
+          "confidence": 0.9405945,
+          "endTime": 13.195084,
+          "startTime": 12.965084,
+          "word": "代"
+        },
+        {
+          "confidence": 0.8462282,
+          "endTime": 13.375084,
+          "startTime": 13.195084,
+          "word": "码"
+        },
+        {
+          "confidence": 0.9367508,
+          "endTime": 13.535084,
+          "startTime": 13.375084,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9458255,
+          "endTime": 13.755083,
+          "startTime": 13.535084,
+          "word": "结"
+        },
+        {
+          "confidence": 0.9641316,
+          "endTime": 13.915083,
+          "startTime": 13.755083,
+          "word": "果"
+        },
+        {
+          "confidence": 0.9319932,
+          "endTime": 14.005083,
+          "startTime": 13.915083,
+          "word": "的"
+        },
+        {
+          "confidence": 0.97189605,
+          "endTime": 14.155084,
+          "startTime": 14.005083,
+          "word": "关"
+        },
+        {
+          "confidence": 0.9338545,
+          "endTime": 14.305083,
+          "startTime": 14.155084,
+          "word": "系"
+        },
+        {
+          "confidence": 0.9532262,
+          "endTime": 14.535084,
+          "startTime": 14.305083,
+          "word": "上。"
+        }
+      ]
+    }
+  ]
+}

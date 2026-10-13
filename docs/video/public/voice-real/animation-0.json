@@ -1,0 +1,184 @@
+{
+  "duration": 6.062833333333334,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "代码是静止的，但数据会一步步流动。怎么让学生看明白这个过程？",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "代码是静止的，但数据会一步步流动。",
+      "words": [
+        {
+          "confidence": 0.94027925,
+          "endTime": 0.435,
+          "startTime": 0.225,
+          "word": "代"
+        },
+        {
+          "confidence": 0.79091674,
+          "endTime": 0.655,
+          "startTime": 0.435,
+          "word": "码"
+        },
+        {
+          "confidence": 0.89787066,
+          "endTime": 0.845,
+          "startTime": 0.655,
+          "word": "是"
+        },
+        {
+          "confidence": 0.85787046,
+          "endTime": 1.075,
+          "startTime": 0.845,
+          "word": "静"
+        },
+        {
+          "confidence": 0.90011215,
+          "endTime": 1.295,
+          "startTime": 1.075,
+          "word": "止"
+        },
+        {
+          "confidence": 0.9514946,
+          "endTime": 1.525,
+          "startTime": 1.325,
+          "word": "的，"
+        },
+        {
+          "confidence": 0.97782904,
+          "endTime": 1.925,
+          "startTime": 1.795,
+          "word": "但"
+        },
+        {
+          "confidence": 0.92489505,
+          "endTime": 2.185,
+          "startTime": 1.925,
+          "word": "数"
+        },
+        {
+          "confidence": 0.82609034,
+          "endTime": 2.445,
+          "startTime": 2.185,
+          "word": "据"
+        },
+        {
+          "confidence": 0.93674666,
+          "endTime": 2.665,
+          "startTime": 2.445,
+          "word": "会"
+        },
+        {
+          "confidence": 0.86483103,
+          "endTime": 2.805,
+          "startTime": 2.665,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9446751,
+          "endTime": 2.935,
+          "startTime": 2.805,
+          "word": "步"
+        },
+        {
+          "confidence": 0.90971214,
+          "endTime": 3.085,
+          "startTime": 2.935,
+          "word": "步"
+        },
+        {
+          "confidence": 0.8402363,
+          "endTime": 3.285,
+          "startTime": 3.085,
+          "word": "流"
+        },
+        {
+          "confidence": 0.9600129,
+          "endTime": 3.465,
+          "startTime": 3.285,
+          "word": "动。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "怎么让学生看明白这个过程？",
+      "words": [
+        {
+          "confidence": 0.5399284,
+          "endTime": 3.9550416,
+          "startTime": 3.8800416,
+          "word": "怎"
+        },
+        {
+          "confidence": 0.44768447,
+          "endTime": 4.015042,
+          "startTime": 3.9550416,
+          "word": "么"
+        },
+        {
+          "confidence": 0.9499102,
+          "endTime": 4.1350417,
+          "startTime": 4.015042,
+          "word": "让"
+        },
+        {
+          "confidence": 0.9788005,
+          "endTime": 4.3350415,
+          "startTime": 4.1350417,
+          "word": "学"
+        },
+        {
+          "confidence": 0.85588235,
+          "endTime": 4.575042,
+          "startTime": 4.3350415,
+          "word": "生"
+        },
+        {
+          "confidence": 0.956033,
+          "endTime": 4.805042,
+          "startTime": 4.575042,
+          "word": "看"
+        },
+        {
+          "confidence": 0.94658375,
+          "endTime": 4.995042,
+          "startTime": 4.805042,
+          "word": "明"
+        },
+        {
+          "confidence": 0.83120894,
+          "endTime": 5.1550417,
+          "startTime": 4.995042,
+          "word": "白"
+        },
+        {
+          "confidence": 0.89633393,
+          "endTime": 5.2550416,
+          "startTime": 5.1550417,
+          "word": "这"
+        },
+        {
+          "confidence": 0.20435625,
+          "endTime": 5.3150415,
+          "startTime": 5.2550416,
+          "word": "个"
+        },
+        {
+          "confidence": 0.3614184,
+          "endTime": 5.3750415,
+          "startTime": 5.3150415,
+          "word": "过"
+        },
+        {
+          "confidence": 0.26733896,
+          "endTime": 5.4350414,
+          "startTime": 5.3750415,
+          "word": "程？"
+        }
+      ]
+    }
+  ]
+}

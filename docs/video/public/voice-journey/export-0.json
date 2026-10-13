@@ -1,0 +1,526 @@
+{
+  "duration": 17.519125,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "准备完成以后，老师还需要把材料带走。",
+      "words": [
+        {
+          "confidence": 0.926571,
+          "endTime": 0.415,
+          "startTime": 0.225,
+          "word": "准"
+        },
+        {
+          "confidence": 0.9788677,
+          "endTime": 0.555,
+          "startTime": 0.415,
+          "word": "备"
+        },
+        {
+          "confidence": 0.9851209,
+          "endTime": 0.685,
+          "startTime": 0.555,
+          "word": "完"
+        },
+        {
+          "confidence": 0.98100775,
+          "endTime": 0.885,
+          "startTime": 0.685,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9465724,
+          "endTime": 0.995,
+          "startTime": 0.885,
+          "word": "以"
+        },
+        {
+          "confidence": 0.98260087,
+          "endTime": 1.355,
+          "startTime": 0.995,
+          "word": "后，"
+        },
+        {
+          "confidence": 0.97200376,
+          "endTime": 1.735,
+          "startTime": 1.585,
+          "word": "老"
+        },
+        {
+          "confidence": 0.9595088,
+          "endTime": 1.915,
+          "startTime": 1.735,
+          "word": "师"
+        },
+        {
+          "confidence": 0.9177715,
+          "endTime": 2.075,
+          "startTime": 1.915,
+          "word": "还"
+        },
+        {
+          "confidence": 0.9474499,
+          "endTime": 2.245,
+          "startTime": 2.075,
+          "word": "需"
+        },
+        {
+          "confidence": 0.9763554,
+          "endTime": 2.325,
+          "startTime": 2.245,
+          "word": "要"
+        },
+        {
+          "confidence": 0.9566499,
+          "endTime": 2.475,
+          "startTime": 2.325,
+          "word": "把"
+        },
+        {
+          "confidence": 0.9520199,
+          "endTime": 2.665,
+          "startTime": 2.475,
+          "word": "材"
+        },
+        {
+          "confidence": 0.915235,
+          "endTime": 2.795,
+          "startTime": 2.665,
+          "word": "料"
+        },
+        {
+          "confidence": 0.8879202,
+          "endTime": 2.985,
+          "startTime": 2.795,
+          "word": "带"
+        },
+        {
+          "confidence": 0.962741,
+          "endTime": 3.235,
+          "startTime": 2.985,
+          "word": "走。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "工作区的导出入口可以生成课件和文档。",
+      "words": [
+        {
+          "confidence": 0.7602775,
+          "endTime": 3.8250418,
+          "startTime": 3.7400417,
+          "word": "工"
+        },
+        {
+          "confidence": 0.84537345,
+          "endTime": 3.9650416,
+          "startTime": 3.8250418,
+          "word": "作"
+        },
+        {
+          "confidence": 0.8376977,
+          "endTime": 4.1550417,
+          "startTime": 3.9650416,
+          "word": "区"
+        },
+        {
+          "confidence": 0.9015519,
+          "endTime": 4.2550416,
+          "startTime": 4.1550417,
+          "word": "的"
+        },
+        {
+          "confidence": 0.88260126,
+          "endTime": 4.415042,
+          "startTime": 4.2550416,
+          "word": "导"
+        },
+        {
+          "confidence": 0.9312671,
+          "endTime": 4.6050415,
+          "startTime": 4.415042,
+          "word": "出"
+        },
+        {
+          "confidence": 0.96994615,
+          "endTime": 4.7750416,
+          "startTime": 4.6050415,
+          "word": "入"
+        },
+        {
+          "confidence": 0.9662504,
+          "endTime": 5.085042,
+          "startTime": 4.7750416,
+          "word": "口"
+        },
+        {
+          "confidence": 0.81120574,
+          "endTime": 5.335042,
+          "startTime": 5.1750417,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7005041,
+          "endTime": 5.4250417,
+          "startTime": 5.335042,
+          "word": "以"
+        },
+        {
+          "confidence": 0.96599686,
+          "endTime": 5.6350417,
+          "startTime": 5.4250417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.94110864,
+          "endTime": 5.8450418,
+          "startTime": 5.6350417,
+          "word": "成"
+        },
+        {
+          "confidence": 0.9530313,
+          "endTime": 6.075042,
+          "startTime": 5.8450418,
+          "word": "课"
+        },
+        {
+          "confidence": 0.92183274,
+          "endTime": 6.255042,
+          "startTime": 6.075042,
+          "word": "件"
+        },
+        {
+          "confidence": 0.90142566,
+          "endTime": 6.4050417,
+          "startTime": 6.255042,
+          "word": "和"
+        },
+        {
+          "confidence": 0.9137642,
+          "endTime": 6.575042,
+          "startTime": 6.4050417,
+          "word": "文"
+        },
+        {
+          "confidence": 0.9106477,
+          "endTime": 6.795042,
+          "startTime": 6.575042,
+          "word": "档。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "课件用于投影讲解，教师教案则可以继续编辑或打印。",
+      "words": [
+        {
+          "confidence": 0.90193415,
+          "endTime": 7.3750834,
+          "startTime": 7.220083,
+          "word": "课"
+        },
+        {
+          "confidence": 0.89804476,
+          "endTime": 7.675083,
+          "startTime": 7.3750834,
+          "word": "件"
+        },
+        {
+          "confidence": 0.9572388,
+          "endTime": 7.835083,
+          "startTime": 7.675083,
+          "word": "用"
+        },
+        {
+          "confidence": 0.9218745,
+          "endTime": 7.925083,
+          "startTime": 7.835083,
+          "word": "于"
+        },
+        {
+          "confidence": 0.96693915,
+          "endTime": 8.155084,
+          "startTime": 7.925083,
+          "word": "投"
+        },
+        {
+          "confidence": 0.90060675,
+          "endTime": 8.275084,
+          "startTime": 8.155084,
+          "word": "影"
+        },
+        {
+          "confidence": 0.9007052,
+          "endTime": 8.495083,
+          "startTime": 8.275084,
+          "word": "讲"
+        },
+        {
+          "confidence": 0.9420297,
+          "endTime": 8.755083,
+          "startTime": 8.495083,
+          "word": "解，"
+        },
+        {
+          "confidence": 0.76540184,
+          "endTime": 9.225083,
+          "startTime": 9.0650835,
+          "word": "教"
+        },
+        {
+          "confidence": 0.8059399,
+          "endTime": 9.425083,
+          "startTime": 9.225083,
+          "word": "师"
+        },
+        {
+          "confidence": 0.85841525,
+          "endTime": 9.645083,
+          "startTime": 9.425083,
+          "word": "教"
+        },
+        {
+          "confidence": 0.88503546,
+          "endTime": 9.855083,
+          "startTime": 9.645083,
+          "word": "案"
+        },
+        {
+          "confidence": 0.7762164,
+          "endTime": 10.045083,
+          "startTime": 9.855083,
+          "word": "则"
+        },
+        {
+          "confidence": 0.87285095,
+          "endTime": 10.185083,
+          "startTime": 10.045083,
+          "word": "可"
+        },
+        {
+          "confidence": 0.7948982,
+          "endTime": 10.295083,
+          "startTime": 10.185083,
+          "word": "以"
+        },
+        {
+          "confidence": 0.9507212,
+          "endTime": 10.485084,
+          "startTime": 10.295083,
+          "word": "继"
+        },
+        {
+          "confidence": 0.95957905,
+          "endTime": 10.675083,
+          "startTime": 10.485084,
+          "word": "续"
+        },
+        {
+          "confidence": 0.8482055,
+          "endTime": 10.895083,
+          "startTime": 10.675083,
+          "word": "编"
+        },
+        {
+          "confidence": 0.9528767,
+          "endTime": 11.085083,
+          "startTime": 10.895083,
+          "word": "辑"
+        },
+        {
+          "confidence": 0.17969027,
+          "endTime": 11.145083,
+          "startTime": 11.085083,
+          "word": "或"
+        },
+        {
+          "confidence": 0.14327204,
+          "endTime": 11.205083,
+          "startTime": 11.145083,
+          "word": "打"
+        },
+        {
+          "confidence": 0.23830314,
+          "endTime": 11.235083,
+          "startTime": 11.205083,
+          "word": "印。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "准备完成以后，老师还需要把材料带走。工作区的导出入口可以生成课件和文档。课件用于投影讲解，教师教案则可以继续编辑或打印。视频里这份课程的课件文件和 Word 文档，都已经实际生成并检查过。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "视频里这份课程的课件文件和 Word 文档，都已经实际生成并检查过。",
+      "words": [
+        {
+          "confidence": 0.9430773,
+          "endTime": 12.255125,
+          "startTime": 12.035125,
+          "word": "视"
+        },
+        {
+          "confidence": 0.9728356,
+          "endTime": 12.465125,
+          "startTime": 12.255125,
+          "word": "频"
+        },
+        {
+          "confidence": 0.90421337,
+          "endTime": 12.645124,
+          "startTime": 12.465125,
+          "word": "里"
+        },
+        {
+          "confidence": 0.94662523,
+          "endTime": 12.775125,
+          "startTime": 12.645124,
+          "word": "这"
+        },
+        {
+          "confidence": 0.8627221,
+          "endTime": 12.925125,
+          "startTime": 12.775125,
+          "word": "份"
+        },
+        {
+          "confidence": 0.92934597,
+          "endTime": 13.105124,
+          "startTime": 12.925125,
+          "word": "课"
+        },
+        {
+          "confidence": 0.95085615,
+          "endTime": 13.265125,
+          "startTime": 13.105124,
+          "word": "程"
+        },
+        {
+          "confidence": 0.87658536,
+          "endTime": 13.365125,
+          "startTime": 13.265125,
+          "word": "的"
+        },
+        {
+          "confidence": 0.9617768,
+          "endTime": 13.555124,
+          "startTime": 13.365125,
+          "word": "课"
+        },
+        {
+          "confidence": 0.96638274,
+          "endTime": 13.745125,
+          "startTime": 13.555124,
+          "word": "件"
+        },
+        {
+          "confidence": 0.9589787,
+          "endTime": 13.895124,
+          "startTime": 13.745125,
+          "word": "文"
+        },
+        {
+          "confidence": 0.9512798,
+          "endTime": 14.165125,
+          "startTime": 13.895124,
+          "word": "件"
+        },
+        {
+          "confidence": 0.8836694,
+          "endTime": 14.395124,
+          "startTime": 14.195125,
+          "word": "和"
+        },
+        {
+          "confidence": 0.47231963,
+          "endTime": 14.595125,
+          "startTime": 14.395124,
+          "word": "Word"
+        },
+        {
+          "confidence": 0.861753,
+          "endTime": 14.775125,
+          "startTime": 14.595125,
+          "word": "文"
+        },
+        {
+          "confidence": 0.8907626,
+          "endTime": 14.965124,
+          "startTime": 14.775125,
+          "word": "档，"
+        },
+        {
+          "confidence": 0.92947876,
+          "endTime": 15.385124,
+          "startTime": 15.215124,
+          "word": "都"
+        },
+        {
+          "confidence": 0.9274539,
+          "endTime": 15.495125,
+          "startTime": 15.385124,
+          "word": "已"
+        },
+        {
+          "confidence": 0.9710035,
+          "endTime": 15.655125,
+          "startTime": 15.495125,
+          "word": "经"
+        },
+        {
+          "confidence": 0.95038587,
+          "endTime": 15.875125,
+          "startTime": 15.655125,
+          "word": "实"
+        },
+        {
+          "confidence": 0.93492454,
+          "endTime": 16.025124,
+          "startTime": 15.875125,
+          "word": "际"
+        },
+        {
+          "confidence": 0.9231026,
+          "endTime": 16.235125,
+          "startTime": 16.025124,
+          "word": "生"
+        },
+        {
+          "confidence": 0.91828936,
+          "endTime": 16.505125,
+          "startTime": 16.235125,
+          "word": "成"
+        },
+        {
+          "confidence": 0.932406,
+          "endTime": 16.655125,
+          "startTime": 16.505125,
+          "word": "并"
+        },
+        {
+          "confidence": 0.89310765,
+          "endTime": 16.825125,
+          "startTime": 16.655125,
+          "word": "检"
+        },
+        {
+          "confidence": 0.9784211,
+          "endTime": 17.075125,
+          "startTime": 16.825125,
+          "word": "查"
+        },
+        {
+          "confidence": 0.9036677,
+          "endTime": 17.305124,
+          "startTime": 17.075125,
+          "word": "过。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "duration": 101.108,
+  "events": [
+    {
+      "at": 0.0,
+      "progress": {
+        "phase": "uploading",
+        "total": 2,
+        "completed": 0,
+        "fileName": "教师教案.docx"
+      }
+    },
+    {
+      "at": 0.115,
+      "progress": {
+        "phase": "parsing",
+        "total": 2,
+        "completed": 0,
+        "fileName": "教师教案.docx"
+      }
+    },
+    {
+      "at": 81.81,
+      "progress": {
+        "phase": "uploading",
+        "total": 2,
+        "completed": 1,
+        "fileName": "食堂情境.png"
+      }
+    },
+    {
+      "at": 81.861,
+      "progress": {
+        "phase": "parsing",
+        "total": 2,
+        "completed": 1,
+        "fileName": "食堂情境.png"
+      }
+    },
+    {
+      "at": 101.108,
+      "progress": {
+        "phase": "complete",
+        "total": 2,
+        "completed": 2,
+        "fileName": ""
+      }
+    }
+  ],
+  "materials": [
+    {
+      "parseRevision": 1,
+      "parseStatus": "partial",
+      "id": "ff212c43-60fc-401a-a068-c56a283ef3ad",
+      "name": "教师教案.docx",
+      "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "sizeBytes": 2766086,
+      "createdAt": "2026-10-09T09:06:30.210219+08:00"
+    },
+    {
+      "parseRevision": 1,
+      "parseStatus": "partial",
+      "id": "c27e9baf-ce5a-420f-8c17-ba5ef128202a",
+      "name": "食堂情境.png",
+      "mediaType": "image/png",
+      "sizeBytes": 1913493,
+      "createdAt": "2026-10-09T09:07:51.968575+08:00"
+    }
+  ]
+}

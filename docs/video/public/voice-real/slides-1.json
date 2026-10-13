@@ -1,0 +1,226 @@
+{
+  "duration": 7.131291666666667,
+  "sentences": [
+    {
+      "phonemes": [],
+      "text": "三张内容都沿着食堂点餐展开。",
+      "words": [
+        {
+          "confidence": 0.8901101,
+          "endTime": 0.485,
+          "startTime": 0.235,
+          "word": "三"
+        },
+        {
+          "confidence": 0.9705294,
+          "endTime": 0.655,
+          "startTime": 0.485,
+          "word": "张"
+        },
+        {
+          "confidence": 0.85559887,
+          "endTime": 0.785,
+          "startTime": 0.655,
+          "word": "内"
+        },
+        {
+          "confidence": 0.9569797,
+          "endTime": 1.055,
+          "startTime": 0.785,
+          "word": "容"
+        },
+        {
+          "confidence": 0.85024697,
+          "endTime": 1.245,
+          "startTime": 1.055,
+          "word": "都"
+        },
+        {
+          "confidence": 0.87441283,
+          "endTime": 1.395,
+          "startTime": 1.245,
+          "word": "沿"
+        },
+        {
+          "confidence": 0.81001604,
+          "endTime": 1.505,
+          "startTime": 1.395,
+          "word": "着"
+        },
+        {
+          "confidence": 0.766638,
+          "endTime": 1.735,
+          "startTime": 1.505,
+          "word": "食"
+        },
+        {
+          "confidence": 0.964907,
+          "endTime": 1.945,
+          "startTime": 1.735,
+          "word": "堂"
+        },
+        {
+          "confidence": 0.93889374,
+          "endTime": 2.165,
+          "startTime": 1.945,
+          "word": "点"
+        },
+        {
+          "confidence": 0.9592288,
+          "endTime": 2.375,
+          "startTime": 2.165,
+          "word": "餐"
+        },
+        {
+          "confidence": 0.9030325,
+          "endTime": 2.565,
+          "startTime": 2.375,
+          "word": "展"
+        },
+        {
+          "confidence": 0.9719837,
+          "endTime": 2.845,
+          "startTime": 2.565,
+          "word": "开。"
+        }
+      ]
+    },
+    {
+      "phonemes": [],
+      "text": "三张内容都沿着食堂点餐展开。学生不用每换一个概念，就重新理解一段陌生背景。",
+      "words": []
+    },
+    {
+      "phonemes": [],
+      "text": "学生不用每换一个概念，就重新理解一段陌生背景。",
+      "words": [
+        {
+          "confidence": 0.6376427,
+          "endTime": 3.4350417,
+          "startTime": 3.3600416,
+          "word": "学"
+        },
+        {
+          "confidence": 0.91087836,
+          "endTime": 3.6750417,
+          "startTime": 3.4350417,
+          "word": "生"
+        },
+        {
+          "confidence": 0.942175,
+          "endTime": 3.7950416,
+          "startTime": 3.6750417,
+          "word": "不"
+        },
+        {
+          "confidence": 0.92929196,
+          "endTime": 3.9350417,
+          "startTime": 3.7950416,
+          "word": "用"
+        },
+        {
+          "confidence": 0.95159215,
+          "endTime": 4.1150417,
+          "startTime": 3.9350417,
+          "word": "每"
+        },
+        {
+          "confidence": 0.8801708,
+          "endTime": 4.2950416,
+          "startTime": 4.1150417,
+          "word": "换"
+        },
+        {
+          "confidence": 0.89230716,
+          "endTime": 4.4250417,
+          "startTime": 4.2950416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.9409894,
+          "endTime": 4.5250416,
+          "startTime": 4.4250417,
+          "word": "个"
+        },
+        {
+          "confidence": 0.8497279,
+          "endTime": 4.7250414,
+          "startTime": 4.5250416,
+          "word": "概"
+        },
+        {
+          "confidence": 0.92893314,
+          "endTime": 4.9350414,
+          "startTime": 4.7250414,
+          "word": "念，"
+        },
+        {
+          "confidence": 0.8872107,
+          "endTime": 5.1850414,
+          "startTime": 5.035042,
+          "word": "就"
+        },
+        {
+          "confidence": 0.7660172,
+          "endTime": 5.4250417,
+          "startTime": 5.1850414,
+          "word": "重"
+        },
+        {
+          "confidence": 0.90483236,
+          "endTime": 5.665042,
+          "startTime": 5.4250417,
+          "word": "新"
+        },
+        {
+          "confidence": 0.93978655,
+          "endTime": 5.8150415,
+          "startTime": 5.665042,
+          "word": "理"
+        },
+        {
+          "confidence": 0.95179313,
+          "endTime": 5.9850416,
+          "startTime": 5.8150415,
+          "word": "解"
+        },
+        {
+          "confidence": 0.8609904,
+          "endTime": 6.0850415,
+          "startTime": 5.9850416,
+          "word": "一"
+        },
+        {
+          "confidence": 0.8958586,
+          "endTime": 6.2350416,
+          "startTime": 6.0850415,
+          "word": "段"
+        },
+        {
+          "confidence": 0.81862706,
+          "endTime": 6.3550415,
+          "startTime": 6.2350416,
+          "word": "陌"
+        },
+        {
+          "confidence": 0.12568015,
+          "endTime": 6.415042,
+          "startTime": 6.3550415,
+          "word": "生"
+        },
+        {
+          "confidence": 0.12803386,
+          "endTime": 6.4750414,
+          "startTime": 6.415042,
+          "word": "背"
+        },
+        {
+          "confidence": 0.18525434,
+          "endTime": 6.535042,
+          "startTime": 6.4750414,
+          "word": "景。"
+        }
+      ]
+    }
+  ]
+}
