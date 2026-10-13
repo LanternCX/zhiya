@@ -37,6 +37,7 @@
 
 - 本地运行与部署：[开发指南](docs/development.md)。
 - 导入教材和教学资料：[知识库说明](apps/knowledge/README.md)。
+- 查看或恢复演示视频制作工程：[视频制作备份](docs/video-backup.md)。
 - 参与开发：[贡献指南](CONTRIBUTING.md)。
 
 ## License
