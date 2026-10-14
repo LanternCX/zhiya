@@ -37,6 +37,7 @@
 
 - 本地运行与部署：[开发指南](docs/development.md)。
 - 导入教材和教学资料：[知识库说明](apps/knowledge/README.md)。
+- 了解和使用教师版、学生版演示视频工程：[视频工程](docs/video.md)。
 - 参与开发：[贡献指南](CONTRIBUTING.md)。
 
 ## License
