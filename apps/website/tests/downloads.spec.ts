@@ -22,14 +22,25 @@ for (const width of [1440, 390]) {
       await openWebsite(page);
       const section = page.locator('#download');
       await expect(section.getByRole('status')).toHaveText('正在读取下载信息…');
-      const geometry = () => section.evaluate(element =>
-        ['.download-card', '.download-metadata', '.installation-guides'].flatMap(selector =>
-          Array.from(element.querySelectorAll(selector), item => {
-            const rect = item.getBoundingClientRect();
-            return { top: rect.top + window.scrollY, height: rect.height };
-          }),
-        ),
-      );
+      const geometry = () => section.evaluate(element => {
+        // Earlier demos allocate scroll space as they load. Measure this
+        // section's own layout independently of its position in the document.
+        const sectionRect = element.getBoundingClientRect();
+        return {
+          height: sectionRect.height,
+          items: ['.download-card', '.download-metadata', '.installation-guides'].flatMap(selector =>
+            Array.from(element.querySelectorAll(selector), item => {
+              const rect = item.getBoundingClientRect();
+              return {
+                top: rect.top - sectionRect.top,
+                left: rect.left - sectionRect.left,
+                width: rect.width,
+                height: rect.height,
+              };
+            }),
+          ),
+        };
+      });
       const before = await geometry();
       release();
       await expect(section.getByRole('status')).toHaveText(available ? '版本 1.2.3' : '安装包准备中');
