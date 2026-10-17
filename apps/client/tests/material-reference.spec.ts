@@ -64,10 +64,13 @@ for (const mode of ["normal", "retry", "pagination"] as const) {
       route.fulfill({ json: { courses: [course] } }),
     );
     const requested: string[] = [];
+    let releaseSource!: () => void;
+    const sourceReady = new Promise<void>(resolve => { releaseSource = resolve; });
     let failed = false;
     await page.route(
       `**/api/courses/citation-course/materials/${id}/content?*`,
-      (route) => {
+      async (route) => {
+        await sourceReady;
         const url = new URL(route.request().url());
         requested.push(url.search);
         const start = Number(url.searchParams.get("startLine"));
@@ -115,6 +118,9 @@ for (const mode of ["normal", "retry", "pagination"] as const) {
     );
     await chip.click();
     const panel = page.getByRole("dialog", { name: "文件引用" });
+    await expect(panel.getByRole("status")).toHaveText("正在读取引用…");
+    const beforeSource = await panel.boundingBox();
+    releaseSource();
     if (mode === "retry") {
       await expect(panel.getByRole("alert")).toContainText("暂时无法读取引用");
       await panel.getByRole("button", { name: "重试" }).click();
@@ -122,6 +128,7 @@ for (const mode of ["normal", "retry", "pagination"] as const) {
     await expect(panel).toContainText("引用内容 4");
     await expect(panel).toContainText("引用内容 42");
     await expect(panel).toContainText("引用内容 74");
+    expect(await panel.boundingBox()).toEqual(beforeSource);
     await expect(panel).toContainText("第 2 页");
     await expect(panel).toContainText("模型描述");
     await expect(panel).toContainText("第 3 页图片未识别");

@@ -118,7 +118,10 @@ export async function exportHTML(
   const sections = item.blocks
     .map(
       (block, index) =>
-        `<section class="reader-section" id="page-${index + 1}"><p class="reader-kicker">${index + 1} / ${item.blocks.length}</p><h2>${escapeHTML(block.title)}</h2>${renderBlock(block)}${block.imageIds.map((id) => `<img src="${pictures.get(id)!.data}" alt="${escapeHTML(block.title)}"/>`).join("")}</section>`,
+        `<section class="reader-section" id="page-${index + 1}"><p class="reader-kicker">${index + 1} / ${item.blocks.length}</p><h2>${escapeHTML(block.title)}</h2>${renderBlock(block)}${block.imageIds.map((id) => {
+          const image = pictures.get(id)!;
+          return `<img src="${image.data}" width="${image.width}" height="${image.height}" alt="${escapeHTML(block.title)}"/>`;
+        }).join("")}</section>`,
     )
     .join("");
   const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>${escapeHTML(item.title)}</title><style>${styles}</style></head><body class="reader-page"><header class="reader-header"><span class="reader-brand">知芽 · ${item.kind === "presentation" ? "演示文稿" : "文档"}</span><h1>${escapeHTML(item.title)}</h1><p>导出快照 · ${escapeHTML(item.updatedAt.slice(0, 10))}</p></header><main class="reader-content">${sections}</main>${

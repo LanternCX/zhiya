@@ -37,9 +37,11 @@
 .download-card p { font-size: 12px; min-height: 48px; }
 .download-card .product-link { margin-top: 22px; font-size: 13px; padding: 12px 16px; width: 100%; }
 .download-card small { display: block; font: 11px monospace; margin-top: 14px; color: var(--muted); }
-.download-pending { display: block; margin-top: 22px; padding: 12px 16px; background: var(--media); border-radius: 4px; text-align: center; font-size: 13px; }
+.download-pending { display: flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 22px; padding: 12px 16px; border: 2px solid transparent; background: var(--media); border-radius: 4px; text-align: center; font-size: 13px; }
 .download-metadata { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 26px; }
-.download-metadata a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+.download-metadata a, .download-checksum-placeholder { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+.download-checksum-placeholder { visibility: hidden; }
+.download-metadata > :first-child { min-width: 120px; }
 .download-metadata svg { width: 14px; height: 14px; }
 .installation-note { margin-top: 28px; color: var(--muted); font-size: 12px; }
 .installation-guides { margin-top: 20px; border-top: 1px solid var(--border); }

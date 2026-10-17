@@ -102,16 +102,14 @@ function Pictures({
   }, [courseId, key]);
   return (
     <div className="deliverable-pictures">
-      {error && <p role="alert">{error}</p>}
-      {ids.length > 0 && !images.length && !error && (
-        <p role="status">正在加载图片…</p>
-      )}
-      {images.map((image, index) => (
-        <img
-          key={ids[index]}
-          src={image.data}
-          alt={`${title} · 配图 ${index + 1}`}
-        />
+      {ids.map((id, index) => (
+        <div className="deliverable-picture" key={id}>
+          {images[index] ? (
+            <img src={images[index].data} alt={`${title} · 配图 ${index + 1}`} />
+          ) : index === 0 ? (
+            error ? <p role="alert">{error}</p> : <p role="status">正在加载图片…</p>
+          ) : null}
+        </div>
       ))}
     </div>
   );

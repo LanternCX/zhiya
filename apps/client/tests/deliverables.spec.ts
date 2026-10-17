@@ -23,7 +23,12 @@ test(`classroom and document retain export and sharing behavior with motion ${re
   ];
   const picture = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAAJklEQVR4nGP0ro1ioCVgoqnpoxaMWjBqwagFoxaMWjBqwagFVAMALtoBUr9C5zIAAAAASUVORK5CYII=", "base64");
   await page.route("**/api/courses/course/deliverable-images/picture", (route) => route.fulfill({ json: { url: new URL("/test-picture.png", route.request().url()).href, headers: {} } }));
-  await page.route("**/test-picture.png", (route) => route.fulfill({ contentType: "image/png", body: picture }));
+  let releasePicture!: () => void;
+  const pictureReady = new Promise<void>(resolve => { releasePicture = resolve; });
+  await page.route("**/test-picture.png", async route => {
+    await pictureReady;
+    await route.fulfill({ contentType: "image/png", body: picture });
+  });
   const materials = [{ id: "handout", kind: "document", title: "补充阅读", source: "", revision: 1, blocks: materialBlocks, updatedAt: "2026-10-03" }];
   let contentVersion = 1;
   const files = () => {
@@ -93,6 +98,15 @@ test(`classroom and document retain export and sharing behavior with motion ${re
   const documentPreview = page.getByRole("region", { name: "文档预览" });
   await expect(documentPreview).toContainText("人工智能可以识别图片吗");
   await expect(documentPreview).toContainText("从生活中的例子认识人工智能");
+  const followingHeading = documentPreview.getByRole("heading", { name: "生活中的例子", exact: true });
+  const readingPosition = () => followingHeading.evaluate(element => {
+    const preview = element.closest(".deliverable-preview")!;
+    return element.getBoundingClientRect().top + preview.scrollTop;
+  });
+  const beforePicture = await readingPosition();
+  releasePicture();
+  await expect(documentPreview.getByRole("img", { name: "认识人工智能 · 配图 1" })).toBeVisible();
+  expect(await readingPosition()).toBe(beforePicture);
   await expect(documentPreview).not.toContainText("课件和文档已准备完成");
   await expect.poll(() => state.deliverableSelection).toEqual({ id: "course-document", blockId: "question-source" });
   await expect(page.getByRole("button", { name: "展开交付产物侧栏" })).toHaveAttribute("aria-expanded", "false");

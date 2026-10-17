@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import ThemeToggle from "./components/ThemeToggle";
 import AmbientBackground from "./components/AmbientBackground";
 import Mark from "./components/Mark";
@@ -36,7 +37,7 @@ export default function App() {
     if (!loading) heading.current?.focus();
   }, [view, loading, hasFlow]);
   useEffect(() => {
-    if (error) errorMessage.current?.focus();
+    if (error) errorMessage.current?.focus({ preventScroll: true });
   }, [error]);
 
   const titles: Record<View, string> = {
@@ -50,8 +51,8 @@ export default function App() {
     email: "更换邮箱",
     delete: "注销账号",
   };
-  const feedback = (
-    <>
+  const feedback = error || notice ? createPortal(
+    <div className="account-feedback">
       {error && (
         <p
           ref={errorMessage}
@@ -67,8 +68,9 @@ export default function App() {
           {notice}
         </p>
       )}
-    </>
-  );
+    </div>,
+    document.body,
+  ) : null;
 
   if (!loading && !offline) {
     if (!user && !isAuthPage(page)) {

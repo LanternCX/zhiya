@@ -16,14 +16,16 @@ function SharedPicture({
   title: string;
 }) {
   const [failed, setFailed] = useState(false);
-  return failed ? (
-    <p role="alert">图片暂时无法加载，请刷新重试。</p>
-  ) : (
-    <img
-      src={`/api/shares/${encodeURIComponent(token)}/images/${encodeURIComponent(id)}`}
-      alt={title}
-      onError={() => setFailed(true)}
-    />
+  return (
+    <div className="reader-picture">
+      {failed ? <p role="alert">图片暂时无法加载，请刷新重试。</p> : (
+        <img
+          src={`/api/shares/${encodeURIComponent(token)}/images/${encodeURIComponent(id)}`}
+          alt={title}
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
   );
 }
 
