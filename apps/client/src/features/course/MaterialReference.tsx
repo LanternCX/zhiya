@@ -8,6 +8,7 @@ import {
 import { api } from "../../api";
 import { parseKnowledgeReference } from "../../domain/knowledge";
 import { KnowledgeCitation } from "./KnowledgeReference";
+import "./citation.css";
 import type { MaterialContent } from "../../domain/learning";
 import {
   parseMaterialReference,
@@ -86,7 +87,7 @@ function Citation({
           aria-label="文件引用"
           sideOffset={8}
           collisionPadding={12}
-          className="z-50 w-[min(26rem,calc(100vw-24px))] rounded-xl border bg-popover p-4 text-sm text-popover-foreground shadow-lg"
+          className="citation-panel z-50 w-[min(26rem,calc(100vw-24px))] rounded-xl border bg-popover p-4 text-sm text-popover-foreground shadow-lg"
         >
           <div className="mb-2 flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -107,7 +108,7 @@ function Citation({
               <XIcon className="size-4" />
             </Popover.Close>
           </div>
-          <div className="max-h-80 overflow-y-auto overscroll-contain">
+          <div className="citation-content">
             {loading && <p role="status">正在读取引用…</p>}
             {error && (
               <div role="alert">

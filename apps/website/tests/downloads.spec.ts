@@ -9,6 +9,35 @@ const downloads = [
 const manifest = { schemaVersion: 1, tag, version: '1.2.3', signing: 'untrusted', downloads,
   releaseUrl: `https://github.com/LanternCX/zhiya/releases/tag/${tag}`, checksumsUrl: prefix + 'SHA256SUMS.txt' };
 
+for (const width of [1440, 390]) {
+  for (const available of [true, false]) {
+    test(`download information preserves layout when it resolves (${width}, available=${available})`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      let release!: () => void;
+      const response = new Promise<void>(resolve => { release = resolve; });
+      await page.route('**/downloads.json', async route => {
+        await response;
+        await route.fulfill({ json: available ? manifest : { schemaVersion: 1, version: null, downloads: [] } });
+      });
+      await openWebsite(page);
+      const section = page.locator('#download');
+      await expect(section.getByRole('status')).toHaveText('正在读取下载信息…');
+      const geometry = () => section.evaluate(element =>
+        ['.download-card', '.download-metadata', '.installation-guides'].flatMap(selector =>
+          Array.from(element.querySelectorAll(selector), item => {
+            const rect = item.getBoundingClientRect();
+            return { top: rect.top + window.scrollY, height: rect.height };
+          }),
+        ),
+      );
+      const before = await geometry();
+      release();
+      await expect(section.getByRole('status')).toHaveText(available ? '版本 1.2.3' : '安装包准备中');
+      expect(await geometry()).toEqual(before);
+    });
+  }
+}
+
 test('the download section explains availability when no complete release exists', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.route('**/downloads.json', route => route.fulfill({ json: { schemaVersion: 1, version: null, downloads: [] } }));

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
 import {
   AudioWaveformIcon,
   FileUpIcon,
@@ -127,15 +127,22 @@ function ChatComposerInput({
     controller.textInput.value.trim() || attachments.files.length,
   );
   const updateLayout = (element: HTMLTextAreaElement) => {
-    const style = getComputedStyle(element);
-    const padding =
-      parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-    setMultiline(
-      Boolean(element.value) &&
-        (element.value.includes("\n") ||
-          element.scrollHeight - padding >
-            (parseFloat(style.lineHeight) || 24) * 1.5),
-    );
+    if (!element.clientWidth) return;
+    // Measure the compact layout independently of the expanded textarea. Its
+    // wider text area must not make the two layouts alternate while typing.
+    const measure = element.cloneNode() as HTMLTextAreaElement;
+    measure.removeAttribute("id");
+    measure.removeAttribute("name");
+    measure.setAttribute("aria-hidden", "true");
+    measure.tabIndex = -1;
+    measure.value = element.value;
+    measure.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${element.clientWidth}px;height:0;min-height:0;max-height:none;padding:14px var(--chat-composer-inline-end) 14px var(--chat-composer-inline-start);`;
+    element.parentElement!.append(measure);
+    const lineHeight = parseFloat(getComputedStyle(measure).lineHeight) || 24;
+    const expanded = Boolean(element.value) &&
+      (element.value.includes("\n") || measure.scrollHeight - 28 > lineHeight * 1.5);
+    measure.remove();
+    setMultiline(expanded);
   };
   const preserveCapture = () => {
     if (capture.current && recognized.current)
@@ -258,9 +265,21 @@ function ChatComposerInput({
       input?.end();
     };
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textarea.current) updateLayout(textarea.current);
   }, [controller.textInput.value]);
+  useLayoutEffect(() => {
+    const element = textarea.current;
+    if (!element) return;
+    let width = element.clientWidth;
+    const resize = new ResizeObserver(() => {
+      if (element.clientWidth === width) return;
+      width = element.clientWidth;
+      updateLayout(element);
+    });
+    resize.observe(element);
+    return () => resize.disconnect();
+  }, []);
   const hasFiles = (event: DragEvent<HTMLFormElement>) =>
     event.dataTransfer.types.includes("Files");
 

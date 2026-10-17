@@ -96,9 +96,12 @@ test("knowledge search history and source citations survive reopening on desktop
   await page.route("**/api/courses", (route) =>
     route.fulfill({ json: { courses: [course] } }),
   );
-  await page.route(`**/api/knowledge/${version}/blocks/${blockId}`, (route) =>
-    route.fulfill({ json: source }),
-  );
+  let releaseSource!: () => void;
+  const sourceReady = new Promise<void>(resolve => { releaseSource = resolve; });
+  await page.route(`**/api/knowledge/${version}/blocks/${blockId}`, async route => {
+    await sourceReady;
+    await route.fulfill({ json: source });
+  });
   await page.route(
     `**/api/knowledge/${version}/blocks/${blockId}/original`,
     (route) =>
@@ -114,7 +117,11 @@ test("knowledge search history and source citations survive reopening on desktop
     .last()
     .click();
   const panel = page.getByRole("dialog", { name: "知识库引用" });
+  await expect(panel.getByRole("status")).toHaveText("正在读取引用…");
+  const beforeSource = await panel.boundingBox();
+  releaseSource();
   await expect(panel).toContainText("训练数据是供模型学习的样本");
+  expect(await panel.boundingBox()).toEqual(beforeSource);
   await expect(panel).toContainText("第 2 页");
   await expect(panel).not.toContainText("未审核");
   await expect(panel).not.toContainText("已审核");

@@ -1,0 +1,16 @@
+.citation-panel {
+  display: flex;
+  flex-direction: column;
+  height: min(440px, calc(100dvh - 24px));
+  max-height: var(--radix-popover-content-available-height);
+}
+.citation-panel > :first-child { flex-shrink: 0; }
+.citation-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.citation-location { min-height: 16px; }
+.citation-footer { min-height: 16px; margin-top: 12px; font-size: 12px; flex-shrink: 0; }

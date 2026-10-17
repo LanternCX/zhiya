@@ -337,6 +337,7 @@ input:not([type="checkbox"]):not([type="file"]) {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
+  min-block-size: 2lh;
   overflow-wrap: anywhere;
 }
 .field-error { color: var(--error); }
@@ -426,6 +427,23 @@ input[aria-invalid="true"] { border-color: var(--error) !important; }
   color: var(--text);
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+.account-feedback {
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top));
+  right: 16px;
+  z-index: 110;
+  width: min(440px, calc(100vw - 32px));
+  display: grid;
+  gap: 8px;
+}
+.account-feedback .feedback {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--panel-shadow);
 }
 .error {
   color: var(--error);
