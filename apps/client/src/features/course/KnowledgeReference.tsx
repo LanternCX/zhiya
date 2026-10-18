@@ -8,6 +8,7 @@ import {
 } from "../../transport/object-storage";
 import type { KnowledgeSource, KnowledgeSearch } from "../../domain/knowledge";
 import { Spinner } from "../../components/ui/spinner";
+import "./citation.css";
 
 function locationText(source: KnowledgeSource) {
   if (source.location.page) return `第 ${source.location.page} 页`;
@@ -98,18 +99,16 @@ export function KnowledgeCitation({
           aria-label="知识库引用"
           sideOffset={8}
           collisionPadding={12}
-          className="z-50 w-[min(26rem,calc(100vw-24px))] rounded-xl border bg-popover p-4 text-sm text-popover-foreground shadow-lg"
+          className="citation-panel z-50 w-[min(26rem,calc(100vw-24px))] rounded-xl border bg-popover p-4 text-sm text-popover-foreground shadow-lg"
         >
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="truncate font-semibold">
                 {source?.title ?? children}
               </div>
-              {source && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {locationText(source)}
-                </div>
-              )}
+              <div className="citation-location mt-1 text-xs text-muted-foreground">
+                {source ? locationText(source) : null}
+              </div>
             </div>
             <Popover.Close
               aria-label="关闭引用"
@@ -118,7 +117,7 @@ export function KnowledgeCitation({
               <XIcon className="size-4" />
             </Popover.Close>
           </div>
-          <div className="max-h-80 overflow-y-auto overscroll-contain">
+          <div className="citation-content">
             {loading && <p role="status">正在读取引用…</p>}
             {error && (
               <div role="alert">
@@ -166,16 +165,16 @@ export function KnowledgeCitation({
               </p>
             ) : null}
           </div>
-          {original && (
+          <div className="citation-footer">{original && (
             <a
               href={original}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-block text-xs underline"
+              className="inline-block underline"
             >
               查看原文件
             </a>
-          )}
+          )}</div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

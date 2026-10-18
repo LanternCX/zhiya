@@ -336,12 +336,21 @@
 .deliverable-pictures:empty {
   display: none;
 }
-.deliverable-pictures img {
-  max-width: 100%;
+.deliverable-picture {
+  width: 100%;
+  aspect-ratio: 4 / 3;
   max-height: 520px;
-  margin: auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.deliverable-picture img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   object-fit: contain;
 }
+.deliverable-picture p { margin: 0; }
 .deliverable-placeholder {
   height: 100%;
   min-height: 220px;

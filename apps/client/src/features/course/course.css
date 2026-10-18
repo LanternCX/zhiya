@@ -191,10 +191,6 @@
   background: transparent;
   color: var(--text);
   text-align: left;
-  transition: padding 160ms ease;
-}
-.course-section-card:hover .course-section-open {
-  padding-left: 14px;
 }
 .course-section-number {
   color: var(--brand-green);

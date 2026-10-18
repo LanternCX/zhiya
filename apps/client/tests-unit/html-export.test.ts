@@ -48,6 +48,7 @@ test("HTML export embeds content and pictures without external resources or exec
   assert.match(html, /中文讲解/);
   assert.match(html, /<table>/);
   assert.ok(html.includes(image));
+  assert.match(html, /<img[^>]*width="32"[^>]*height="24"/);
   assert.ok(!html.includes("<script>alert(1)</script>"));
   assert.ok(!html.includes("<img src=x"));
   assert.ok(!html.includes('src="https:'));

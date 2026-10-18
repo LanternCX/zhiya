@@ -79,7 +79,6 @@ export function Field({
         id={`${id}-help`}
         className={error ? "field-error" : "field-hint"}
         aria-live="polite"
-        hidden={!error && !hint}
       >
         {error || hint}
       </p>
