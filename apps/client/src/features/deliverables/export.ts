@@ -13,6 +13,7 @@ import {
   ImageRun,
 } from "docx";
 import type { Deliverable } from "../../domain/deliverable";
+import { layoutDiagram } from "../course/diagram-layout";
 
 export type ExportImage = { data: string; width: number; height: number };
 type Content =
@@ -254,32 +255,31 @@ export async function exportDeliverable(
     };
     let slide = newPage();
     if (block.diagram) {
-      const nodes = block.diagram.nodes;
-      const labels = new Map(block.diagram.nodes.map((node) => [node.id, node.label]));
+      const layout = await layoutDiagram(block.diagram);
+      const nodes = [...block.diagram.nodes].sort((a, b) => Number(b.shape === "group") - Number(a.shape === "group"));
       const highlighted = new Set(block.diagram.highlightedIds);
       const flowing = new Set(block.diagram.flowingIds);
-      for (let offset = 0; offset < nodes.length; offset += 12) {
-        if (offset > 0) slide = newPage();
-        const batch = nodes.slice(offset, offset + 12);
-        const columns = block.diagram.layout === "vertical" ? 2 : Math.min(3, batch.length);
-        const rows = Math.ceil(batch.length / columns);
-        const cellWidth = 12 / columns;
-        const cellHeight = Math.min(1.8, (6.6 - y) / rows);
-        const positions = new Map(batch.map((node, index) => [node.id, {
-          x: 0.65 + (index % columns) * cellWidth + 0.15,
-          y: y + Math.floor(index / columns) * cellHeight + 0.15,
-          w: cellWidth - 0.65,
-          h: cellHeight - 0.45,
+      if (nodes.length) {
+        const batch = nodes;
+        const scale = Math.min(12 / layout.width, (6.6 - y) / layout.height);
+        const positions = new Map(layout.nodes.map(node => [node.id, {
+          x: 0.65 + node.x * scale, y: y + node.y * scale,
+          w: node.width * scale, h: node.height * scale,
         }]));
+        // Containers must be behind both connections and their children.
+        for (const node of batch.filter(node => node.shape === "group")) {
+          const box = positions.get(node.id)!;
+          slide.addShape(pptx.ShapeType.rect, { ...box, fill: { color: "F1EFE6" }, line: { color: "6F8B76" } });
+          const lines = layout.nodes.find(n => n.id === node.id)!.lines;
+          slide.addText(lines.join("\n"), { ...box, h: (lines.length * 24 + 16) * scale, fontSize: 16 * scale * 72, align: "center", margin: 0 });
+        }
         for (const edge of block.diagram.edges) {
           const start = positions.get(edge.source), end = positions.get(edge.target);
           if (!start || !end) continue;
-          const vertical = Math.abs(end.y - start.y) > 0.1;
-          const forward = vertical ? end.y >= start.y : end.x >= start.x;
-          const x1 = vertical ? start.x + start.w / 2 : start.x + (forward ? start.w : 0);
-          const y1 = vertical ? start.y + (forward ? start.h : 0) : start.y + start.h / 2;
-          const x2 = vertical ? end.x + end.w / 2 : end.x + (forward ? 0 : end.w);
-          const y2 = vertical ? end.y + (forward ? 0 : end.h) : end.y + end.h / 2;
+          const route = layout.edges.find(e => e.id === edge.id)!;
+          for (let i = 1; i < route.points.length; i++) {
+          const x1 = 0.65 + route.points[i - 1].x * scale, y1 = y + route.points[i - 1].y * scale;
+          const x2 = 0.65 + route.points[i].x * scale, y2 = y + route.points[i].y * scale;
           const emphasized = highlighted.has(edge.id) || flowing.has(edge.id);
           slide.addShape(pptx.ShapeType.line, {
             x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1), h: Math.abs(y2 - y1),
@@ -288,19 +288,20 @@ export async function exportDeliverable(
               color: emphasized ? "2F7D50" : "6F8B76",
               width: emphasized ? 3 : 1.5,
               ...(flowing.has(edge.id) ? { dashType: "dash" as const } : {}),
-              ...(edge.arrow !== false ? { endArrowType: "triangle" as const } : {}),
+              ...(edge.arrow !== false && i === route.points.length - 1 ? { endArrowType: "triangle" as const } : {}),
             },
           });
-          if (edge.label) slide.addText(edge.label, { x: (x1 + x2) / 2 - 0.55, y: (y1 + y2) / 2 - 0.35, w: 1.1, h: 0.25, fontSize: 11, align: "center", color: "243C30", margin: 0 });
+          }
+          if (route.label) slide.addText(route.label.lines.join("\n"), { x: 0.65 + route.label.x * scale, y: y + route.label.y * scale, w: route.label.width * scale, h: route.label.height * scale, fontSize: 14 * scale * 72, align: "center", color: "243C30", margin: 0 });
         }
         for (const node of batch) {
+          if (node.shape === "group") continue;
           const box = positions.get(node.id)!;
-          if (node.shape !== "text") slide.addShape(node.shape === "circle" ? pptx.ShapeType.ellipse : node.shape === "diamond" ? pptx.ShapeType.diamond : pptx.ShapeType.rect, { ...box, fill: { color: node.shape === "group" ? "F1EFE6" : "E7EEE5" }, line: { color: highlighted.has(node.id) ? "2F7D50" : "6F8B76", width: highlighted.has(node.id) ? 3 : 1 } });
-          const remote = block.diagram.edges.filter((edge) => edge.source === node.id && !positions.has(edge.target)).map((edge) => `${edge.arrow === false ? "—" : "→"} ${labels.get(edge.target) ?? edge.target}${edge.label ? `（${edge.label}）` : ""}`);
-          const label = [node.label, ...(node.groupId ? [`所属：${labels.get(node.groupId) ?? node.groupId}`] : []), ...remote].join("\n");
-          slide.addText(label, { ...box, fontSize: 14, bold: highlighted.has(node.id), color: "243C30", align: "center", valign: "middle", margin: 0.08, fit: "shrink" });
+          if (node.shape !== "text") slide.addShape(node.shape === "circle" ? pptx.ShapeType.ellipse : node.shape === "diamond" ? pptx.ShapeType.diamond : pptx.ShapeType.rect, { ...box, fill: { color: "E7EEE5" }, line: { color: highlighted.has(node.id) ? "2F7D50" : "6F8B76", width: highlighted.has(node.id) ? 3 : 1 } });
+          const label = layout.nodes.find(n => n.id === node.id)!.lines.join("\n");
+          slide.addText(label, { ...box, fontSize: 16 * scale * 72, bold: highlighted.has(node.id), color: "243C30", align: "center", valign: "middle", margin: 0, fit: "shrink" });
         }
-        y += rows * cellHeight;
+        y += layout.height * scale;
       }
     }
     for (const part of content(block.diagram ? "" : block.markdown)) {

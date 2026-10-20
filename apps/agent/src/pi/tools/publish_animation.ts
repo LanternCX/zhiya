@@ -15,6 +15,30 @@ export const animationLimits = {
 type AnimationDraft = Omit<AnimationPage, "kind" | "id"> & { pageId: string };
 
 function assertSimpleAnimation(page: AnimationDraft) {
+  const nodes = new Map(page.nodes.map(node => [node.id, node]));
+  const ids = new Set<string>();
+  for (const item of [...page.nodes, ...page.edges]) {
+    if (ids.has(item.id)) throw new Error(`图示对象 ID 重复：${item.id}`);
+    ids.add(item.id);
+  }
+  for (const edge of page.edges) {
+    if (!nodes.has(edge.source) || !nodes.has(edge.target))
+      throw new Error(`连线 ${edge.id} 引用了不存在的图形`);
+  }
+  for (const node of page.nodes) {
+    if (node.groupId && (node.shape === "group" || nodes.get(node.groupId)?.shape !== "group"))
+      throw new Error(`图形 ${node.id} 的分组无效：分组必须存在且不能嵌套`);
+  }
+  const buttons = new Set<string>();
+  for (const button of page.buttons) {
+    if (buttons.has(button.id)) throw new Error(`按钮 ID 重复：${button.id}`);
+    buttons.add(button.id);
+    for (const action of button.steps.flat()) {
+      if (!ids.has(action.targetId)) throw new Error(`动作引用了不存在的对象 ${action.targetId}`);
+      if (action.type === "flow" && !page.edges.some(edge => edge.id === action.targetId))
+        throw new Error(`流动动作必须引用连线：${action.targetId}`);
+    }
+  }
   const actionCount = page.buttons.reduce(
     (total, button) =>
       total +
@@ -60,7 +84,7 @@ export function publishAnimationTool(
     name: "publish_animation",
     label: "发布动画页",
     description:
-      "Publish one complete, validated animation asset. This releases any wait for the scene but never presents it automatically. Use relationships and layout direction; never supply SVG, code, styles, colors, or pixel coordinates.",
+      "Publish one complete structured diagram or animation. Static diagrams use buttons: []. Cycles and self-loops are allowed. Groups are non-nested visual containers. Every edge must reference nodes, and flow actions must reference edges. The app computes sizes and routes. This releases any wait for the scene but never presents it automatically. Never supply SVG, code, styles, colors, or coordinates.",
     parameters: Type.Object(
       {
         pageId: Type.String({ minLength: 1, maxLength: 64 }),
@@ -119,7 +143,7 @@ export function publishAnimationTool(
             },
             { additionalProperties: false },
           ),
-          { minItems: 1, maxItems: animationLimits.buttons },
+          { maxItems: animationLimits.buttons },
         ),
       },
       { additionalProperties: false },

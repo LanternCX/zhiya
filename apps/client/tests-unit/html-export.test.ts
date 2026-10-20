@@ -6,6 +6,24 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 
+test("diagram SVG keeps full escaped labels and directional cycle routes", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "zhiya-svg-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const path = join(dir, "svg.cjs");
+  await build({ entryPoints: ["src/features/course/diagram-svg.ts"], outfile: path, bundle: true, platform: "node", format: "cjs" });
+  const { diagramSVG } = createRequire(import.meta.url)(path);
+  const label = "<脚本>&".repeat(12);
+  const svg = await diagramSVG({
+    layout: "vertical",
+    nodes: [{ id: "a", shape: "rectangle", label }, { id: "b", shape: "diamond", label: "完成？" }],
+    edges: [{ id: "ab", source: "a", target: "b" }, { id: "ba", source: "b", target: "a", label: "重试" }],
+  });
+  assert.doesNotMatch(svg, /<脚本>/);
+  assert.equal((svg.replace(/<\/?tspan[^>]*>/g, "").match(/&lt;脚本&gt;&amp;/g) ?? []).length, 12);
+  assert.match(svg, /重试/);
+  assert.equal((svg.match(/rotate\(/g) ?? []).length, 2);
+});
+
 test("HTML export embeds content and pictures without external resources or executable source markup", async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "zhiya-html-"));
   t.after(() => rm(dir, { recursive: true, force: true }));

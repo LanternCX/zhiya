@@ -38,6 +38,11 @@ function response(
 
 async function classroom(page: Page, pages: LessonPage[] = [], enter = true) {
   await completedOnboarding(page);
+  await page.route("**/api/account-rules", route => route.fulfill({ json: {
+    password_min_characters: 8, password_max_bytes: 256,
+    nickname_max_characters: 40, avatar_max_bytes: 2097152,
+    avatar_max_dimension: 2048, verification_code_digits: 8, verification_ttl_seconds: 60,
+  } }));
   await page.route("**/api/me", (route) =>
     route.fulfill({
       json: {
@@ -189,6 +194,43 @@ test("a diagram remains readable when opened from a hidden page and resized", as
   await page.getByRole("button", { name: "下一页", exact: true }).click();
   await page.getByRole("button", { name: "上一页", exact: true }).click();
   await expect.poll(readable).toBe(true);
+});
+
+test("static grouped cycles show full labels without overlapping nodes", async ({ page }) => {
+  const label = "这是一段需要完整展示并自动换行的中文流程说明";
+  const diagram: LessonPage = {
+    kind: "animation", id: "cycle", title: "循环流程", layout: "vertical",
+    nodes: [
+      { id: "group", shape: "group", label: "处理过程" },
+      { id: "work", shape: "rectangle", label, groupId: "group" },
+      { id: "check", shape: "diamond", label: "是否完成", groupId: "group" },
+      { id: "done", shape: "circle", label: "完成" },
+    ],
+    edges: [
+      { id: "next", source: "work", target: "check" },
+      { id: "retry", source: "check", target: "work", label: "重新处理" },
+      { id: "finish", source: "check", target: "done", label: "完成" },
+    ],
+    buttons: [],
+  };
+  const course = await classroom(page, [diagram]);
+  course.state.presentations = [{ id: "shown", pageId: "cycle" }];
+  course.state.currentPresentationId = "shown";
+  await page.reload();
+  const canvas = page.getByRole("img", { name: "动画页面：循环流程", exact: true });
+  await expect(canvas.locator(".x6-node")).toHaveCount(4);
+  await expect(canvas.locator(".x6-edge")).toHaveCount(3);
+  await expect(canvas.getByRole("button", { name: "暂停动画" })).toHaveCount(0);
+  const work = canvas.locator('.x6-node[data-cell-id="work"]');
+  await expect(work).toContainText(label.slice(0, 14));
+  const boxes = await canvas.locator('.x6-node:not([data-cell-id="group"])').evaluateAll(elements =>
+    elements.map(element => {
+      const r = element.getBoundingClientRect();
+      return { x: r.x, y: r.y, right: r.right, bottom: r.bottom };
+    }));
+  for (const [index, a] of boxes.entries())
+    for (const b of boxes.slice(index + 1))
+      expect(a.right <= b.x || b.right <= a.x || a.bottom <= b.y || b.bottom <= a.y).toBe(true);
 });
 
 test("voice replies hold the teaching turn until speech playback completes", async ({ page }) => {
