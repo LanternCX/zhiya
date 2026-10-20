@@ -123,25 +123,9 @@
   height: auto;
   color: #7a907c;
 }
-.reader-diagram rect,
-.reader-diagram ellipse,
-.reader-diagram polygon {
-  fill: var(--reader-tint, #eef2e9);
-  stroke: #7a907c;
-  stroke-width: 2;
-}
 .reader-diagram text {
   fill: var(--reader-ink, #243c30);
   font-size: 16px;
-}
-.reader-diagram .emphasized {
-  color: #277447;
-}
-.reader-diagram .emphasized rect,
-.reader-diagram .emphasized ellipse,
-.reader-diagram .emphasized polygon {
-  stroke: #277447;
-  stroke-width: 4;
 }
 .reader-diagram figcaption {
   font-size: 14px;

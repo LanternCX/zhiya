@@ -2,9 +2,23 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { RefreshCw } from "lucide-react";
 import { api, APIError } from "../../api";
-import type { Deliverable } from "../../domain/deliverable";
+import type { Deliverable, DeliverableBlock } from "../../domain/deliverable";
 import { renderBlock } from "./html";
 import "./reader.css";
+
+function SharedBlock({ block }: { block: DeliverableBlock }) {
+  const [content, setContent] = useState<{ block: DeliverableBlock; html: string }>();
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    setError("");
+    void renderBlock(block).then(html => {
+      if (!cancelled) setContent({ block, html });
+    }).catch(() => { if (!cancelled) setError("图示暂时无法展示，请刷新重试。"); });
+    return () => { cancelled = true; };
+  }, [block]);
+  return error ? <p role="alert">{error}</p> : <div dangerouslySetInnerHTML={{ __html: content?.block === block ? content.html : "" }} />;
+}
 
 function SharedPicture({
   token,
@@ -136,7 +150,7 @@ export default function SharedDeliverable() {
                   {index + 1} / {item.blocks.length}
                 </p>
                 <h2>{block.title}</h2>
-                <div dangerouslySetInnerHTML={{ __html: renderBlock(block) }} />
+                <SharedBlock block={block} />
                 {block.imageIds.map((id) => (
                   <SharedPicture
                     key={`${refresh}:${id}`}

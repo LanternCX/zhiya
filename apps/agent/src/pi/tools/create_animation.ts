@@ -9,7 +9,7 @@ export function createAnimationTool(start: AnimationTools["start"]): AgentTool {
   return {
     name: "create_animation",
     label: activityLabel,
-    description: `Start one simple animation-page task in the background and return immediately. Keep the goal within the supported basic shapes, relationships, and button-driven steps: at most ${animationLimits.nodes} nodes, ${animationLimits.edges} edges, ${animationLimits.buttons} buttons, ${animationLimits.stepsPerButton} steps per button, ${animationLimits.actionsPerStep} actions per step, and ${animationLimits.actionsPerPage} actions total. Request no colors, custom icons, coordinates, code, SVG, complex morphing, or extra reset controls. Use a unique pageId, then use show_lesson_page when you are ready to present it.`,
+    description: `Start one structured diagram or animation task in the background and return immediately. Use this for flowcharts, mind maps and node-link diagrams. Describe nodes, relationships, groups and reading direction; cycles and return edges are allowed. Static diagrams have no buttons. Keep within ${animationLimits.nodes} nodes, ${animationLimits.edges} edges, ${animationLimits.buttons} buttons, ${animationLimits.stepsPerButton} steps per button, ${animationLimits.actionsPerStep} actions per step, and ${animationLimits.actionsPerPage} actions total. Request no colors, custom icons, coordinates, code, SVG, complex morphing, or extra reset controls. Use a unique pageId, then use show_lesson_page when ready.`,
     parameters: Type.Object({
       pageId: Type.String({ minLength: 1, maxLength: 64 }),
       goal: Type.String({ minLength: 1, maxLength: 500 }),

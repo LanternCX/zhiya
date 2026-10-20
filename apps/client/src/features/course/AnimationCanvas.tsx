@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Graph } from "@antv/x6";
+import { diagramLines, layoutDiagram } from "./diagram-layout";
 import type {
   AnimationAction,
   AnimationPage,
@@ -17,48 +18,6 @@ const edgeLabel = (text: string) => ({
     body: { fill: "var(--surface)", stroke: "none", rx: 4, ry: 4 },
   },
 });
-
-function flowPositions(page: AnimationPage) {
-  if (page.nodes.some(node => node.shape === "group")) return new Map<string, { x: number; y: number }>();
-  const nodes = page.nodes.filter(node => node.shape !== "group" && !node.groupId);
-  const ranks = new Map<string, number>();
-  const remaining = new Set(nodes.map(node => node.id));
-  const edges = page.edges.filter(edge => remaining.has(edge.source) && remaining.has(edge.target));
-  // Longest-path layers keep both branches beside each other and joins after
-  // their predecessors. Cyclic diagrams retain the explicit layout order.
-  while (remaining.size) {
-    const ready = [...remaining].filter(id => !edges.some(edge => edge.target === id && remaining.has(edge.source)));
-    if (!ready.length) return new Map<string, { x: number; y: number }>();
-    for (const id of ready) {
-      ranks.set(id, Math.max(0, ...edges.filter(edge => edge.target === id).map(edge => (ranks.get(edge.source) ?? 0) + 1)));
-      remaining.delete(id);
-    }
-  }
-  const positions = new Map<string, { x: number; y: number }>();
-  if (page.layout === "grid" || !edges.length) return positions;
-  for (const node of nodes) {
-    const rank = ranks.get(node.id)!;
-    const peers = nodes.filter(candidate => ranks.get(candidate.id) === rank);
-    const cross = (peers.indexOf(node) - (peers.length - 1) / 2) * 260;
-    positions.set(node.id, page.layout === "vertical"
-      ? { x: cross, y: rank * 180 }
-      : { x: rank * 280, y: cross });
-  }
-  return positions;
-}
-
-function nodePosition(
-  index: number,
-  count: number,
-  layout: AnimationPage["layout"],
-) {
-  if (layout === "vertical") return { x: 310, y: 70 + index * 130 };
-  if (layout === "grid") {
-    const columns = Math.min(3, Math.ceil(Math.sqrt(count)));
-    return { x: 90 + (index % columns) * 230, y: 70 + Math.floor(index / columns) * 150 };
-  }
-  return { x: 70 + index * 235, y: 190 };
-}
 
 export type AnimationController = {
   control: (command: AnimationPlaybackCommand) => AnimationPlaybackState;
@@ -78,6 +37,11 @@ export default function AnimationCanvas({
 }) {
   const container = useRef<HTMLDivElement | null>(null);
   const graph = useRef<Graph | null>(null);
+  const edgePositions = useRef(new Map<string, { distance: number; offset: { x: number; y: number } }>());
+  const labelsForEdge = (id: string, text: string) => text ? [{
+    ...edgeLabel(diagramLines(text, 12).join("\n")),
+    position: edgePositions.current.get(id),
+  }] : [];
   const run = useRef(0);
   const paused = useRef(false);
   const commandLocked = useRef(false);
@@ -90,6 +54,8 @@ export default function AnimationCanvas({
     () => playback.current,
   );
   const [playing, setPlaying] = useState(false);
+  const [layoutError, setLayoutError] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const element = container.current;
@@ -105,54 +71,44 @@ export default function AnimationCanvas({
       mousewheel: { enabled: true, modifiers: ["ctrl", "meta"], minScale: 0.35, maxScale: 2.5 },
     });
     graph.current = instance;
-    const positions = flowPositions(page);
-
+    let cancelled = false;
+    setReady(false);
+    setLayoutError("");
+    edgePositions.current.clear();
+    void layoutDiagram(page).then(layout => {
+    if (cancelled) return;
+    const positions = new Map(layout.nodes.map(node => [node.id, node]));
     const groups = page.nodes.filter((node) => node.shape === "group");
-    const groupPositions = new Map<string, { x: number; y: number }>();
-    for (const [index, node] of groups.entries()) {
-      const position = nodePosition(index, Math.max(groups.length, 1), page.layout);
-      groupPositions.set(node.id, position);
+    for (const node of groups) {
+      const position = positions.get(node.id)!;
       instance.addNode({
         id: node.id,
         shape: "rect",
-        x: position.x - 28,
-        y: position.y - 34,
-        width: 210,
-        height: 130,
+        x: position.x,
+        y: position.y,
+        width: position.width,
+        height: position.height,
         zIndex: 0,
-        label: node.label,
+        label: position.lines.join("\n"),
         attrs: {
           body: { rx: 12, ry: 12, fill: "var(--subtle)", stroke: "var(--line)", strokeDasharray: "6 5" },
-          label: { fill: "var(--muted)", fontSize: 13, refY: 16, textAnchor: "middle", fontFamily: "inherit" },
+          label: { fill: "var(--muted)", fontSize: 16, lineHeight: 24, refY: 24 + (position.lines.length - 1) * 12, textAnchor: "middle", fontFamily: "inherit" },
         },
       });
     }
     const contentNodes = page.nodes.filter((node) => node.shape !== "group");
-    const groupChildren = new Map<string, number>();
-    for (const [index, node] of contentNodes.entries()) {
-      const groupPosition = node.groupId
-        ? groupPositions.get(node.groupId)
-        : undefined;
-      const childIndex = node.groupId
-        ? (groupChildren.get(node.groupId) ?? 0)
-        : 0;
-      if (node.groupId) groupChildren.set(node.groupId, childIndex + 1);
-      const position = groupPosition
-        ? {
-            x: groupPosition.x - 12 + (childIndex % 2) * 92,
-            y: groupPosition.y + 6 + Math.floor(childIndex / 2) * 52,
-          }
-        : positions.get(node.id) ?? nodePosition(index, contentNodes.length, page.layout);
+    for (const node of contentNodes) {
+      const position = positions.get(node.id)!;
       const shape = node.shape === "circle" ? "ellipse" : node.shape === "diamond" ? "polygon" : "rect";
       const cell = instance.addNode({
         id: node.id,
         shape,
         x: position.x,
         y: position.y,
-        width: groupPosition ? 82 : 190,
-        height: groupPosition ? 42 : node.shape === "diamond" ? 120 : 82,
+        width: position.width,
+        height: position.height,
         zIndex: 2,
-        label: node.label,
+        label: position.lines.join("\n"),
         attrs: {
           body: {
             ...(shape === "polygon"
@@ -164,23 +120,25 @@ export default function AnimationCanvas({
             rx: 10,
             ry: 10,
           },
-          label: { fill: "var(--text)", fontSize: 16, fontWeight: 500, fontFamily: "inherit", textWrap: { width: node.shape === "diamond" ? "55%" : -24, height: node.shape === "diamond" ? "50%" : -16, ellipsis: true } },
+          label: { fill: "var(--text)", fontSize: 16, lineHeight: 24, fontWeight: 500, fontFamily: "inherit" },
         },
       });
       if (node.groupId) instance.getCellById(node.groupId)?.addChild(cell);
     }
     for (const edge of page.edges) {
-      const from = positions.get(edge.source);
-      const to = positions.get(edge.target);
-      const forward = from && to && (page.layout === "vertical" ? to.y > from.y : to.x > from.x);
-      const sourceSide = page.layout === "vertical" ? "bottom" : "right";
-      const targetSide = page.layout === "vertical" ? "top" : "left";
+      const route = layout.edges.find(value => value.id === edge.id)!;
+      if (route.label) edgePositions.current.set(edge.id, {
+        distance: 0, offset: {
+          x: route.label.x + route.label.width / 2 - route.points[0].x,
+          y: route.label.y + route.label.height / 2 - route.points[0].y,
+        },
+      });
       instance.addEdge({
         id: edge.id,
-        source: forward ? { cell: edge.source, anchor: { name: sourceSide } } : edge.source,
-        target: forward ? { cell: edge.target, anchor: { name: targetSide } } : edge.target,
+        source: route.points[0],
+        target: route.points.at(-1)!,
+        vertices: route.points.slice(1, -1),
         zIndex: 1,
-        router: { name: "manhattan", args: { padding: 18, ...(forward ? { startDirections: [sourceSide], endDirections: [targetSide] } : {}) } },
         connector: { name: "rounded", args: { radius: 12 } },
         attrs: {
           line: {
@@ -189,11 +147,18 @@ export default function AnimationCanvas({
             targetMarker: edge.arrow === false ? null : { name: "block", width: 8, height: 6 },
           },
         },
-        labels: edge.label
-          ? [edgeLabel(edge.label)]
-          : [],
+        labels: labelsForEdge(edge.id, edge.label ?? ""),
       });
     }
+    setReady(true);
+    previousWidth = previousHeight = 0;
+    resize();
+    }).catch(error => {
+      if (!cancelled) {
+        instance.clearCells();
+        setLayoutError(error instanceof Error ? error.message : "图示布局失败");
+      }
+    });
     const host = element.parentElement!;
     let previousWidth = 0;
     let previousHeight = 0;
@@ -216,6 +181,7 @@ export default function AnimationCanvas({
     observer.observe(host);
     resize();
     return () => {
+      cancelled = true;
       observer.disconnect();
       run.current++;
       graph.current = null;
@@ -239,7 +205,8 @@ export default function AnimationCanvas({
       if (cell?.isNode()) {
         cell.attr("body/stroke", node.shape === "text" ? "transparent" : node.shape === "group" ? "var(--line)" : "var(--muted)");
         cell.attr("body/strokeWidth", node.shape === "group" ? 1 : 1.5);
-        cell.attr("label/text", node.label);
+        cell.attr("label/text", diagramLines(node.label).join("\n"));
+        if (node.shape === "group") cell.attr("label/refY", 24 + (diagramLines(node.label).length - 1) * 12);
       }
     }
     for (const edge of page.edges) {
@@ -250,7 +217,7 @@ export default function AnimationCanvas({
         cell.attr("line/strokeWidth", 1.5);
         cell.attr("line/strokeDasharray", "");
         cell.attr("line/style/animation", "");
-        cell.setLabels(edge.label ? [edgeLabel(edge.label)] : []);
+        cell.setLabels(labelsForEdge(edge.id, edge.label ?? ""));
       }
     }
     playback.current = { pageId: page.id, status: "idle", step: 0 };
@@ -279,8 +246,13 @@ export default function AnimationCanvas({
       cell.attr("line/style/animation", "animation-flow 0.7s linear infinite");
     }
     if (action.type === "update") {
-      if (cell.isNode()) cell.attr("label/text", action.value);
-      else if (cell.isEdge()) cell.setLabels([edgeLabel(action.value)]);
+      if (cell.isNode()) {
+        const lines = diagramLines(action.value);
+        cell.attr("label/text", lines.join("\n"));
+        if (page.nodes.find(node => node.id === action.targetId)?.shape === "group")
+          cell.attr("label/refY", 24 + (lines.length - 1) * 12);
+      }
+      else if (cell.isEdge()) cell.setLabels(labelsForEdge(action.targetId, action.value));
     }
   };
 
@@ -297,6 +269,7 @@ export default function AnimationCanvas({
   };
 
   const play = (buttonId: string, steps: AnimationAction[][]) => {
+    if (!ready) throw new Error(layoutError || "图示正在排版，请稍后播放");
     if (playback.current.status === "playing") return playback.current;
     const resume =
       playback.current.status === "paused" &&
@@ -372,14 +345,15 @@ export default function AnimationCanvas({
         </nav>
       </header>
       <div className="animation-canvas-host">
+        {layoutError && <p role="alert">图示暂时无法展示：{layoutError}</p>}
         <div className="animation-canvas" ref={container} />
       </div>
-      <footer>
+      {page.buttons.length > 0 && <footer>
         <div className="animation-presets">
           {page.buttons.map((button) => (
             <button
               key={button.id}
-              disabled={playing}
+              disabled={playing || !ready}
               onClick={() => command.current({ action: "play", buttonId: button.id })}
             >
               <span aria-hidden="true">▶</span>
@@ -402,7 +376,7 @@ export default function AnimationCanvas({
             重置
           </button>
         </div>
-      </footer>
+      </footer>}
     </article>
   );
 }

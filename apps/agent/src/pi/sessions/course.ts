@@ -658,6 +658,7 @@ export class CourseSession {
 
   private validateAnimation(page: AnimationPage) {
     const ids = new Set<string>();
+    const nodeIds = new Set(page.nodes.map(node => node.id));
     const groupIds = new Set(
       page.nodes
         .filter((node) => node.shape === "group")
@@ -669,7 +670,7 @@ export class CourseSession {
     }
     for (const edge of page.edges) {
       if (ids.has(edge.id)) throw new Error(`动画对象 ID 重复：${edge.id}`);
-      if (!ids.has(edge.source) || !ids.has(edge.target))
+      if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target))
         throw new Error(`连线 ${edge.id} 引用了不存在的图形`);
       ids.add(edge.id);
     }
@@ -678,10 +679,6 @@ export class CourseSession {
         throw new Error(`分组 ${node.id} 不能嵌套在另一个分组中`);
       if (node.groupId && !groupIds.has(node.groupId))
         throw new Error(`图形 ${node.id} 引用了不存在的分组`);
-    }
-    for (const groupId of groupIds) {
-      if (page.nodes.filter((node) => node.groupId === groupId).length > 4)
-        throw new Error(`分组 ${groupId} 最多包含 4 个图形`);
     }
     const buttonIds = new Set<string>();
     for (const button of page.buttons) {
