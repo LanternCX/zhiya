@@ -6,6 +6,7 @@ const developmentURL = new URL(config.dev_origin);
 developmentURL.port = String(Number(developmentURL.port || 80) + 1);
 // These tests import source modules or exercise Vite's private-file protection.
 const developmentTests = [
+  "**/coding-graphics.spec.ts",
   "**/voice-mode.spec.ts",
   "**/conversation-sync.spec.ts",
   "**/rate-limit.spec.ts",
