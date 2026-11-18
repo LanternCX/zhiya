@@ -234,3 +234,12 @@ npx --workspace @zhiya/client playwright install chromium
 ```
 
 自动化测试中的模型响应是模拟数据。教学效果需要使用真实模型另行验证。
+
+
+### 本地 Python 静态绘图
+
+Python 编程练习运行时会加载无桌面窗口的 turtle 兼容模块，在现有 go-judge 沙箱内执行，返回静态 SVG 图像；网页输出区同时显示文字、错误和绘图。修改后需重启 Go 后端及 Agent，并刷新页面，无需重建 runner 镜像。历史练习需重新点击“运行代码”。
+
+支持基本移动和转向、抬笔落笔、颜色线宽、填充、圆弧、点、文字、清除和重置，以及模块级函数。画布自动扩展以包含绘制内容。`speed`、`tracer`、`update` 不产生逐帧动画；`done`、`mainloop` 和 `exitonclick` 不等待窗口事件。不支持 Tkinter 桌面窗口、鼠标键盘回调、定时器、Matplotlib 或其他 GUI 库；不支持的方法会报错。输出限制为 10000 个元素及 1MB，并保留现有 CPU、内存和超时限制。
+
+验证：`python3 apps/server/internal/coderunner/test_turtle.py`；启动 runner 后，运行 `ZHIYA_TEST_RUNNER=http://127.0.0.1:2358 go -C apps/server test ./internal/coderunner`。

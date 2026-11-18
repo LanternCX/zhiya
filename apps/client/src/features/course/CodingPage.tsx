@@ -37,6 +37,9 @@ export default function CodingPage({
   const [localResult, setLocalResult] = useState<
     CodeRunResult | null | undefined
   >(undefined);
+  const pageRef = useRef<HTMLElement>(null);
+  const outputRef = useRef<HTMLElement>(null);
+  const revealResultRef = useRef(false);
   const stdinLabelRef = useRef<HTMLLabelElement>(null);
   const stdinRef = useRef<HTMLTextAreaElement>(null);
   const ended = exercise.status === "ended";
@@ -46,6 +49,22 @@ export default function CodingPage({
         .filter(Boolean)
         .join("\n")
     : "";
+
+  useLayoutEffect(() => {
+    if (!revealResultRef.current || running || (!localResult && !actionError)) return;
+    // Wait for the completed result layout; scroll only this classroom pane.
+    const frame = requestAnimationFrame(() => {
+      const page = pageRef.current;
+      const output = outputRef.current;
+      if (!page || !output) return;
+      page.scrollTo({
+        top: page.scrollTop + output.getBoundingClientRect().top - page.getBoundingClientRect().top - 12,
+        behavior: "instant",
+      });
+      revealResultRef.current = false;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [running, localResult, actionError]);
 
   useLayoutEffect(() => {
     const label = stdinLabelRef.current;
@@ -62,7 +81,7 @@ export default function CodingPage({
   }, []);
 
   return (
-    <article className="coding-page" aria-label={`编程练习：${exercise.title}`}>
+    <article ref={pageRef} className="coding-page" aria-label={`编程练习：${exercise.title}`}>
       <header>
         <div>
           <p>编程练习</p>
@@ -85,7 +104,7 @@ export default function CodingPage({
           onChange={(code) => onChange({ code, stdin: exercise.stdin })}
         />
       </section>
-      <section className="coding-output" aria-label="运行结果">
+      <section ref={outputRef} className="coding-output" aria-label="运行结果">
         <header>
           <span>输出</span>
           <span>
@@ -102,9 +121,20 @@ export default function CodingPage({
               ? "正在重新运行…"
               : "正在运行…"
             : result
-              ? output || "程序没有产生输出"
+              ? output || (result.graphics?.length ? "绘图完成，结果如下" : "程序没有产生输出")
               : "运行代码后，结果会显示在这里"}
         </pre>
+        {!running && result?.graphics?.slice(0, 1).map((graphic, index) =>
+          graphic.mimeType === "image/svg+xml" && graphic.data.length <= 1_333_336 && /^[A-Za-z0-9+/]+={0,2}$/.test(graphic.data) ? (
+            <figure className="coding-graphic" key={index}>
+              <figcaption>{result.status.description === "Completed" ? "绘图结果" : "执行中断前的绘图"}</figcaption>
+              <img
+                src={`data:image/svg+xml;base64,${graphic.data}`}
+                alt="Python turtle 运行生成的图形"
+              />
+            </figure>
+          ) : null,
+        )}
       </section>
       <label ref={stdinLabelRef}>
         <span>标准输入（可选）</span>
@@ -132,6 +162,7 @@ export default function CodingPage({
           className="coding-run-button"
           disabled={ended || running}
           onClick={() => {
+            revealResultRef.current = true;
             setRerunning(Boolean(result));
             setLocalResult(null);
             setActionError("");

@@ -123,6 +123,7 @@ export type LessonPage =
 
 export type CodeLanguage = { id: number; name: string };
 export type CodeRunResult = {
+  graphics?: { mimeType: "image/svg+xml"; data: string }[];
   stdout: string;
   stderr: string;
   compileOutput: string;

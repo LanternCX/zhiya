@@ -2205,3 +2205,35 @@
   padding: 4px 0;
   margin-right: 8px;
 }
+
+/* Drawing rows use their content height; the classroom scrolls as one surface. */
+.coding-page:has(.coding-graphic) {
+  grid-template-rows: none;
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+/* Static sandbox drawing results stay in image context, separate from text. */
+.coding-output:has(.coding-graphic) {
+  /* Grid items with overflow:hidden otherwise shrink to the text-only minimum. */
+  min-height: max-content;
+  max-height: none;
+}
+.coding-graphic {
+  margin: 0;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+}
+.coding-graphic figcaption {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.coding-graphic img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  object-fit: contain;
+  background: white;
+  border-radius: 8px;
+}

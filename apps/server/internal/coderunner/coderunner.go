@@ -24,13 +24,14 @@ type Status struct {
 	Description string `json:"description"`
 }
 type Result struct {
-	Stdout        string `json:"stdout"`
-	Stderr        string `json:"stderr"`
-	CompileOutput string `json:"compileOutput"`
-	Message       string `json:"message"`
-	Status        Status `json:"status"`
-	Time          string `json:"time"`
-	Memory        int    `json:"memory"`
+	Graphics      []Graphic `json:"graphics,omitempty"`
+	Stdout        string    `json:"stdout"`
+	Stderr        string    `json:"stderr"`
+	CompileOutput string    `json:"compileOutput"`
+	Message       string    `json:"message"`
+	Status        Status    `json:"status"`
+	Time          string    `json:"time"`
+	Memory        int       `json:"memory"`
 }
 type Runner interface {
 	Languages(context.Context) ([]Language, error)
@@ -69,6 +70,8 @@ type command struct {
 	MemoryLimit   int64                     `json:"memoryLimit"`
 	ProcLimit     int                       `json:"procLimit"`
 	CopyIn        map[string]map[string]any `json:"copyIn"`
+	CopyOut       []string                  `json:"copyOut,omitempty"`
+	CopyOutMax    int64                     `json:"copyOutMax,omitempty"`
 	CopyOutCached []string                  `json:"copyOutCached,omitempty"`
 }
 type judgeResult struct {
@@ -124,11 +127,24 @@ func (c *Client) Run(ctx context.Context, languageID int, sourceCode, stdin stri
 		}
 		copyIn = map[string]map[string]any{runtime.artifact: {"fileId": artifactID}}
 	}
-	result, err := c.execute(ctx, command{Args: runtime.run, Env: environment(), Files: files(stdin), CPULimit: 3_000_000_000, ClockLimit: 6_000_000_000, MemoryLimit: 512 * 1024 * 1024, ProcLimit: 64, CopyIn: copyIn})
+	var copyOut []string
+	if languageID == 1 {
+		copyIn["turtle.py"] = map[string]any{"content": turtleModule}
+		copyOut = []string{turtleOutput + "?"}
+	}
+	result, err := c.execute(ctx, command{CopyOut: copyOut, CopyOutMax: maxGraphicBytes, Args: runtime.run, Env: environment(), Files: files(stdin), CPULimit: 3_000_000_000, ClockLimit: 6_000_000_000, MemoryLimit: 512 * 1024 * 1024, ProcLimit: 64, CopyIn: copyIn})
 	if err != nil {
 		return Result{}, err
 	}
-	return Result{Stdout: result.Files["stdout"], Stderr: result.Files["stderr"], CompileOutput: compileOutput, Message: result.Error, Status: Status{Description: executionStatus(result.Status)}, Time: formatTime(result.Time), Memory: result.Memory}, nil
+	output := Result{Stdout: result.Files["stdout"], Stderr: result.Files["stderr"], CompileOutput: compileOutput, Message: result.Error, Status: Status{Description: executionStatus(result.Status)}, Time: formatTime(result.Time), Memory: result.Memory}
+	if svg := result.Files[turtleOutput]; languageID == 1 && svg != "" {
+		if graphic, valid := turtleGraphic(svg); valid {
+			output.Graphics = []Graphic{graphic}
+		} else {
+			output.Message += "\n绘图结果无效或超出大小限制，未显示图形。"
+		}
+	}
+	return output, nil
 }
 
 func runtimeFor(languageID int) (runtime, bool) {
